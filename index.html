@@ -1204,9 +1204,12 @@ function build(){
     if(o.img) paintShot(c, tex, o.img, o.t, o.s);
     const wall = new THREE.Group();
     wall.position.set(f.x, 0, f.z); wall.rotation.y = f.rot; g.add(wall);
-    B(wall, 3.2,3.95,.14, M.dark, AOFF, 3.15, .24, .9);
-    const art = new THREE.Mesh(new THREE.PlaneGeometry(3.0,3.75), new THREE.MeshBasicMaterial({map:tex}));
-    art.position.set(AOFF,3.15,.32); wall.add(art);
+    // room 00's wall is the favicon grid instead of a single framed piece
+    if(i !== 0){
+      B(wall, 3.2,3.95,.14, M.dark, AOFF, 3.15, .24, .9);
+      const art = new THREE.Mesh(new THREE.PlaneGeometry(3.0,3.75), new THREE.MeshBasicMaterial({map:tex}));
+      art.position.set(AOFF,3.15,.32); wall.add(art);
+    }
     const cap = new THREE.Mesh(new THREE.PlaneGeometry(1.6,.66), new THREE.MeshBasicMaterial({map:capCanvas(o)}));
     cap.position.set(AOFF + (AOFF > 0 ? -2.75 : 2.75), 2.0, .28); wall.add(cap);
     const sp = new THREE.SpotLight(0xfff4e2, MOBILE?3:4.6, 13, .5, .8, 1.2);
@@ -1237,28 +1240,26 @@ function build(){
       B(wall, .85,.12,.3, M.dark, dOff, H-.5, 2.2, .7);
     }
 
-    /* ---- entrance hall: every project's favicon on one wall, face above ---- */
+    /* ---- entrance hall: the wall of favicons IS the artwork, face on top.
+           Everything is centred on AOFF so it lands where the camera pans. ---- */
     if(i === 0){
-      const row = ROOMS.slice(1, 9);                 // one tile per room beyond this one
-      const pitch = .92, size = .8;
-      const startX = -Math.sign(AOFF || 1) * 3.5 - (row.length-1)*pitch/2;
-      row.forEach((r, k) => {
-        const tx = startX + k*pitch;
-        B(wall, size+.1, size+.1, .1, M.dark, tx, 2.75, .24, .9);
+      const tiles = ROOMS.slice(1, 9);               // one per room beyond this one
+      const pitch = .9, size = .78;
+      tiles.forEach((r, k) => {
+        const col = k % 4, rowN = (k / 4) | 0;
+        const tx = AOFF + (col - 1.5) * pitch;
+        const ty = 2.55 - rowN * pitch;
+        B(wall, size+.09, size+.09, .1, M.dark, tx, ty, .24, .85);
         const tl = new THREE.Mesh(new THREE.PlaneGeometry(size, size),
-          new THREE.MeshBasicMaterial({map: logoTile(r.t === 'ARTHIS.LAND' ? LOGO_LAND : null, r.icon, r.t.split('.')[0])}));
-        tl.position.set(tx, 2.75, .32); wall.add(tl);
+          new THREE.MeshBasicMaterial({map: logoTile(
+            r.t === 'ARTHIS.LAND' ? LOGO_LAND : null, r.icon, r.t.split('.')[0])}));
+        tl.position.set(tx, ty, .32); wall.add(tl);
       });
-      // the face, larger, centred over the row
-      const fx = startX + (row.length-1)*pitch/2;
-      B(wall, 1.5, 1.5, .12, M.dark, fx, 4.55, .24, .95);
-      const fm = new THREE.Mesh(new THREE.PlaneGeometry(1.34, 1.34),
+      // the face, larger, sitting above the grid
+      B(wall, 1.62, 1.62, .12, M.dark, AOFF, 4.35, .24, .95);
+      const fm = new THREE.Mesh(new THREE.PlaneGeometry(1.44, 1.44),
         new THREE.MeshBasicMaterial({map: logoTile(FACE, 'intro', 'AAYUSH')}));
-      fm.position.set(fx, 4.55, .32); wall.add(fm);
-      const fsp = new THREE.SpotLight(0xfff4e2, MOBILE?2.4:3.4, 12, .55, .8, 1.2);
-      fsp.position.set(f.x*.72 + f.lx.x*fx, H-.7, f.z*.72 + f.lx.z*fx);
-      fsp.target.position.set(f.x + f.lx.x*fx, 3.5, f.z + f.lx.z*fx);
-      g.add(fsp); g.add(fsp.target);
+      fm.position.set(AOFF, 4.35, .32); wall.add(fm);
     }
 
     /* ---- the two live platforms get their logo repeated as a frieze ---- */
@@ -1378,6 +1379,7 @@ let counted = false;
 function setActive(i){
   if(i === active) return;
   active = i;
+  if(i < 0 || i >= N){ els.forEach(el=>el.classList.remove('on')); return; }
   els.forEach((el,k)=> el.classList.toggle('on', k===i));
   const label = '<em>' + String(i).padStart(2,'0') + '</em>' + ROOMS[i].theme;
   sCur.innerHTML = label;
