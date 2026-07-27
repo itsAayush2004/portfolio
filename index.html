@@ -691,6 +691,23 @@ function CYL(par, rt,rb,h,seg, mat, x,y,z, o){
 // legacy call sites: outline(mesh, strength) — now a hull on the same parent
 function outline(mesh, o){ return null; }
 
+/* sharp-edged box — the gates keep crisp architectural corners while every
+   other asset in the house stays soft                                     */
+function BS(par, w,h,d, mat, x,y,z, o){
+  const key = 'S'+w+'|'+h+'|'+d;
+  let g = GEO.get(key);
+  if(!g){ g = new THREE.BoxGeometry(w,h,d); GEO.set(key,g); }
+  const m = new THREE.Mesh(g, mat);
+  m.position.set(x,y,z); par.add(m);
+  const str = (o === undefined) ? .72 : o;
+  if(str > 0){
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g, 20),
+      new THREE.LineBasicMaterial({color:0x14140f, transparent:true, opacity:Math.min(1,str)}));
+    e.position.copy(m.position); par.add(e);
+  }
+  return m;
+}
+
 function build(){
   const canvas = document.getElementById('scene');
   try{ renderer = new THREE.WebGLRenderer({canvas, antialias:!MOBILE, alpha:false, powerPreference:'high-performance'}); }
@@ -785,14 +802,14 @@ function build(){
     const CZ = .64, CD = .80, WD = .84;
     [-1,1].forEach(s=>{
       const cx = s*(DW + .23);
-      B(gate, .46, DH,      CD, wallM,  cx, DH/2,      CZ, .95);   // column
-      B(gate, .66, .24,     WD, wallM,  cx, .12,       CZ, .95);   // base
-      B(gate, .66, .26,     WD, wallM,  cx, DH - .13,  CZ, .95);   // capital
-      B(gate, .04, DH-.6,   .04, M.brass, cx, DH/2, CZ + CD/2 + .01, 0); // brass inlay on the face
+      BS(gate, .46, DH,      CD, wallM,  cx, DH/2,      CZ, .95);   // column
+      BS(gate, .66, .24,     WD, wallM,  cx, .12,       CZ, .95);   // base
+      BS(gate, .66, .26,     WD, wallM,  cx, DH - .13,  CZ, .95);   // capital
+      BS(gate, .04, DH-.6,   .04, M.brass, cx, DH/2, CZ + CD/2 + .01, 0); // brass inlay on the face
     });
-    B(gate, DW*2 + .92, .54, WD, wallM, 0, DH + .27, CZ, .95);     // beam
-    B(gate, DW*2 + .92, .1,  WD, M.brass, 0, DH + .01, CZ, 0);      // brass under-rail
-    B(gate, DW*2, .05, .74, M.brass, 0, .025, CZ, 0);               // threshold
+    BS(gate, DW*2 + .92, .54, WD, wallM, 0, DH + .27, CZ, .95);     // beam
+    BS(gate, DW*2 + .92, .1,  WD, M.brass, 0, DH + .01, CZ, 0);      // brass under-rail
+    BS(gate, DW*2, .05, .74, M.brass, 0, .025, CZ, 0);               // threshold
 
     // medallion naming the next room
     const nxt = ROOMS[roomIdx+1] || ROOMS[roomIdx];
@@ -810,9 +827,9 @@ function build(){
       const hinge = new THREE.Group();
       hinge.position.set(s*DW, 0, 0); gate.add(hinge);
       const leaf = new THREE.Group(); hinge.add(leaf);
-      B(leaf, DW, DH-.12, .1, M.woodD, -s*DW/2, (DH-.12)/2, 0, .85);
-      B(leaf, DW*.62, DH*.42, .13, M.wood, -s*DW/2, DH*.30, .01, .7);
-      B(leaf, DW*.62, DH*.28, .13, M.wood, -s*DW/2, DH*.70, .01, .7);
+      BS(leaf, DW, DH-.12, .1, M.woodD, -s*DW/2, (DH-.12)/2, 0, .85);
+      BS(leaf, DW*.62, DH*.42, .13, M.wood, -s*DW/2, DH*.30, .01, .7);
+      BS(leaf, DW*.62, DH*.28, .13, M.wood, -s*DW/2, DH*.70, .01, .7);
       CYL(leaf, .05,.05,.26,8, M.brass, -s*DW*.9, DH*.5, .1, 0);
       doors.push({hinge, s, wx:mx, wz:mz});
     });
@@ -1032,6 +1049,69 @@ function build(){
   /* ══════════════════════════════════════════════════════
      ART on the free walls of every room
      ══════════════════════════════════════════════════════ */
+  /* ---------- logos ---------- */
+  const FACE = 'https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png';
+  const LOGO_LAND = 'https://arthis.land/assets/LOGO-3Edited.png';
+
+  // a single favicon-style tile: real logo if it loads, drawn pixel glyph if not
+  function logoTile(url, icon, label){
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const g = c.getContext('2d');
+    const base = () => {
+      g.fillStyle='#fbfaf7'; g.fillRect(0,0,256,256);
+      g.strokeStyle='#14140f'; g.lineWidth=6; g.strokeRect(11,11,234,234);
+    };
+    const cap = () => {
+      g.fillStyle='#fbfaf7'; g.fillRect(16,182,224,58);
+      g.fillStyle='#14140f'; g.textAlign='center';
+      g.font='600 21px '+PX+', monospace';
+      g.fillText(label, 128, 214);
+      g.fillStyle='#c0472c'; g.fillRect(112,226,32,4);
+    };
+    base(); drawIcon(g, icon, 128, 104, 116); cap();
+    const t = texFrom(c);
+    if(url){
+      const im = new Image(); im.crossOrigin='anonymous';
+      im.onload = () => {
+        base();
+        const s = Math.min(150/im.width, 132/im.height);
+        g.drawImage(im, 128 - im.width*s/2, 104 - im.height*s/2, im.width*s, im.height*s);
+        cap(); t.needsUpdate = true;
+      };
+      im.onerror = () => {};
+      im.src = url;
+    }
+    return t;
+  }
+
+  // the same logo repeated across a frieze band
+  function logoFrieze(url, icon, cols){
+    const CS = 128;
+    const c = document.createElement('canvas'); c.width = cols*CS; c.height = CS;
+    const g = c.getContext('2d');
+    const paint = img => {
+      g.fillStyle='#fbfaf7'; g.fillRect(0,0,c.width,c.height);
+      g.fillStyle='#14140f'; g.fillRect(0,0,c.width,4); g.fillRect(0,CS-4,c.width,4);
+      for(let k=0;k<cols;k++){
+        const cx = k*CS + CS/2, cy = CS/2 + 2;
+        if(img){
+          const s = Math.min(74/img.width, 74/img.height);
+          g.drawImage(img, cx - img.width*s/2, cy - img.height*s/2, img.width*s, img.height*s);
+        } else drawIcon(g, icon, cx, cy, 68);
+        if(k < cols-1){ g.fillStyle='#c0472c'; g.fillRect(cx + CS/2 - 2, cy - 3, 5, 5); }
+      }
+    };
+    paint(null);
+    const t = texFrom(c);
+    if(url){
+      const im = new Image(); im.crossOrigin='anonymous';
+      im.onload = () => { paint(im); t.needsUpdate = true; };
+      im.onerror = () => {};
+      im.src = url;
+    }
+    return t;
+  }
+
   function artCanvas(o){
     const c = document.createElement('canvas'); c.width=900; c.height=1125;
     const g = c.getContext('2d');
@@ -1155,6 +1235,39 @@ function build(){
       sp2.target.position.set(f.x + f.lx.x*dOff, 2.9, f.z + f.lx.z*dOff);
       g.add(sp2); g.add(sp2.target);
       B(wall, .85,.12,.3, M.dark, dOff, H-.5, 2.2, .7);
+    }
+
+    /* ---- entrance hall: every project's favicon on one wall, face above ---- */
+    if(i === 0){
+      const row = ROOMS.slice(1, 9);                 // one tile per room beyond this one
+      const pitch = .92, size = .8;
+      const startX = -Math.sign(AOFF || 1) * 3.5 - (row.length-1)*pitch/2;
+      row.forEach((r, k) => {
+        const tx = startX + k*pitch;
+        B(wall, size+.1, size+.1, .1, M.dark, tx, 2.75, .24, .9);
+        const tl = new THREE.Mesh(new THREE.PlaneGeometry(size, size),
+          new THREE.MeshBasicMaterial({map: logoTile(r.t === 'ARTHIS.LAND' ? LOGO_LAND : null, r.icon, r.t.split('.')[0])}));
+        tl.position.set(tx, 2.75, .32); wall.add(tl);
+      });
+      // the face, larger, centred over the row
+      const fx = startX + (row.length-1)*pitch/2;
+      B(wall, 1.5, 1.5, .12, M.dark, fx, 4.55, .24, .95);
+      const fm = new THREE.Mesh(new THREE.PlaneGeometry(1.34, 1.34),
+        new THREE.MeshBasicMaterial({map: logoTile(FACE, 'intro', 'AAYUSH')}));
+      fm.position.set(fx, 4.55, .32); wall.add(fm);
+      const fsp = new THREE.SpotLight(0xfff4e2, MOBILE?2.4:3.4, 12, .55, .8, 1.2);
+      fsp.position.set(f.x*.72 + f.lx.x*fx, H-.7, f.z*.72 + f.lx.z*fx);
+      fsp.target.position.set(f.x + f.lx.x*fx, 3.5, f.z + f.lx.z*fx);
+      g.add(fsp); g.add(fsp.target);
+    }
+
+    /* ---- the two live platforms get their logo repeated as a frieze ---- */
+    if(o.t === 'ARTHIS.SPACE' || o.t === 'ARTHIS.LAND'){
+      const isLand = o.t === 'ARTHIS.LAND';
+      const fr = new THREE.Mesh(new THREE.PlaneGeometry(9.6, .82),
+        new THREE.MeshBasicMaterial({map: logoFrieze(isLand ? LOGO_LAND : null, o.icon, 12)}));
+      fr.position.set(0, 6.55, .3); wall.add(fr);
+      B(wall, 9.76, .96, .08, M.dark, 0, 6.55, .24, .85);
     }
 
     // furniture, rotated so its "back" sits against the feature wall
