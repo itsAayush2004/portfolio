@@ -30,13 +30,25 @@
 
   var scene = null, cars = [], last = 0, started = false;
 
-  /* ---------- frame hook ---------- */
-  var origRender = THREE.WebGLRenderer.prototype.render;
-  THREE.WebGLRenderer.prototype.render = function (sc, cam) {
+  /* ---------- frame hook ----------
+     three r128 hangs render() off the instance, not the prototype, so the
+     renderer has to be wrapped as it is constructed */
+  function hook(sc) {
     if (!started && sc && sc.isScene) { started = true; scene = sc; load(); }
     if (cars.length) step();
-    return origRender.call(this, sc, cam);
-  };
+  }
+
+  var Renderer = THREE.WebGLRenderer;
+  function Wrapped(params) {
+    var r = new Renderer(params);
+    var draw = r.render;
+    if (typeof draw === 'function') {
+      r.render = function (sc, cam) { hook(sc); return draw.call(this, sc, cam); };
+    }
+    return r;
+  }
+  Wrapped.prototype = Renderer.prototype;
+  THREE.WebGLRenderer = Wrapped;
 
   /* ---------- geometry blob ---------- */
   /* CARM | u32 vertCount | u32 indexCount | f32 min[3] | f32 size[3]
