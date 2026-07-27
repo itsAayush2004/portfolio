@@ -3,9 +3,11 @@
 > A scroll-driven 3D gallery that doubles as my CV.
 > **Live → [itsaayush2004.github.io/portfolio](https://itsaayush2004.github.io/portfolio/)**
 
-You walk in through a gate. Scrolling moves the camera forward through nine toon-shaded rooms —
-each with its own artwork, a museum caption card, a sculpture on a pedestal, and a signed gate
-telling you what's next door. The camera turns to face whichever wall the artwork hangs on.
+You walk in through a gate. Scrolling moves the camera forward through nine toon-shaded rooms. Every
+room has a piece on its back wall, two more on the left and right walls, a museum caption card, a
+sculpture rotating on a pedestal, and a built gate ahead of it — columns, beam, brass threshold and
+a logo medallion naming whatever is next door. The camera turns to face whichever wall the main
+piece hangs on. The copy rides over the top on a frosted glass card that pops in as you arrive.
 
 Built as a single self-contained `index.html` — no build step, no bundler, no dependencies to
 install. Three.js and Chart.js load from CDN; every other asset is drawn procedurally at runtime.
@@ -44,8 +46,10 @@ rooms, weighted by `smoothstep(1 - |p - i| / 0.5)`.
 `EdgesGeometry` outlines on every solid give it the drawn, cel-shaded edge.
 
 **Text lives in the DOM, not the canvas.** WebGL renders the room; every readable word is real HTML
-over the top, behind a gradient scrim. That keeps the site selectable, searchable, screen-reader
-friendly, and legible even if WebGL fails entirely.
+on a `backdrop-filter` glass card over the top. That keeps the site selectable, searchable,
+screen-reader friendly, and legible even if WebGL fails entirely. The card lands with a spring
+transform, a light sweep across the glass, an accent rail wiping down the leading edge, and its
+children staggered 60 ms apart.
 
 **Everything is drawn, not downloaded.** Gate signs, artworks, caption cards, floor numerals and all
 nine section icons are painted with the Canvas 2D API into `CanvasTexture`s at runtime. Sculptures,
