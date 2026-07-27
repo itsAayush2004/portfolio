@@ -3,12 +3,12 @@
 > A scroll-driven 3D gallery that doubles as my CV.
 > **Live → [itsaayush2004.github.io/portfolio](https://itsaayush2004.github.io/portfolio/)**
 
-You walk in through a doorway. Scrolling moves the camera down a white gallery corridor; each
-artwork on the wall is a project, and the text panel beside it is the write-up. One room near the
-end holds the numbers.
+You walk in through a gate. Scrolling moves the camera forward through nine toon-shaded rooms —
+each with its own artwork, a museum caption card, a sculpture on a pedestal, and a signed gate
+telling you what's next door. The camera turns to face whichever wall the artwork hangs on.
 
 Built as a single self-contained `index.html` — no build step, no bundler, no dependencies to
-install. Three.js and Chart.js load from CDN.
+install. Three.js and Chart.js load from CDN; every other asset is drawn procedurally at runtime.
 
 ---
 
@@ -30,22 +30,35 @@ install. Three.js and Chart.js load from CDN.
 
 ## How it works
 
-**Scroll → camera.** Body is `900vh` tall. Scroll position normalises to `0…1`, which maps linearly
-to camera `z` along the corridor. The value is damped each frame (`current += (target - current) * 0.075`)
-so the camera glides rather than snaps.
+**Scroll → camera.** Body is `900vh` tall. Scroll normalises to `0…1` and maps linearly to camera
+`z`. Camera travel is locked to room spacing (`END_Z = START_Z - (N-1) * SPACING`) so the camera
+always comes to rest exactly at a room's centre — no drift. The value is damped each frame
+(`current += (target - current) * 0.075`) so it glides rather than snaps.
 
-**Text lives in the DOM, not the canvas.** WebGL renders the room shell — floor, walls, framed
-canvases, spotlights, dust. Every readable word is real HTML positioned over the top. That keeps the
-site selectable, searchable, screen-reader friendly, and legible if WebGL fails.
+**The camera turns.** Each room hangs its artwork on one half of its back wall. As you enter a room
+the look-at target eases sideways toward that wall and returns to dead-ahead in the gates between
+rooms, weighted by `smoothstep(1 - |p - i| / 0.5)`.
 
-**Artworks are canvas textures.** Each framed piece on the wall is drawn with the Canvas 2D API at
-1024×1280, then wrapped in a `CanvasTexture`. No image files, no network requests.
+**Toon shading.** Everything uses `MeshToonMaterial` with a 4-step `DataTexture` ramp on
+`NearestFilter`, lit by low ambient + one strong key so the bands actually read. Black
+`EdgesGeometry` outlines on every solid give it the drawn, cel-shaded edge.
+
+**Text lives in the DOM, not the canvas.** WebGL renders the room; every readable word is real HTML
+over the top, behind a gradient scrim. That keeps the site selectable, searchable, screen-reader
+friendly, and legible even if WebGL fails entirely.
+
+**Everything is drawn, not downloaded.** Gate signs, artworks, caption cards, floor numerals and all
+nine section icons are painted with the Canvas 2D API into `CanvasTexture`s at runtime. Sculptures,
+pedestals, benches and plants are built from primitives. The only network images are the two live
+product screenshots pulled from the Arthis repos.
 
 **Graceful degradation.**
 
 - No WebGL → canvas hides itself, the DOM content stands alone and stays fully readable
-- `prefers-reduced-motion` → camera drift, dust and easing all switch off
-- Mobile → pixel ratio capped at 1.5, shadows and particles disabled, side nav hidden
+- Screenshot fails to load → the hand-drawn canvas artwork underneath is already there
+- `prefers-reduced-motion` → camera drift, turning, dust and easing all switch off
+- Mobile → pixel ratio capped at 1.5, particles disabled, side nav hidden, scrim flips to vertical
+- Keyboard → arrow keys and PageUp/PageDown walk room to room
 
 ---
 

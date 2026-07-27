@@ -70,7 +70,12 @@ a{color:inherit;text-decoration:none}
   padding:0 clamp(22px,6vw,110px);opacity:0;visibility:hidden;
   transition:opacity .45s ease,transform .8s cubic-bezier(.16,.84,.34,1);transform:translateY(30px)}
 .panel.on{opacity:1;visibility:visible;transform:none;pointer-events:auto}
-.inner{max-width:560px;width:100%}
+/* readability scrim so copy always wins over the 3D behind it */
+.panel::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(242,241,238,.94) 0%,rgba(242,241,238,.86) 30%,rgba(242,241,238,.4) 48%,rgba(242,241,238,0) 62%)}
+.panel.right::before{background:linear-gradient(270deg,rgba(242,241,238,.94) 0%,rgba(242,241,238,.86) 30%,rgba(242,241,238,.4) 48%,rgba(242,241,238,0) 62%)}
+.panel[data-i="8"]::before{background:radial-gradient(60% 70% at 50% 50%,rgba(242,241,238,.94) 0%,rgba(242,241,238,.8) 55%,rgba(242,241,238,0) 100%)}
+.inner{max-width:560px;width:100%;position:relative;z-index:1}
 .panel.right{justify-content:flex-end}
 
 .num{font-size:10.5px;letter-spacing:.34em;color:var(--soft);text-transform:uppercase;margin-bottom:18px;font-weight:600}
@@ -151,6 +156,7 @@ ul.pts li b{color:var(--ink);font-weight:600}
   .statgrid .c:nth-child(n+5){border-bottom:none}
   .panel{padding:0 20px}
   .panel.right{justify-content:flex-start}
+  .panel::before,.panel.right::before{background:linear-gradient(180deg,rgba(242,241,238,.9) 0%,rgba(242,241,238,.9) 78%,rgba(242,241,238,.2) 100%)}
   .shots{max-width:330px}
 }
 @media(prefers-reduced-motion:reduce){.panel{transition:opacity .2s}#hint .bar{animation:none}}
