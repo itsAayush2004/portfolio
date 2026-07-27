@@ -19,9 +19,9 @@
 
 <style>
 :root{
-  --paper:#f2f1ee; --ink:#14140f; --mid:#4f4e47; --soft:#8e8c82;
-  --line:#d8d5cd; --accent:#c0472c; --grid:rgba(20,20,15,.055);
-  --glass:rgba(250,249,246,.62); --glass-line:rgba(255,255,255,.85);
+  --paper:#f2f1ee; --ink:#14140f; --mid:#3f3e38; --soft:#7c7a71;
+  --line:#cbc7bd; --accent:#c0472c; --grid:rgba(20,20,15,.055);
+  --glass:rgba(249,248,244,.86); --glass-line:rgba(255,255,255,.95);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -106,10 +106,10 @@ a{color:inherit;text-decoration:none}
 h1{font-size:clamp(38px,7vw,80px);line-height:.9;font-weight:300;letter-spacing:-.045em}
 h1 em{font-style:normal;display:block;font-weight:600}
 h2{font-size:clamp(24px,3.7vw,40px);font-weight:300;line-height:1.05;letter-spacing:-.035em;margin-bottom:14px}
-.lede{font-size:clamp(13.5px,1.45vw,16.5px);color:var(--mid);font-weight:300;line-height:1.6;margin-top:14px}
-p.body{font-size:13px;color:var(--mid);font-weight:300;line-height:1.65;margin-bottom:13px}
+.lede{font-size:clamp(14.5px,1.5vw,17.5px);color:var(--mid);font-weight:400;line-height:1.62;margin-top:14px}
+p.body{font-size:14px;color:var(--mid);font-weight:400;line-height:1.68;margin-bottom:13px}
 ul.pts{list-style:none;margin:14px 0}
-ul.pts li{font-size:12.5px;color:var(--mid);font-weight:300;padding-left:17px;position:relative;margin-bottom:7px;line-height:1.54}
+ul.pts li{font-size:13.5px;color:var(--mid);font-weight:400;padding-left:17px;position:relative;margin-bottom:8px;line-height:1.58}
 ul.pts li::before{content:'';position:absolute;left:0;top:9px;width:8px;height:1px;background:var(--soft)}
 ul.pts li b{color:var(--ink);font-weight:600}
 .meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
@@ -146,11 +146,36 @@ ul.pts li b{color:var(--ink);font-weight:600}
 .chart .box{position:relative;height:112px}
 
 #prog{position:fixed;left:0;top:0;height:2px;background:var(--ink);width:0;z-index:9}
-#nav{position:fixed;right:clamp(14px,2.6vw,34px);top:50%;transform:translateY(-50%);z-index:8;display:flex;flex-direction:column;gap:12px}
-#nav button{width:24px;height:9px;border:none;background:none;cursor:pointer;padding:4px 0;display:block}
-#nav button i{display:block;height:1.5px;width:12px;background:var(--soft);transition:.35s;margin-left:auto}
-#nav button.on i{width:24px;background:var(--ink)}
-#nav button:hover i{width:24px;background:var(--ink)}
+
+/* ══ SLIDER — one control, vertical on desktop, horizontal on phones ══ */
+#slider{position:fixed;z-index:9;touch-action:none;-webkit-user-select:none;user-select:none;
+  right:clamp(20px,3vw,42px);top:50%;transform:translateY(-50%);
+  width:34px;height:min(46vh,420px);display:flex;align-items:center;justify-content:center;cursor:grab}
+#slider.drag{cursor:grabbing}
+#slider .rail{position:absolute;top:0;bottom:0;width:2px;background:var(--line);border-radius:2px}
+#slider .fill{position:absolute;top:0;width:2px;background:var(--ink);border-radius:2px;height:0}
+#slider .ticks{position:absolute;top:0;bottom:0;width:100%;pointer-events:none}
+#slider .ticks i{position:absolute;left:50%;width:7px;height:1px;background:var(--line);transform:translateX(-50%)}
+#slider .knob{position:absolute;left:50%;width:14px;height:14px;margin-left:-7px;margin-top:-7px;
+  border-radius:50%;background:var(--paper);border:2px solid var(--ink);top:0;
+  box-shadow:0 4px 14px -4px rgba(20,20,15,.5);transition:transform .2s}
+#slider:hover .knob,#slider.drag .knob{transform:scale(1.25)}
+#slider .knob::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .2s}
+#slider.drag .knob::after{opacity:1}
+#slider .cur{position:absolute;right:30px;white-space:nowrap;text-align:right;
+  font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--ink);
+  background:rgba(249,248,244,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.9);border-radius:999px;padding:6px 12px;
+  box-shadow:0 8px 22px -14px rgba(20,20,15,.6);pointer-events:none;transform:translateY(-50%)}
+#slider .cur em{font-style:normal;color:var(--accent);margin-right:7px}
+
+/* the opening cue */
+#cue{position:fixed;z-index:9;right:clamp(20px,3vw,42px);top:calc(50% + min(23vh,210px) + 22px);
+  transform:translateX(35%);font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;
+  font-weight:700;color:var(--soft);white-space:nowrap;transition:opacity .5s;
+  display:flex;align-items:center;gap:8px}
+#cue .arw{display:inline-block;animation:nudge 1.7s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(5px);opacity:1}}
 #brand{position:fixed;left:clamp(16px,3vw,36px);top:clamp(16px,3vw,30px);z-index:8;
   display:flex;align-items:center;gap:10px;background:rgba(250,249,246,.55);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
@@ -170,17 +195,55 @@ ul.pts li b{color:var(--ink);font-weight:600}
 @keyframes fall{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}
   55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
+/* ══════════════ MOBILE ══════════════ */
 @media(max-width:860px){
-  #nav,#roomtag{display:none}
-  .charts{grid-template-columns:1fr}
+  #roomtag,#hint{display:none}
+  .charts{grid-template-columns:1fr;gap:12px}
   .statgrid{grid-template-columns:repeat(2,1fr)}
   .statgrid .c:nth-child(3n){border-right:1px solid var(--line)}
   .statgrid .c:nth-child(2n){border-right:none}
   .statgrid .c:nth-child(n+4){border-bottom:1px solid var(--line)}
   .statgrid .c:nth-child(n+5){border-bottom:none}
-  .panel{padding:0 14px}
-  .panel.right{justify-content:flex-start}
-  .inner{max-height:82vh;overflow-y:auto}
+
+  /* cards dock to the bottom of the screen and rise from below */
+  #stage{align-items:flex-end}
+  .panel,.panel.right{padding:0;justify-content:center;align-items:flex-end}
+  .inner{max-width:100%;width:100%;border-radius:16px 16px 0 0;border-bottom:none;
+    padding:20px 20px calc(74px + env(safe-area-inset-bottom));
+    max-height:66vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    transform:translateY(100%) scale(1);
+    box-shadow:0 -20px 50px -26px rgba(20,20,15,.5),inset 0 1px 0 rgba(255,255,255,.9)}
+  .panel.on .inner{transform:translateY(0)}
+  .inner::before{left:0;right:0;top:0;bottom:auto;width:auto;height:2px;
+    transform:scaleX(0);transform-origin:left}
+  .panel.on .inner::before{transform:scaleX(1)}
+  .inner::after{display:none}
+  /* grab handle */
+  .inner > .room-kicker{position:relative;padding-top:12px}
+  .inner > .room-kicker::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:38px;height:4px;border-radius:4px;background:var(--line)}
+
+  h1{font-size:clamp(34px,11vw,52px)}
+  h2{font-size:clamp(22px,6.4vw,30px)}
+  .shots a{max-width:none}
+  .shots img{height:74px}
+
+  /* slider becomes a bottom scrubber */
+  #slider{right:auto;left:50%;top:auto;bottom:calc(14px + env(safe-area-inset-bottom));
+    transform:translateX(-50%);width:min(78vw,340px);height:38px}
+  #slider .rail,#slider .fill{top:50%;left:0;right:0;bottom:auto;width:auto;height:2px;margin-top:-1px}
+  #slider .fill{right:auto;width:0}
+  #slider .ticks{top:0;bottom:0;left:0;right:0;width:auto}
+  #slider .ticks i{top:50%;left:0;width:1px;height:7px;transform:translate(-50%,-50%)}
+  #slider .knob{top:50%;left:0;width:18px;height:18px;margin-left:-9px;margin-top:-9px}
+  #slider .cur{right:auto;left:50%;top:-16px;transform:translateX(-50%)}
+  #cue{right:auto;left:50%;transform:translateX(-50%);
+    top:auto;bottom:calc(62px + env(safe-area-inset-bottom))}
+  #cue .arw{animation:nudgeX 1.7s ease-in-out infinite}
+  @keyframes nudgeX{0%,100%{transform:translateX(0);opacity:.4}50%{transform:translateX(6px);opacity:1}}
+  #brand{padding:4px 12px 4px 4px}
+  #brand img{width:24px;height:24px}
+  #brand span{font-size:9.5px;letter-spacing:.2em}
 }
 @media(prefers-reduced-motion:reduce){
   .inner,.panel.on .inner{transition:opacity .2s}
@@ -215,7 +278,15 @@ ul.pts li b{color:var(--ink);font-weight:600}
   <span>Aayush Kumar</span>
 </div>
 <div id="roomtag">Entrance Hall</div>
-<nav id="nav" aria-label="Rooms"></nav>
+
+<div id="slider" role="slider" aria-label="Walk through the house"
+     aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" tabindex="0">
+  <span class="rail"></span><span class="fill" id="sFill"></span>
+  <span class="ticks" id="sTicks"></span>
+  <span class="knob" id="sKnob"></span>
+  <span class="cur" id="sCur"><em>00</em>Entrance Hall</span>
+</div>
+<div id="cue"><span class="arw">↓</span> Slide to explore</div>
 
 <div id="stage">
 
@@ -544,8 +615,8 @@ function build(){
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf2f1ee);
-  scene.fog = new THREE.Fog(0xf2f1ee, 22, 74);
-  camera = new THREE.PerspectiveCamera(52, innerWidth/innerHeight, .1, 260);
+  scene.fog = new THREE.Fog(0xf2f1ee, 28, 88);
+  camera = new THREE.PerspectiveCamera(MOBILE ? 76 : 70, innerWidth/innerHeight, .1, 260);
 
   // toon ramp
   const steps = new Uint8Array([86,150,210,255]);
@@ -692,144 +763,151 @@ function build(){
     return m;
   }
 
+  /* Everything lives in the four corner quadrants (|x| and |z| both > ~4.2).
+     Doors sit at wall centres and the camera walks centre-to-centre, so a
+     corner-only rule guarantees nothing blocks a doorway, a swinging leaf,
+     or the line you walk. `a` is +1/-1: the side the feature artwork hangs on,
+     so the hero piece always sits underneath it.                        */
   const KITS = {
-    foyer(g){
-      rug(g, 5, 3.4, M.cloth, 0, 0);
-      B(g, 3.0,1.05,.7, M.wood, 0,.52,-7.2,.85);          // reception desk
-      B(g, 3.2,.09,.86, M.woodD, 0,1.08,-7.2,.7);
-      CYL(g,.06,.06,1.9,8, M.dark, -6.6,.95,-6.6,.5);      // coat stand
-      CYL(g,.4,.4,.06,10, M.dark, -6.6,.05,-6.6,.5);
-      [[-7,6.6],[7,6.6]].forEach(p=>plant(g,p[0],p[1]));
-      lampOn(g, M.dark, 1.3, 1.08, -7.2);
+    foyer(g, a){
+      rug(g, 5.4, 4.4, M.cloth, 0, 0);
+      B(g, 3.0,1.0,.72, M.wood,  a*6.4,.5,-8.3,.85);          // reception desk
+      B(g, 3.2,.09,.88, M.woodD, a*6.4,1.03,-8.3,.7);
+      lampOn(g, M.dark, a*7.5, 1.03, -8.3);
+      CYL(g,.06,.06,1.9,8, M.dark, -a*7.6,.95,-8.0,.5);       // coat stand
+      CYL(g,.42,.42,.06,10, M.dark, -a*7.6,.05,-8.0,.5);
+      B(g, 2.6,.14,.7, M.woodD, -a*6.6,.46,7.2,.8);           // waiting bench
+      [[-1.0,6.9],[1.0,6.9],[-1.0,7.5],[1.0,7.5]].forEach(p=>B(g,.12,.46,.12,M.woodD,-a*6.6+p[0],.23,p[1],.5));
+      plant(g, a*8.2, 8.0); plant(g, -a*8.2, 8.0);
     },
-    bedroom(g){
-      rug(g, 5.4, 4, M.cloth, 0, .8);
-      const b = new THREE.Group(); b.position.set(-4.4,0,-4.2); g.add(b);
-      B(b, 3.0,.42,4.3, M.wood, 0,.24,0,.85);              // frame
-      B(b, 2.8,.34,4.0, M.white, 0,.6,.1,.6);              // mattress
-      B(b, 2.8,.22,2.1, M.cloth, 0,.86,.95,.6);            // duvet
-      B(b, 1.1,.24,.5, M.white, -.65,.85,-1.7,.5);         // pillows
-      B(b, 1.1,.24,.5, M.white,  .65,.85,-1.7,.5);
-      B(b, 3.1,1.9,.2, M.woodD, 0,.95,-2.2,.8);            // headboard
-      B(g, .6,.62,.6, M.wood, -2.5,.31,-6.6,.75);          // nightstand
-      lampOn(g, M.dark, -2.5, .62, -6.6);
-      B(g, 2.2,2.6,.75, M.woodD, 5.6,1.3,-6.2,.85);        // wardrobe
-      B(g, .06,2.4,.03, M.brass, 5.6,1.3,-5.8,0);
-      B(g, 1.9,.09,.8, M.wood, 6.2,.78,3.2,.8);            // desk
-      [[5.4,2.9],[7.0,2.9],[5.4,3.5],[7.0,3.5]].forEach(p=>B(g,.08,.78,.08,M.wood,p[0],.39,p[1],.5));
-      screenPanel(g, 1.1,.7, 6.2,1.24,2.95, 0, ['> unity build','> 154 games','> _']);
-      chair(g, M.woodD, 6.2, 4.4, Math.PI);
-      plant(g, -7.4, 6.6);
+    bedroom(g, a){
+      rug(g, 5.6, 4.6, M.cloth, 0, .4);
+      const b = new THREE.Group(); b.position.set(a*6.5,0,-6.6); g.add(b);
+      B(b, 3.0,.42,4.2, M.wood,  0,.24,0,.85);                // frame
+      B(b, 2.8,.34,3.9, M.white, 0,.6,.1,.6);                 // mattress
+      B(b, 2.8,.22,2.0, M.cloth, 0,.86,.9,.6);                // duvet
+      B(b, 1.1,.24,.5, M.white, -.65,.85,-1.6,.5);
+      B(b, 1.1,.24,.5, M.white,  .65,.85,-1.6,.5);
+      B(b, 3.1,1.9,.2, M.woodD, 0,.95,-2.15,.8);              // headboard
+      B(g, .6,.62,.6, M.wood, a*4.4,.31,-8.3,.75);            // nightstand
+      lampOn(g, M.dark, a*4.4,.62,-8.3);
+      B(g, 2.2,2.6,.72, M.woodD, -a*6.8,1.3,-8.3,.85);        // wardrobe
+      B(g, .05,2.3,.04, M.brass, -a*6.8,1.3,-7.92,0);
+      B(g, 2.0,.09,.82, M.wood, -a*6.6,.78,7.3,.8);           // desk
+      [[-.85,7.0],[.85,7.0],[-.85,7.6],[.85,7.6]].forEach(p=>B(g,.09,.78,.09,M.wood,-a*6.6+p[0],.39,p[1],.5));
+      screenPanel(g, 1.2,.74, -a*6.6,1.26,7.55, Math.PI, ['> unity build','> 154 games','> _']);
+      chair(g, M.woodD, -a*6.6, 5.9, 0);
+      plant(g, a*8.3, 8.0);
     },
-    game(g){
-      rug(g, 5.6, 4.2, M.cloth, 1, 1.5);
-      [-1,0,1].forEach((k,i)=>{                            // arcade cabinets
-        const a = new THREE.Group(); a.position.set(-6.4, 0, -3.4 + k*2.6); a.rotation.y = Math.PI/2; g.add(a);
-        B(a, 1.0,2.1,.9, M.dark, 0,1.05,0,.9);
-        B(a, .86,.62,.1, M.red, 0,1.5,.46,.6);
-        screenPanel(a, .74,.52, 0,1.5,.53, 0, ['SCORE 0'+(i+3)+'40','PLAYER 1']);
-        B(a, .9,.12,.42, M.red, 0,.96,.5,.6);
-        CYL(a,.07,.07,.16,8, M.red, -.2,1.06,.6,0);
-        CYL(a,.07,.07,.16,8, M.brass, .2,1.06,.6,0);
+    game(g, a){
+      rug(g, 5.4, 4.4, M.cloth, 0, .4);
+      [-1.25,1.25].forEach((k,i)=>{                            // arcade cabinets
+        const c = new THREE.Group(); c.position.set(a*6.4 + k*1.3, 0, -8.4); g.add(c);
+        B(c, 1.0,2.1,.9, M.dark, 0,1.05,0,.9);
+        B(c, .86,.62,.1, M.red, 0,1.5,.46,.6);
+        screenPanel(c, .74,.52, 0,1.5,.53, 0, ['SCORE 0'+(i+3)+'40','PLAYER 1']);
+        B(c, .9,.12,.42, M.red, 0,.96,.5,.6);
+        CYL(c,.07,.07,.16,8, M.red, -.2,1.06,.6,0);
+        CYL(c,.07,.07,.16,8, M.brass, .2,1.06,.6,0);
       });
-      B(g, 2.4,.5,.55, M.woodD, 4.6,.25,-6.8,.8);          // tv stand
-      screenPanel(g, 3.0,1.7, 4.6,1.6,-6.9, 0, ['ARTHIS.SPACE','feed · multiplayer']);
-      CYL(g,.9,1.0,.7,12, M.red, 5.0,.35,2.4,.7);          // beanbag
-      B(g, 1.5,.1,1.0, M.wood, 0,.42,5.2,.7);              // low table
-      [[-.6,4.8],[.6,4.8],[-.6,5.6],[.6,5.6]].forEach(p=>B(g,.08,.42,.08,M.wood,p[0],.21,p[1],.4));
-      plant(g, -7.2, 6.8);
+      B(g, 2.4,.5,.55, M.woodD, -a*6.6,.25,-8.4,.8);           // tv unit
+      screenPanel(g, 3.0,1.7, -a*6.6,1.6,-8.05, 0, ['ARTHIS.SPACE','feed · multiplayer']);
+      CYL(g,.9,1.0,.7,12, M.red, a*6.8,.35,7.2,.7);            // beanbag
+      B(g, 1.6,.1,1.0, M.wood, -a*6.4,.42,7.0,.7);             // low table
+      [[-.65,6.6],[.65,6.6],[-.65,7.4],[.65,7.4]].forEach(p=>B(g,.08,.42,.08,M.wood,-a*6.4+p[0],.21,p[1],.4));
+      plant(g, -a*8.3, 8.0);
     },
-    living(g){
-      rug(g, 6.4, 4.4, M.cloth, 0, .6);
-      const s = new THREE.Group(); s.position.set(-5.2,0,0); s.rotation.y = Math.PI/2; g.add(s);
-      B(s, 3.6,.5,1.15, M.cloth, 0,.32,0,.8);              // sofa
+    living(g, a){
+      rug(g, 6.0, 4.6, M.cloth, 0, .2);
+      const s = new THREE.Group(); s.position.set(a*6.4,0,-8.1); g.add(s);
+      B(s, 3.6,.5,1.15, M.cloth, 0,.32,0,.8);                  // sofa
       B(s, 3.6,.8,.28, M.cloth, 0,.75,-.44,.8);
       B(s, .28,.62,1.15, M.cloth, -1.66,.62,0,.7);
       B(s, .28,.62,1.15, M.cloth,  1.66,.62,0,.7);
       [[-1.5,.45],[1.5,.45],[-1.5,-.45],[1.5,-.45]].forEach(p=>B(s,.12,.14,.12,M.woodD,p[0],.07,p[1],0));
-      B(g, 1.7,.1,1.0, M.wood, -.6,.45,.4,.75);            // coffee table
-      [[-1.3,-.0],[.1,-.0],[-1.3,.8],[.1,.8]].forEach(p=>B(g,.09,.45,.09,M.wood,p[0],.22,p[1],.45));
-      B(g, 2.8,.5,.5, M.woodD, 5.0,.25,-6.9,.8);           // media unit
-      screenPanel(g, 3.4,1.9, 5.0,1.75,-6.95, 0, ['ARTHIS.LAND','the wall · unity webgl']);
-      CYL(g,.04,.04,1.7,8, M.dark, 3.6,.85,3.6,.5);        // floor lamp
-      CYL(g,.34,.24,.34,10, M.white, 3.6,1.82,3.6,.6);
-      chair(g, M.woodD, 3.4, -1.2, -Math.PI/2);
-      plant(g, 7.0, 6.6); plant(g, -7.2, -6.6);
+      B(g, 1.8,.1,1.0, M.wood, a*6.4,.45,-5.7,.75);            // coffee table
+      [[-.75,-6.1],[.75,-6.1],[-.75,-5.3],[.75,-5.3]].forEach(p=>B(g,.09,.45,.09,M.wood,a*6.4+p[0],.22,p[1],.45));
+      B(g, 2.8,.5,.5, M.woodD, -a*6.6,.25,-8.4,.8);            // media unit
+      screenPanel(g, 3.2,1.8, -a*6.6,1.7,-8.05, 0, ['ARTHIS.LAND','the wall · unity webgl']);
+      CYL(g,.04,.04,1.7,8, M.dark, a*8.4,.85,-4.6,.5);         // floor lamp
+      CYL(g,.34,.24,.34,10, M.white, a*8.4,1.82,-4.6,.6);
+      chair(g, M.woodD, -a*6.6, 7.0, Math.PI);
+      plant(g, a*8.3, 8.0); plant(g, -a*8.3, 8.0);
     },
-    workshop(g){
-      B(g, 4.2,.14,1.1, M.woodD, -4.8,.98,-2.0,.85);       // bench
-      [[-6.6,-2.4],[-3.0,-2.4],[-6.6,-1.6],[-3.0,-1.6]].forEach(p=>B(g,.14,.98,.14,M.woodD,p[0],.49,p[1],.5));
-      B(g, 4.2,1.9,.1, M.stone, -4.8,2.6,-2.62,.7);        // pegboard
-      for(let k=0;k<7;k++) B(g,.09,.5+Math.random()*.5,.09, M.steel, -6.5+k*.56, 2.5, -2.5, .4);
-      for(let k=0;k<4;k++)                                  // hex tile stack on the bench
-        CYL(g,.42-k*.05,.42-k*.05,.16,6, k%2?M.stone:M.wood, -5.6,1.13+k*.17,-2.0,.7);
-      const crate = new THREE.Group(); crate.position.set(-1.2,0,-6.6); g.add(crate);
-      [0,1,2].forEach(k=>B(crate,.9,.7,.9, M.wood, (k%2?.5:-.5),.35+ (k>1?.7:0), 0,.7));
-      B(g, .5,.9,.5, M.woodD, -2.4,.45,-1.0,.7);           // stool
-      rug(g, 3.4,2.6, M.cloth, 4.4, 2.4);
-      plant(g, 7.0,-6.8);
+    workshop(g, a){
+      B(g, 4.0,.14,1.1, M.woodD, a*6.3,.98,-8.2,.85);          // bench
+      [[-1.8,-8.6],[1.8,-8.6],[-1.8,-7.8],[1.8,-7.8]].forEach(p=>B(g,.14,.98,.14,M.woodD,a*6.3+p[0],.49,p[1],.5));
+      B(g, 4.0,1.8,.09, M.stone, a*6.3,2.7,-8.86,.7);          // pegboard
+      for(let k=0;k<7;k++) B(g,.09,.5+((k*37)%50)/100,.09, M.steel, a*6.3-1.6+k*.53, 2.6, -8.75, .4);
+      for(let k=0;k<4;k++)                                      // hex tile stack
+        CYL(g,.42-k*.05,.42-k*.05,.16,6, k%2?M.stone:M.wood, a*6.3-1.2,1.13+k*.17,-8.2,.7);
+      const crate = new THREE.Group(); crate.position.set(-a*7.2,0,-7.8); g.add(crate);
+      [0,1,2].forEach(k=>B(crate,.9,.7,.9, M.wood, (k%2?.55:-.55),.35+(k>1?.7:0), 0,.7));
+      B(g, .5,.9,.5, M.woodD, a*6.3,.45,-6.1,.7);              // stool
+      shelfBooks(g, -a*6.6, 7.6, Math.PI);
+      plant(g, a*8.3, 7.8);
     },
-    studio(g){
-      B(g, 4.6,.11,1.2, M.woodD, 0,.79,-6.4,.85);          // desk
-      [[-2.1,-6.9],[2.1,-6.9],[-2.1,-5.9],[2.1,-5.9]].forEach(p=>B(g,.1,.79,.1,M.woodD,p[0],.4,p[1],.5));
-      screenPanel(g, 1.8,1.05, -.9,1.42,-6.7, 0, ['lipsync_pro v5','phoneme → bone']);
-      screenPanel(g, 1.4,.85, 1.2,1.32,-6.7, -.35, ['render 240/300']);
-      chair(g, M.dark, 0,-4.9, 0);
-      const trip = new THREE.Group(); trip.position.set(5.6,0,-1.4); g.add(trip);
-      [0,1,2].forEach(k=>{ const a=k*Math.PI*2/3;
-        CYL(trip,.04,.04,1.9,6, M.dark, Math.cos(a)*.36,.9,Math.sin(a)*.36,.4); });
+    studio(g, a){
+      B(g, 4.0,.11,1.15, M.woodD, a*6.3,.79,-8.2,.85);         // desk
+      [[-1.8,-8.6],[1.8,-8.6],[-1.8,-7.8],[1.8,-7.8]].forEach(p=>B(g,.1,.79,.1,M.woodD,a*6.3+p[0],.4,p[1],.5));
+      screenPanel(g, 1.8,1.05, a*6.3-.8,1.42,-8.55, 0, ['lipsync_pro v5','phoneme → bone']);
+      screenPanel(g, 1.3,.8,  a*6.3+1.1,1.32,-8.5, -.3, ['render 240/300']);
+      chair(g, M.dark, a*6.3, -6.2, 0);
+      const trip = new THREE.Group(); trip.position.set(-a*7.4,0,-7.4); g.add(trip);
+      [0,1,2].forEach(k=>{ const q=k*Math.PI*2/3;
+        CYL(trip,.04,.04,1.9,6, M.dark, Math.cos(q)*.36,.9,Math.sin(q)*.36,.4); });
       B(trip, .62,.4,1.0, M.dark, 0,2.05,0,.8);
       CYL(trip,.17,.17,.3,12, M.steel, 0,2.05,.6,.6);
-      shelfBooks(g, -6.4, 1.0, Math.PI/2);
-      rug(g, 3.6,2.8, M.cloth, 1.6, 3.4);
-      plant(g, 7.0, 6.6);
+      shelfBooks(g, -a*6.6, 7.6, Math.PI);
+      rug(g, 4.0,3.0, M.cloth, 0, .6);
+      plant(g, a*8.3, 8.0);
     },
-    server(g){
-      [-1,0,1].forEach(k=>{                                 // racks
-        const r = new THREE.Group(); r.position.set(-6.2, 0, -3.0 + k*2.3); r.rotation.y = Math.PI/2; g.add(r);
-        B(r, 1.1,2.5,.95, M.dark, 0,1.25,0,.9);
+    server(g, a){
+      [-1.6,0,1.6].forEach(k=>{                                 // racks along the free wall
+        const r = new THREE.Group(); r.position.set(a*6.4 + k*1.25, 0, -8.4); g.add(r);
+        B(r, 1.15,2.5,.95, M.dark, 0,1.25,0,.9);
         for(let u=0;u<9;u++){
-          B(r, .96,.14,.06, M.steel, 0,.35+u*.24,.49, 0);
-          B(r, .05,.05,.03, u%3? M.red : M.leaf, .38,.35+u*.24,.53, 0);
+          B(r, 1.0,.14,.06, M.steel, 0,.35+u*.24,.49, 0);
+          B(r, .05,.05,.03, u%3? M.red : M.leaf, .4,.35+u*.24,.53, 0);
         }
       });
-      B(g, 3.4,.1,1.0, M.steel, 3.6,.78,-6.4,.8);           // console desk
-      [[2.1,-6.8],[5.1,-6.8],[2.1,-6.0],[5.1,-6.0]].forEach(p=>B(g,.09,.78,.09,M.steel,p[0],.39,p[1],.5));
-      screenPanel(g, 1.5,.9, 2.9,1.35,-6.6, 0, ['POST /infer 200','p95  38ms','rag: 12 docs']);
-      screenPanel(g, 1.3,.8, 4.6,1.3,-6.6, .3, ['gpt2 · step 4210','loss 2.13']);
-      chair(g, M.dark, 3.6,-4.8, 0);
-      B(g, 4.0,.12,.5, M.steel, 0, 6.3, -1.0, .5);          // cable tray
-      rug(g, 3.0,2.4, M.cloth, 4.6, 3.0);
+      B(g, 3.2,.1,1.0, M.steel, -a*6.5,.78,-8.3,.8);            // console desk
+      [[-1.4,-8.7],[1.4,-8.7],[-1.4,-7.9],[1.4,-7.9]].forEach(p=>B(g,.09,.78,.09,M.steel,-a*6.5+p[0],.39,p[1],.5));
+      screenPanel(g, 1.5,.9, -a*6.5-.7,1.35,-8.65, 0, ['POST /infer 200','p95  38ms','rag: 12 docs']);
+      screenPanel(g, 1.3,.8, -a*6.5+.9,1.3,-8.6, .28, ['gpt2 · step 4210','loss 2.13']);
+      chair(g, M.dark, -a*6.5, -6.3, 0);
+      B(g, 3.6,.12,.5, M.steel, a*6.4, 6.6, -8.2, .5);          // cable tray
+      rug(g, 4.0,3.0, M.cloth, 0, .6);
     },
-    library(g){
-      shelfBooks(g, -6.6, -3.4, Math.PI/2);
-      shelfBooks(g, -6.6, -.9, Math.PI/2);
-      shelfBooks(g, -6.6,  1.6, Math.PI/2);
-      shelfBooks(g,  6.6, -2.2, -Math.PI/2);
-      shelfBooks(g,  6.6,  .3, -Math.PI/2);
-      rug(g, 5.0, 3.6, M.cloth, 0, 1.4);
-      B(g, 2.8,.12,1.4, M.woodD, 0,.78,1.4,.85);            // reading table
-      [[-1.2,.85],[1.2,.85],[-1.2,1.95],[1.2,1.95]].forEach(p=>B(g,.11,.78,.11,M.woodD,p[0],.39,p[1],.5));
-      lampOn(g, M.dark, .9, .84, 1.4);
-      chair(g, M.woodD, -1.9, 1.4, Math.PI/2);
-      chair(g, M.woodD,  1.9, 1.4, -Math.PI/2);
-      plant(g, 7.2, 6.6);
+    library(g, a){
+      shelfBooks(g, a*5.0, -8.5, 0);
+      shelfBooks(g, a*7.6, -8.5, 0);
+      shelfBooks(g, -a*5.2, -8.5, 0);
+      shelfBooks(g, -a*7.8, -8.5, 0);
+      rug(g, 5.0, 4.0, M.cloth, 0, .6);
+      B(g, 2.8,.12,1.4, M.woodD, a*6.4,.78,7.0,.85);            // reading table
+      [[-1.2,6.45],[1.2,6.45],[-1.2,7.55],[1.2,7.55]].forEach(p=>B(g,.11,.78,.11,M.woodD,a*6.4+p[0],.39,p[1],.5));
+      lampOn(g, M.dark, a*7.3,.84,7.0);
+      chair(g, M.woodD, a*4.6, 7.0, Math.PI/2);
+      chair(g, M.woodD, a*8.2, 7.0, -Math.PI/2);
+      plant(g, -a*8.3, 7.8);
     },
-    dining(g){
-      rug(g, 6.2, 4.6, M.cloth, 0, 0);
-      B(g, 4.2,.14,1.9, M.wood, 0,.79,0,.9);                // table
-      [[-1.85,-.75],[1.85,-.75],[-1.85,.75],[1.85,.75]].forEach(p=>B(g,.16,.79,.16,M.woodD,p[0],.4,p[1],.55));
-      [-1.3,0,1.3].forEach(x=>{ chair(g, M.woodD, x,-1.8, 0); chair(g, M.woodD, x,1.8, Math.PI); });
-      [-1.3,0,1.3].forEach(x=>{                              // pendant lamps
-        CYL(g,.015,.015,1.7,6, M.dark, x, H-.85, 0, 0);
-        CYL(g,.12,.34,.4,12, M.white, x, H-1.85, 0, .6);
+    dining(g, a){
+      rug(g, 5.6, 4.4, M.cloth, 0, 0);
+      const d = new THREE.Group(); d.position.set(a*6.4,0,-6.5); g.add(d);
+      B(d, 4.0,.14,1.8, M.wood, 0,.79,0,.9);                    // table
+      [[-1.75,-.7],[1.75,-.7],[-1.75,.7],[1.75,.7]].forEach(p=>B(d,.16,.79,.16,M.woodD,p[0],.4,p[1],.55));
+      [-1.25,0,1.25].forEach(x=>{ chair(d, M.woodD, x,-1.75, 0); chair(d, M.woodD, x,1.75, Math.PI); });
+      [-1.25,0,1.25].forEach(x=>{                                // pendants
+        CYL(d,.015,.015,1.7,6, M.dark, x, H-.85, 0, 0);
+        CYL(d,.12,.34,.4,12, M.white, x, H-1.85, 0, .6);
       });
-      B(g, .3,.16,.3, M.white, -1.1,.9,.3,.5);              // plates
-      B(g, .3,.16,.3, M.white,  1.1,.9,-.3,.5);
-      CYL(g,.1,.14,.5,10, M.glass, 0,1.05,0,.5);            // carafe
-      B(g, 3.0,.9,.55, M.woodD, 5.4,.45,-6.6,.85);          // sideboard
-      B(g, 3.1,.08,.62, M.wood, 5.4,.92,-6.6,.6);
-      plant(g, -7.0, 6.6); plant(g, 7.2, 6.6);
+      B(d, .3,.16,.3, M.white, -1.1,.9,.28,.5);
+      B(d, .3,.16,.3, M.white,  1.1,.9,-.28,.5);
+      CYL(d,.1,.14,.5,10, M.glass, 0,1.05,0,.5);
+      B(g, 3.0,.9,.55, M.woodD, -a*6.7,.45,-8.3,.85);           // sideboard
+      B(g, 3.1,.08,.62, M.wood,  -a*6.7,.92,-8.3,.6);
+      plant(g, -a*8.3, 8.0); plant(g, a*8.3, 8.0);
     }
   };
 
@@ -908,9 +986,12 @@ function build(){
     im.src = url;
   }
   // side → wall centre + facing rotation (into the room)
+  // lx = the wall's own left-to-right axis in world space
   const SIDE = {
-    px:{x: HALF, z:0, rot:-Math.PI/2}, nx:{x:-HALF, z:0, rot: Math.PI/2},
-    pz:{x:0, z: HALF, rot: Math.PI},   nz:{x:0, z:-HALF, rot: 0}
+    px:{x: HALF, z:0, rot:-Math.PI/2, lx:{x:0,z: 1}},
+    nx:{x:-HALF, z:0, rot: Math.PI/2, lx:{x:0,z:-1}},
+    pz:{x:0, z: HALF, rot: Math.PI,   lx:{x:-1,z:0}},
+    nz:{x:0, z:-HALF, rot: 0,         lx:{x: 1,z:0}}
   };
 
   const featureDir = [];   // unit vector from room centre toward its feature wall
@@ -919,46 +1000,59 @@ function build(){
     const g = new THREE.Group(); g.position.set(p.x, 0, p.z); scene.add(g);
 
     // rooms are laid out with the kit facing -Z; rotate so free walls line up
-    const free = ['nz','px','pz','nx'].filter(k => !doorSides[i][k]);
+    // pick the free wall you are most facing as you travel through: never the
+    // one directly behind you, so the survey turn stays short
+    const nxt = P[Math.min(N-1, i+1)], prv = P[Math.max(0, i-1)];
+    const out = (i < N-1)
+      ? {x:Math.sign(nxt.x-P[i].x), z:Math.sign(nxt.z-P[i].z)}
+      : {x:Math.sign(P[i].x-prv.x), z:Math.sign(P[i].z-prv.z)};
+    const free = ['nz','px','pz','nx'].filter(k => !doorSides[i][k])
+      .sort((a,b) => (SIDE[b].x*out.x + SIDE[b].z*out.z) - (SIDE[a].x*out.x + SIDE[a].z*out.z));
     const featKey = free[0] || 'nz';
     const secKey  = free[1] || free[0] || 'px';
     const f = SIDE[featKey];
-    featureDir[i] = new THREE.Vector3(f.x, 0, f.z).normalize();
+    // slide the piece down the wall in the direction of travel, so it sits
+    // ahead-and-to-the-side as you come through the door rather than beside you
+    const AOFF = 5.4 * (out.x*f.lx.x + out.z*f.lx.z);
+    const wox = f.lx.x*AOFF, woz = f.lx.z*AOFF;
+    featureDir[i] = new THREE.Vector3(f.x + wox, 0, f.z + woz).normalize();
 
-    // feature piece
     const c = artCanvas(o); const tex = texFrom(c);
     if(o.img) paintShot(c, tex, o.img, o.t, o.s);
     const wall = new THREE.Group();
     wall.position.set(f.x, 0, f.z); wall.rotation.y = f.rot; g.add(wall);
-    B(wall, 3.2,3.95,.14, M.dark, 0, 3.5, .24, .9);
+    B(wall, 3.2,3.95,.14, M.dark, AOFF, 3.15, .24, .9);
     const art = new THREE.Mesh(new THREE.PlaneGeometry(3.0,3.75), new THREE.MeshBasicMaterial({map:tex}));
-    art.position.set(0,3.5,.32); wall.add(art);
+    art.position.set(AOFF,3.15,.32); wall.add(art);
     const cap = new THREE.Mesh(new THREE.PlaneGeometry(1.6,.66), new THREE.MeshBasicMaterial({map:capCanvas(o)}));
-    cap.position.set(0,1.16,.28); wall.add(cap);
-    const sp = new THREE.SpotLight(0xfff4e2, MOBILE?3:4.2, 12, .5, .8, 1.2);
-    sp.position.set(f.x*.7, H-.7, f.z*.7); sp.target.position.set(f.x, 3.4, f.z);
+    cap.position.set(AOFF + (AOFF > 0 ? -2.0 : 2.0), 2.2, .28); wall.add(cap);
+    const sp = new THREE.SpotLight(0xfff4e2, MOBILE?3:4.6, 13, .5, .8, 1.2);
+    sp.position.set(f.x*.72 + wox, H-.7, f.z*.72 + woz);
+    sp.target.position.set(f.x + wox, 3.1, f.z + woz);
     g.add(sp); g.add(sp.target);
-    B(wall, .95,.12,.3, M.dark, 0, H-.5, 2.2, .7);
+    B(wall, .95,.12,.3, M.dark, AOFF, H-.5, 2.2, .7);
 
     // room name sign on the second free wall
     const s2 = SIDE[secKey];
     const sg = new THREE.Group(); sg.position.set(s2.x,0,s2.z); sg.rotation.y = s2.rot; g.add(sg);
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.4,.94), new THREE.MeshBasicMaterial({map:themeSign(o,i)}));
-    sign.position.set(0,4.6,.3); sg.add(sign);
-    B(sg, 3.56,1.1,.1, M.dark, 0,4.6,.24, .9);
+    sign.position.set(0,5.15,.3); sg.add(sign);
+    B(sg, 3.56,1.1,.1, M.dark, 0,5.15,.24, .9);
     if(o.img2){
       const c2 = artCanvas({n:'', icon:o.icon, t:o.t, s:o.s});
       const t2 = texFrom(c2); paintShot(c2, t2, o.img2, o.t, 'detail');
-      B(sg, 2.4,3.0,.12, M.dark, 0,2.5,.24,.9);
+      B(sg, 2.4,3.0,.12, M.dark, 0,2.8,.24,.9);
       const a2 = new THREE.Mesh(new THREE.PlaneGeometry(2.24,2.8), new THREE.MeshBasicMaterial({map:t2}));
-      a2.position.set(0,2.5,.32); sg.add(a2);
+      a2.position.set(0,2.8,.32); sg.add(a2);
     }
 
     // furniture, rotated so its "back" sits against the feature wall
     const kit = new THREE.Group();
-    kit.rotation.y = Math.atan2(f.x, -f.z);   // -Z of the kit points at the feature wall
-    g.add(kit);
-    (KITS[o.kit] || KITS.foyer)(kit);
+    const ky = Math.atan2(f.x, -f.z);         // -Z of the kit points at the feature wall
+    kit.rotation.y = ky; g.add(kit);
+    // which side of that wall the artwork ended up on, in kit-local terms
+    const artSide = Math.sign(wox*Math.cos(ky) + woz*(-Math.sin(ky))) || 1;
+    (KITS[o.kit] || KITS.foyer)(kit, artSide);
 
     // floor numeral
     const nc = document.createElement('canvas'); nc.width=nc.height=256;
@@ -992,25 +1086,85 @@ function build(){
 /* ══════════════════════════════════════════════════════════
    PANELS + NAV
    ══════════════════════════════════════════════════════════ */
-const els = [...document.querySelectorAll('.panel')];
-const nav = document.getElementById('nav');
-const tag = document.getElementById('roomtag');
-els.forEach((el,i)=>{
-  const b = document.createElement('button');
-  b.innerHTML='<i></i>';
-  b.setAttribute('aria-label', el.dataset.name); b.title = el.dataset.name;
-  b.onclick = ()=> scrollTo({top:(i/(N-1))*maxScroll(), behavior:'smooth'});
-  nav.appendChild(b);
+const els   = [...document.querySelectorAll('.panel')];
+const tag   = document.getElementById('roomtag');
+const slider= document.getElementById('slider');
+const sFill = document.getElementById('sFill');
+const sKnob = document.getElementById('sKnob');
+const sCur  = document.getElementById('sCur');
+const cue   = document.getElementById('cue');
+
+// ticks, one per room
+{
+  const tk = document.getElementById('sTicks');
+  for(let i=0;i<N;i++){
+    const e = document.createElement('i');
+    e.dataset.i = i; tk.appendChild(e);
+  }
+}
+const isVertical = () => innerWidth > 860;
+function layoutSlider(){
+  const ticks = document.getElementById('sTicks').children;
+  for(let i=0;i<N;i++){
+    const pc = (i/(N-1))*100 + '%';
+    if(isVertical()){ ticks[i].style.top = pc; ticks[i].style.left = '50%'; }
+    else            { ticks[i].style.left = pc; ticks[i].style.top = '50%'; }
+  }
+}
+layoutSlider(); addEventListener('resize', layoutSlider);
+
+function paintSlider(v){          // v is 0..1
+  const pc = v*100 + '%';
+  if(isVertical()){
+    sFill.style.height = pc; sFill.style.width = '2px';
+    sKnob.style.top = pc; sKnob.style.left = '50%';
+    sCur.style.top = pc; sCur.style.left = '';
+  } else {
+    sFill.style.width = pc; sFill.style.height = '2px';
+    sKnob.style.left = pc; sKnob.style.top = '50%';
+    sCur.style.top = '-16px';
+  }
+}
+// dragging the slider walks you through the house
+let dragging = false;
+function fromEvent(e){
+  const r = slider.getBoundingClientRect();
+  const v = isVertical() ? (e.clientY - r.top)/r.height : (e.clientX - r.left)/r.width;
+  return Math.max(0, Math.min(1, v));
+}
+function applyDrag(e){
+  const v = fromEvent(e);
+  scrollTo({top: v*maxScroll()});
+}
+slider.addEventListener('pointerdown', e=>{
+  dragging = true; slider.classList.add('drag');
+  slider.setPointerCapture(e.pointerId); applyDrag(e); e.preventDefault();
 });
-const navBtns = [...nav.children];
+slider.addEventListener('pointermove', e=>{ if(dragging) applyDrag(e); });
+['pointerup','pointercancel'].forEach(t=>slider.addEventListener(t, e=>{
+  dragging = false; slider.classList.remove('drag');
+  try{ slider.releasePointerCapture(e.pointerId); }catch(_){}
+}));
+slider.addEventListener('keydown', e=>{
+  if(['ArrowDown','ArrowRight'].includes(e.key)){ e.preventDefault();
+    scrollTo({top:(Math.min(N-1,active+1)/(N-1))*maxScroll(), behavior:'smooth'}); }
+  if(['ArrowUp','ArrowLeft'].includes(e.key)){ e.preventDefault();
+    scrollTo({top:(Math.max(0,active-1)/(N-1))*maxScroll(), behavior:'smooth'}); }
+});
+
 let counted = false;
 function setActive(i){
   if(i === active) return;
   active = i;
   els.forEach((el,k)=> el.classList.toggle('on', k===i));
-  navBtns.forEach((b,k)=> b.classList.toggle('on', k===i));
-  tag.innerHTML = '<em>' + String(i).padStart(2,'0') + '</em> &nbsp;' + ROOMS[i].theme;
-  document.getElementById('hint').style.opacity = i===0 ? '1' : '0';
+  const label = '<em>' + String(i).padStart(2,'0') + '</em>' + ROOMS[i].theme;
+  sCur.innerHTML = label;
+  tag.innerHTML  = label;
+  slider.setAttribute('aria-valuenow', i);
+  slider.setAttribute('aria-valuetext', ROOMS[i].theme);
+  cue.style.opacity = i === 0 ? '1' : '0';
+  const h = document.getElementById('hint');
+  if(h) h.style.opacity = i === 0 ? '1' : '0';
   if(i === 7 && !counted){ counted = true; runCounts(); }
 }
 function runCounts(){
@@ -1045,6 +1199,7 @@ function loop(){
   const p = current*(N-1);
   setActive(Math.round(p));
   document.getElementById('prog').style.width = (current*100)+'%';
+  paintSlider(current);
 
   if(ready){
     const t = clamp01(current);
@@ -1071,7 +1226,7 @@ function loop(){
       const cross = fwd.x*fd.z - fwd.z*fd.x;
       const dot   = fwd.x*fd.x + fwd.z*fd.z;
       const ang   = Math.atan2(-cross, dot);
-      want = Math.max(-1.05, Math.min(1.05, ang)) * smooth(1 - d/.5);
+      want = Math.max(-.58, Math.min(.58, ang)) * smooth(1 - d/.5);
     }
     sweep += (want - sweep) * (REDUCED ? 1 : .06);
 
@@ -1079,7 +1234,7 @@ function loop(){
     const cs = Math.cos(a), sn = Math.sin(a);
     look.set(fwd.x*cs + fwd.z*sn, 0, -fwd.x*sn + fwd.z*cs)
         .multiplyScalar(9).add(camera.position);
-    look.y = 2.9 - my*.7;
+    look.y = 2.35 - my*.6;
     camera.lookAt(look);
 
     // doors open as you get close
