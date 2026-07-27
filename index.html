@@ -7,151 +7,158 @@
 <meta name="description" content="Aayush Kumar — Game Developer, AI &amp; Backend Engineer. 154 shipped games, procedural systems in Unity, Blender tooling, and two live platforms: Arthis.Space and Arthis.Land.">
 <meta name="author" content="Aayush Kumar">
 <meta property="og:title" content="Aayush Kumar — Game Developer &amp; AI Engineer">
-<meta property="og:description" content="A scrollable gallery of 154 shipped games, procedural Unity systems, and Blender tooling.">
+<meta property="og:description" content="A toon-shaded gallery you scroll through. 154 shipped games, procedural Unity systems, Blender tooling.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23111'/><text y='.9em' x='50%25' text-anchor='middle' font-size='62' font-family='Georgia' fill='%23fff'>A</text></svg>">
+<meta property="og:url" content="https://itsaayush2004.github.io/portfolio/">
+<meta name="theme-color" content="#f2f1ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2314140f'/><text y='.92em' x='50%25' text-anchor='middle' font-size='64' font-family='Helvetica' font-weight='300' fill='%23f2f1ee'>A</text></svg>">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://raw.githubusercontent.com">
 
 <style>
 :root{
   --paper:#f2f1ee;
-  --ink:#0f0f0e;
-  --mid:#5c5b56;
-  --soft:#9b998f;
-  --line:#d9d7d0;
-  --accent:#b4472e;
+  --ink:#14140f;
+  --mid:#57564f;
+  --soft:#98968c;
+  --line:#d8d5cd;
+  --accent:#c0472c;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:auto;-webkit-text-size-adjust:100%}
-body{
-  background:var(--paper);color:var(--ink);
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);
   font-family:'Helvetica Neue',Helvetica,Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
-  font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
-}
-a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);transition:border-color .25s,color .25s}
-a:hover{border-color:var(--ink)}
+  font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
 
-/* ---------- WEBGL LAYER ---------- */
 #scene{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
-#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;
+#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
 #vig{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(120% 90% at 50% 45%,transparent 45%,rgba(15,15,14,.10) 100%)}
+  background:radial-gradient(125% 95% at 50% 45%,transparent 42%,rgba(20,20,15,.13) 100%)}
 
-/* ---------- SCROLL TRACK ---------- */
 #track{position:relative;z-index:2;height:900vh}
-
-/* ---------- FIXED OVERLAY ---------- */
 #stage{position:fixed;inset:0;z-index:3;pointer-events:none;display:flex;align-items:center}
-.panel{
-  position:absolute;inset:0;display:flex;align-items:center;
-  padding:0 clamp(24px,7vw,120px);opacity:0;visibility:hidden;
-  transition:opacity .5s ease, transform .7s cubic-bezier(.16,.84,.34,1);
-  transform:translateY(28px);
-}
+
+.panel{position:absolute;inset:0;display:flex;align-items:center;
+  padding:0 clamp(22px,6vw,110px);opacity:0;visibility:hidden;
+  transition:opacity .45s ease,transform .8s cubic-bezier(.16,.84,.34,1);transform:translateY(30px)}
 .panel.on{opacity:1;visibility:visible;transform:none;pointer-events:auto}
-.inner{max-width:640px;width:100%}
-.panel.right .inner{margin-left:auto;text-align:left}
+.inner{max-width:600px;width:100%}
+.panel.right{justify-content:flex-end}
+.panel.right .inner{text-align:left}
 
-.num{font-size:11px;letter-spacing:.34em;color:var(--soft);text-transform:uppercase;margin-bottom:22px;font-weight:500}
-h1{font-size:clamp(44px,9vw,104px);line-height:.92;font-weight:300;letter-spacing:-.045em}
-h1 em{font-style:normal;display:block;font-weight:500}
-h2{font-size:clamp(28px,4.6vw,50px);font-weight:300;line-height:1.06;letter-spacing:-.035em;margin-bottom:22px}
-.lede{font-size:clamp(15px,1.7vw,19px);color:var(--mid);font-weight:300;line-height:1.62;margin-top:22px;max-width:52ch}
-p.body{font-size:15px;color:var(--mid);font-weight:300;line-height:1.72;margin-bottom:20px;max-width:52ch}
-.rule{width:44px;height:1px;background:var(--ink);margin:26px 0}
+.num{font-size:10.5px;letter-spacing:.34em;color:var(--soft);text-transform:uppercase;margin-bottom:20px;font-weight:600}
+h1{font-size:clamp(42px,8.6vw,100px);line-height:.9;font-weight:300;letter-spacing:-.045em}
+h1 em{font-style:normal;display:block;font-weight:600}
+h2{font-size:clamp(27px,4.4vw,48px);font-weight:300;line-height:1.05;letter-spacing:-.035em;margin-bottom:20px}
+.lede{font-size:clamp(15px,1.65vw,18.5px);color:var(--mid);font-weight:300;line-height:1.62;margin-top:20px;max-width:50ch}
+p.body{font-size:14.5px;color:var(--mid);font-weight:300;line-height:1.7;margin-bottom:18px;max-width:50ch}
 
-ul.pts{list-style:none;margin:22px 0}
-ul.pts li{font-size:14px;color:var(--mid);font-weight:300;padding-left:20px;position:relative;margin-bottom:10px;line-height:1.6;max-width:52ch}
-ul.pts li::before{content:'';position:absolute;left:0;top:11px;width:8px;height:1px;background:var(--soft)}
-ul.pts li b{color:var(--ink);font-weight:500}
+ul.pts{list-style:none;margin:20px 0}
+ul.pts li{font-size:13.5px;color:var(--mid);font-weight:300;padding-left:19px;position:relative;margin-bottom:9px;line-height:1.58;max-width:50ch}
+ul.pts li::before{content:'';position:absolute;left:0;top:10px;width:8px;height:1px;background:var(--soft)}
+ul.pts li b{color:var(--ink);font-weight:600}
 
-.meta{display:flex;gap:34px;flex-wrap:wrap;margin-top:30px;padding-top:22px;border-top:1px solid var(--line)}
-.meta div .k{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:5px}
-.meta div .v{font-size:15px;font-weight:400}
-.meta div .v.big{font-size:26px;font-weight:300;letter-spacing:-.02em}
+.meta{display:flex;gap:30px;flex-wrap:wrap;margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
+.meta div .k{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:4px;font-weight:600}
+.meta div .v{font-size:14.5px;font-weight:400}
+.meta div .v.big{font-size:25px;font-weight:300;letter-spacing:-.02em}
 
-.stack{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px}
-.chip{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;border:1px solid var(--line);
-  padding:6px 11px;border-radius:2px;color:var(--mid);font-weight:500;background:rgba(255,255,255,.4)}
+.stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.chip{font-size:10px;letter-spacing:.11em;text-transform:uppercase;border:1px solid var(--line);
+  padding:5px 10px;color:var(--mid);font-weight:600;background:rgba(255,255,255,.45)}
 .chip.hi{border-color:var(--ink);color:var(--ink)}
 
-.cta{display:inline-flex;align-items:center;gap:9px;margin-top:30px;font-size:13px;letter-spacing:.05em;
-  border:none;border-bottom:1px solid var(--ink);padding-bottom:4px;font-weight:500}
-.cta span{transition:transform .3s}
-.cta:hover span{transform:translateX(5px)}
+/* live screenshot thumbs */
+.shots{display:flex;gap:10px;margin-top:22px}
+.shots a{display:block;position:relative;border:1.5px solid var(--ink);background:#fff;
+  overflow:hidden;transition:transform .3s cubic-bezier(.16,.84,.34,1);flex:1;max-width:170px}
+.shots a:hover{transform:translateY(-4px)}
+.shots img{display:block;width:100%;height:100px;object-fit:cover;object-position:top center}
+.shots .cap{font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:6px 8px;
+  border-top:1.5px solid var(--ink);font-weight:600;background:var(--paper)}
 
-/* ---------- HERO ---------- */
-.hero-links{display:flex;gap:26px;flex-wrap:wrap;margin-top:38px;font-size:13px;letter-spacing:.04em}
-.hero-links a{border-bottom:1px solid var(--line);padding-bottom:3px}
+.cta{display:inline-flex;align-items:center;gap:9px;margin-top:24px;font-size:12.5px;letter-spacing:.05em;
+  border-bottom:1.5px solid var(--ink);padding-bottom:3px;font-weight:600}
+.cta i{font-style:normal;transition:transform .3s}
+.cta:hover i{transform:translateX(6px)}
+
+.hero-links{display:flex;gap:22px;flex-wrap:wrap;margin-top:34px;font-size:12.5px;letter-spacing:.04em}
+.hero-links a{border-bottom:1px solid var(--line);padding-bottom:3px;transition:border-color .25s}
+.hero-links a:hover{border-color:var(--ink)}
 .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin-right:7px;vertical-align:middle}
 
-/* ---------- STATS ---------- */
-.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
-  border:1px solid var(--line);margin:26px 0}
-.statgrid .c{background:var(--paper);padding:17px 15px}
-.statgrid .n2{font-size:clamp(26px,3.4vw,38px);font-weight:300;letter-spacing:-.03em;line-height:1}
-.statgrid .l2{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-top:9px;line-height:1.45}
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:26px}
-.chart{position:relative;height:180px}
-.chart .cap{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:12px}
-.chart .box{position:relative;height:148px}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1.5px solid var(--ink);margin:22px 0}
+.statgrid .c{padding:15px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(242,241,238,.82)}
+.statgrid .c:nth-child(3n){border-right:none}
+.statgrid .c:nth-child(n+4){border-bottom:none}
+.statgrid .n2{font-size:clamp(24px,3.2vw,36px);font-weight:300;letter-spacing:-.03em;line-height:1}
+.statgrid .l2{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-top:8px;line-height:1.4;font-weight:600}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px}
+.chart .cap{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:10px;font-weight:600}
+.chart .box{position:relative;height:140px}
 
-/* ---------- PROGRESS / NAV ---------- */
-#prog{position:fixed;left:0;top:0;height:2px;background:var(--ink);width:0;z-index:9;transition:width .1s linear}
-#nav{position:fixed;right:clamp(16px,3vw,38px);top:50%;transform:translateY(-50%);z-index:8;
-  display:flex;flex-direction:column;gap:13px}
-#nav button{width:22px;height:9px;border:none;background:none;cursor:pointer;padding:4px 0;display:block}
-#nav button i{display:block;height:1px;width:14px;background:var(--soft);transition:.35s;margin-left:auto}
-#nav button.on i{width:22px;background:var(--ink)}
-#nav button:hover i{width:22px}
+#prog{position:fixed;left:0;top:0;height:2px;background:var(--ink);width:0;z-index:9}
+#nav{position:fixed;right:clamp(14px,2.6vw,34px);top:50%;transform:translateY(-50%);z-index:8;display:flex;flex-direction:column;gap:12px}
+#nav button{width:24px;height:9px;border:none;background:none;cursor:pointer;padding:4px 0;display:block}
+#nav button i{display:block;height:1.5px;width:12px;background:var(--soft);transition:.35s;margin-left:auto}
+#nav button.on i{width:24px;background:var(--ink)}
+#nav button:hover i{width:24px;background:var(--ink)}
 
-#brand{position:fixed;left:clamp(20px,4vw,44px);top:clamp(20px,4vw,38px);z-index:8;
-  font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;mix-blend-mode:multiply}
-#hint{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:8;font-size:10px;
-  letter-spacing:.3em;text-transform:uppercase;color:var(--soft);transition:opacity .5s;display:flex;
-  flex-direction:column;align-items:center;gap:9px}
-#hint .bar{width:1px;height:26px;background:linear-gradient(var(--soft),transparent);animation:fall 1.9s infinite}
+#brand{position:fixed;left:clamp(18px,3.5vw,40px);top:clamp(18px,3.5vw,34px);z-index:8;
+  font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;mix-blend-mode:multiply}
+#roomtag{position:fixed;right:clamp(50px,6vw,80px);top:clamp(18px,3.5vw,34px);z-index:8;
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);font-weight:600}
+#hint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:8;font-size:9.5px;
+  letter-spacing:.3em;text-transform:uppercase;color:var(--soft);transition:opacity .5s;
+  display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:600}
+#hint .bar{width:1.5px;height:24px;background:linear-gradient(var(--soft),transparent);animation:fall 1.9s infinite}
 @keyframes fall{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}
   55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
-/* ---------- LOADER ---------- */
 #load{position:fixed;inset:0;z-index:20;background:var(--paper);display:flex;align-items:center;
-  justify-content:center;flex-direction:column;gap:20px;transition:opacity .7s}
+  justify-content:center;flex-direction:column;gap:18px;transition:opacity .8s}
 #load.gone{opacity:0;pointer-events:none}
-#load .t{font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--soft)}
-#load .l{width:150px;height:1px;background:var(--line);position:relative;overflow:hidden}
-#load .l i{position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(0);transition:transform .35s}
+#load .t{font-size:10.5px;letter-spacing:.36em;text-transform:uppercase;color:var(--soft);font-weight:600}
+#load .pct{font-size:44px;font-weight:300;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+#load .l{width:160px;height:1.5px;background:var(--line);position:relative;overflow:hidden}
+#load .l i{position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(0);transition:transform .3s}
 
-@media(max-width:820px){
-  #nav{display:none}
+@media(max-width:860px){
+  #nav,#roomtag{display:none}
   .charts{grid-template-columns:1fr}
   .statgrid{grid-template-columns:repeat(2,1fr)}
-  .panel{padding:0 22px}
-  .panel.right .inner{margin-left:0}
-  .meta{gap:22px}
+  .statgrid .c:nth-child(3n){border-right:1px solid var(--line)}
+  .statgrid .c:nth-child(2n){border-right:none}
+  .statgrid .c:nth-child(n+4){border-bottom:1px solid var(--line)}
+  .statgrid .c:nth-child(n+5){border-bottom:none}
+  .panel{padding:0 20px}
+  .panel.right{justify-content:flex-start}
+  .shots{max-width:340px}
 }
-@media(prefers-reduced-motion:reduce){
-  .panel{transition:opacity .2s}
-  #hint .bar{animation:none}
-}
+@media(prefers-reduced-motion:reduce){.panel{transition:opacity .2s}#hint .bar{animation:none}}
 </style>
 </head>
 <body>
 
-<div id="load"><div class="t">Aayush Kumar</div><div class="l"><i id="loadbar"></i></div></div>
+<div id="load">
+  <div class="t">Aayush Kumar</div>
+  <div class="pct" id="pct">0</div>
+  <div class="l"><i id="loadbar"></i></div>
+</div>
 
 <canvas id="scene"></canvas>
 <div id="grain"></div>
 <div id="vig"></div>
 <div id="prog"></div>
 <div id="brand">AK</div>
+<div id="roomtag">Room 00</div>
 
-<nav id="nav" aria-label="Sections"></nav>
+<nav id="nav" aria-label="Rooms"></nav>
 
 <div id="stage">
 
-  <!-- 0 — ENTRANCE -->
   <article class="panel" data-i="0" data-name="Intro">
     <div class="inner">
       <div class="num">Portfolio — 2026</div>
@@ -166,8 +173,7 @@ ul.pts li b{color:var(--ink);font-weight:500}
     </div>
   </article>
 
-  <!-- 1 — STATEMENT -->
-  <article class="panel right" data-i="1" data-name="About">
+  <article class="panel right" data-i="1" data-name="Practice">
     <div class="inner">
       <div class="num">01 — Practice</div>
       <h2>154 shipped builds,<br>one throughline.</h2>
@@ -181,47 +187,60 @@ ul.pts li b{color:var(--ink);font-weight:500}
     </div>
   </article>
 
-  <!-- 2 — ARTHIS.SPACE -->
   <article class="panel" data-i="2" data-name="Arthis.Space">
     <div class="inner">
       <div class="num">02 — Live Platform</div>
       <h2>Arthis.Space</h2>
-      <p class="body">A social gaming platform where games launch straight in the browser or app — no downloads — with profiles, feeds and community discovery built around play rather than bolted on after it.</p>
+      <p class="body">A browser-based mini-games platform with a TikTok-style vertical feed. Open it and you're already playing — swipe up for the next game, no installs, solo or with friends.</p>
       <ul class="pts">
-        <li>AI agents generate gameplay logic, assets and 3D web content from natural-language prompts through <b>MCP-connected tools</b></li>
+        <li>Infinite swipeable feed; each card is a complete, self-contained mini-game loaded on demand</li>
+        <li>AI agents generate gameplay logic, assets and 3D web content from prompts via <b>MCP-connected tools</b></li>
         <li>Supabase / PostgreSQL backend scaled from <b>1 to 10,000 daily active users</b></li>
-        <li>Synchronised multiplayer sessions with progress carried across devices</li>
+        <li>Real-time rooms — host creates a code, others join, state stays in sync</li>
       </ul>
+      <div class="shots">
+        <a href="https://arthis.space" target="_blank" rel="noopener">
+          <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.space/main/screenshot-2.png" alt="Fruit Blast mini-game on Arthis.Space" loading="lazy">
+          <div class="cap">Fruit Blast</div></a>
+        <a href="https://arthis.space" target="_blank" rel="noopener">
+          <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.space/main/screenshot-3.png" alt="Doodle Militia mini-game on Arthis.Space" loading="lazy">
+          <div class="cap">Doodle Militia</div></a>
+      </div>
       <div class="stack">
         <span class="chip hi">Supabase</span><span class="chip hi">PostgreSQL</span>
-        <span class="chip">LLM Agents</span><span class="chip">MCP</span>
-        <span class="chip">WebRTC</span><span class="chip">React</span>
+        <span class="chip">LLM Agents</span><span class="chip">MCP</span><span class="chip">Realtime</span>
       </div>
-      <a class="cta" href="https://arthis.space" target="_blank" rel="noopener">Visit arthis.space <span>→</span></a>
+      <a class="cta" href="https://arthis.space" target="_blank" rel="noopener">Visit arthis.space <i>→</i></a>
     </div>
   </article>
 
-  <!-- 3 — ARTHIS.LAND -->
   <article class="panel right" data-i="3" data-name="Arthis.Land">
     <div class="inner">
       <div class="num">03 — Live Platform</div>
       <h2>Arthis.Land</h2>
-      <p class="body">A metaverse-style wall you explore rather than scroll. Each brick opens into a game's own page with a playable build embedded inside the virtual space.</p>
+      <p class="body">"The Wall" — a handcrafted vertical city you climb and explore in the browser. Built in Unity, shipped to WebGL, and multiplayer: 2–4 people share a space in real time.</p>
       <ul class="pts">
-        <li>Procedural generation engine that assembles customisable virtual rooms in web 3D</li>
-        <li><b>Unity / Unreal WebGL builds</b> embedded directly into the wall</li>
-        <li><b>40+ named rooms</b> live — Halcyon, Kowloon Drift, Vermillion, Xeno&nbsp;Garden</li>
-        <li>Supabase backend managing user-generated worlds and generation parameters</li>
+        <li>Procedural engine assembles customisable virtual rooms — <b>40+ live</b>, from Halcyon to Xeno&nbsp;Garden</li>
+        <li><b>Unity → WebGL</b> builds embedded straight into the wall</li>
+        <li>Room codes: one player hosts, others join with a 4-digit code</li>
+        <li>Backed by <b>arthisland-relay</b> — a zero-dependency TCP + WebSocket relay in pure Python stdlib</li>
       </ul>
-      <div class="stack">
-        <span class="chip hi">Procedural Generation</span><span class="chip hi">Three.js</span>
-        <span class="chip">Unity WebGL</span><span class="chip">Supabase</span>
+      <div class="shots">
+        <a href="https://arthis.land" target="_blank" rel="noopener">
+          <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.land/main/preview.png" alt="Arthis.Land — The Wall" loading="lazy">
+          <div class="cap">The Wall</div></a>
+        <a href="https://arthis.land" target="_blank" rel="noopener">
+          <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.land/main/screenshot-2.png" alt="The Akverse Room inside Arthis.Land" loading="lazy">
+          <div class="cap">Akverse Room</div></a>
       </div>
-      <a class="cta" href="https://arthis.land" target="_blank" rel="noopener">Visit arthis.land <span>→</span></a>
+      <div class="stack">
+        <span class="chip hi">Unity</span><span class="chip hi">WebGL</span>
+        <span class="chip">Procedural Gen</span><span class="chip">Python Relay</span><span class="chip">WebSocket</span>
+      </div>
+      <a class="cta" href="https://arthis.land" target="_blank" rel="noopener">Enter The Wall <i>→</i></a>
     </div>
   </article>
 
-  <!-- 4 — HEXABED -->
   <article class="panel" data-i="4" data-name="HexaBed">
     <div class="inner">
       <div class="num">04 — Unity Engine</div>
@@ -229,8 +248,8 @@ ul.pts li b{color:var(--ink);font-weight:500}
       <p class="body">A procedural terrain system on a hexagonal grid, and the custom editor tooling that lets a designer build a world without opening a script.</p>
       <ul class="pts">
         <li>Generates <b>160+ hex tiles</b> into a single playable world with varied heights</li>
-        <li>Road generator selects straight / turn / ramp / pit assets from neighbouring tile heights and direction</li>
-        <li><b>HexTileEditor</b> — a custom Unity inspector panel for visual world building and regeneration</li>
+        <li>Road generator picks straight / turn / ramp / pit assets from neighbouring tile heights and direction</li>
+        <li><b>HexTileEditor</b> — a custom Unity inspector panel for visual world building</li>
         <li>Pivot compensation, 60° rotation snapping, bounds-based prefab alignment</li>
         <li>GLB export pipeline — 25+ generated world meshes</li>
       </ul>
@@ -242,14 +261,13 @@ ul.pts li b{color:var(--ink);font-weight:500}
     </div>
   </article>
 
-  <!-- 5 — BLENDER -->
-  <article class="panel right" data-i="5" data-name="Blender Tools">
+  <article class="panel right" data-i="5" data-name="Blender Suite">
     <div class="inner">
       <div class="num">05 — Pipeline Tooling</div>
       <h2>Blender Add-on Suite</h2>
       <p class="body">Twenty-eight Python add-ons written to automate the animation and rendering pipeline behind a working content operation.</p>
       <ul class="pts">
-        <li><b>lipsync_pro</b> — phoneme-driven lip-sync, Rhubarb CLI to bone animation, iterated v1→v5 with CloudRig support</li>
+        <li><b>lipsync_pro</b> — phoneme-driven lip-sync, Rhubarb CLI to bone animation, v1→v5 with CloudRig support</li>
         <li><b>camera_animator_pro</b> — 81 KB cinematic camera rig tool, six major versions</li>
         <li><b>quick_bone_animator</b> / <b>arthis_auto_pose</b> — drag-based IK rigging and automated posing</li>
         <li><b>asset_spawner_pro</b>, <b>one_click_render_setup</b>, <b>smart_pose_interpolate</b>, <b>animated_text</b></li>
@@ -261,12 +279,11 @@ ul.pts li b{color:var(--ink);font-weight:500}
     </div>
   </article>
 
-  <!-- 6 — AI -->
   <article class="panel" data-i="6" data-name="AI Systems">
     <div class="inner">
       <div class="num">06 — AI &amp; Backend</div>
       <h2>Systems &amp; Inference</h2>
-      <p class="body">Six months at <b style="font-weight:500">Clymora</b> as an on-campus AI backend engineering intern, building the services behind AI-driven product features — alongside first-principles model work.</p>
+      <p class="body">Six months at <b style="font-weight:600">Clymora</b> as an on-campus AI backend engineering intern, building the services behind AI-driven product features — alongside first-principles model work.</p>
       <ul class="pts">
         <li>Built a <b>GPT-2 language model from scratch</b> — transformer blocks, tokenisation, training loop</li>
         <li><b>RAG pipelines</b> with vector-database retrieval for context-aware responses</li>
@@ -281,9 +298,8 @@ ul.pts li b{color:var(--ink);font-weight:500}
     </div>
   </article>
 
-  <!-- 7 — STATS ROOM -->
-  <article class="panel" data-i="7" data-name="By the Numbers">
-    <div class="inner" style="max-width:760px">
+  <article class="panel" data-i="7" data-name="Evidence">
+    <div class="inner" style="max-width:720px">
       <div class="num">07 — Evidence</div>
       <h2>By the numbers</h2>
       <p class="body" style="margin-bottom:0">Counted from source files, with versioned duplicates collapsed to one project each.</p>
@@ -302,19 +318,18 @@ ul.pts li b{color:var(--ink);font-weight:500}
     </div>
   </article>
 
-  <!-- 8 — CONTACT -->
   <article class="panel" data-i="8" data-name="Contact">
     <div class="inner" style="text-align:center;margin:0 auto">
       <div class="num" style="text-align:center">08 — End of gallery</div>
       <h2 style="text-align:center">Let's build something.</h2>
-      <p class="body" style="margin:0 auto 26px">Open to game development, graphics and AI engineering roles from 2026.</p>
+      <p class="body" style="margin:0 auto 24px">Open to game development, graphics and AI engineering roles from 2026.</p>
       <div class="hero-links" style="justify-content:center">
         <a href="mailto:akversebusiness@gmail.com">akversebusiness@gmail.com</a>
         <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
         <a href="https://arthis.space" target="_blank" rel="noopener">arthis.space</a>
         <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
       </div>
-      <div class="meta" style="justify-content:center;margin-top:38px">
+      <div class="meta" style="justify-content:center;margin-top:34px">
         <div style="text-align:center"><div class="k">JEE Advanced</div><div class="v">AIR 8956</div></div>
         <div style="text-align:center"><div class="k">JEE Main</div><div class="v">98.9 %ile</div></div>
         <div style="text-align:center"><div class="k">Degree</div><div class="v">B.Tech ECE, NIT Jaipur</div></div>
@@ -333,28 +348,79 @@ ul.pts li b{color:var(--ink);font-weight:500}
 (function(){
 'use strict';
 
-const SECTIONS = 9;
-const SPACING  = 17;          // world units between rooms
-const START_Z  = 26;          // camera starts outside the doorway
-const END_Z    = START_Z - (SECTIONS - 1) * SPACING;
+/* ══════════════════════════════════════════════════════════
+   CONFIG
+   ══════════════════════════════════════════════════════════ */
+const N        = 9;      // rooms
+const SPACING  = 20;     // distance between room centres
+const W        = 7;      // half-width of the hall
+const H        = 8;      // ceiling height
+const DOOR_W   = 2.7;    // half-width of each doorway
+const DOOR_H   = 5.6;
+const START_Z  = 22;
+const END_Z    = -(N - 1) * SPACING - 6;
 const REDUCED  = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MOBILE   = innerWidth < 820;
+const MOBILE   = innerWidth < 860;
 
-/* ============================================================
-   SCROLL STATE
-   ============================================================ */
+const RAW = 'https://raw.githubusercontent.com/itsAayush2004/';
+
+// side: -1 left wall, +1 right wall, 0 = no artwork (open room)
+const ROOMS = [
+  {t:'AAYUSH KUMAR', s:'Portfolio 2026',           n:'',      side: 0, img:null},
+  {t:'PRACTICE',     s:'Systems and tooling',      n:'154',   side:-1, img:null},
+  {t:'ARTHIS.SPACE', s:'Mini-games feed · live',   n:'',      side: 1, img:RAW+'arthis.space/main/screenshot-2.png'},
+  {t:'ARTHIS.LAND',  s:'The Wall · live',          n:'',      side:-1, img:RAW+'arthis.land/main/preview.png'},
+  {t:'HEXABED',      s:'Unity hex terrain',        n:'160',   side: 1, img:null},
+  {t:'BLENDER SUITE',s:'Pipeline add-ons',         n:'28',    side:-1, img:null},
+  {t:'AI SYSTEMS',   s:'RAG · FastAPI · GPT-2',    n:'',      side: 1, img:null},
+  {t:'EVIDENCE',     s:'By the numbers',           n:'141K',  side:-1, img:null},
+  {t:'CONTACT',      s:'Open to 2026 roles',       n:'',      side: 0, img:null}
+];
+
+/* ══════════════════════════════════════════════════════════
+   SCROLL
+   ══════════════════════════════════════════════════════════ */
 let target = 0, current = 0, active = -1;
-function maxScroll(){ return document.body.scrollHeight - innerHeight; }
-function onScroll(){ target = Math.min(1, Math.max(0, scrollY / Math.max(1, maxScroll()))); }
+const maxScroll = () => Math.max(1, document.body.scrollHeight - innerHeight);
+const onScroll  = () => { target = Math.min(1, Math.max(0, scrollY / maxScroll())); };
 addEventListener('scroll', onScroll, {passive:true});
 addEventListener('resize', onScroll);
 onScroll();
 
-/* ============================================================
-   THREE.JS  —  minimal white gallery
-   ============================================================ */
+// pointer parallax
+let px = 0, py = 0;
+addEventListener('pointermove', e => {
+  px = (e.clientX / innerWidth  - .5) * 2;
+  py = (e.clientY / innerHeight - .5) * 2;
+}, {passive:true});
+
+/* ══════════════════════════════════════════════════════════
+   THREE — toon-shaded gallery of connected rooms
+   ══════════════════════════════════════════════════════════ */
 let renderer, scene, camera, ready = false;
-const panels = [];
+const artMeshes = [];
+
+// crisp 4-band gradient ramp: this is what makes the shading "toon"
+function toonRamp(){
+  const steps = new Uint8Array([90, 155, 215, 255]);
+  const t = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter;
+  t.generateMipmaps = false;
+  t.needsUpdate = true;
+  return t;
+}
+
+const OUTLINE = new THREE.LineBasicMaterial({color:0x14140f, transparent:true, opacity:.62});
+function outline(mesh, opacity){
+  const e = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry, 18),
+    opacity === undefined ? OUTLINE : new THREE.LineBasicMaterial({color:0x14140f, transparent:true, opacity})
+  );
+  e.position.copy(mesh.position);
+  e.rotation.copy(mesh.rotation);
+  e.scale.copy(mesh.scale);
+  return e;
+}
 
 function build(){
   const canvas = document.getElementById('scene');
@@ -366,158 +432,197 @@ function build(){
   renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.5 : 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = !MOBILE;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf2f1ee);
-  scene.fog = new THREE.Fog(0xf2f1ee, 26, 92);
+  scene.fog = new THREE.Fog(0xf2f1ee, 30, 108);
 
-  camera = new THREE.PerspectiveCamera(46, innerWidth/innerHeight, 0.1, 260);
-  camera.position.set(0, 2.15, START_Z);
+  camera = new THREE.PerspectiveCamera(48, innerWidth/innerHeight, 0.1, 300);
+  camera.position.set(0, 2.2, START_Z);
 
-  const W = 6.6, H = 7.4, L = Math.abs(END_Z - START_Z) + 60;
+  const ramp = toonRamp();
+  const toon = (hex) => new THREE.MeshToonMaterial({color:hex, gradientMap:ramp});
+
+  const matWall  = toon(0xf7f6f3);
+  const matFloor = toon(0xe6e4dd);
+  const matCeil  = toon(0xfcfbf8);
+  const matDiv   = toon(0xeeece5);
+  const matDark  = toon(0x1b1b16);
+
+  const L    = Math.abs(END_Z - START_Z) + 70;
   const zMid = (START_Z + END_Z) / 2;
 
-  const matWall  = new THREE.MeshStandardMaterial({color:0xf6f5f2, roughness:.96, metalness:0});
-  const matFloor = new THREE.MeshStandardMaterial({color:0xe6e4de, roughness:.62, metalness:.04});
-  const matCeil  = new THREE.MeshStandardMaterial({color:0xfaf9f6, roughness:1, metalness:0});
-
-  // floor
+  /* ---------- shell ---------- */
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W*2, L), matFloor);
-  floor.rotation.x = -Math.PI/2; floor.position.set(0, 0, zMid);
-  floor.receiveShadow = true; scene.add(floor);
+  floor.rotation.x = -Math.PI/2; floor.position.set(0, 0, zMid); scene.add(floor);
 
-  // ceiling
   const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W*2, L), matCeil);
   ceil.rotation.x = Math.PI/2; ceil.position.set(0, H, zMid); scene.add(ceil);
 
-  // walls
   [-1, 1].forEach(s => {
     const wall = new THREE.Mesh(new THREE.PlaneGeometry(L, H), matWall);
     wall.rotation.y = s * Math.PI/2;
     wall.position.set(s * W, H/2, zMid);
-    wall.receiveShadow = true; scene.add(wall);
+    scene.add(wall);
+    // skirting line — reads as a drawn edge
+    const bb = new THREE.Mesh(new THREE.BoxGeometry(.08, .18, L), matDark);
+    bb.position.set(s * (W - .04), .09, zMid); scene.add(bb);
   });
 
-  // baseboard — a single thin dark line grounding each wall
-  [-1,1].forEach(s=>{
-    const bb = new THREE.Mesh(new THREE.BoxGeometry(.06, .16, L),
-      new THREE.MeshStandardMaterial({color:0xcecbc2, roughness:1}));
-    bb.position.set(s*(W-.03), .08, zMid); scene.add(bb);
-  });
+  /* ---------- dividing walls with doorways: this is what makes them rooms ---------- */
+  const sideW = W - DOOR_W;
+  for(let i = 0; i < N; i++){
+    const z = START_Z - i * SPACING - SPACING/2;
+    const parts = [];
+    [-1, 1].forEach(s => {
+      const p = new THREE.Mesh(new THREE.BoxGeometry(sideW, DOOR_H, .5), matDiv);
+      p.position.set(s * (DOOR_W + sideW/2), DOOR_H/2, z);
+      parts.push(p);
+    });
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(W*2, H - DOOR_H, .5), matDiv);
+    lintel.position.set(0, DOOR_H + (H - DOOR_H)/2, z);
+    parts.push(lintel);
+    parts.forEach(p => { scene.add(p); scene.add(outline(p, .8)); });
 
-  /* ---------- lighting: soft ambient + pools over each artwork ---------- */
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xdedbd2, .95));
-  const key = new THREE.DirectionalLight(0xffffff, .34);
-  key.position.set(4, 14, 12); scene.add(key);
+    // dark reveal inside the door opening — gives the arch depth
+    const jambM = matDark;
+    [-1,1].forEach(s=>{
+      const j = new THREE.Mesh(new THREE.BoxGeometry(.09, DOOR_H, .52), jambM);
+      j.position.set(s * DOOR_W, DOOR_H/2, z); scene.add(j);
+    });
+    const head = new THREE.Mesh(new THREE.BoxGeometry(DOOR_W*2, .09, .52), jambM);
+    head.position.set(0, DOOR_H, z); scene.add(head);
+  }
 
-  /* ---------- framed artworks ---------- */
-  const SECT = [
-    {t:'AAYUSH KUMAR', s:'Portfolio 2026',        n:'',        side: 0},
-    {t:'PRACTICE',     s:'Systems & tooling',     n:'154',     side:-1},
-    {t:'ARTHIS.SPACE', s:'Social gaming platform',n:'10K',     side: 1},
-    {t:'ARTHIS.LAND',  s:'Procedural metaverse',  n:'40+',     side:-1},
-    {t:'HEXABED',      s:'Unity hex terrain',     n:'160',     side: 1},
-    {t:'BLENDER SUITE',s:'Pipeline add-ons',      n:'28',      side:-1},
-    {t:'AI SYSTEMS',   s:'RAG · FastAPI · LLM',   n:'GPT-2',   side: 1},
-    {t:'EVIDENCE',     s:'By the numbers',        n:'141K',    side:-1},
-    {t:'CONTACT',      s:'Open to 2026 roles',    n:'',        side: 0}
-  ];
+  /* ---------- lighting tuned for banded toon shading ---------- */
+  scene.add(new THREE.AmbientLight(0xffffff, .58));
+  const key = new THREE.DirectionalLight(0xfff6e8, .95);
+  key.position.set(6, 13, 9); scene.add(key);
+  const fill = new THREE.DirectionalLight(0xdfe6ff, .3);
+  fill.position.set(-7, 6, -9); scene.add(fill);
 
-  function artTexture(o){
+  /* ---------- artwork ---------- */
+  const AW = 3.1, AH = 3.9;
+
+  function artCanvas(o){
     const c = document.createElement('canvas');
-    c.width = 1024; c.height = 1280;
+    c.width = 900; c.height = 1132;
     const g = c.getContext('2d');
-    g.fillStyle = '#fbfaf7'; g.fillRect(0,0,1024,1280);
-    // inner hairline
-    g.strokeStyle = '#e2dfd7'; g.lineWidth = 3;
-    g.strokeRect(46,46,1024-92,1280-92);
+    g.fillStyle = '#fbfaf7'; g.fillRect(0, 0, 900, 1132);
+    g.strokeStyle = '#14140f'; g.lineWidth = 5;
+    g.strokeRect(30, 30, 840, 1072);
     g.textAlign = 'center';
     if(o.n){
-      g.fillStyle = '#12120f';
-      g.font = '300 300px Helvetica, Arial, sans-serif';
-      g.fillText(o.n, 512, 660);
+      g.fillStyle = '#14140f';
+      g.font = '300 268px Helvetica, Arial, sans-serif';
+      g.fillText(o.n, 450, 600);
     }
-    g.fillStyle = '#12120f';
-    g.font = '500 62px Helvetica, Arial, sans-serif';
-    g.fillText(o.t, 512, o.n ? 880 : 640);
-    g.fillStyle = '#96948b';
-    g.font = '300 40px Helvetica, Arial, sans-serif';
-    g.fillText(o.s, 512, o.n ? 950 : 710);
-    // accent tick
-    g.fillStyle = '#b4472e'; g.fillRect(482, o.n ? 1030 : 790, 60, 3);
+    g.fillStyle = '#14140f';
+    g.font = '600 54px Helvetica, Arial, sans-serif';
+    g.fillText(o.t, 450, o.n ? 800 : 560);
+    g.fillStyle = '#98968c';
+    g.font = '300 36px Helvetica, Arial, sans-serif';
+    g.fillText(o.s, 450, o.n ? 866 : 626);
+    g.fillStyle = '#c0472c';
+    g.fillRect(415, o.n ? 940 : 700, 70, 5);
+    return c;
+  }
+
+  ROOMS.forEach((o, i) => {
+    if(o.side === 0) return;
+    const z = START_Z - i * SPACING;
+    const c = artCanvas(o);
     const tex = new THREE.CanvasTexture(c);
     tex.anisotropy = MOBILE ? 2 : 8;
     tex.encoding = THREE.sRGBEncoding;
-    return tex;
-  }
 
-  SECT.forEach((o, i) => {
-    const z = START_Z - i * SPACING - 4;
-    if(o.side === 0) return;                    // hero + contact rooms stay empty
+    // real product screenshots painted into the canvas once they arrive
+    if(o.img){
+      const im = new Image();
+      im.crossOrigin = 'anonymous';
+      im.onload = () => {
+        const g = c.getContext('2d');
+        const bx = 70, by = 70, bw = 760, bh = 700;
+        g.fillStyle = '#14140f'; g.fillRect(bx-6, by-6, bw+12, bh+12);
+        const r = Math.max(bw/im.width, bh/im.height);
+        const dw = im.width*r, dh = im.height*r;
+        g.save(); g.beginPath(); g.rect(bx, by, bw, bh); g.clip();
+        g.drawImage(im, bx + (bw-dw)/2, by, dw, dh);
+        g.restore();
+        g.fillStyle = '#fbfaf7'; g.fillRect(40, 790, 820, 300);
+        g.textAlign = 'center';
+        g.fillStyle = '#14140f'; g.font = '600 54px Helvetica, Arial, sans-serif';
+        g.fillText(o.t, 450, 880);
+        g.fillStyle = '#98968c'; g.font = '300 36px Helvetica, Arial, sans-serif';
+        g.fillText(o.s, 450, 942);
+        g.fillStyle = '#c0472c'; g.fillRect(415, 1000, 70, 5);
+        tex.needsUpdate = true;
+      };
+      im.onerror = () => {};   // canvas fallback already drawn
+      im.src = o.img;
+    }
+
     const grp = new THREE.Group();
-    const w = 2.5, h = 3.13;
 
-    // frame (thin dark border)
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(w + .13, h + .13, .08),
-      new THREE.MeshStandardMaterial({color:0x181815, roughness:.7}));
+    // frame — dark slab behind, art plane in front
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(AW + .18, AH + .18, .12), matDark);
     grp.add(frame);
+    const art = new THREE.Mesh(new THREE.PlaneGeometry(AW, AH),
+      new THREE.MeshBasicMaterial({map: tex}));   // basic keeps screenshots legible
+    art.position.z = .07; grp.add(art);
+    grp.add(outline(frame, .9));
 
-    // canvas
-    const art = new THREE.Mesh(new THREE.PlaneGeometry(w, h),
-      new THREE.MeshStandardMaterial({map: artTexture(o), roughness:.95}));
-    art.position.z = .05; grp.add(art);
-
-    grp.position.set(o.side * (W - .16), 3.35, z);
+    grp.position.set(o.side * (W - .2), 3.5, z);
     grp.rotation.y = -o.side * Math.PI/2;
-    grp.castShadow = true;
     scene.add(grp);
-    panels.push(grp);
+    artMeshes.push(grp);
 
-    // spotlight washing the artwork
-    const sp = new THREE.SpotLight(0xfff8ec, MOBILE ? 3.4 : 4.2, 13, .58, .72, 1.4);
-    sp.position.set(o.side * (W - 1.9), H - .45, z);
-    sp.target.position.set(o.side * W, 3.2, z);
+    // ceiling fixture + light pool
+    const fix = new THREE.Mesh(new THREE.BoxGeometry(.42,.11,.42), matDark);
+    fix.position.set(o.side * (W - 2.1), H - .14, z); scene.add(fix);
+
+    const sp = new THREE.SpotLight(0xfff4e2, MOBILE ? 2.6 : 3.4, 15, .55, .78, 1.3);
+    sp.position.set(o.side * (W - 2.1), H - .5, z);
+    sp.target.position.set(o.side * W, 3.4, z);
     scene.add(sp); scene.add(sp.target);
 
-    // small ceiling fixture
-    const fix = new THREE.Mesh(new THREE.BoxGeometry(.36,.09,.36),
-      new THREE.MeshStandardMaterial({color:0x1a1a17, roughness:.6}));
-    fix.position.set(o.side * (W - 1.9), H - .12, z); scene.add(fix);
-
-    // faint bounce on the floor beneath the piece
-    const pool = new THREE.Mesh(new THREE.CircleGeometry(1.5, 24),
-      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:.16}));
+    const pool = new THREE.Mesh(new THREE.CircleGeometry(1.75, 28),
+      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:.2}));
     pool.rotation.x = -Math.PI/2;
-    pool.position.set(o.side * (W - 1.15), .012, z); scene.add(pool);
+    pool.position.set(o.side * (W - 1.35), .014, z); scene.add(pool);
+
+    // room number stencilled on the floor
+    const nc = document.createElement('canvas'); nc.width = nc.height = 256;
+    const ng = nc.getContext('2d');
+    ng.fillStyle = 'rgba(0,0,0,0)'; ng.fillRect(0,0,256,256);
+    ng.fillStyle = 'rgba(20,20,15,.2)'; ng.textAlign = 'center';
+    ng.font = '600 150px Helvetica, Arial, sans-serif';
+    ng.fillText(String(i).padStart(2,'0'), 128, 180);
+    const nt = new THREE.CanvasTexture(nc);
+    const plate = new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.5),
+      new THREE.MeshBasicMaterial({map:nt, transparent:true}));
+    plate.rotation.x = -Math.PI/2; plate.rotation.z = Math.PI;
+    plate.position.set(-o.side * 3.2, .016, z + 1.5);
+    scene.add(plate);
+
+    // a low bench opposite the artwork — gives the room furniture and scale
+    const bench = new THREE.Mesh(new THREE.BoxGeometry(3.4, .42, .95), toon(0xdedbd2));
+    bench.position.set(-o.side * 2.9, .21, z);
+    scene.add(bench); scene.add(outline(bench, .75));
   });
 
-  /* ---------- doorway arches between rooms, for depth ---------- */
-  for(let i = 0; i < SECTIONS; i++){
-    const z = START_Z - i * SPACING - SPACING/2;
-    const lintel = new THREE.Mesh(new THREE.BoxGeometry(W*2, .1, .28),
-      new THREE.MeshStandardMaterial({color:0xe4e1d9, roughness:1}));
-    lintel.position.set(0, 5.5, z); scene.add(lintel);
-    [-1,1].forEach(s=>{
-      const jamb = new THREE.Mesh(new THREE.BoxGeometry(.5, 5.5, .28),
-        new THREE.MeshStandardMaterial({color:0xeceae3, roughness:1}));
-      jamb.position.set(s*(W-.25), 2.75, z); scene.add(jamb);
-    });
-  }
-
-  /* ---------- a few motes of dust in the light ---------- */
+  /* ---------- dust ---------- */
   if(!MOBILE && !REDUCED){
-    const N = 260, pos = new Float32Array(N*3);
-    for(let i=0;i<N;i++){
-      pos[i*3]   = (Math.random()-.5) * W * 1.9;
+    const M = 300, pos = new Float32Array(M*3);
+    for(let i=0;i<M;i++){
+      pos[i*3]   = (Math.random()-.5) * W * 1.95;
       pos[i*3+1] = Math.random() * H;
-      pos[i*3+2] = START_Z - Math.random() * (Math.abs(END_Z-START_Z) + 20);
+      pos[i*3+2] = START_Z - Math.random() * (Math.abs(END_Z-START_Z) + 25);
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
     scene.add(new THREE.Points(geo, new THREE.PointsMaterial({
-      color:0x8a8880, size:.022, transparent:true, opacity:.5, sizeAttenuation:true})));
+      color:0x8a8880, size:.024, transparent:true, opacity:.55, sizeAttenuation:true})));
   }
 
   addEventListener('resize', ()=>{
@@ -529,17 +634,18 @@ function build(){
   return true;
 }
 
-/* ============================================================
-   PANEL / NAV SYNC
-   ============================================================ */
-const els = [...document.querySelectorAll('.panel')];
-const nav = document.getElementById('nav');
+/* ══════════════════════════════════════════════════════════
+   PANELS + NAV
+   ══════════════════════════════════════════════════════════ */
+const els  = [...document.querySelectorAll('.panel')];
+const nav  = document.getElementById('nav');
+const tag  = document.getElementById('roomtag');
 els.forEach((el,i)=>{
   const b = document.createElement('button');
   b.innerHTML = '<i></i>';
   b.setAttribute('aria-label', el.dataset.name);
   b.title = el.dataset.name;
-  b.onclick = ()=> scrollTo({top: (i/(SECTIONS-1)) * maxScroll(), behavior:'smooth'});
+  b.onclick = ()=> scrollTo({top:(i/(N-1)) * maxScroll(), behavior:'smooth'});
   nav.appendChild(b);
 });
 const navBtns = [...nav.children];
@@ -550,6 +656,7 @@ function setActive(i){
   active = i;
   els.forEach((el,k)=> el.classList.toggle('on', k === i));
   navBtns.forEach((b,k)=> b.classList.toggle('on', k === i));
+  tag.textContent = 'Room ' + String(i).padStart(2,'0') + ' · ' + els[i].dataset.name;
   document.getElementById('hint').style.opacity = i === 0 ? '1' : '0';
   if(i === 7 && !counted){ counted = true; runCounts(); }
 }
@@ -565,87 +672,113 @@ function runCounts(){
   });
 }
 
-/* ============================================================
-   RENDER LOOP
-   ============================================================ */
-let t = 0;
+addEventListener('keydown', e=>{
+  const i = active;
+  if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown'){
+    e.preventDefault(); scrollTo({top:(Math.min(N-1,i+1)/(N-1))*maxScroll(), behavior:'smooth'});
+  }
+  if(e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp'){
+    e.preventDefault(); scrollTo({top:(Math.max(0,i-1)/(N-1))*maxScroll(), behavior:'smooth'});
+  }
+});
+
+/* ══════════════════════════════════════════════════════════
+   LOOP — camera glides forward and turns toward each artwork
+   ══════════════════════════════════════════════════════════ */
+const smooth = t => t*t*(3 - 2*t);
+let clk = 0, lookX = 0, mx = 0, my = 0;
+
 function loop(){
   requestAnimationFrame(loop);
-  current += (target - current) * (REDUCED ? 1 : 0.075);
-  t += 0.01;
+  current += (target - current) * (REDUCED ? 1 : .075);
+  clk += .01;
+  mx += (px - mx) * .05;
+  my += (py - my) * .05;
 
-  const p = current * (SECTIONS - 1);
+  const p = current * (N - 1);
   setActive(Math.round(p));
-  document.getElementById('prog').style.width = (current * 100) + '%';
+  document.getElementById('prog').style.width = (current*100) + '%';
 
   if(ready){
     camera.position.z = START_Z - current * (START_Z - END_Z);
-    if(!REDUCED){
-      camera.position.x = Math.sin(t * .55) * .22;
-      camera.position.y = 2.15 + Math.sin(t * .78) * .05;
-      camera.rotation.z = Math.sin(t * .4) * .004;
+
+    // yaw target: full turn at a room's centre, dead ahead in the doorways between
+    let want = 0;
+    for(let i = 0; i < N; i++){
+      const d = Math.abs(p - i);
+      if(d < .5 && ROOMS[i].side !== 0) want += ROOMS[i].side * 7.4 * smooth(1 - d/.5);
     }
-    camera.lookAt(camera.position.x * .35, 2.55, camera.position.z - 14);
+    lookX += (want - lookX) * (REDUCED ? 1 : .07);
+
+    if(!REDUCED){
+      camera.position.x = Math.sin(clk*.5)*.16 + mx*.5;
+      camera.position.y = 2.2 + Math.sin(clk*.72)*.045 - my*.18;
+    }
+    camera.lookAt(lookX + mx*1.4, 2.9 - my*.7, camera.position.z - 9);
     renderer.render(scene, camera);
   }
 }
 
-/* ============================================================
+/* ══════════════════════════════════════════════════════════
    BOOT
-   ============================================================ */
+   ══════════════════════════════════════════════════════════ */
 function boot(){
   const bar = document.getElementById('loadbar');
-  bar.style.transform = 'scaleX(.4)';
-  const ok = (typeof THREE !== 'undefined') && build();
-  if(!ok){ document.getElementById('scene').style.display = 'none'; }
-  bar.style.transform = 'scaleX(1)';
-  setTimeout(()=>{
-    document.getElementById('load').classList.add('gone');
-    setActive(0);
-    els[0].classList.add('on');
-  }, 420);
+  const pct = document.getElementById('pct');
+  let v = 0;
+  const tick = setInterval(()=>{
+    v = Math.min(100, v + 7 + Math.random()*11);
+    pct.textContent = Math.round(v);
+    bar.style.transform = 'scaleX(' + (v/100) + ')';
+    if(v >= 100){
+      clearInterval(tick);
+      setTimeout(()=>{
+        document.getElementById('load').classList.add('gone');
+        setActive(-1); setActive(0);
+      }, 260);
+    }
+  }, 90);
+
+  if(!(typeof THREE !== 'undefined' && build())){
+    document.getElementById('scene').style.display = 'none';
+  }
   loop();
   drawCharts();
 }
 
-/* ============================================================
+/* ══════════════════════════════════════════════════════════
    CHARTS — hairline, no chrome
-   ============================================================ */
+   ══════════════════════════════════════════════════════════ */
 function drawCharts(){
   if(typeof Chart === 'undefined') return;
-  Chart.defaults.color = '#9b998f';
+  Chart.defaults.color = '#98968c';
   Chart.defaults.font.family = "'Helvetica Neue',Helvetica,Arial,sans-serif";
   Chart.defaults.font.size = 10;
-  Chart.defaults.animation.duration = 900;
 
   new Chart(document.getElementById('cGenre'), {
     type:'bar',
-    data:{ labels:['Arcade','Sports','Board','Sim','FX','Other','Tools','3D'],
-      datasets:[{ data:[34,28,27,26,21,13,10,8],
-        backgroundColor:'#12120f', hoverBackgroundColor:'#b4472e',
-        borderRadius:0, barPercentage:.62 }] },
-    options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}, tooltip:{
-        backgroundColor:'#12120f', padding:9, cornerRadius:2, displayColors:false,
-        callbacks:{label:c=>c.raw+' builds'}}},
-      scales:{ x:{grid:{display:false}, border:{color:'#d9d7d0'}, ticks:{font:{size:9.5}}},
-               y:{grid:{color:'#eae8e2'}, border:{display:false}, ticks:{maxTicksLimit:4}} } }
+    data:{labels:['Arcade','Sports','Board','Sim','FX','Other','Tools','3D'],
+      datasets:[{data:[34,28,27,26,21,13,10,8],
+        backgroundColor:'#14140f', hoverBackgroundColor:'#c0472c', barPercentage:.62}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#14140f',padding:9,
+        cornerRadius:0,displayColors:false,callbacks:{label:c=>c.raw+' builds'}}},
+      scales:{x:{grid:{display:false},border:{color:'#d8d5cd'},ticks:{font:{size:9}}},
+              y:{grid:{color:'#eae8e2'},border:{display:false},ticks:{maxTicksLimit:4}}}}
   });
 
   new Chart(document.getElementById('cTime'), {
     type:'line',
-    data:{ labels:['Nov 25','Dec','Jan 26','Feb','Mar','Apr','May','Jun','Jul'],
-      datasets:[{ data:[9,10,27,113,39,29,6,3,1],
-        borderColor:'#12120f', borderWidth:1.5, tension:.34,
-        pointBackgroundColor:'#f2f1ee', pointBorderColor:'#12120f',
-        pointBorderWidth:1.5, pointRadius:3, pointHoverRadius:5,
-        fill:true, backgroundColor:'rgba(18,18,15,.05)' }] },
-    options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}, tooltip:{
-        backgroundColor:'#12120f', padding:9, cornerRadius:2, displayColors:false,
-        callbacks:{label:c=>c.raw+' new projects'}}},
-      scales:{ x:{grid:{display:false}, border:{color:'#d9d7d0'}, ticks:{font:{size:9.5}}},
-               y:{grid:{color:'#eae8e2'}, border:{display:false}, ticks:{maxTicksLimit:4}} } }
+    data:{labels:['Nov 25','Dec','Jan 26','Feb','Mar','Apr','May','Jun','Jul'],
+      datasets:[{data:[9,10,27,113,39,29,6,3,1],
+        borderColor:'#14140f',borderWidth:1.5,tension:.34,
+        pointBackgroundColor:'#f2f1ee',pointBorderColor:'#14140f',pointBorderWidth:1.5,
+        pointRadius:3,pointHoverRadius:5,fill:true,backgroundColor:'rgba(20,20,15,.05)'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#14140f',padding:9,
+        cornerRadius:0,displayColors:false,callbacks:{label:c=>c.raw+' new projects'}}},
+      scales:{x:{grid:{display:false},border:{color:'#d8d5cd'},ticks:{font:{size:9}}},
+              y:{grid:{color:'#eae8e2'},border:{display:false},ticks:{maxTicksLimit:4}}}}
   });
 }
 
