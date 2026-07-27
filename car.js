@@ -21,7 +21,7 @@
   var ROOM = 20;
   var CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4],[0,-4]];
 
-  var SCALE   = 1.4;                 // model is 1.0 tall as authored
+  var SCALE   = 2.0;                 // model is 1.0 tall as authored
   var LAP     = 6.6;                 // lap radius inside the 20×20 room
   var SPEED   = REDUCED ? 0 : 0.30;  // rad/s
   var PUFFS   = (MOBILE || REDUCED) ? 0 : 8;
@@ -135,7 +135,7 @@
       var puffs = [];
       for (var k = 0; k < PUFFS; k++) {
         var s = new THREE.Sprite(new THREE.SpriteMaterial({
-          map: ptex, color: 0xd7d4cc, transparent: true,
+          map: ptex, color: 0x8b8880, transparent: true,   /* dark enough to read on white walls */
           opacity: 0, depthWrite: false, fog: false
         }));
         s.visible = false;
@@ -209,7 +209,7 @@
         var u = 1 - q.t / LIFE;                    // 0 → 1 over its life
         var sc = (0.34 + u * 1.15) * SCALE;
         q.s.scale.set(sc, sc, 1);
-        q.s.material.opacity = 0.46 * (1 - u) * Math.min(1, u * 6);
+        q.s.material.opacity = 0.5 * (1 - u) * Math.min(1, u * 6);
       }
     }
   }
