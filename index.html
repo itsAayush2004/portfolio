@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aayush Kumar — Game Developer &amp; AI Engineer</title>
+<meta name="description" content="Aayush Kumar — Game Developer, AI &amp; Backend Engineer. 154 shipped games, procedural systems in Unity, Blender tooling, and two live platforms: Arthis.Space and Arthis.Land.">
+<meta name="author" content="Aayush Kumar">
+<meta property="og:title" content="Aayush Kumar — Game Developer &amp; AI Engineer">
+<meta property="og:description" content="A scrollable gallery of 154 shipped games, procedural Unity systems, and Blender tooling.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23111'/><text y='.9em' x='50%25' text-anchor='middle' font-size='62' font-family='Georgia' fill='%23fff'>A</text></svg>">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+<style>
+:root{
+  --paper:#f2f1ee;
+  --ink:#0f0f0e;
+  --mid:#5c5b56;
+  --soft:#9b998f;
+  --line:#d9d7d0;
+  --accent:#b4472e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto;-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:'Helvetica Neue',Helvetica,Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line);transition:border-color .25s,color .25s}
+a:hover{border-color:var(--ink)}
+
+/* ---------- WEBGL LAYER ---------- */
+#scene{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+#vig{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 45%,transparent 45%,rgba(15,15,14,.10) 100%)}
+
+/* ---------- SCROLL TRACK ---------- */
+#track{position:relative;z-index:2;height:900vh}
+
+/* ---------- FIXED OVERLAY ---------- */
+#stage{position:fixed;inset:0;z-index:3;pointer-events:none;display:flex;align-items:center}
+.panel{
+  position:absolute;inset:0;display:flex;align-items:center;
+  padding:0 clamp(24px,7vw,120px);opacity:0;visibility:hidden;
+  transition:opacity .5s ease, transform .7s cubic-bezier(.16,.84,.34,1);
+  transform:translateY(28px);
+}
+.panel.on{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+.inner{max-width:640px;width:100%}
+.panel.right .inner{margin-left:auto;text-align:left}
+
+.num{font-size:11px;letter-spacing:.34em;color:var(--soft);text-transform:uppercase;margin-bottom:22px;font-weight:500}
+h1{font-size:clamp(44px,9vw,104px);line-height:.92;font-weight:300;letter-spacing:-.045em}
+h1 em{font-style:normal;display:block;font-weight:500}
+h2{font-size:clamp(28px,4.6vw,50px);font-weight:300;line-height:1.06;letter-spacing:-.035em;margin-bottom:22px}
+.lede{font-size:clamp(15px,1.7vw,19px);color:var(--mid);font-weight:300;line-height:1.62;margin-top:22px;max-width:52ch}
+p.body{font-size:15px;color:var(--mid);font-weight:300;line-height:1.72;margin-bottom:20px;max-width:52ch}
+.rule{width:44px;height:1px;background:var(--ink);margin:26px 0}
+
+ul.pts{list-style:none;margin:22px 0}
+ul.pts li{font-size:14px;color:var(--mid);font-weight:300;padding-left:20px;position:relative;margin-bottom:10px;line-height:1.6;max-width:52ch}
+ul.pts li::before{content:'';position:absolute;left:0;top:11px;width:8px;height:1px;background:var(--soft)}
+ul.pts li b{color:var(--ink);font-weight:500}
+
+.meta{display:flex;gap:34px;flex-wrap:wrap;margin-top:30px;padding-top:22px;border-top:1px solid var(--line)}
+.meta div .k{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:5px}
+.meta div .v{font-size:15px;font-weight:400}
+.meta div .v.big{font-size:26px;font-weight:300;letter-spacing:-.02em}
+
+.stack{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px}
+.chip{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;border:1px solid var(--line);
+  padding:6px 11px;border-radius:2px;color:var(--mid);font-weight:500;background:rgba(255,255,255,.4)}
+.chip.hi{border-color:var(--ink);color:var(--ink)}
+
+.cta{display:inline-flex;align-items:center;gap:9px;margin-top:30px;font-size:13px;letter-spacing:.05em;
+  border:none;border-bottom:1px solid var(--ink);padding-bottom:4px;font-weight:500}
+.cta span{transition:transform .3s}
+.cta:hover span{transform:translateX(5px)}
+
+/* ---------- HERO ---------- */
+.hero-links{display:flex;gap:26px;flex-wrap:wrap;margin-top:38px;font-size:13px;letter-spacing:.04em}
+.hero-links a{border-bottom:1px solid var(--line);padding-bottom:3px}
+.dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin-right:7px;vertical-align:middle}
+
+/* ---------- STATS ---------- */
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);margin:26px 0}
+.statgrid .c{background:var(--paper);padding:17px 15px}
+.statgrid .n2{font-size:clamp(26px,3.4vw,38px);font-weight:300;letter-spacing:-.03em;line-height:1}
+.statgrid .l2{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-top:9px;line-height:1.45}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:26px}
+.chart{position:relative;height:180px}
+.chart .cap{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:12px}
+.chart .box{position:relative;height:148px}
+
+/* ---------- PROGRESS / NAV ---------- */
+#prog{position:fixed;left:0;top:0;height:2px;background:var(--ink);width:0;z-index:9;transition:width .1s linear}
+#nav{position:fixed;right:clamp(16px,3vw,38px);top:50%;transform:translateY(-50%);z-index:8;
+  display:flex;flex-direction:column;gap:13px}
+#nav button{width:22px;height:9px;border:none;background:none;cursor:pointer;padding:4px 0;display:block}
+#nav button i{display:block;height:1px;width:14px;background:var(--soft);transition:.35s;margin-left:auto}
+#nav button.on i{width:22px;background:var(--ink)}
+#nav button:hover i{width:22px}
+
+#brand{position:fixed;left:clamp(20px,4vw,44px);top:clamp(20px,4vw,38px);z-index:8;
+  font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;mix-blend-mode:multiply}
+#hint{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:8;font-size:10px;
+  letter-spacing:.3em;text-transform:uppercase;color:var(--soft);transition:opacity .5s;display:flex;
+  flex-direction:column;align-items:center;gap:9px}
+#hint .bar{width:1px;height:26px;background:linear-gradient(var(--soft),transparent);animation:fall 1.9s infinite}
+@keyframes fall{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}
+  55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ---------- LOADER ---------- */
+#load{position:fixed;inset:0;z-index:20;background:var(--paper);display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:20px;transition:opacity .7s}
+#load.gone{opacity:0;pointer-events:none}
+#load .t{font-size:11px;letter-spacing:.36em;text-transform:uppercase;color:var(--soft)}
+#load .l{width:150px;height:1px;background:var(--line);position:relative;overflow:hidden}
+#load .l i{position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(0);transition:transform .35s}
+
+@media(max-width:820px){
+  #nav{display:none}
+  .charts{grid-template-columns:1fr}
+  .panel{padding:0 22px}
+  .panel.right .inner{margin-left:0}
+  .meta{gap:22px}
+}
+@media(prefers-reduced-motion:reduce){
+  .panel{transition:opacity .2s}
+  #hint .bar{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div id="load"><div class="t">Aayush Kumar</div><div class="l"><i id="loadbar"></i></div></div>
+
+<canvas id="scene"></canvas>
+<div id="grain"></div>
+<div id="vig"></div>
+<div id="prog"></div>
+<div id="brand">AK</div>
+
+<nav id="nav" aria-label="Sections"></nav>
+
+<div id="stage">
+
+  <!-- 0 — ENTRANCE -->
+  <article class="panel" data-i="0" data-name="Intro">
+    <div class="inner">
+      <div class="num">Portfolio — 2026</div>
+      <h1>Aayush<em>Kumar</em></h1>
+      <p class="lede">Game developer and AI&nbsp;/&nbsp;backend engineer. I build procedural systems, the editor tooling that drives them, and the platforms they ship on.</p>
+      <div class="hero-links">
+        <a href="https://arthis.space" target="_blank" rel="noopener"><span class="dot"></span>arthis.space</a>
+        <a href="https://arthis.land" target="_blank" rel="noopener"><span class="dot"></span>arthis.land</a>
+        <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
+      </div>
+    </div>
+  </article>
+
+  <!-- 1 — STATEMENT -->
+  <article class="panel right" data-i="1" data-name="About">
+    <div class="inner">
+      <div class="num">01 — Practice</div>
+      <h2>154 shipped builds,<br>one throughline.</h2>
+      <p class="body">Final-year Electronics &amp; Communication student at NIT Jaipur. Most of what I make is systems that make other things easier to make — a hex terrain generator so level design stops being manual, a lip-sync add-on so animation stops being frame-by-frame, an agent layer so a game can start from a sentence.</p>
+      <p class="body">The output is wide by design: Unity and C# for engines, Python for Blender pipelines, JavaScript and Three.js for the web, FastAPI for the backend behind it all.</p>
+      <div class="meta">
+        <div><div class="k">Based</div><div class="v">Jaipur, India</div></div>
+        <div><div class="k">Education</div><div class="v">NIT Jaipur · B.Tech ECE</div></div>
+        <div><div class="k">Graduating</div><div class="v">2026</div></div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 2 — ARTHIS.SPACE -->
+  <article class="panel" data-i="2" data-name="Arthis.Space">
+    <div class="inner">
+      <div class="num">02 — Live Platform</div>
+      <h2>Arthis.Space</h2>
+      <p class="body">A social gaming platform where games launch straight in the browser or app — no downloads — with profiles, feeds and community discovery built around play rather than bolted on after it.</p>
+      <ul class="pts">
+        <li>AI agents generate gameplay logic, assets and 3D web content from natural-language prompts through <b>MCP-connected tools</b></li>
+        <li>Supabase / PostgreSQL backend scaled from <b>1 to 10,000 daily active users</b></li>
+        <li>Synchronised multiplayer sessions with progress carried across devices</li>
+      </ul>
+      <div class="stack">
+        <span class="chip hi">Supabase</span><span class="chip hi">PostgreSQL</span>
+        <span class="chip">LLM Agents</span><span class="chip">MCP</span>
+        <span class="chip">WebRTC</span><span class="chip">React</span>
+      </div>
+      <a class="cta" href="https://arthis.space" target="_blank" rel="noopener">Visit arthis.space <span>→</span></a>
+    </div>
+  </article>
+
+  <!-- 3 — ARTHIS.LAND -->
+  <article class="panel right" data-i="3" data-name="Arthis.Land">
+    <div class="inner">
+      <div class="num">03 — Live Platform</div>
+      <h2>Arthis.Land</h2>
+      <p class="body">A metaverse-style wall you explore rather than scroll. Each brick opens into a game's own page with a playable build embedded inside the virtual space.</p>
+      <ul class="pts">
+        <li>Procedural generation engine that assembles customisable virtual rooms in web 3D</li>
+        <li><b>Unity / Unreal WebGL builds</b> embedded directly into the wall</li>
+        <li><b>40+ named rooms</b> live — Halcyon, Kowloon Drift, Vermillion, Xeno&nbsp;Garden</li>
+        <li>Supabase backend managing user-generated worlds and generation parameters</li>
+      </ul>
+      <div class="stack">
+        <span class="chip hi">Procedural Generation</span><span class="chip hi">Three.js</span>
+        <span class="chip">Unity WebGL</span><span class="chip">Supabase</span>
+      </div>
+      <a class="cta" href="https://arthis.land" target="_blank" rel="noopener">Visit arthis.land <span>→</span></a>
+    </div>
+  </article>
+
+  <!-- 4 — HEXABED -->
+  <article class="panel" data-i="4" data-name="HexaBed">
+    <div class="inner">
+      <div class="num">04 — Unity Engine</div>
+      <h2>HexaBed</h2>
+      <p class="body">A procedural terrain system on a hexagonal grid, and the custom editor tooling that lets a designer build a world without opening a script.</p>
+      <ul class="pts">
+        <li>Generates <b>160+ hex tiles</b> into a single playable world with varied heights</li>
+        <li>Road generator selects straight / turn / ramp / pit assets from neighbouring tile heights and direction</li>
+        <li><b>HexTileEditor</b> — a custom Unity inspector panel for visual world building and regeneration</li>
+        <li>Pivot compensation, 60° rotation snapping, bounds-based prefab alignment</li>
+        <li>GLB export pipeline — 25+ generated world meshes</li>
+      </ul>
+      <div class="meta">
+        <div><div class="k">Scripts</div><div class="v big">14</div></div>
+        <div><div class="k">Lines of C#</div><div class="v big">3,705</div></div>
+        <div><div class="k">Engine</div><div class="v big">Unity</div></div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 5 — BLENDER -->
+  <article class="panel right" data-i="5" data-name="Blender Tools">
+    <div class="inner">
+      <div class="num">05 — Pipeline Tooling</div>
+      <h2>Blender Add-on Suite</h2>
+      <p class="body">Twenty-eight Python add-ons written to automate the animation and rendering pipeline behind a working content operation.</p>
+      <ul class="pts">
+        <li><b>lipsync_pro</b> — phoneme-driven lip-sync, Rhubarb CLI to bone animation, iterated v1→v5 with CloudRig support</li>
+        <li><b>camera_animator_pro</b> — 81 KB cinematic camera rig tool, six major versions</li>
+        <li><b>quick_bone_animator</b> / <b>arthis_auto_pose</b> — drag-based IK rigging and automated posing</li>
+        <li><b>asset_spawner_pro</b>, <b>one_click_render_setup</b>, <b>smart_pose_interpolate</b>, <b>animated_text</b></li>
+      </ul>
+      <div class="meta">
+        <div><div class="k">Add-ons</div><div class="v big">28</div></div>
+        <div><div class="k">Lines of Python</div><div class="v big">27,208</div></div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 6 — AI -->
+  <article class="panel" data-i="6" data-name="AI Systems">
+    <div class="inner">
+      <div class="num">06 — AI &amp; Backend</div>
+      <h2>Systems &amp; Inference</h2>
+      <p class="body">Six months at <b style="font-weight:500">Clymora</b> as an on-campus AI backend engineering intern, building the services behind AI-driven product features — alongside first-principles model work.</p>
+      <ul class="pts">
+        <li>Built a <b>GPT-2 language model from scratch</b> — transformer blocks, tokenisation, training loop</li>
+        <li><b>RAG pipelines</b> with vector-database retrieval for context-aware responses</li>
+        <li>Async <b>FastAPI</b> inference endpoints tuned for low-latency real-time workloads</li>
+        <li>23 ComfyUI workflows — Flux, SDXL, Hunyuan3D, WAN VACE, LTX-2, VibeVoice</li>
+      </ul>
+      <div class="stack">
+        <span class="chip hi">FastAPI</span><span class="chip hi">RAG</span>
+        <span class="chip">Vector DB</span><span class="chip">Transformers</span>
+        <span class="chip">ComfyUI</span><span class="chip">n8n</span>
+      </div>
+    </div>
+  </article>
+
+  <!-- 7 — STATS ROOM -->
+  <article class="panel" data-i="7" data-name="By the Numbers">
+    <div class="inner" style="max-width:760px">
+      <div class="num">07 — Evidence</div>
+      <h2>By the numbers</h2>
+      <p class="body" style="margin-bottom:0">Counted from source files, with versioned duplicates collapsed to one project each.</p>
+      <div class="statgrid">
+        <div class="c"><div class="n2" data-count="154">0</div><div class="l2">Interactive builds</div></div>
+        <div class="c"><div class="n2"><span data-count="141">0</span>K</div><div class="l2">Lines of game code</div></div>
+        <div class="c"><div class="n2" data-count="43">0</div><div class="l2">Three.js 3D builds</div></div>
+        <div class="c"><div class="n2" data-count="15">0</div><div class="l2">P2P multiplayer</div></div>
+        <div class="c"><div class="n2" data-count="28">0</div><div class="l2">Blender add-ons</div></div>
+        <div class="c"><div class="n2"><span data-count="21.9">0</span>K</div><div class="l2">YouTube subscribers</div></div>
+      </div>
+      <div class="charts">
+        <div class="chart"><div class="cap">Builds by genre</div><div class="box"><canvas id="cGenre"></canvas></div></div>
+        <div class="chart"><div class="cap">New projects per month</div><div class="box"><canvas id="cTime"></canvas></div></div>
+      </div>
+    </div>
+  </article>
+
+  <!-- 8 — CONTACT -->
+  <article class="panel" data-i="8" data-name="Contact">
+    <div class="inner" style="text-align:center;margin:0 auto">
+      <div class="num" style="text-align:center">08 — End of gallery</div>
+      <h2 style="text-align:center">Let's build something.</h2>
+      <p class="body" style="margin:0 auto 26px">Open to game development, graphics and AI engineering roles from 2026.</p>
+      <div class="hero-links" style="justify-content:center">
+        <a href="mailto:akversebusiness@gmail.com">akversebusiness@gmail.com</a>
+        <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://arthis.space" target="_blank" rel="noopener">arthis.space</a>
+        <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
+      </div>
+      <div class="meta" style="justify-content:center;margin-top:38px">
+        <div style="text-align:center"><div class="k">JEE Advanced</div><div class="v">AIR 8956</div></div>
+        <div style="text-align:center"><div class="k">JEE Main</div><div class="v">98.9 %ile</div></div>
+        <div style="text-align:center"><div class="k">Degree</div><div class="v">B.Tech ECE, NIT Jaipur</div></div>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<div id="hint"><span>Scroll</span><span class="bar"></span></div>
+<div id="track"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+const SECTIONS = 9;
+const SPACING  = 17;          // world units between rooms
+const START_Z  = 26;          // camera starts outside the doorway
+const END_Z    = START_Z - (SECTIONS - 1) * SPACING;
+const REDUCED  = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MOBILE   = innerWidth < 820;
+
+/* ============================================================
+   SCROLL STATE
+   ============================================================ */
+let target = 0, current = 0, active = -1;
+function maxScroll(){ return document.body.scrollHeight - innerHeight; }
+function onScroll(){ target = Math.min(1, Math.max(0, scrollY / Math.max(1, maxScroll()))); }
+addEventListener('scroll', onScroll, {passive:true});
+addEventListener('resize', onScroll);
+onScroll();
+
+/* ============================================================
+   THREE.JS  —  minimal white gallery
+   ============================================================ */
+let renderer, scene, camera, ready = false;
+const panels = [];
+
+function build(){
+  const canvas = document.getElementById('scene');
+  try{
+    renderer = new THREE.WebGLRenderer({canvas, antialias:!MOBILE, alpha:false, powerPreference:'high-performance'});
+  }catch(e){ return false; }
+  if(!renderer.getContext()) return false;
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE ? 1.5 : 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = !MOBILE;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf2f1ee);
+  scene.fog = new THREE.Fog(0xf2f1ee, 26, 92);
+
+  camera = new THREE.PerspectiveCamera(46, innerWidth/innerHeight, 0.1, 260);
+  camera.position.set(0, 2.15, START_Z);
+
+  const W = 6.6, H = 7.4, L = Math.abs(END_Z - START_Z) + 60;
+  const zMid = (START_Z + END_Z) / 2;
+
+  const matWall  = new THREE.MeshStandardMaterial({color:0xf6f5f2, roughness:.96, metalness:0});
+  const matFloor = new THREE.MeshStandardMaterial({color:0xe6e4de, roughness:.62, metalness:.04});
+  const matCeil  = new THREE.MeshStandardMaterial({color:0xfaf9f6, roughness:1, metalness:0});
+
+  // floor
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W*2, L), matFloor);
+  floor.rotation.x = -Math.PI/2; floor.position.set(0, 0, zMid);
+  floor.receiveShadow = true; scene.add(floor);
+
+  // ceiling
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W*2, L), matCeil);
+  ceil.rotation.x = Math.PI/2; ceil.position.set(0, H, zMid); scene.add(ceil);
+
+  // walls
+  [-1, 1].forEach(s => {
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(L, H), matWall);
+    wall.rotation.y = s * Math.PI/2;
+    wall.position.set(s * W, H/2, zMid);
+    wall.receiveShadow = true; scene.add(wall);
+  });
+
+  // baseboard — a single thin dark line grounding each wall
+  [-1,1].forEach(s=>{
+    const bb = new THREE.Mesh(new THREE.BoxGeometry(.06, .16, L),
+      new THREE.MeshStandardMaterial({color:0xcecbc2, roughness:1}));
+    bb.position.set(s*(W-.03), .08, zMid); scene.add(bb);
+  });
+
+  /* ---------- lighting: soft ambient + pools over each artwork ---------- */
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xdedbd2, .95));
+  const key = new THREE.DirectionalLight(0xffffff, .34);
+  key.position.set(4, 14, 12); scene.add(key);
+
+  /* ---------- framed artworks ---------- */
+  const SECT = [
+    {t:'AAYUSH KUMAR', s:'Portfolio 2026',        n:'',        side: 0},
+    {t:'PRACTICE',     s:'Systems & tooling',     n:'154',     side:-1},
+    {t:'ARTHIS.SPACE', s:'Social gaming platform',n:'10K',     side: 1},
+    {t:'ARTHIS.LAND',  s:'Procedural metaverse',  n:'40+',     side:-1},
+    {t:'HEXABED',      s:'Unity hex terrain',     n:'160',     side: 1},
+    {t:'BLENDER SUITE',s:'Pipeline add-ons',      n:'28',      side:-1},
+    {t:'AI SYSTEMS',   s:'RAG · FastAPI · LLM',   n:'GPT-2',   side: 1},
+    {t:'EVIDENCE',     s:'By the numbers',        n:'141K',    side:-1},
+    {t:'CONTACT',      s:'Open to 2026 roles',    n:'',        side: 0}
+  ];
+
+  function artTexture(o){
+    const c = document.createElement('canvas');
+    c.width = 1024; c.height = 1280;
+    const g = c.getContext('2d');
+    g.fillStyle = '#fbfaf7'; g.fillRect(0,0,1024,1280);
+    // inner hairline
+    g.strokeStyle = '#e2dfd7'; g.lineWidth = 3;
+    g.strokeRect(46,46,1024-92,1280-92);
+    g.textAlign = 'center';
+    if(o.n){
+      g.fillStyle = '#12120f';
+      g.font = '300 300px Helvetica, Arial, sans-serif';
+      g.fillText(o.n, 512, 660);
+    }
+    g.fillStyle = '#12120f';
+    g.font = '500 62px Helvetica, Arial, sans-serif';
+    g.fillText(o.t, 512, o.n ? 880 : 640);
+    g.fillStyle = '#96948b';
+    g.font = '300 40px Helvetica, Arial, sans-serif';
+    g.fillText(o.s, 512, o.n ? 950 : 710);
+    // accent tick
+    g.fillStyle = '#b4472e'; g.fillRect(482, o.n ? 1030 : 790, 60, 3);
+    const tex = new THREE.CanvasTexture(c);
+    tex.anisotropy = MOBILE ? 2 : 8;
+    tex.encoding = THREE.sRGBEncoding;
+    return tex;
+  }
+
+  SECT.forEach((o, i) => {
+    const z = START_Z - i * SPACING - 4;
+    if(o.side === 0) return;                    // hero + contact rooms stay empty
+    const grp = new THREE.Group();
+    const w = 2.5, h = 3.13;
+
+    // frame (thin dark border)
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(w + .13, h + .13, .08),
+      new THREE.MeshStandardMaterial({color:0x181815, roughness:.7}));
+    grp.add(frame);
+
+    // canvas
+    const art = new THREE.Mesh(new THREE.PlaneGeometry(w, h),
+      new THREE.MeshStandardMaterial({map: artTexture(o), roughness:.95}));
+    art.position.z = .05; grp.add(art);
+
+    grp.position.set(o.side * (W - .16), 3.35, z);
+    grp.rotation.y = -o.side * Math.PI/2;
+    grp.castShadow = true;
+    scene.add(grp);
+    panels.push(grp);
+
+    // spotlight washing the artwork
+    const sp = new THREE.SpotLight(0xfff8ec, MOBILE ? 3.4 : 4.2, 13, .58, .72, 1.4);
+    sp.position.set(o.side * (W - 1.9), H - .45, z);
+    sp.target.position.set(o.side * W, 3.2, z);
+    scene.add(sp); scene.add(sp.target);
+
+    // small ceiling fixture
+    const fix = new THREE.Mesh(new THREE.BoxGeometry(.36,.09,.36),
+      new THREE.MeshStandardMaterial({color:0x1a1a17, roughness:.6}));
+    fix.position.set(o.side * (W - 1.9), H - .12, z); scene.add(fix);
+
+    // faint bounce on the floor beneath the piece
+    const pool = new THREE.Mesh(new THREE.CircleGeometry(1.5, 24),
+      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:.16}));
+    pool.rotation.x = -Math.PI/2;
+    pool.position.set(o.side * (W - 1.15), .012, z); scene.add(pool);
+  });
+
+  /* ---------- doorway arches between rooms, for depth ---------- */
+  for(let i = 0; i < SECTIONS; i++){
+    const z = START_Z - i * SPACING - SPACING/2;
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(W*2, .1, .28),
+      new THREE.MeshStandardMaterial({color:0xe4e1d9, roughness:1}));
+    lintel.position.set(0, 5.5, z); scene.add(lintel);
+    [-1,1].forEach(s=>{
+      const jamb = new THREE.Mesh(new THREE.BoxGeometry(.5, 5.5, .28),
+        new THREE.MeshStandardMaterial({color:0xeceae3, roughness:1}));
+      jamb.position.set(s*(W-.25), 2.75, z); scene.add(jamb);
+    });
+  }
+
+  /* ---------- a few motes of dust in the light ---------- */
+  if(!MOBILE && !REDUCED){
+    const N = 260, pos = new Float32Array(N*3);
+    for(let i=0;i<N;i++){
+      pos[i*3]   = (Math.random()-.5) * W * 1.9;
+      pos[i*3+1] = Math.random() * H;
+      pos[i*3+2] = START_Z - Math.random() * (Math.abs(END_Z-START_Z) + 20);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    scene.add(new THREE.Points(geo, new THREE.PointsMaterial({
+      color:0x8a8880, size:.022, transparent:true, opacity:.5, sizeAttenuation:true})));
+  }
+
+  addEventListener('resize', ()=>{
+    camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  ready = true;
+  return true;
+}
+
+/* ============================================================
+   PANEL / NAV SYNC
+   ============================================================ */
+const els = [...document.querySelectorAll('.panel')];
+const nav = document.getElementById('nav');
+els.forEach((el,i)=>{
+  const b = document.createElement('button');
+  b.innerHTML = '<i></i>';
+  b.setAttribute('aria-label', el.dataset.name);
+  b.title = el.dataset.name;
+  b.onclick = ()=> scrollTo({top: (i/(SECTIONS-1)) * maxScroll(), behavior:'smooth'});
+  nav.appendChild(b);
+});
+const navBtns = [...nav.children];
+
+let counted = false;
+function setActive(i){
+  if(i === active) return;
+  active = i;
+  els.forEach((el,k)=> el.classList.toggle('on', k === i));
+  navBtns.forEach((b,k)=> b.classList.toggle('on', k === i));
+  document.getElementById('hint').style.opacity = i === 0 ? '1' : '0';
+  if(i === 7 && !counted){ counted = true; runCounts(); }
+}
+
+function runCounts(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const to = parseFloat(el.dataset.count), dec = to % 1 !== 0 ? 1 : 0;
+    let v = 0; const step = to / 42;
+    const t = setInterval(()=>{
+      v += step; if(v >= to){ v = to; clearInterval(t); }
+      el.textContent = v.toFixed(dec);
+    }, 18);
+  });
+}
+
+/* ============================================================
+   RENDER LOOP
+   ============================================================ */
+let t = 0;
+function loop(){
+  requestAnimationFrame(loop);
+  current += (target - current) * (REDUCED ? 1 : 0.075);
+  t += 0.01;
+
+  const p = current * (SECTIONS - 1);
+  setActive(Math.round(p));
+  document.getElementById('prog').style.width = (current * 100) + '%';
+
+  if(ready){
+    camera.position.z = START_Z - current * (START_Z - END_Z);
+    if(!REDUCED){
+      camera.position.x = Math.sin(t * .55) * .22;
+      camera.position.y = 2.15 + Math.sin(t * .78) * .05;
+      camera.rotation.z = Math.sin(t * .4) * .004;
+    }
+    camera.lookAt(camera.position.x * .35, 2.55, camera.position.z - 14);
+    renderer.render(scene, camera);
+  }
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot(){
+  const bar = document.getElementById('loadbar');
+  bar.style.transform = 'scaleX(.4)';
+  const ok = (typeof THREE !== 'undefined') && build();
+  if(!ok){ document.getElementById('scene').style.display = 'none'; }
+  bar.style.transform = 'scaleX(1)';
+  setTimeout(()=>{
+    document.getElementById('load').classList.add('gone');
+    setActive(0);
+    els[0].classList.add('on');
+  }, 420);
+  loop();
+  drawCharts();
+}
+
+/* ============================================================
+   CHARTS — hairline, no chrome
+   ============================================================ */
+function drawCharts(){
+  if(typeof Chart === 'undefined') return;
+  Chart.defaults.color = '#9b998f';
+  Chart.defaults.font.family = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+  Chart.defaults.font.size = 10;
+  Chart.defaults.animation.duration = 900;
+
+  new Chart(document.getElementById('cGenre'), {
+    type:'bar',
+    data:{ labels:['Arcade','Sports','Board','Sim','FX','Other','Tools','3D'],
+      datasets:[{ data:[34,28,27,26,21,13,10,8],
+        backgroundColor:'#12120f', hoverBackgroundColor:'#b4472e',
+        borderRadius:0, barPercentage:.62 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{
+        backgroundColor:'#12120f', padding:9, cornerRadius:2, displayColors:false,
+        callbacks:{label:c=>c.raw+' builds'}}},
+      scales:{ x:{grid:{display:false}, border:{color:'#d9d7d0'}, ticks:{font:{size:9.5}}},
+               y:{grid:{color:'#eae8e2'}, border:{display:false}, ticks:{maxTicksLimit:4}} } }
+  });
+
+  new Chart(document.getElementById('cTime'), {
+    type:'line',
+    data:{ labels:['Nov 25','Dec','Jan 26','Feb','Mar','Apr','May','Jun','Jul'],
+      datasets:[{ data:[9,10,27,113,39,29,6,3,1],
+        borderColor:'#12120f', borderWidth:1.5, tension:.34,
+        pointBackgroundColor:'#f2f1ee', pointBorderColor:'#12120f',
+        pointBorderWidth:1.5, pointRadius:3, pointHoverRadius:5,
+        fill:true, backgroundColor:'rgba(18,18,15,.05)' }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{
+        backgroundColor:'#12120f', padding:9, cornerRadius:2, displayColors:false,
+        callbacks:{label:c=>c.raw+' new projects'}}},
+      scales:{ x:{grid:{display:false}, border:{color:'#d9d7d0'}, ticks:{font:{size:9.5}}},
+               y:{grid:{color:'#eae8e2'}, border:{display:false}, ticks:{maxTicksLimit:4}} } }
+  });
+}
+
+if(document.readyState === 'loading') addEventListener('DOMContentLoaded', boot);
+else boot();
+
+})();
+</script>
+</body>
+</html>
