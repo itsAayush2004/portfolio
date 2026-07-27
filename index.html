@@ -217,28 +217,60 @@ ul.pts li b{color:var(--ink);font-weight:600}
   .statgrid .c:nth-child(n+4){border-bottom:1px solid var(--line)}
   .statgrid .c:nth-child(n+5){border-bottom:none}
 
-  /* cards dock to the bottom of the screen and rise from below */
+  /* cards dock to the bottom, rise on arrival, then drop back to a peek bar
+     so the room is never hidden for long */
   #stage{align-items:flex-end}
   .panel,.panel.right{padding:0;justify-content:center;align-items:flex-end}
-  .inner{max-width:100%;width:100%;border-radius:16px 16px 0 0;border-bottom:none;
-    padding:20px 20px calc(74px + env(safe-area-inset-bottom));
-    max-height:66vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    transform:translateY(100%) scale(1);
-    box-shadow:0 -20px 50px -26px rgba(20,20,15,.5),inset 0 1px 0 rgba(255,255,255,.9)}
+  .inner{max-width:100%;width:100%;border-radius:14px 14px 0 0;border-bottom:none;
+    padding:14px 16px calc(54px + env(safe-area-inset-bottom));
+    max-height:52vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    transform:translateY(100%);
+    transition:transform .55s cubic-bezier(.16,.9,.3,1),opacity .4s ease;
+    box-shadow:0 -18px 44px -26px rgba(20,20,15,.5),inset 0 1px 0 rgba(255,255,255,.9)}
   .panel.on .inner{transform:translateY(0)}
+  /* collapsed: only the handle + room name stay on screen */
+  .panel.on.peek .inner{transform:translateY(calc(100% - 46px));overflow:hidden}
   .inner::before{left:0;right:0;top:0;bottom:auto;width:auto;height:2px;
     transform:scaleX(0);transform-origin:left}
   .panel.on .inner::before{transform:scaleX(1)}
   .inner::after{display:none}
-  /* grab handle */
-  .inner > .room-kicker{position:relative;padding-top:12px}
-  .inner > .room-kicker::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
-    width:38px;height:4px;border-radius:4px;background:var(--line)}
 
-  h1{font-size:clamp(34px,11vw,52px)}
-  h2{font-size:clamp(22px,6.4vw,30px)}
+  /* grab handle — tap to expand or collapse */
+  .inner > .room-kicker{position:relative;padding-top:11px;margin-bottom:9px;
+    cursor:pointer;pointer-events:auto;font-size:9px;letter-spacing:.2em}
+  .inner > .room-kicker::before{content:'';position:absolute;top:1px;left:50%;transform:translateX(-50%);
+    width:34px;height:4px;border-radius:4px;background:var(--line)}
+  .inner > .room-kicker::after{content:'▾';margin-left:8px;font-size:11px;color:var(--soft);
+    transition:transform .35s;display:inline-block}
+  .panel.peek .inner > .room-kicker::after{transform:rotate(180deg)}
+
+  h1{font-size:clamp(28px,9vw,42px)}
+  h2{font-size:clamp(19px,5.4vw,25px)}
+  .num{font-size:9px;margin-bottom:9px}
+  .lede{font-size:13px;line-height:1.5;margin-top:10px}
+  p.body{font-size:12px;line-height:1.55;margin-bottom:9px}
+  ul.pts{margin:10px 0}
+  ul.pts li{font-size:11.5px;line-height:1.45;margin-bottom:5px;padding-left:14px}
+  ul.pts li::before{top:8px;width:6px}
+  .meta{gap:16px;margin-top:12px;padding-top:10px}
+  .meta div .v{font-size:11.5px}
+  .meta div .v.big{font-size:17px}
+  .meta div .k{font-size:8px;letter-spacing:.16em}
+  .stack{margin-top:10px;gap:4px}
+  .chip{font-size:8px;padding:4px 7px}
+  .hero-links{margin-top:14px;gap:12px;font-size:10.5px}
+  .cta{margin-top:11px;font-size:10.5px}
+  .shots{margin-top:10px;gap:7px}
   .shots a{max-width:none}
-  .shots img{height:74px}
+  .shots img{height:60px}
+  .shots .cap{font-size:7px;padding:4px 5px}
+  .statgrid{margin:11px 0}
+  .statgrid .c{padding:9px 8px}
+  .statgrid .n2{font-size:17px}
+  .statgrid .l2{font-size:7.5px;margin-top:4px}
+  .charts{margin-top:10px;gap:10px}
+  .chart .box{height:92px}
+  .chart .cap{font-size:7.5px;margin-bottom:5px}
 
   /* slider becomes a bottom scrubber */
   #slider{right:auto;left:50%;top:auto;bottom:calc(12px + env(safe-area-inset-bottom));
@@ -615,23 +647,24 @@ function pixelMap(){
   t.repeat.set(7, 7);          // fine enough that big planes read as texture, not blotches
   return t;
 }
-/* floor grid — pixel wash with a hard tile lattice drawn over it */
-function gridMap(rep){
+/* pixel wash with a hard lattice drawn over it — floors get a tight tile grid,
+   walls a wider panel grid                                                  */
+function gridMap(repX, repY, strong, faint){
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const g = c.getContext('2d');
-  const sh = ['#ffffff','#fafaf7','#f3f3ee'];
+  const sh = ['#ffffff','#ffffff','#fbfbf9','#f5f5f1'];
   for(let y=0;y<64;y++) for(let x=0;x<64;x++){
     g.fillStyle = sh[(Math.random()*sh.length)|0]; g.fillRect(x,y,1,1);
   }
-  g.fillStyle = 'rgba(20,20,15,.20)';
+  g.fillStyle = 'rgba(20,20,15,'+strong+')';
   g.fillRect(0,0,64,1); g.fillRect(0,0,1,64);
-  g.fillStyle = 'rgba(20,20,15,.08)';
+  g.fillStyle = 'rgba(20,20,15,'+faint+')';
   g.fillRect(0,32,64,1); g.fillRect(32,0,1,64);
   const t = new THREE.CanvasTexture(c);
   t.magFilter = t.minFilter = THREE.NearestFilter;
   t.generateMipmaps = false;
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(rep, rep);
+  t.repeat.set(repX, repY === undefined ? repX : repY);
   return t;
 }
 function toon(hex, map){
@@ -755,8 +788,9 @@ function build(){
   const built = new Set();
   P.forEach((p, i) => {
     const sh = ROOMS[i].shade;
-    const wallM = toon(sh.wall), ceilM = toon(sh.ceil);
-    const floorM = toon(sh.floor, gridMap(10));   // grid lattice underfoot
+    const wallM  = toon(sh.wall,  gridMap(5, 2, .13, .05));   // panel grid on the walls
+    const ceilM  = toon(sh.ceil,  gridMap(6, 6, .07, .03));
+    const floorM = toon(sh.floor, gridMap(10, 10, .20, .08)); // tighter tile grid underfoot
 
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), floorM);
     fl.rotation.x = -Math.PI/2; fl.position.set(p.x, 0, p.z); scene.add(fl);
@@ -1051,7 +1085,10 @@ function build(){
      ══════════════════════════════════════════════════════ */
   /* ---------- logos ---------- */
   const FACE = 'https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png';
-  const LOGO_LAND = 'https://arthis.land/assets/LOGO-3Edited.png';
+  // shipped with the repo, so same-origin and safe to paint into a canvas
+  const LOGO_LAND  = 'arthis-land.png';
+  const LOGO_SPACE = 'arthis-space.png';
+  const logoFor = t => t === 'ARTHIS.LAND' ? LOGO_LAND : t === 'ARTHIS.SPACE' ? LOGO_SPACE : null;
 
   // a single favicon-style tile: real logo if it loads, drawn pixel glyph if not
   function logoTile(url, icon, label){
@@ -1110,6 +1147,25 @@ function build(){
       im.src = url;
     }
     return t;
+  }
+
+  // the logo, large, as a framed piece
+  function paintLogoArt(c, tex, url, title, sub){
+    const im = new Image();
+    im.onload = () => {
+      const g = c.getContext('2d');
+      g.fillStyle='#fbfaf7'; g.fillRect(0,0,900,1125);
+      g.strokeStyle='#14140f'; g.lineWidth=5; g.strokeRect(30,30,840,1065);
+      const s = Math.min(600/im.width, 560/im.height);
+      g.drawImage(im, 450 - im.width*s/2, 430 - im.height*s/2, im.width*s, im.height*s);
+      g.textAlign='center';
+      g.fillStyle='#14140f'; g.font='600 54px '+PX+', monospace'; g.fillText(title,450,830);
+      g.fillStyle='#8e8c82'; g.font='300 36px '+PX+', monospace'; g.fillText(sub,450,896);
+      g.fillStyle='#c0472c'; g.fillRect(415,952,70,5);
+      tex.needsUpdate = true;
+    };
+    im.onerror = () => {};
+    im.src = url;
   }
 
   function artCanvas(o){
@@ -1202,6 +1258,7 @@ function build(){
 
     const c = artCanvas(o); const tex = texFrom(c);
     if(o.img) paintShot(c, tex, o.img, o.t, o.s);
+    else if(logoFor(o.t)) paintLogoArt(c, tex, logoFor(o.t), o.t, o.s);
     const wall = new THREE.Group();
     wall.position.set(f.x, 0, f.z); wall.rotation.y = f.rot; g.add(wall);
     // room 00's wall is the favicon grid instead of a single framed piece
@@ -1251,8 +1308,7 @@ function build(){
         const ty = 2.55 - rowN * pitch;
         B(wall, size+.09, size+.09, .1, M.dark, tx, ty, .24, .85);
         const tl = new THREE.Mesh(new THREE.PlaneGeometry(size, size),
-          new THREE.MeshBasicMaterial({map: logoTile(
-            r.t === 'ARTHIS.LAND' ? LOGO_LAND : null, r.icon, r.t.split('.')[0])}));
+          new THREE.MeshBasicMaterial({map: logoTile(logoFor(r.t), r.icon, r.t.split('.')[0])}));
         tl.position.set(tx, ty, .32); wall.add(tl);
       });
       // the face, larger, sitting above the grid
@@ -1264,9 +1320,8 @@ function build(){
 
     /* ---- the two live platforms get their logo repeated as a frieze ---- */
     if(o.t === 'ARTHIS.SPACE' || o.t === 'ARTHIS.LAND'){
-      const isLand = o.t === 'ARTHIS.LAND';
       const fr = new THREE.Mesh(new THREE.PlaneGeometry(9.6, .82),
-        new THREE.MeshBasicMaterial({map: logoFrieze(isLand ? LOGO_LAND : null, o.icon, 12)}));
+        new THREE.MeshBasicMaterial({map: logoFrieze(logoFor(o.t), o.icon, 12)}));
       fr.position.set(0, 6.55, .3); wall.add(fr);
       B(wall, 9.76, .96, .08, M.dark, 0, 6.55, .24, .85);
     }
@@ -1375,11 +1430,41 @@ slider.addEventListener('keydown', e=>{
     scrollTo({top:(Math.max(0,active-1)/(N-1))*maxScroll(), behavior:'smooth'}); }
 });
 
+/* ── mobile sheet: rises on arrival, drops to a peek bar a moment later,
+      and collapses out of the way the instant you start moving again ── */
+const isPhone = () => innerWidth <= 860;
+let peekTimer = 0;
+function collapseNow(){ if(isPhone()) els.forEach(el => el.classList.add('peek')); }
+function expandThenPeek(delay){
+  clearTimeout(peekTimer);
+  if(!isPhone()) return;
+  els.forEach(el => el.classList.remove('peek'));
+  peekTimer = setTimeout(collapseNow, delay === undefined ? 4200 : delay);
+}
+els.forEach(el => {
+  const k = el.querySelector('.room-kicker');
+  if(!k) return;
+  k.addEventListener('click', e => {
+    if(!isPhone()) return;
+    e.stopPropagation();
+    clearTimeout(peekTimer);
+    el.classList.toggle('peek');
+  });
+});
+let moveTimer = 0;
+addEventListener('scroll', () => {
+  if(!isPhone()) return;
+  collapseNow();
+  clearTimeout(moveTimer);
+  moveTimer = setTimeout(() => expandThenPeek(), 420);   // settle, then show
+}, {passive:true});
+
 let counted = false;
 function setActive(i){
   if(i === active) return;
   active = i;
   if(i < 0 || i >= N){ els.forEach(el=>el.classList.remove('on')); return; }
+  expandThenPeek();
   els.forEach((el,k)=> el.classList.toggle('on', k===i));
   const label = '<em>' + String(i).padStart(2,'0') + '</em>' + ROOMS[i].theme;
   sCur.innerHTML = label;
