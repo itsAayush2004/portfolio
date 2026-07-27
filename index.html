@@ -16,13 +16,27 @@
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://raw.githubusercontent.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --paper:#f2f1ee; --ink:#14140f; --mid:#3f3e38; --soft:#7c7a71;
   --line:#cbc7bd; --accent:#c0472c; --grid:rgba(20,20,15,.055);
   --glass:rgba(249,248,244,.86); --glass-line:rgba(255,255,255,.95);
+  --pixel:'Pixelify Sans','Courier New',monospace;
+  --body:'Helvetica Neue',Helvetica,Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
 }
+/* pixel type carries every display element; body copy stays in a reading face */
+h1,h2,.room-kicker,.num,.chip,.cta,.meta .k,.statgrid .n2,.statgrid .l2,
+.chart .cap,.shots .cap,#brand span,#slider .cur,#cue,.loader-label,.loader-pct,
+.hero-links,.meta .v.big{
+  font-family:var(--pixel);
+  letter-spacing:.02em;
+}
+h1,h2{font-weight:600}
+.statgrid .n2,.meta .v.big{font-weight:600}
 *{margin:0;padding:0;box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--paper);color:var(--ink);
@@ -103,9 +117,9 @@ a{color:inherit;text-decoration:none}
   text-transform:uppercase;font-weight:700;color:var(--accent);margin-bottom:12px}
 .room-kicker b{width:16px;height:1.5px;background:var(--accent);display:block}
 .num{font-size:10px;letter-spacing:.34em;color:var(--soft);text-transform:uppercase;margin-bottom:14px;font-weight:600}
-h1{font-size:clamp(38px,7vw,80px);line-height:.9;font-weight:300;letter-spacing:-.045em}
-h1 em{font-style:normal;display:block;font-weight:600}
-h2{font-size:clamp(24px,3.7vw,40px);font-weight:300;line-height:1.05;letter-spacing:-.035em;margin-bottom:14px}
+h1{font-size:clamp(36px,6.4vw,72px);line-height:1.0;letter-spacing:-.01em}
+h1 em{font-style:normal;display:block;font-weight:700}
+h2{font-size:clamp(23px,3.4vw,36px);line-height:1.14;letter-spacing:-.005em;margin-bottom:14px}
 .lede{font-size:clamp(14.5px,1.5vw,17.5px);color:var(--mid);font-weight:400;line-height:1.62;margin-top:14px}
 p.body{font-size:14px;color:var(--mid);font-weight:400;line-height:1.68;margin-bottom:13px}
 ul.pts{list-style:none;margin:14px 0}
@@ -500,6 +514,7 @@ const EYE   = 2.05;
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MOBILE  = innerWidth < 860;
 const RAW = 'https://raw.githubusercontent.com/itsAayush2004/';
+const PX  = '"Pixelify Sans"';   // canvas textures use the pixel face too
 
 // grid coordinates: straight (-Z), left (-X), straight, right (+X), …
 const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4],[0,-4]];
@@ -682,14 +697,20 @@ function build(){
     const gate = new THREE.Group();
     gate.position.set(mx, 0, mz); gate.rotation.y = rotY; g.add(gate);
 
-    // jambs + head + threshold, in gate-local space (opening spans local X)
+    /* The wall itself occupies z −T/2 … +T/2. Every part of the gate frame is
+       pushed clear of that slab (z ≥ 0.22) so nothing interpenetrates:
+         column  0.24 … 1.04     capital / base  0.22 … 1.06     beam  0.22 … 1.06  */
+    const CZ = .64, CD = .80, WD = .84;
     [-1,1].forEach(s=>{
-      B(gate, .42, DH+.3, .95, M.wall, s*(DW+.21), (DH+.3)/2, 0, .9);
-      B(gate, .1, DH, .98, M.brass, s*DW, DH/2, 0, 0);
-      B(gate, .62, .26, 1.15, M.wall, s*(DW+.21), DH+.35, 0, .9);
+      const cx = s*(DW + .23);
+      B(gate, .46, DH,      CD, M.wall,  cx, DH/2,      CZ, .95);   // column
+      B(gate, .66, .24,     WD, M.wall,  cx, .12,       CZ, .95);   // base
+      B(gate, .66, .26,     WD, M.wall,  cx, DH - .13,  CZ, .95);   // capital
+      B(gate, .04, DH-.6,   .04, M.brass, cx, DH/2, CZ + CD/2 + .01, 0); // brass inlay on the face
     });
-    B(gate, DW*2+.84, .52, 1.15, M.wall, 0, DH+.26, 0, .9);
-    B(gate, DW*2, .05, .8, M.brass, 0, .025, 0, 0);
+    B(gate, DW*2 + .92, .54, WD, M.wall, 0, DH + .27, CZ, .95);     // beam
+    B(gate, DW*2 + .92, .1,  WD, M.brass, 0, DH + .01, CZ, 0);      // brass under-rail
+    B(gate, DW*2, .05, .74, M.brass, 0, .025, CZ, 0);               // threshold
 
     // medallion naming the next room
     const nxt = ROOMS[roomIdx+1] || ROOMS[roomIdx];
@@ -700,7 +721,7 @@ function build(){
     mg.strokeStyle='#c0472c'; mg.lineWidth=3; mg.beginPath(); mg.arc(150,150,118,0,7); mg.stroke();
     drawIcon(mg, nxt.icon, 150, 148, 138);
     const med = new THREE.Mesh(new THREE.CircleGeometry(.27,30), new THREE.MeshBasicMaterial({map:texFrom(mc)}));
-    med.position.set(0, DH+.26, .59); gate.add(med);
+    med.position.set(0, DH+.27, CZ + WD/2 + .01); gate.add(med);
 
     // door leaves — hinged at the jambs, swung open on approach
     [-1,1].forEach(s=>{
@@ -934,10 +955,10 @@ function build(){
     g.fillStyle='#fbfaf7'; g.fillRect(0,0,900,1125);
     g.strokeStyle='#14140f'; g.lineWidth=5; g.strokeRect(30,30,840,1065);
     g.textAlign='center';
-    if(o.n){ g.fillStyle='#14140f'; g.font='300 262px Helvetica, Arial, sans-serif'; g.fillText(o.n,450,590); }
+    if(o.n){ g.fillStyle='#14140f'; g.font='300 262px '+PX+', monospace'; g.fillText(o.n,450,590); }
     else drawIcon(g, o.icon, 450, 470, 300);
-    g.fillStyle='#14140f'; g.font='600 54px Helvetica, Arial, sans-serif'; g.fillText(o.t,450,790);
-    g.fillStyle='#8e8c82'; g.font='300 36px Helvetica, Arial, sans-serif'; g.fillText(o.s,450,856);
+    g.fillStyle='#14140f'; g.font='600 54px '+PX+', monospace'; g.fillText(o.t,450,790);
+    g.fillStyle='#8e8c82'; g.font='300 36px '+PX+', monospace'; g.fillText(o.s,450,856);
     g.fillStyle='#c0472c'; g.fillRect(415,930,70,5);
     return c;
   }
@@ -947,9 +968,9 @@ function build(){
     g.fillStyle='#14140f'; g.fillRect(0,0,560,232);
     g.fillStyle='#fbfaf7'; g.fillRect(5,5,550,222);
     g.textAlign='left';
-    g.fillStyle='#14140f'; g.font='600 40px Helvetica, Arial, sans-serif'; g.fillText(o.t,34,74);
-    g.fillStyle='#4f4e47'; g.font='300 29px Helvetica, Arial, sans-serif'; g.fillText(o.s,34,120);
-    g.fillStyle='#8e8c82'; g.font='600 21px Helvetica, Arial, sans-serif'; g.fillText(o.spec,34,176);
+    g.fillStyle='#14140f'; g.font='600 40px '+PX+', monospace'; g.fillText(o.t,34,74);
+    g.fillStyle='#4f4e47'; g.font='300 29px '+PX+', monospace'; g.fillText(o.s,34,120);
+    g.fillStyle='#8e8c82'; g.font='600 21px '+PX+', monospace'; g.fillText(o.spec,34,176);
     g.fillStyle='#c0472c'; g.fillRect(34,192,48,4);
     return texFrom(c);
   }
@@ -959,9 +980,9 @@ function build(){
     g.fillStyle='#14140f'; g.fillRect(0,0,900,250);
     g.fillStyle='#f4f2ed'; g.fillRect(6,6,888,238);
     g.textAlign='center';
-    g.fillStyle='#8e8c82'; g.font='600 26px Helvetica, Arial, sans-serif';
+    g.fillStyle='#8e8c82'; g.font='600 26px '+PX+', monospace';
     g.fillText('ROOM ' + String(i).padStart(2,'0'), 450, 84);
-    g.fillStyle='#14140f'; g.font='600 76px Helvetica, Arial, sans-serif';
+    g.fillStyle='#14140f'; g.font='600 76px '+PX+', monospace';
     g.fillText(o.theme, 450, 166);
     g.fillStyle='#c0472c'; g.fillRect(410,196,80,6);
     return texFrom(c);
@@ -977,8 +998,8 @@ function build(){
       g.drawImage(im, bx+(bw-im.width*r)/2, by, im.width*r, im.height*r); g.restore();
       g.fillStyle='#fbfaf7'; g.fillRect(40,782,820,300);
       g.textAlign='center';
-      g.fillStyle='#14140f'; g.font='600 54px Helvetica, Arial, sans-serif'; g.fillText(title,450,862);
-      g.fillStyle='#8e8c82'; g.font='300 36px Helvetica, Arial, sans-serif'; g.fillText(sub,450,924);
+      g.fillStyle='#14140f'; g.font='600 54px '+PX+', monospace'; g.fillText(title,450,862);
+      g.fillStyle='#8e8c82'; g.font='300 36px '+PX+', monospace'; g.fillText(sub,450,924);
       g.fillStyle='#c0472c'; g.fillRect(415,986,70,5);
       tex.needsUpdate = true;
     };
@@ -1009,7 +1030,6 @@ function build(){
     const free = ['nz','px','pz','nx'].filter(k => !doorSides[i][k])
       .sort((a,b) => (SIDE[b].x*out.x + SIDE[b].z*out.z) - (SIDE[a].x*out.x + SIDE[a].z*out.z));
     const featKey = free[0] || 'nz';
-    const secKey  = free[1] || free[0] || 'px';
     const f = SIDE[featKey];
     // slide the piece down the wall in the direction of travel, so it sits
     // ahead-and-to-the-side as you come through the door rather than beside you
@@ -1032,18 +1052,26 @@ function build(){
     g.add(sp); g.add(sp.target);
     B(wall, .95,.12,.3, M.dark, AOFF, H-.5, 2.2, .7);
 
-    // room name sign on the second free wall
-    const s2 = SIDE[secKey];
-    const sg = new THREE.Group(); sg.position.set(s2.x,0,s2.z); sg.rotation.y = s2.rot; g.add(sg);
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.4,.94), new THREE.MeshBasicMaterial({map:themeSign(o,i)}));
-    sign.position.set(0,5.15,.3); sg.add(sign);
-    B(sg, 3.56,1.1,.1, M.dark, 0,5.15,.24, .9);
+    // Everything readable hangs on the wall the camera pans to — nothing on
+    // the walls you never turn toward. Room name sits above the main piece,
+    // the detail shot further along the same wall.
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.4,.94),
+      new THREE.MeshBasicMaterial({map: themeSign(o,i)}));
+    sign.position.set(AOFF, 5.85, .32); wall.add(sign);
+    B(wall, 3.56,1.1,.1, M.dark, AOFF, 5.85, .26, .9);
+
     if(o.img2){
       const c2 = artCanvas({n:'', icon:o.icon, t:o.t, s:o.s});
       const t2 = texFrom(c2); paintShot(c2, t2, o.img2, o.t, 'detail');
-      B(sg, 2.4,3.0,.12, M.dark, 0,2.8,.24,.9);
-      const a2 = new THREE.Mesh(new THREE.PlaneGeometry(2.24,2.8), new THREE.MeshBasicMaterial({map:t2}));
-      a2.position.set(0,2.8,.32); sg.add(a2);
+      const dOff = AOFF - Math.sign(AOFF || 1) * 5.4;      // further down the same wall
+      B(wall, 2.5,3.1,.12, M.dark, dOff, 2.95, .24, .9);
+      const a2 = new THREE.Mesh(new THREE.PlaneGeometry(2.32,2.9), new THREE.MeshBasicMaterial({map:t2}));
+      a2.position.set(dOff, 2.95, .32); wall.add(a2);
+      const sp2 = new THREE.SpotLight(0xfff4e2, MOBILE?2.4:3.4, 12, .5, .8, 1.2);
+      sp2.position.set(f.x*.72 + f.lx.x*dOff, H-.7, f.z*.72 + f.lx.z*dOff);
+      sp2.target.position.set(f.x + f.lx.x*dOff, 2.9, f.z + f.lx.z*dOff);
+      g.add(sp2); g.add(sp2.target);
+      B(wall, .85,.12,.3, M.dark, dOff, H-.5, 2.2, .7);
     }
 
     // furniture, rotated so its "back" sits against the feature wall
@@ -1058,7 +1086,7 @@ function build(){
     const nc = document.createElement('canvas'); nc.width=nc.height=256;
     const ng = nc.getContext('2d');
     ng.fillStyle='rgba(20,20,15,.2)'; ng.textAlign='center';
-    ng.font='600 150px Helvetica, Arial, sans-serif';
+    ng.font='600 150px '+PX+', monospace';
     ng.fillText(String(i).padStart(2,'0'),128,180);
     const plate = new THREE.Mesh(new THREE.PlaneGeometry(1.7,1.7),
       new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(nc), transparent:true}));
@@ -1237,12 +1265,21 @@ function loop(){
     look.y = 2.35 - my*.6;
     camera.lookAt(look);
 
-    // doors open as you get close
+    // doors open when you are near AND looking at them — walk up head-on and
+    // they swing; glance at a wall across the room and they stay shut
+    const vx = look.x - camera.position.x, vz = look.z - camera.position.z;
+    const vl = Math.hypot(vx, vz) || 1;
+    const gx = vx/vl, gz = vz/vl;
     for(let k=0;k<doors.length;k++){
       const dr = doors[k];
-      const dist = Math.hypot(camera.position.x - dr.wx, camera.position.z - dr.wz);
-      const open = 1 - clamp01((dist - 7) / 8);
-      dr.hinge.rotation.y += (dr.s * -1.85 * open - dr.hinge.rotation.y) * .1;
+      const dx = dr.wx - camera.position.x, dz = dr.wz - camera.position.z;
+      const dist = Math.hypot(dx, dz) || 1;
+      const facing = (dx/dist)*gx + (dz/dist)*gz;          // 1 = dead ahead
+      const near   = 1 - clamp01((dist - 3.2) / 3.2);      // right at it → always open
+      const range  = 1 - clamp01((dist - 5) / 9);
+      const aim    = smooth(clamp01((facing - .25) / .45));
+      const open   = Math.max(near, range * aim);
+      dr.hinge.rotation.y += (dr.s * -1.85 * open - dr.hinge.rotation.y) * .09;
     }
     for(let k=0;k<spinners.length;k++) spinners[k].rotation.y += .0042;
 
@@ -1253,14 +1290,33 @@ function loop(){
 /* ══════════════════════════════════════════════════════════
    BOOT
    ══════════════════════════════════════════════════════════ */
-function boot(){
-  const bar = document.getElementById('lbar'), pct = document.getElementById('lpct');
-  let v = 0;
+function start(){
   const ok = (typeof THREE !== 'undefined') && build();
   if(!ok) document.getElementById('scene').style.display='none';
   loop(); drawCharts();
+}
+
+function boot(){
+  const bar = document.getElementById('lbar'), pct = document.getElementById('lpct');
+  let v = 0;
+
+  // the pixel face has to be resident before any canvas texture is painted,
+  // otherwise every sign bakes in the fallback and never repaints
+  const fontReady = (document.fonts && document.fonts.load)
+    ? Promise.race([
+        Promise.all([
+          document.fonts.load('600 64px "Pixelify Sans"'),
+          document.fonts.load('400 36px "Pixelify Sans"')
+        ]),
+        new Promise(r => setTimeout(r, 2500))
+      ])
+    : Promise.resolve();
+
+  let started = false;
+  fontReady.then(()=>{ if(!started){ started = true; start(); } })
+           .catch(()=>{ if(!started){ started = true; start(); } });
   const tick = setInterval(()=>{
-    v = Math.min(100, v + 6 + Math.random()*10);
+    v = Math.min(started ? 100 : 82, v + 6 + Math.random()*10);
     pct.textContent = Math.round(v)+'%'; bar.style.width = v+'%';
     if(v >= 100){ clearInterval(tick);
       setTimeout(()=>{ document.getElementById('loader').classList.add('done');
