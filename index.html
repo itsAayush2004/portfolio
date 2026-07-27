@@ -373,7 +373,7 @@ const ROOMS = [
   {t:'HEXABED',      s:'Unity hex terrain',        n:'160',   side: 1, img:null},
   {t:'BLENDER SUITE',s:'Pipeline add-ons',         n:'28',    side:-1, img:null},
   {t:'AI SYSTEMS',   s:'RAG · FastAPI · GPT-2',    n:'',      side: 1, img:null},
-  {t:'EVIDENCE',     s:'By the numbers',           n:'141K',  side:-1, img:null},
+  {t:'EVIDENCE',     s:'By the numbers',           n:'141K',  side: 1, img:null},
   {t:'CONTACT',      s:'Open to 2026 roles',       n:'',      side: 0, img:null}
 ];
 
@@ -410,7 +410,7 @@ function toonRamp(){
   return t;
 }
 
-const OUTLINE = new THREE.LineBasicMaterial({color:0x14140f, transparent:true, opacity:.62});
+const OUTLINE = new THREE.LineBasicMaterial({color:0x14140f, transparent:true, opacity:.85});
 function outline(mesh, opacity){
   const e = new THREE.LineSegments(
     new THREE.EdgesGeometry(mesh.geometry, 18),
@@ -443,10 +443,10 @@ function build(){
   const ramp = toonRamp();
   const toon = (hex) => new THREE.MeshToonMaterial({color:hex, gradientMap:ramp});
 
-  const matWall  = toon(0xf7f6f3);
-  const matFloor = toon(0xe6e4dd);
-  const matCeil  = toon(0xfcfbf8);
-  const matDiv   = toon(0xeeece5);
+  const matWall  = toon(0xf2f0ea);
+  const matFloor = toon(0xd8d5cb);
+  const matCeil  = toon(0xfaf9f5);
+  const matDiv   = toon(0xe6e3d9);
   const matDark  = toon(0x1b1b16);
 
   const L    = Math.abs(END_Z - START_Z) + 70;
@@ -495,11 +495,11 @@ function build(){
   }
 
   /* ---------- lighting tuned for banded toon shading ---------- */
-  scene.add(new THREE.AmbientLight(0xffffff, .58));
-  const key = new THREE.DirectionalLight(0xfff6e8, .95);
-  key.position.set(6, 13, 9); scene.add(key);
-  const fill = new THREE.DirectionalLight(0xdfe6ff, .3);
-  fill.position.set(-7, 6, -9); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xffffff, .30));
+  const key = new THREE.DirectionalLight(0xfff4e2, 1.25);
+  key.position.set(7, 12, 8); scene.add(key);
+  const fill = new THREE.DirectionalLight(0xcfd9ff, .42);
+  fill.position.set(-8, 5, -10); scene.add(fill);
 
   /* ---------- artwork ---------- */
   const AW = 3.1, AH = 3.9;
@@ -601,7 +601,7 @@ function build(){
     const nt = new THREE.CanvasTexture(nc);
     const plate = new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.5),
       new THREE.MeshBasicMaterial({map:nt, transparent:true}));
-    plate.rotation.x = -Math.PI/2; plate.rotation.z = Math.PI;
+    plate.rotation.x = -Math.PI/2;
     plate.position.set(-o.side * 3.2, .016, z + 1.5);
     scene.add(plate);
 
