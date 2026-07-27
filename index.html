@@ -170,10 +170,13 @@ ul.pts li b{color:var(--ink);font-weight:600}
 #slider .cur em{font-style:normal;color:var(--accent);margin-right:7px}
 
 /* the opening cue */
-#cue{position:fixed;z-index:9;right:clamp(20px,3vw,42px);top:calc(50% + min(23vh,210px) + 22px);
-  transform:translateX(35%);font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;
-  font-weight:700;color:var(--soft);white-space:nowrap;transition:opacity .5s;
-  display:flex;align-items:center;gap:8px}
+#cue{position:fixed;z-index:9;right:clamp(16px,2.6vw,36px);top:calc(50% + min(23vh,210px) + 20px);
+  font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;
+  font-weight:700;color:var(--ink);white-space:nowrap;transition:opacity .5s;
+  display:flex;align-items:center;gap:8px;
+  background:rgba(249,248,244,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.9);border-radius:999px;padding:7px 13px;
+  box-shadow:0 8px 22px -14px rgba(20,20,15,.6)}
 #cue .arw{display:inline-block;animation:nudge 1.7s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(5px);opacity:1}}
 #brand{position:fixed;left:clamp(16px,3vw,36px);top:clamp(16px,3vw,30px);z-index:8;
@@ -183,11 +186,8 @@ ul.pts li b{color:var(--ink);font-weight:600}
   box-shadow:0 10px 26px -18px rgba(20,20,15,.6)}
 #brand img{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#ddd9cf;display:block}
 #brand span{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:600}
-#roomtag{position:fixed;right:clamp(50px,6vw,80px);top:clamp(18px,3.5vw,32px);z-index:8;
-  font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);font-weight:600;
-  background:rgba(250,249,246,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,.8);padding:7px 14px;border-radius:999px}
-#roomtag em{font-style:normal;color:var(--accent)}
+/* the slider already names the room, so this stays hidden */
+#roomtag{display:none}
 #hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:8;font-size:9.5px;
   letter-spacing:.3em;text-transform:uppercase;color:var(--soft);transition:opacity .5s;
   display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:600}
@@ -1025,7 +1025,7 @@ function build(){
     const art = new THREE.Mesh(new THREE.PlaneGeometry(3.0,3.75), new THREE.MeshBasicMaterial({map:tex}));
     art.position.set(AOFF,3.15,.32); wall.add(art);
     const cap = new THREE.Mesh(new THREE.PlaneGeometry(1.6,.66), new THREE.MeshBasicMaterial({map:capCanvas(o)}));
-    cap.position.set(AOFF + (AOFF > 0 ? -2.0 : 2.0), 2.2, .28); wall.add(cap);
+    cap.position.set(AOFF + (AOFF > 0 ? -2.75 : 2.75), 2.0, .28); wall.add(cap);
     const sp = new THREE.SpotLight(0xfff4e2, MOBILE?3:4.6, 13, .5, .8, 1.2);
     sp.position.set(f.x*.72 + wox, H-.7, f.z*.72 + woz);
     sp.target.position.set(f.x + wox, 3.1, f.z + woz);
