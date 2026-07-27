@@ -603,7 +603,7 @@ const HULL_MIN = MOBILE ? .8 : .5;      // skip outlines on small detail parts
 function pixelMap(){
   const c = document.createElement('canvas'); c.width = c.height = 32;
   const g = c.getContext('2d');
-  const sh = ['#ffffff','#ffffff','#f8f8f5','#f1f1ec','#eaeae3'];
+  const sh = ['#ffffff','#ffffff','#ffffff','#fcfcfa','#f7f7f4','#f2f2ee'];
   for(let y=0;y<32;y++) for(let x=0;x<32;x++){
     g.fillStyle = sh[(Math.random()*sh.length)|0];
     g.fillRect(x,y,1,1);
@@ -612,7 +612,7 @@ function pixelMap(){
   t.magFilter = t.minFilter = THREE.NearestFilter;
   t.generateMipmaps = false;
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(2.4, 2.4);
+  t.repeat.set(7, 7);          // fine enough that big planes read as texture, not blotches
   return t;
 }
 /* floor grid — pixel wash with a hard tile lattice drawn over it */
