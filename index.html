@@ -325,12 +325,13 @@ body.panel .sheet{
   transform-origin:50% 100%;
   transform:perspective(1100px) translateY(64px) rotateX(-13deg) scale(.97);
   opacity:0; visibility:hidden;
-  transition:opacity .42s var(--ease-out), transform .86s var(--ease-fold), visibility .86s;
+  transition:opacity .22s var(--ease-out), transform .4s var(--ease-out), visibility .4s;
 }
 body.panel .sheet::-webkit-scrollbar{ width:0; height:0 }
 body.panel .fold.active .sheet{
   opacity:1; visibility:visible;
   transform:perspective(1100px) translateY(0) rotateX(0deg) scale(1);
+  transition:opacity .45s var(--ease-out) .16s, transform .9s var(--ease-fold) .1s, visibility 0s;
 }
 body.panel .fold.right{ justify-content:flex-end }
 body.panel .fold:nth-child(odd)  .sheet{ rotate:-.5deg }
@@ -1269,12 +1270,12 @@ function build(){
     const t = TINT[i % 3], a = .16 + (i % 4) * .035;
     return {
       icon:ICONS[i], theme:THEMES[i], tint:t,
-      wall: mix(0xE6DECA, t, a),
-      floor:mix(0xA89B78, t, a*1.5),
-      ceil: mix(0xE5DDC9, t, a*1.1),
-      rail: mix(0xC7B996, t, a*2.2),
-      art:  mix(0xD3C7A9, t, a*1.3),
-      obj:  mix(0xE2D8C0, t, a*1.0)
+      wall: mix(0xE9E2D1, t, a*.40),
+      floor:mix(0xA79C85, t, a*1.15),
+      ceil: mix(0xE8E1D0, t, a*.55),
+      rail: mix(0xC0B191, t, a*2.4),
+      art:  mix(0xCFC3A5, t, a*1.5),
+      obj:  mix(0xE0D6BE, t, a*1.2)
     };
   });
 
@@ -1761,32 +1762,22 @@ function build(){
 
     const frame = new THREE.Group();
     frame.position.set(ax, 0, az); frame.rotation.y = face; g.add(frame);
-    BS(frame, 5.9, 4.55, .16, paper(R.art), 0, 3.5, 0, .85);
+    BS(frame, 5.9, 4.55, .16, paper(R.art), 0, 4.55, 0, .85);
     const art = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 3.64), new THREE.MeshBasicMaterial({ map:artTex[i] }));
-    art.position.set(0, 3.5, .14); frame.add(art);
+    art.position.set(0, 4.55, .14); frame.add(art);
     const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.5, .8), new THREE.MeshBasicMaterial({ map:labTex[i] }));
-    lab.position.set(0, .95, .14); frame.add(lab);
+    lab.position.set(0, 2.55, .14); frame.add(lab);
 
-    /* the free wall gets a row of framed tiles */
-    const freeKeys = ['px','nx','pz','nz'].filter(kk => !doorSides[i][kk] && kk !== ak);
-    if (freeKeys.length){
-      const fk = freeKeys[0], fv = SIDEVEC[fk];
-      const wallX = p.x + fv[0]*(HALF - T*.5 - .06);
-      const wallZ = p.z + fv[1]*(HALF - T*.5 - .06);
-      const shelf = new THREE.Group();
-      shelf.position.set(wallX, 0, wallZ);
-      shelf.rotation.y = Math.atan2(-fv[0], -fv[1]);
-      g.add(shelf);
-      const set = WALLSET[i % WALLSET.length];
-      for (let k = 0; k < set.length; k++){
-        const ox = (k - 1) * 2.55;
-        BS(shelf, 2.25, 2.25, .12, paper(R.art), ox, 3.9, 0, .8);
-        const tl = new THREE.Mesh(new THREE.PlaneGeometry(1.86, 1.86),
-          new THREE.MeshBasicMaterial({ map:tilePanel(set[k][0], set[k][1], HEXC[i % 3]) }));
-        tl.position.set(ox, 3.9, .11); shelf.add(tl);
-      }
-      BS(shelf, 8.4, .16, .46, M.warmD, 0, 2.42, .18, .8);   /* the shelf itself */
+    /* three framed tiles under the piece, on a shelf */
+    const set = WALLSET[i % WALLSET.length];
+    for (let k = 0; k < set.length; k++){
+      const ox = (k - 1) * 2.15;
+      BS(frame, 1.92, 1.92, .12, paper(R.art), ox, 1.20, 0, .8);
+      const tl = new THREE.Mesh(new THREE.PlaneGeometry(1.56, 1.56),
+        new THREE.MeshBasicMaterial({ map:tilePanel(set[k][0], set[k][1], HEXC[i % 3]) }));
+      tl.position.set(ox, 1.20, .11); frame.add(tl);
     }
+    BS(frame, 7.2, .16, .5, M.warmD, 0, .16, .2, .8);
 
     /* dressing, arranged in front of the piece */
     const AX = av[0], AZ = av[1];          /* toward the art wall  */
@@ -1877,7 +1868,7 @@ function build(){
     const yawWant = yawFwd + shortAngle(yawFwd, yawArt) * w;
     yaw += shortAngle(yaw, yawWant) * clamp(dt * 2.4, 0, 1);
 
-    const pitchWant = .052 * w;
+    const pitchWant = .085 * w;
     pitch += (pitchWant - pitch) * clamp(dt * 2.4, 0, 1);
 
     ptr.x += (ptr.tx - ptr.x) * clamp(dt*2.6,0,1);
