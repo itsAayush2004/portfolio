@@ -1152,6 +1152,8 @@ const NAMES = sections.map(s => s.dataset.name || '');
 const ticks = [];
 const onTick = fn => ticks.push(fn);
 
+try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e){}
+
 const view = { w:innerWidth, h:innerHeight };
 const scroll = { y:0, max:1, p:0, damped:0 };
 let MODE = '';
@@ -1292,6 +1294,9 @@ onTick(dt => {
 function enter(){
   if (document.body.classList.contains('entered')) return;
   document.body.classList.add('entered');
+  window.scrollTo(0, 0);
+  scroll.y = 0; scroll.p = 0; scroll.damped = 0;
+  if (resetViewFn) resetViewFn();
   const cover = $('#s0 .sheet');
   if (cover){ cover.classList.add('on'); const gg = $('.stg', cover); if (gg) gg.classList.add('on'); }
   setTimeout(() => { if (gate && gate.parentNode) gate.remove(); }, 1100);
@@ -1396,7 +1401,7 @@ if (stickEl){
   stickEl.addEventListener('pointercancel', release);
 }
 let playing = false, loaded = false;
-let dockFn = null, undockFn = null;
+let dockFn = null, undockFn = null, resetViewFn = null;
 
 /* the scene calls this every frame once the camera has arrived */
 function onDocked(rect){
@@ -2545,14 +2550,25 @@ function build(){
 
   const pos = new THREE.Vector3(P[0].x, EYE, P[0].z);
   const lookAt = new THREE.Vector3(), tmpA = new THREE.Vector3();
-  /* open facing the piece, not the corridor */
-  let yaw = (function(){
+  /* the angle that puts the first piece dead centre */
+  const HOME_YAW = (function(){
     const d = dirAt(0), a0 = SIDEVEC[artKey[0]];
     const yf = Math.atan2(d.x, d.z);
     const ya = Math.atan2(a0[0]*9.4, a0[1]*9.4);
     return yf + shortAngle(yf, ya) * .78;
   })();
-  let yawV = 0, pitch = .0585, pitchV = 0;
+  const HOME_PITCH = .075 * .78;
+  let yaw = HOME_YAW, yawV = 0, pitch = HOME_PITCH, pitchV = 0;
+
+  /* called when the reader enters, so a restored scroll position or a
+     tab switch can never leave them staring at a doorway */
+  resetViewFn = function(){
+    scroll.damped = 0;
+    pos.set(P[0].x, EYE, P[0].z);
+    yaw = HOME_YAW; yawV = 0;
+    pitch = HOME_PITCH; pitchV = 0;
+    if (typeof undock === 'function') undock();
+  };
 
   /* ── dock mode ───────────────────────────────────────────────
      The camera leaves the walk path, squares up to the screen at
