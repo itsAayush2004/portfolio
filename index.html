@@ -322,13 +322,20 @@ body.panel .sheet{
   max-height:min(74vh, 660px);
   overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none;
   padding:22px 24px 26px;
-  filter:drop-shadow(0 2px 2px rgba(23,21,15,.14)) drop-shadow(0 20px 34px rgba(58,48,28,.26));
+  background:linear-gradient(152deg, rgba(255,253,248,.60) 0%, rgba(243,238,226,.40) 100%);
+  -webkit-backdrop-filter:blur(22px) saturate(1.25);
+  backdrop-filter:blur(22px) saturate(1.25);
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 4px rgba(20,16,8,.16), 0 22px 48px rgba(20,16,8,.34);
   transform-origin:50% 100%;
   transform:perspective(1100px) translateY(64px) rotateX(-13deg) scale(.97);
   opacity:0; visibility:hidden;
   transition:opacity .22s var(--ease-out), transform .4s var(--ease-out), visibility .4s;
 }
 body.panel .sheet::-webkit-scrollbar{ width:0; height:0 }
+body.panel .sheet::before{ opacity:.22 }
+body.panel .sheet::after{ background:linear-gradient(124deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 44%) }
+body.panel .tab{ opacity:.85 }
 body.panel .fold.active .sheet{
   opacity:1; visibility:visible;
   transform:perspective(1100px) translateY(0) rotateX(0deg) scale(1);
@@ -574,6 +581,24 @@ body.flow .sheet.on{ opacity:1; transform:perspective(1500px) translateY(0) rota
 .stg.on > *:nth-child(8){ transition-delay:.33s }
 .stg.on > *:nth-child(9){ transition-delay:.36s }
 
+/* ── 10a. TYPED COPY ──────────────────────────────────────────── */
+.sheet span.w{
+  display:inline-block; opacity:0;
+  transform:translateY(.24em); filter:blur(3px);
+}
+.sheet.go span.w{
+  opacity:1; transform:none; filter:none;
+  transition:opacity .26s ease, transform .34s var(--ease-out), filter .26s ease;
+  transition-delay:calc(var(--i) * 15ms);
+}
+.sheet.tw h2::after{
+  content:""; display:inline-block; width:.46em; height:.86em;
+  background:var(--red); margin-left:.1em; vertical-align:-.06em;
+  animation:caret .68s steps(1) infinite;
+}
+.sheet.tw.done h2::after{ display:none }
+@keyframes caret{ 0%,49%{ opacity:1 } 50%,100%{ opacity:0 } }
+
 /* ── 10b. THE ARCADE ──────────────────────────────────────────── */
 .play-btn{
   position:fixed; z-index:80; right:calc(var(--gut) + 46px); bottom:clamp(22px,4vh,40px);
@@ -595,12 +620,14 @@ body.flow .sheet.on{ opacity:1; transform:perspective(1500px) translateY(0) rota
 }
 
 #arcade{
-  position:fixed; inset:0; z-index:180; background:var(--ink);
-  display:flex; flex-direction:column;
+  position:fixed; inset:0; z-index:180; background:transparent; pointer-events:none;
 }
 #arcade[hidden]{ display:none }
 .arcade-bar{
-  flex:none; display:flex; align-items:center; gap:14px;
+  position:fixed; top:0; left:0; right:0; pointer-events:auto;
+  display:flex; align-items:center; gap:14px;
+  opacity:0; transform:translateY(-100%);
+  transition:opacity .5s var(--ease-out), transform .6s var(--ease-fold);
   padding:10px clamp(12px,2vw,22px);
   padding-top:calc(10px + env(safe-area-inset-top));
   background:var(--ink); color:var(--paper-hi);
@@ -619,11 +646,26 @@ body.flow .sheet.on{ opacity:1; transform:perspective(1500px) translateY(0) rota
 }
 .arcade-close:hover{ background:rgba(251,248,241,.12); border-color:var(--paper-hi) }
 .arcade-close i{ font-style:normal; color:var(--red) }
-#arcadeFrame{ flex:1; width:100%; border:0; background:#fff; display:block }
+body.docked .arcade-bar{ opacity:1; transform:none }
+#arcadeFrame{
+  position:absolute; border:0; background:#fff; display:block; pointer-events:auto;
+  opacity:0; transition:opacity .55s var(--ease-out) .1s;
+  box-shadow:0 0 0 2px rgba(23,21,15,.9), 0 26px 60px rgba(0,0,0,.45);
+}
+body.docked #arcadeFrame{ opacity:1 }
+.dock-note{
+  position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+  pointer-events:none; opacity:0; transition:opacity .5s var(--ease-out) .5s;
+  font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--ink-3);
+}
+body.docked .dock-note{ opacity:1 }
 @media (max-width:600px){ .arcade-hint{ display:none } }
 
 body.playing .hud,body.playing .scrub,body.playing .scrub-hint,
-body.playing .play-btn,body.playing .grain,body.playing .vig,body.playing .fibre{ display:none }
+body.playing .play-btn,body.playing .grain,body.playing .vig,body.playing .fibre,
+body.playing .fold{ display:none }
+body.playing{ overflow:hidden }
 
 /* ── 11. THE ENTRANCE ─────────────────────────────────────────── */
 .gate{
@@ -1001,6 +1043,7 @@ body.noweb{
     <button class="arcade-close" id="arcadeClose" type="button">Close <i aria-hidden="true">&#10005;</i></button>
   </div>
   <iframe id="arcadeFrame" title="Playable game" allow="autoplay; fullscreen; gamepad"></iframe>
+  <div class="dock-note">Press Esc to step back</div>
 </div>
 
 <div id="track" aria-hidden="true"></div>
@@ -1071,11 +1114,47 @@ requestAnimationFrame(frame);
    1 — MODE : panels on a desktop, a normal document on a phone
    ════════════════════════════════════════════════════════════════ */
 let flowIO = null;
+/* copy arrives a word at a time, like it is being written */
+function typeIn(sheet){
+  if (sheet.dataset.tw) return;
+  sheet.dataset.tw = '1';
+  let n = 0;
+  const CAP = 54;
+  $$('.kicker, h2, .lede, .copy, .pts li', sheet).forEach(el => {
+    const kids = Array.prototype.slice.call(el.childNodes);
+    const walk = list => list.forEach(node => {
+      if (node.nodeType === 3){
+        const parts = node.nodeValue.split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < parts.length; i++){
+          const p = parts[i];
+          if (!p) continue;
+          if (/^\s+$/.test(p)){ frag.appendChild(document.createTextNode(p)); continue; }
+          const sp = document.createElement('span');
+          sp.className = 'w';
+          sp.textContent = p;
+          sp.style.setProperty('--i', Math.min(n++, CAP));
+          frag.appendChild(sp);
+        }
+        if (node.parentNode) node.parentNode.replaceChild(frag, node);
+      } else if (node.nodeType === 1){
+        walk(Array.prototype.slice.call(node.childNodes));
+      }
+    });
+    walk(kids);
+  });
+  if (!n) return;
+  sheet.classList.add('tw');
+  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add('go')));
+  setTimeout(() => sheet.classList.add('done'), Math.min(n, CAP) * 15 + 700);
+}
+
 function litUp(sheet){
   if (!sheet || sheet.dataset.lit) return;
   sheet.dataset.lit = '1';
   sheet.classList.add('on');
   const s = $('.stg', sheet); if (s) s.classList.add('on');
+  if (!REDUCED) typeIn(sheet);
 }
 function setMode(next){
   if (next === MODE) return;
@@ -1213,24 +1292,44 @@ const arcTitle = $('#arcadeTitle');
 const arcHint  = $('#arcadeHint');
 const playBtn  = $('#playBtn');
 const playName = playBtn ? $('span', playBtn) : null;
-let playing = false;
+let playing = false, loaded = false;
+let dockFn = null, undockFn = null;
+
+/* the scene calls this every frame once the camera has arrived */
+function onDocked(rect){
+  if (!rect || !playing) return;
+  if (!loaded){
+    loaded = true;
+    arcFrame.src = GAMES[playing.room].file;
+    document.body.classList.add('docked');
+  }
+  arcFrame.style.left   = rect.x.toFixed(1) + 'px';
+  arcFrame.style.top    = rect.y.toFixed(1) + 'px';
+  arcFrame.style.width  = Math.max(80, rect.w).toFixed(1) + 'px';
+  arcFrame.style.height = Math.max(60, rect.h).toFixed(1) + 'px';
+}
 
 function openGame(i){
   const gm = (typeof GAMES !== 'undefined') ? GAMES[i] : null;
   if (!gm || playing) return;
-  playing = true;
+  if (!dockFn || !dockFn(i)) return;
+  playing = { room:i };
+  loaded = false;
   arcTitle.textContent = gm.name;
   arcHint.textContent  = gm.hint;
-  arcFrame.src = gm.file;
   arcade.hidden = false;
   document.body.classList.add('playing');
 }
 function closeGame(){
   if (!playing) return;
   playing = false;
+  loaded = false;
   arcade.hidden = true;
   arcFrame.src = 'about:blank';
+  arcFrame.removeAttribute('style');
   document.body.classList.remove('playing');
+  document.body.classList.remove('docked');
+  if (undockFn) undockFn();
 }
 if (playBtn){
   $('#arcadeClose').addEventListener('click', closeGame);
@@ -2074,7 +2173,7 @@ function build(){
 
   /* ── a hanging paper lantern: the light that makes each room ── */
   const lanterns = [];
-  function lantern(g, x, z, tintHex){
+  function lantern(g, x, z, tintHex, roomIdx){
     const y = 5.35;
     const cord = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, y + .52, z), new THREE.Vector3(x, H, z)]),
@@ -2086,10 +2185,12 @@ function build(){
     CYL(g, .87, .87, .07, 10, paper(tintHex), x, y - .44, z, false);
     CYL(g, .86, .86, .05, 10, paper(0xFFE9BE), x, y - .5, z, false);
     /* the bulb's bloom, drawn not lit */
-    const glow = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 3.1), GLOW_MAT);
+    const gm = GLOW_MAT.clone();
+    gm.opacity = 0;
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), gm);
     glow.position.set(x, y - .35, z);
     g.add(glow);
-    lanterns.push({ x:x, y:y - .35, z:z, glow:glow });
+    lanterns.push({ x:x, y:y - .35, z:z, glow:glow, mat:gm, room:roomIdx, lit:0 });
   }
 
   /* ── one hero per room, so every doorway frames something ──── */
@@ -2203,7 +2304,6 @@ function build(){
     const wallM = paper(R.wall);
     const floorM = new THREE.MeshToonMaterial({ color:R.floor, gradientMap:RAMP, map:gridMap(10) });
     const g = new THREE.Group(); scene.add(g); roomGroups.push(g);
-    const plot = Plot(p, doorSides[i]);
 
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), floorM);
     fl.rotation.x = -Math.PI/2; fl.position.set(p.x, 0, p.z); g.add(fl);
@@ -2275,26 +2375,13 @@ function build(){
       const scr = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 3.58),
         new THREE.MeshBasicMaterial({ map:texFrom(screenCanvas(i, GAMES[i])) }));
       scr.position.set(0, 3.78, .33); cab.add(scr);
-      screens.push({ mesh:scr, room:i });
+      screens.push({ mesh:scr, room:i, w:5.4, h:3.58 });
       BS(cab, 6.2, .42, .82, M.warmD, 0, 1.3, .32, .8);
     }
 
-    /* hero, then two quiet corners behind it */
-    const s = hero(i, g, p, A, L, R);
-    plot.claim(s.x, s.z, 2.7);
-    if (i === 4){
-      const b = p.x + A[0]*4.2 + L[0]*-4.2, bz = p.z + A[1]*4.2 + L[1]*-4.2;
-      plot.claim(b, bz, 1.7);
-      plot.claim(p.x + A[0]*7.4 + L[0]*-4.4, p.z + A[1]*7.4 + L[1]*-4.4, 1.15);
-      plot.claim(p.x + A[0]*3.0 + L[0]*-7.0, p.z + A[1]*3.0 + L[1]*-7.0, .7);
-    }
-    const FAR = [[7.4,7.4]];
-    const PROPS = [propLamp, propStack, propStool, propColumn, propVase];
-    for (let k = 0; k < FAR.length; k++){
-      const cx = p.x + A[0]*FAR[k][0] + L[0]*FAR[k][1];
-      const cz = p.z + A[1]*FAR[k][0] + L[1]*FAR[k][1];
-      if (plot.claim(cx, cz, 1.15)) PROPS[(i + k) % PROPS.length](g, cx, cz, R.obj);
-    }
+    /* the room is left empty on purpose — the lamp above the floor
+       where the piece faces is the only thing standing in it */
+    lantern(g, p.x + A[0]*5.2 + L[0]*2.4, p.z + A[1]*5.2 + L[1]*2.4, R.tint, i);
   });
 
   if (refused > 0 && window.console) console.warn('[house] placements refused:', refused);
@@ -2313,11 +2400,11 @@ function build(){
      Low ambient, one cool key, and two warm bulbs that travel with
      you — so the room you are standing in is the lit one.
      ──────────────────────────────────────────────────────────── */
-  scene.add(new THREE.AmbientLight(0xFFFFFF, .26));
-  const key  = new THREE.DirectionalLight(0xFFF1DC, .62); key.position.set(9,16,10);   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xB9CCEC, .24); fill.position.set(-10,7,-12); scene.add(fill);
-  const bulbA = new THREE.PointLight(0xFFCE8E, 2.5, 18, 1.7); scene.add(bulbA);
-  const bulbB = new THREE.PointLight(0xFFCE8E, 1.5, 15, 1.9); scene.add(bulbB);
+  scene.add(new THREE.AmbientLight(0xFFFFFF, .13));
+  const key  = new THREE.DirectionalLight(0xFFF1DC, .30); key.position.set(9,16,10);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xB9CCEC, .13); fill.position.set(-10,7,-12); scene.add(fill);
+  const bulbA = new THREE.PointLight(0xFFCE8E, 0, 20, 1.6); scene.add(bulbA);
+  const bulbB = new THREE.PointLight(0xFFCE8E, 0, 18, 1.8); scene.add(bulbB);
 
   /* ── walking ─────────────────────────────────────────────── */
   const shortAngle = (a, b) => {
@@ -2342,6 +2429,71 @@ function build(){
   const pos = new THREE.Vector3(P[0].x, EYE, P[0].z);
   const lookAt = new THREE.Vector3(), tmpA = new THREE.Vector3();
   let yaw = Math.atan2(dirAt(0).x, dirAt(0).z), yawV = 0, pitch = 0, pitchV = 0;
+
+  /* ── dock mode ───────────────────────────────────────────────
+     The camera leaves the walk path, squares up to the screen at
+     exactly the distance that frames it, and the game is laid over
+     the rectangle the screen projects to. ──────────────────────── */
+  const dock = {
+    on:false, exit:false, screen:null, t:0,
+    camFrom:new THREE.Vector3(), camTo:new THREE.Vector3(),
+    lookFrom:new THREE.Vector3(), lookTo:new THREE.Vector3()
+  };
+  const _n = new THREE.Vector3(), _c = new THREE.Vector3(), _v = new THREE.Vector3();
+
+  function frameDistance(w, h){
+    const vFov = camera.fov * Math.PI / 180;
+    const byH = h / (2 * .80 * Math.tan(vFov/2));
+    const byW = w / (2 * .86 * Math.tan(vFov/2) * camera.aspect);
+    return Math.max(byH, byW) + .35;
+  }
+  function dockTo(roomIdx){
+    let sc = null;
+    for (let i = 0; i < screens.length; i++) if (screens[i].room === roomIdx) sc = screens[i];
+    if (!sc) return false;
+    sc.mesh.updateWorldMatrix(true, false);
+    sc.mesh.getWorldPosition(_c);
+    sc.mesh.getWorldDirection(_n);                 /* the face the screen looks out of */
+    dock.screen = sc;
+    dock.camFrom.copy(camera.position);
+    dock.lookFrom.copy(lookAt);
+    dock.camTo.copy(_c).addScaledVector(_n, frameDistance(sc.w, sc.h));
+    dock.lookTo.copy(_c);
+    dock.t = 0;
+    dock.exit = false;
+    dock.on = true;
+    return true;
+  }
+  /* leaving flies back to the walk path instead of cutting */
+  function undock(){
+    if (!dock.on) return;
+    dock.camFrom.copy(camera.position);
+    dock.lookFrom.copy(lookAt);
+    dock.camTo.set(pos.x, EYE, pos.z);
+    dock.lookTo.set(pos.x + Math.sin(yaw)*13, EYE + Math.tan(pitch)*13, pos.z + Math.cos(yaw)*13);
+    dock.t = 0;
+    dock.exit = true;
+  }
+  dockFn   = dockTo;
+  undockFn = undock;
+
+  /* where on screen the wall panel lands, so the iframe can sit on it */
+  function screenRect(){
+    const sc = dock.screen;
+    if (!sc) return null;
+    const hw = sc.w/2, hh = sc.h/2;
+    let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    for (let i = 0; i < 4; i++){
+      _v.set((i & 1) ? hw : -hw, (i & 2) ? hh : -hh, 0);
+      sc.mesh.localToWorld(_v);
+      _v.project(camera);
+      const sx = (_v.x * .5 + .5) * view.w;
+      const sy = (-_v.y * .5 + .5) * view.h;
+      if (sx < minX) minX = sx; if (sx > maxX) maxX = sx;
+      if (sy < minY) minY = sy; if (sy > maxY) maxY = sy;
+    }
+    return { x:minX, y:minY, w:maxX - minX, h:maxY - minY };
+  }
 
   const ray = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
@@ -2373,6 +2525,25 @@ function build(){
   resize();
 
   function step(dt, t){
+    if (dock.on){
+      dock.t = Math.min(1, dock.t + dt / 1.15);
+      const e = smooth(dock.t);
+      camera.position.lerpVectors(dock.camFrom, dock.camTo, e);
+      lookAt.lerpVectors(dock.lookFrom, dock.lookTo, e);
+      camera.lookAt(lookAt);
+      for (let i = 0; i < lanterns.length; i++){
+        const L2 = lanterns[i];
+        const dd = Math.sqrt((L2.x-camera.position.x)*(L2.x-camera.position.x) + (L2.z-camera.position.z)*(L2.z-camera.position.z));
+        L2.lit += (smooth(clamp(1 - (dd - 5.5)/13, 0, 1)) - L2.lit) * clamp(dt*1.5,0,1);
+        L2.mat.opacity = L2.lit * .92;
+      }
+      renderer.render(scene, camera);
+      if (dock.t >= 1){
+        if (dock.exit){ dock.on = false; dock.exit = false; dock.screen = null; }
+        else if (typeof onDocked === 'function') onDocked(screenRect());
+      }
+      return;
+    }
     const f  = scroll.damped * (N - 1);
     const i0 = clamp(Math.floor(f), 0, N-1), i1 = Math.min(N-1, i0+1);
     const m  = clamp(f - i0, 0, 1);
@@ -2411,16 +2582,27 @@ function build(){
     lookAt.set(pos.x + Math.sin(ay)*D, camY + Math.tan(pitch - ptr.y*.08)*D, pos.z + Math.cos(ay)*D);
     camera.lookAt(lookAt);
 
-    /* the two nearest bulbs travel with you */
+    /* each lamp eases up as you arrive and back down as you leave,
+       so the house is dark until you are standing in it */
     let n1 = 0, n2 = 1, d1 = Infinity, d2 = Infinity;
+    const rate = clamp(dt * 1.5, 0, 1);
     for (let i = 0; i < lanterns.length; i++){
       const L2 = lanterns[i];
       const dd = (L2.x - pos.x)*(L2.x - pos.x) + (L2.z - pos.z)*(L2.z - pos.z);
+      const want = smooth(clamp(1 - (Math.sqrt(dd) - 5.5) / 13, 0, 1));
+      L2.lit += (want - L2.lit) * rate;
+      L2.mat.opacity = L2.lit * .92;
       if (dd < d1){ d2 = d1; n2 = n1; d1 = dd; n1 = i; }
       else if (dd < d2){ d2 = dd; n2 = i; }
     }
-    if (lanterns[n1]) bulbA.position.set(lanterns[n1].x, lanterns[n1].y, lanterns[n1].z);
-    if (lanterns[n2]) bulbB.position.set(lanterns[n2].x, lanterns[n2].y, lanterns[n2].z);
+    if (lanterns[n1]){
+      bulbA.position.set(lanterns[n1].x, lanterns[n1].y, lanterns[n1].z);
+      bulbA.intensity = lanterns[n1].lit * 3.4;
+    }
+    if (lanterns[n2]){
+      bulbB.position.set(lanterns[n2].x, lanterns[n2].y, lanterns[n2].z);
+      bulbB.intensity = lanterns[n2].lit * 2.0;
+    }
 
     for (let i = 0; i < N; i++){
       const dx = (P[i].x - pos.x)/ROOM, dz = (P[i].z - pos.z)/ROOM;
