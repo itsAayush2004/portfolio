@@ -55,7 +55,7 @@
   --ease-io:   cubic-bezier(.65,.05,.36,1);
 
   --gut: clamp(18px, 4vw, 56px);
-  --rooms: 9;
+  --rooms: 8;
 }
 
 /* ── 2. RESET ─────────────────────────────────────────────────── */
@@ -309,35 +309,73 @@ body.panel .stack{
 }
 body.panel .fold{
   position:absolute; inset:0;
-  display:flex; align-items:center;
-  padding:96px var(--gut) 76px;
-  opacity:0; visibility:hidden; pointer-events:none;
-  transition:opacity .55s var(--ease-out), visibility .55s;
+  display:flex; align-items:flex-end;
+  padding:88px var(--gut) clamp(30px,5vh,58px);
+  pointer-events:none;
 }
-body.panel .fold.active{ opacity:1; visibility:visible; pointer-events:auto }
+body.panel .fold.active{ pointer-events:auto }
+
+/* the card: a slip of paper that slides up off the floor */
 body.panel .sheet{
-  width:min(46vw, 620px);
-  max-height:calc(100vh - 190px);
+  width:min(380px, 33vw);
+  max-height:min(74vh, 660px);
   overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none;
-  filter:drop-shadow(0 2px 2px rgba(23,21,15,.12)) drop-shadow(0 22px 40px rgba(58,48,28,.20));
-  transform:perspective(1500px) translateY(26px) rotateX(5deg);
-  transform-origin:50% 0%; opacity:0;
-  transition:opacity .5s var(--ease-out), transform .78s var(--ease-fold);
+  padding:22px 24px 26px;
+  filter:drop-shadow(0 2px 2px rgba(23,21,15,.14)) drop-shadow(0 20px 34px rgba(58,48,28,.26));
+  transform-origin:50% 100%;
+  transform:perspective(1100px) translateY(64px) rotateX(-13deg) scale(.97);
+  opacity:0; visibility:hidden;
+  transition:opacity .42s var(--ease-out), transform .86s var(--ease-fold), visibility .86s;
 }
 body.panel .sheet::-webkit-scrollbar{ width:0; height:0 }
-body.panel .fold.active .sheet{ opacity:1; transform:perspective(1500px) translateY(0) rotateX(0deg) }
+body.panel .fold.active .sheet{
+  opacity:1; visibility:visible;
+  transform:perspective(1100px) translateY(0) rotateX(0deg) scale(1);
+}
 body.panel .fold.right{ justify-content:flex-end }
-body.panel .fold:nth-child(odd)  .sheet{ rotate:-.4deg }
-body.panel .fold:nth-child(even) .sheet{ rotate:.36deg }
-body.panel .cover .sheet{ width:min(52vw, 700px) }
+body.panel .fold:nth-child(odd)  .sheet{ rotate:-.5deg }
+body.panel .fold:nth-child(even) .sheet{ rotate:.45deg }
+body.panel .cover .sheet{ width:min(430px, 38vw); max-height:min(80vh, 720px) }
 body.panel .closer{ justify-content:center }
-body.panel .prints{ grid-template-columns:1fr 1fr }
-body.panel .print{ padding:7px 7px 30px }
+
+/* everything shrinks to fit a slip */
+body.panel .sheet{ font-size:13.5px; line-height:1.6 }
+body.panel h1{ font-size:clamp(38px,3.4vw,52px) }
+body.panel h2{ font-size:clamp(24px,2.1vw,32px); margin-bottom:10px }
+body.panel .lede{ font-size:14px; line-height:1.5; max-width:none }
+body.panel .copy{ max-width:none; margin-bottom:.8em }
+body.panel .kicker{ font-size:9.5px; margin-bottom:10px }
+body.panel .pts{ gap:6px; margin-top:12px }
+body.panel .pts li{ font-size:12.5px; padding-left:22px; line-height:1.5 }
+body.panel .pts li::before{ width:11px; height:7px; top:.5em }
+body.panel .prints{ grid-template-columns:1fr 1fr; gap:10px; margin-top:16px }
+body.panel .print{ padding:5px 5px 22px }
 body.panel .print img{ aspect-ratio:16/11 }
-body.panel .print .cap{ bottom:9px; font-size:9.5px }
-body.panel h1{ font-size:clamp(46px,5.4vw,92px) }
-body.panel h2{ font-size:clamp(30px,3.5vw,52px) }
-body.panel .pts li{ font-size:.93em }
+body.panel .print .cap{ bottom:6px; font-size:8.5px; letter-spacing:.1em }
+body.panel .print .pin{ width:30px; height:12px; top:-6px }
+body.panel .stamps{ gap:5px; margin-top:14px }
+body.panel .chip{ font-size:9px; padding:4px 7px }
+body.panel .spec{ gap:14px; margin-top:16px; padding-top:14px }
+body.panel .spec > div{ min-width:78px }
+body.panel .spec .k{ font-size:8.5px; margin-bottom:4px }
+body.panel .spec .v{ font-size:14px }
+body.panel .spec .v.xl{ font-size:24px }
+body.panel .cta{ margin-top:16px; font-size:10px; padding:10px 14px; min-height:38px; gap:8px }
+body.panel .links{ gap:2px 16px; margin-top:16px }
+body.panel .links a{ font-size:10.5px; min-height:34px; padding:6px 0 }
+body.panel .tally{ grid-template-columns:repeat(2,1fr); margin-top:14px }
+body.panel .tally .cell{ padding:12px 10px }
+body.panel .tally .n{ font-size:28px }
+body.panel .tally .l{ font-size:8.5px; margin-top:6px }
+body.panel .bars{ margin-top:16px }
+body.panel .bars .cap{ font-size:8.5px; padding-bottom:8px; margin-bottom:10px }
+body.panel .bar{ margin-bottom:9px }
+body.panel .bar .name{ font-size:11.5px }
+body.panel .bar .val{ font-size:9.5px }
+body.panel .bar .trk{ height:6px }
+body.panel .tab{ width:34px }
+body.panel .wordmark{ margin:6px 0 12px }
+body.panel .prompt{ display:none }
 
 /* ── 7. TYPE ──────────────────────────────────────────────────── */
 .kicker{
@@ -449,6 +487,34 @@ h2{ font-size:clamp(29px,5.2vw,60px); line-height:1.0; margin-bottom:clamp(13px,
 }
 .wordmark{ margin:clamp(10px,1.6vw,18px) 0 clamp(18px,2.4vw,28px) }
 .wordmark em{ font-style:normal; display:block; color:var(--red); font-variation-settings:"opsz" 144; letter-spacing:-.045em }
+
+/* ── 8b. LOBBY DOORS ──────────────────────────────────────────── */
+.lobby-head{
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.19em; text-transform:uppercase;
+  color:var(--ink-4); margin:18px 0 10px; padding-top:14px; border-top:1px solid var(--rule);
+}
+.lobby{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px }
+.door{
+  display:flex; align-items:center; gap:9px; text-align:left; min-height:46px;
+  padding:8px 10px; background:rgba(255,255,255,.55);
+  border:1px solid var(--rule);
+  transition:transform .38s var(--ease-fold), background .3s, border-color .3s;
+}
+.door:hover,.door:focus-visible{
+  transform:translateY(-2px) rotate(-.6deg);
+  background:var(--paper-hi); border-color:var(--ink-4);
+}
+.door canvas{ width:20px; height:20px; flex:none; opacity:.85 }
+.door .txt{ display:flex; flex-direction:column; gap:1px; min-width:0 }
+.door em{
+  font-style:normal; font-family:var(--mono); font-size:8.5px; letter-spacing:.14em; color:var(--red);
+}
+.door span{
+  font-size:11.5px; color:var(--ink); line-height:1.2;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.cta-row{ display:flex; flex-wrap:wrap; gap:8px }
+.cta-row .cta{ margin-top:16px }
 
 /* ── 9. FIGURES ───────────────────────────────────────────────── */
 .tally{ display:grid; grid-template-columns:repeat(auto-fit,minmax(128px,1fr)); gap:1px; margin-top:clamp(18px,2.6vw,28px); background:var(--rule); border:1px solid var(--rule) }
@@ -587,7 +653,7 @@ body.noweb{
 <div class="grain" aria-hidden="true"></div>
 
 <header class="hud">
-  <a class="mark" href="#s0" aria-label="Aayush Kumar — back to the first room">
+  <a class="mark" href="#s0" aria-label="Aayush Kumar — back to the lobby">
     <img class="face" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png" alt="" loading="eager" onerror="this.style.display='none'">
     <b>Aayush Kumar</b><span class="sep">/</span><span class="role">Games · AI · Backend</span>
   </a>
@@ -600,44 +666,44 @@ body.noweb{
   </nav>
 </header>
 
-<!-- the binder's tape -->
 <div class="scrub" id="scrub" role="slider" tabindex="0"
      aria-label="Walk through the rooms"
-     aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-valuetext="Room 00 — Cover">
+     aria-valuemin="0" aria-valuemax="7" aria-valuenow="0" aria-valuetext="Room 00 — Lobby">
   <span class="tape" aria-hidden="true"></span>
   <span class="tape-fill" id="tapeFill" aria-hidden="true"></span>
   <div class="rules" id="rules" aria-hidden="true"></div>
   <div class="knob" id="knob" aria-hidden="true">
-    <i></i><b><em id="knobNum">00</em><span id="knobName">Cover</span></b>
+    <i></i><b><em id="knobNum">00</em><span id="knobName">Lobby</span></b>
   </div>
 </div>
 <div class="scrub-hint" aria-hidden="true">Drag</div>
 
 <main id="main" class="stack">
 
-  <section class="fold cover" id="s0" data-name="Cover" aria-labelledby="t0">
+  <!-- ══ 00 · LOBBY ═══════════════════════════════════════════ -->
+  <section class="fold cover" id="s0" data-name="Lobby" aria-labelledby="t0">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
       <div class="stg">
-        <div class="kicker"><span class="dash"></span><b>Room 00</b> — Portfolio, 2026</div>
+        <div class="kicker"><span class="dash"></span><b>Room 00</b> — Lobby</div>
         <h1 class="wordmark" id="t0">
           <span class="line"><span>Aayush</span></span>
           <span class="line"><em><span>Kumar</span></em></span>
         </h1>
-        <p class="lede">Game developer and AI&nbsp;/&nbsp;backend engineer. I build procedural systems, the
+        <p class="lede">Game developer and AI&nbsp;/&nbsp;backend engineer. Procedural systems, the
           <span class="ink-u">editor tooling<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C34 2, 58 11, 92 6 S150 2, 198 7"/></svg></span>
           that drives them, and the platforms they ship on.</p>
+        <div class="lobby-head">Pick a door</div>
+        <div class="lobby" id="lobby"></div>
         <div class="links">
-          <a href="https://arthis.space" target="_blank" rel="noopener"><span class="dot"></span>arthis.space</a>
-          <a href="https://arthis.land" target="_blank" rel="noopener"><span class="dot"></span>arthis.land</a>
-          <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
+          <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener"><span class="dot"></span>GitHub</a>
+          <a href="mailto:akversebusiness@gmail.com">Email</a>
         </div>
-        <div class="prompt"><span class="rail"></span>Nine rooms</div>
       </div>
     </div>
   </section>
 
+  <!-- ══ 01 · PRACTICE ════════════════════════════════════════ -->
   <section class="fold right" id="s1" data-name="Practice" aria-labelledby="t1">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
@@ -648,8 +714,8 @@ body.noweb{
           <b>systems that make other things easier to make</b> — a hex terrain generator so level design stops
           being manual, a lip-sync add-on so animation stops being frame-by-frame, an agent layer so a game can
           start from a sentence.</p>
-        <p class="copy">The output is wide by design: Unity and C# for engines, Python for Blender pipelines,
-          JavaScript and Three.js for the web, FastAPI for the backend behind it all.</p>
+        <p class="copy">Unity and C# for engines, Python for Blender pipelines, JavaScript and Three.js for the
+          web, FastAPI for the backend behind it all.</p>
         <div class="spec">
           <div><div class="k">Based</div><div class="v">Jaipur, India</div></div>
           <div><div class="k">Education</div><div class="v">NIT Jaipur · B.Tech ECE</div></div>
@@ -659,19 +725,26 @@ body.noweb{
     </div>
   </section>
 
-  <section class="fold" id="s2" data-name="Arthis.Space" aria-labelledby="t2">
+  <!-- ══ 02 · ARTHIS ══════════════════════════════════════════ -->
+  <section class="fold" id="s2" data-name="Arthis" aria-labelledby="t2">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
       <div class="stg">
-        <div class="kicker"><span class="dash"></span><b>Room 02</b> — Live platform</div>
-        <h2 id="t2">Arthis.Space</h2>
-        <p class="copy">A browser-based mini-games platform with a TikTok-style vertical feed. Open it and you are
-          already playing — swipe up for the next game, no installs, solo or with friends.</p>
+        <div class="kicker"><span class="dash"></span><b>Room 02</b> — Two live platforms</div>
+        <h2 id="t2">Arthis</h2>
+        <p class="copy"><b>Arthis.Space</b> — a browser mini-games platform with a TikTok-style vertical feed.
+          Open it and you are already playing; swipe up for the next game.</p>
         <ul class="pts">
           <li>Infinite swipeable feed; each card is a complete mini-game loaded on demand</li>
           <li>AI agents generate gameplay logic and 3D web content from prompts via <b>MCP-connected tools</b></li>
           <li>Supabase&nbsp;/&nbsp;PostgreSQL backend scaled from <b>1 to 10,000 daily active users</b></li>
-          <li>Real-time rooms — host creates a code, others join, state stays in sync</li>
+        </ul>
+        <p class="copy"><b>Arthis.Land</b> — “The Wall”, a handcrafted vertical city you climb in the browser.
+          Unity, shipped to WebGL, 2–4 people sharing a space in real time.</p>
+        <ul class="pts">
+          <li>Procedural engine assembles virtual rooms — <b>40+ live</b>, Halcyon to Xeno&nbsp;Garden</li>
+          <li>Room codes: one player hosts, others join with a 4-digit code</li>
+          <li><b>arthisland-relay</b> — a zero-dependency TCP + WebSocket relay in pure Python</li>
         </ul>
         <div class="prints">
           <a class="print" href="https://arthis.space" target="_blank" rel="noopener">
@@ -680,65 +753,33 @@ body.noweb{
                  alt="Fruit Blast mini-game in the Arthis.Space feed" loading="lazy" decoding="async"
                  onerror="this.closest('.print').style.display='none'">
             <span class="cap">Fruit Blast</span></a>
-          <a class="print" href="https://arthis.space" target="_blank" rel="noopener">
-            <span class="pin" aria-hidden="true"></span>
-            <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.space/main/screenshot-3.png"
-                 alt="Doodle Militia mini-game in the Arthis.Space feed" loading="lazy" decoding="async"
-                 onerror="this.closest('.print').style.display='none'">
-            <span class="cap">Doodle Militia</span></a>
-        </div>
-        <div class="stamps">
-          <span class="chip hot">Supabase</span><span class="chip hot">PostgreSQL</span>
-          <span class="chip">LLM Agents</span><span class="chip">MCP</span><span class="chip">Realtime</span>
-        </div>
-        <a class="cta" href="https://arthis.space" target="_blank" rel="noopener"><span>Visit arthis.space</span><i aria-hidden="true">→</i></a>
-      </div>
-    </div>
-  </section>
-
-  <section class="fold right" id="s3" data-name="Arthis.Land" aria-labelledby="t3">
-    <div class="sheet">
-      <span class="tab gold" aria-hidden="true"></span>
-      <div class="stg">
-        <div class="kicker"><span class="dash"></span><b>Room 03</b> — Live platform</div>
-        <h2 id="t3">Arthis.Land</h2>
-        <p class="copy">“The Wall” — a handcrafted vertical city you climb and explore in the browser. Built in
-          Unity, shipped to WebGL, and multiplayer: 2–4 people share a space in real time.</p>
-        <ul class="pts">
-          <li>Procedural engine assembles virtual rooms — <b>40+ live</b>, from Halcyon to Xeno&nbsp;Garden</li>
-          <li><b>Unity → WebGL</b> builds embedded straight into the wall</li>
-          <li>Room codes: one player hosts, others join with a 4-digit code</li>
-          <li>Backed by <b>arthisland-relay</b> — a zero-dependency TCP + WebSocket relay in pure Python</li>
-        </ul>
-        <div class="prints">
           <a class="print" href="https://arthis.land" target="_blank" rel="noopener">
             <span class="pin" aria-hidden="true"></span>
             <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.land/main/preview.png"
-                 alt="Arthis.Land — The Wall, a vertical city of rooms" loading="lazy" decoding="async"
+                 alt="Arthis.Land — The Wall" loading="lazy" decoding="async"
                  onerror="this.closest('.print').style.display='none'">
             <span class="cap">The Wall</span></a>
-          <a class="print" href="https://arthis.land" target="_blank" rel="noopener">
-            <span class="pin" aria-hidden="true"></span>
-            <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.land/main/screenshot-2.png"
-                 alt="The Akverse Room inside Arthis.Land" loading="lazy" decoding="async"
-                 onerror="this.closest('.print').style.display='none'">
-            <span class="cap">Akverse Room</span></a>
         </div>
         <div class="stamps">
-          <span class="chip hot">Unity</span><span class="chip hot">WebGL</span>
-          <span class="chip">Procedural Gen</span><span class="chip">Python Relay</span><span class="chip">WebSocket</span>
+          <span class="chip hot">Unity</span><span class="chip hot">WebGL</span><span class="chip hot">Supabase</span>
+          <span class="chip">PostgreSQL</span><span class="chip">LLM Agents</span><span class="chip">MCP</span>
+          <span class="chip">Python Relay</span><span class="chip">WebSocket</span>
         </div>
-        <a class="cta" href="https://arthis.land" target="_blank" rel="noopener"><span>Enter The Wall</span><i aria-hidden="true">→</i></a>
+        <div class="cta-row">
+          <a class="cta" href="https://arthis.space" target="_blank" rel="noopener"><span>arthis.space</span><i aria-hidden="true">→</i></a>
+          <a class="cta" href="https://arthis.land" target="_blank" rel="noopener"><span>arthis.land</span><i aria-hidden="true">→</i></a>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="fold" id="s4" data-name="HexaBed" aria-labelledby="t4">
+  <!-- ══ 03 · HEXABED ═════════════════════════════════════════ -->
+  <section class="fold right" id="s3" data-name="HexaBed" aria-labelledby="t3">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
       <div class="stg">
-        <div class="kicker"><span class="dash"></span><b>Room 04</b> — Unity engine</div>
-        <h2 id="t4">HexaBed</h2>
+        <div class="kicker"><span class="dash"></span><b>Room 03</b> — Unity engine</div>
+        <h2 id="t3">HexaBed</h2>
         <p class="copy">A procedural terrain system on a hexagonal grid, and the custom editor tooling that lets a
           designer build a world without opening a script.</p>
         <ul class="pts">
@@ -757,12 +798,13 @@ body.noweb{
     </div>
   </section>
 
-  <section class="fold right" id="s5" data-name="Blender Suite" aria-labelledby="t5">
+  <!-- ══ 04 · STUDIO ══════════════════════════════════════════ -->
+  <section class="fold" id="s4" data-name="Blender Suite" aria-labelledby="t4">
     <div class="sheet">
       <span class="tab gold" aria-hidden="true"></span>
       <div class="stg">
-        <div class="kicker"><span class="dash"></span><b>Room 05</b> — Pipeline tooling</div>
-        <h2 id="t5">Blender Add-on Suite</h2>
+        <div class="kicker"><span class="dash"></span><b>Room 04</b> — Pipeline tooling</div>
+        <h2 id="t4">Blender Add-on Suite</h2>
         <p class="copy">Twenty-eight Python add-ons written to automate the animation and rendering pipeline behind
           a working content operation.</p>
         <ul class="pts">
@@ -779,12 +821,13 @@ body.noweb{
     </div>
   </section>
 
-  <section class="fold" id="s6" data-name="Systems &amp; Inference" aria-labelledby="t6">
+  <!-- ══ 05 · SERVER ROOM ═════════════════════════════════════ -->
+  <section class="fold right" id="s5" data-name="Systems &amp; Inference" aria-labelledby="t5">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
       <div class="stg">
-        <div class="kicker"><span class="dash"></span><b>Room 06</b> — AI &amp; backend</div>
-        <h2 id="t6">Systems &amp; Inference</h2>
+        <div class="kicker"><span class="dash"></span><b>Room 05</b> — AI &amp; backend</div>
+        <h2 id="t5">Systems &amp; Inference</h2>
         <p class="copy">Six months at <b>Clymora</b> as an on-campus AI backend engineering intern, building the
           services behind AI-driven product features — alongside first-principles model work.</p>
         <ul class="pts">
@@ -802,12 +845,13 @@ body.noweb{
     </div>
   </section>
 
-  <section class="fold right" id="s7" data-name="By the numbers" aria-labelledby="t7">
+  <!-- ══ 06 · LIBRARY ═════════════════════════════════════════ -->
+  <section class="fold" id="s6" data-name="By the numbers" aria-labelledby="t6">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
       <div class="stg">
-        <div class="kicker"><span class="dash"></span><b>Room 07</b> — Evidence</div>
-        <h2 id="t7">By the numbers</h2>
+        <div class="kicker"><span class="dash"></span><b>Room 06</b> — Evidence</div>
+        <h2 id="t6">By the numbers</h2>
         <div class="tally">
           <div class="cell"><div class="n" data-count="154">0</div><div class="l">Interactive builds</div></div>
           <div class="cell"><div class="n" data-count="141" data-suffix="K">0</div><div class="l">Lines of game code</div></div>
@@ -818,9 +862,9 @@ body.noweb{
         </div>
         <div class="bars">
           <div class="cap">Code volume — counted, not estimated</div>
-          <div class="bar"><div class="top"><span class="name">Game code across builds</span><span class="val">141,000 lines</span></div><div class="trk"><i class="fil" style="--w:100%"></i></div></div>
-          <div class="bar"><div class="top"><span class="name">Blender add-on suite · Python</span><span class="val">27,208 lines</span></div><div class="trk"><i class="fil" style="--w:19.3%"></i></div></div>
-          <div class="bar"><div class="top"><span class="name">HexaBed engine · C#</span><span class="val">3,705 lines</span></div><div class="trk"><i class="fil" style="--w:2.6%"></i></div></div>
+          <div class="bar"><div class="top"><span class="name">Game code across builds</span><span class="val">141,000</span></div><div class="trk"><i class="fil" style="--w:100%"></i></div></div>
+          <div class="bar"><div class="top"><span class="name">Blender suite · Python</span><span class="val">27,208</span></div><div class="trk"><i class="fil" style="--w:19.3%"></i></div></div>
+          <div class="bar"><div class="top"><span class="name">HexaBed · C#</span><span class="val">3,705</span></div><div class="trk"><i class="fil" style="--w:2.6%"></i></div></div>
         </div>
         <div class="bars">
           <div class="cap">The 154 builds, split</div>
@@ -832,17 +876,17 @@ body.noweb{
     </div>
   </section>
 
-  <section class="fold closer" id="s8" data-name="Contact" aria-labelledby="t8">
+  <!-- ══ 07 · DINING ROOM ═════════════════════════════════════ -->
+  <section class="fold right closer" id="s7" data-name="Contact" aria-labelledby="t7">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
       <div class="stg">
-        <div class="kicker"><span class="dash"></span><b>Room 08</b> — Unfolded</div>
-        <h2 id="t8">Let us build something.</h2>
+        <div class="kicker"><span class="dash"></span><b>Room 07</b> — Unfolded</div>
+        <h2 id="t7">Let us build something.</h2>
         <p class="copy">Open to game development, graphics and AI engineering roles from 2026.</p>
         <div class="links">
           <a href="mailto:akversebusiness@gmail.com"><span class="dot"></span>akversebusiness@gmail.com</a>
           <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://arthis.space" target="_blank" rel="noopener">arthis.space</a>
           <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
         </div>
         <div class="spec">
@@ -1020,6 +1064,28 @@ for (let i = 0; i < N; i++){
 }
 const ruleBtns = $$('button', rules);
 
+/* the lobby: one door per room */
+(function buildLobby(){
+  const wrap = $('#lobby');
+  if (!wrap) return;
+  const KEYS = ['intro','practice','space','hexa','blender','ai','data','contact'];
+  for (let i = 1; i < N; i++){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'door';
+    b.setAttribute('aria-label', 'Go to room ' + String(i).padStart(2,'0') + ' — ' + NAMES[i]);
+    const c = document.createElement('canvas');
+    c.width = c.height = 44;
+    try { drawIcon(c.getContext('2d'), KEYS[i] || 'intro', 22, 22, 30); } catch(e){}
+    const t = document.createElement('span');
+    t.className = 'txt';
+    t.innerHTML = '<em>' + String(i).padStart(2,'0') + '</em><span>' + NAMES[i] + '</span>';
+    b.appendChild(c); b.appendChild(t);
+    b.addEventListener('click', () => goTo(i));
+    wrap.appendChild(b);
+  }
+})();
+
 function goTo(i){
   i = clamp(Math.round(i), 0, N-1);
   const y = (i/(N-1)) * scroll.max;
@@ -1179,12 +1245,25 @@ function build(){
   /* ── plan ───────────────────────────────────────────────────
      straight, then left, then straight, then right, repeating   */
   const ROOM = 20, HALF = ROOM/2, H = 7.4, DW = 2.3, DH = 5.0, T = .34, EYE = 2.05;
-  const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4],[0,-4]];
+  const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4]];
   const P = CELL.map(c => ({ x:c[0]*ROOM, z:c[1]*ROOM }));
 
   const TINT = [0xC8442A, 0x26406B, 0xB98A2E];
-  const ICONS = ['intro','practice','space','land','hexa','blender','ai','data','contact'];
-  const THEMES = ['ENTRANCE HALL','BEDROOM','GAME ROOM','LIVING ROOM','WORKSHOP','STUDIO','SERVER ROOM','LIBRARY','DINING ROOM'];
+  const ICONS  = ['intro','practice','space','hexa','blender','ai','data','contact'];
+  const THEMES = ['LOBBY','BEDROOM','GAME ROOM','WORKSHOP','STUDIO','SERVER ROOM','LIBRARY','DINING ROOM'];
+
+  /* what hangs on the free wall of each room */
+  const DEV = 'https://cdn.jsdelivr.net/gh/devicons/devicon@master/icons/';
+  const WALLSET = [
+    [[DEV+'threejs/threejs-original.svg','Three.js'], [DEV+'javascript/javascript-original.svg','JavaScript'], [DEV+'github/github-original.svg','GitHub']],
+    [[DEV+'unity/unity-original.svg','Unity'],        [DEV+'python/python-original.svg','Python'],             [DEV+'csharp/csharp-original.svg','C#']],
+    [['./arthis-space.png','Arthis.Space'],           ['./arthis-land.png','Arthis.Land'],                     [DEV+'supabase/supabase-original.svg','Supabase']],
+    [[DEV+'unity/unity-original.svg','Unity'],        [DEV+'csharp/csharp-original.svg','C#'],                 [DEV+'blender/blender-original.svg','Blender']],
+    [[DEV+'blender/blender-original.svg','Blender'],  [DEV+'python/python-original.svg','Python'],             [DEV+'numpy/numpy-original.svg','NumPy']],
+    [[DEV+'fastapi/fastapi-original.svg','FastAPI'],  [DEV+'pytorch/pytorch-original.svg','PyTorch'],          [DEV+'postgresql/postgresql-original.svg','Postgres']],
+    [[DEV+'git/git-original.svg','Git'],              [DEV+'github/github-original.svg','GitHub'],             [DEV+'vscode/vscode-original.svg','VS Code']],
+    [[DEV+'threejs/threejs-original.svg','Three.js'], [DEV+'github/github-original.svg','GitHub'],             [DEV+'javascript/javascript-original.svg','JavaScript']]
+  ];
   const mix = (base, tint, amt) => new THREE.Color(base).lerp(new THREE.Color(tint), amt).getHex();
   const ROOMS = P.map((_, i) => {
     const t = TINT[i % 3], a = .16 + (i % 4) * .035;
@@ -1200,7 +1279,7 @@ function build(){
   });
 
   /* ── paper stock, banded like a toon ramp ─────────────────── */
-  const steps = new Uint8Array([96, 158, 214, 255]);
+  const steps = new Uint8Array([74, 152, 236]);
   const RAMP = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
   RAMP.minFilter = RAMP.magFilter = THREE.NearestFilter;
   RAMP.generateMipmaps = false; RAMP.needsUpdate = true;
@@ -1284,7 +1363,7 @@ function build(){
     m.position.set(x,y,z); par.add(m);
     const str = (o === undefined) ? .72 : o;
     if (str >= HULL_MIN){
-      const t = .026;
+      const t = LOW ? .05 : .085;
       const s = new THREE.Mesh(m.geometry, HULL);
       s.position.copy(m.position);
       s.scale.set((w+t*2)/w, (h+t*2)/h, (d+t*2)/d);
@@ -1299,10 +1378,17 @@ function build(){
     const m = new THREE.Mesh(g, mat);
     m.position.set(x,y,z); par.add(m);
     const str = (o === undefined) ? .72 : o;
-    if (str > 0 && !LOW){
-      const e = new THREE.LineSegments(new THREE.EdgesGeometry(g, 20),
-        new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:Math.min(.85, str) }));
-      e.position.copy(m.position); par.add(e);
+    if (str > 0){
+      const t = LOW ? .045 : .075;
+      const s = new THREE.Mesh(g, HULL);
+      s.position.copy(m.position);
+      s.scale.set((w+t*2)/w, (h+t*2)/h, (d+t*2)/d);
+      par.add(s);
+      if (!LOW){
+        const e = new THREE.LineSegments(new THREE.EdgesGeometry(g, 20),
+          new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:Math.min(.95, str) }));
+        e.position.copy(m.position); par.add(e);
+      }
     }
     return m;
   }
@@ -1493,6 +1579,76 @@ function build(){
     const m = new THREE.Mesh(g, new THREE.MeshToonMaterial({ color:0xF6F2E8, gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide }));
     m.position.set(x, .48, z); m.scale.setScalar(1.15); par.add(m);
   }
+  /* a framed tile: paper card, image dropped in when it arrives */
+  function tilePanel(url, label, tint){
+    const W = 256, Hh = 256;
+    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
+    const g = c.getContext('2d');
+    function base(){
+      g.fillStyle = '#F9F6ED'; g.fillRect(0,0,W,Hh);
+      g.strokeStyle = 'rgba(23,21,15,.28)'; g.lineWidth = 4; g.strokeRect(6,6,W-12,Hh-12);
+      g.fillStyle = tint; g.fillRect(6, Hh-46, W-12, 3);
+      g.fillStyle = '#17150F';
+      g.font = '500 17px "JetBrains Mono", ui-monospace, monospace';
+      g.textAlign = 'center';
+      g.fillText(label.toUpperCase().slice(0,14), W/2, Hh-16);
+    }
+    base();
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    tex.anisotropy = LOW ? 1 : 4;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function(){
+      try {
+        base();
+        const box = 150, x = (W-box)/2, y = 34;
+        g.drawImage(img, x, y, box, box);
+        tex.needsUpdate = true;
+      } catch(e){}
+    };
+    img.onerror = function(){};
+    img.src = url;
+    return tex;
+  }
+
+  /* corner furniture — five pieces, cycled so no two corners match */
+  function propLamp(par, x, z, tint){
+    CYL(par, .07,.09,2.5, 8, M.dark, x, 1.25, z);
+    B(par, .5,.06,.5, M.dark, x, .03, z, .6);
+    const shade = new THREE.Mesh(new THREE.ConeGeometry(.62, .78, 10, 1, true), paper(tint));
+    shade.position.set(x, 2.66, z); par.add(shade);
+  }
+  function propStack(par, x, z, tint){
+    B(par, 1.15,.30,.86, M.white, x, .15, z, .8);
+    B(par, 1.05,.26,.78, paper(tint), x+.09, .43, z-.06, .8);
+    B(par, .95,.24,.7,  M.white, x-.07, .68, z+.05, .8);
+  }
+  function propStool(par, x, z){
+    B(par, .82,.14,.82, M.warm, x, .62, z, .8);
+    [[-.29,-.29],[.29,-.29],[-.29,.29],[.29,.29]].forEach(o =>
+      B(par, .1,.6,.1, M.warmD, x+o[0], .3, z+o[1], .6));
+  }
+  function propColumn(par, x, z, tint){
+    CYL(par, .34,.42,3.1, 6, paper(tint), x, 1.55, z);
+    B(par, 1.0,.2,1.0, M.stone, x, .1, z, .8);
+    B(par, .9,.18,.9,  M.stone, x, 3.2, z, .8);
+  }
+  function propVase(par, x, z, tint){
+    CYL(par, .18,.42,.9, 8, paper(tint), x, .45, z);
+    const g = new THREE.Mesh(new THREE.ConeGeometry(.44, 1.3, 5), M.white);
+    g.position.set(x, 1.5, z); par.add(g);
+  }
+  const PROPS = [propLamp, propStack, propStool, propColumn, propVase];
+  function corners(par, p, i, tint){
+    const d = HALF - 2.2;
+    const spots = [[-d,-d],[d,-d],[-d,d],[d,d]];
+    for (let k = 0; k < spots.length; k++){
+      if (LOW && (k & 1)) continue;
+      PROPS[(i + k) % PROPS.length](par, p.x + spots[k][0], p.z + spots[k][1], tint);
+    }
+  }
+
   function bench(par, x, z, rot){
     const g = new THREE.Group(); g.position.set(x,0,z); g.rotation.y = rot; par.add(g);
     B(g, 2.9, .18, .9, M.warm, 0, .62, 0, .8);
@@ -1611,12 +1767,34 @@ function build(){
     const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.5, .8), new THREE.MeshBasicMaterial({ map:labTex[i] }));
     lab.position.set(0, .95, .14); frame.add(lab);
 
+    /* the free wall gets a row of framed tiles */
+    const freeKeys = ['px','nx','pz','nz'].filter(kk => !doorSides[i][kk] && kk !== ak);
+    if (freeKeys.length){
+      const fk = freeKeys[0], fv = SIDEVEC[fk];
+      const wallX = p.x + fv[0]*(HALF - T*.5 - .06);
+      const wallZ = p.z + fv[1]*(HALF - T*.5 - .06);
+      const shelf = new THREE.Group();
+      shelf.position.set(wallX, 0, wallZ);
+      shelf.rotation.y = Math.atan2(-fv[0], -fv[1]);
+      g.add(shelf);
+      const set = WALLSET[i % WALLSET.length];
+      for (let k = 0; k < set.length; k++){
+        const ox = (k - 1) * 2.55;
+        BS(shelf, 2.25, 2.25, .12, paper(R.art), ox, 3.9, 0, .8);
+        const tl = new THREE.Mesh(new THREE.PlaneGeometry(1.86, 1.86),
+          new THREE.MeshBasicMaterial({ map:tilePanel(set[k][0], set[k][1], HEXC[i % 3]) }));
+        tl.position.set(ox, 3.9, .11); shelf.add(tl);
+      }
+      BS(shelf, 8.4, .16, .46, M.warmD, 0, 2.42, .18, .8);   /* the shelf itself */
+    }
+
     /* dressing, arranged in front of the piece */
     const AX = av[0], AZ = av[1];          /* toward the art wall  */
     const LX = av[1], LZ = -av[0];         /* along the art wall   */
     pedestal(g, p.x + AX*5.4 + LX*3.3, p.z + AZ*5.4 + LZ*3.3, i);
     plant(g,    p.x + AX*7.4 - LX*3.9, p.z + AZ*7.4 - LZ*3.9, R.tint);
     if (!LOW) bench(g, p.x + AX*.2, p.z + AZ*.2, Math.atan2(AX, AZ));
+    corners(g, p, i, R.obj);
   });
 
   /* redraw the artwork once the display face has actually arrived */
@@ -1646,9 +1824,18 @@ function build(){
   }
 
   const pos    = new THREE.Vector3(P[0].x, EYE, P[0].z);
-  const dirNow = dirAt(0).clone();
   const lookAt = new THREE.Vector3();
-  const tmpA   = new THREE.Vector3(), tmpB = new THREE.Vector3();
+  const tmpA   = new THREE.Vector3();
+
+  /* the camera is steered by a single damped heading angle, so turning
+     a corner and swinging across to a wall are the same smooth motion */
+  const shortAngle = (a, b) => {
+    let d = (b - a + Math.PI) % (Math.PI*2);
+    if (d < 0) d += Math.PI*2;
+    return d - Math.PI;
+  };
+  let yaw   = Math.atan2(dirAt(0).x, dirAt(0).z);
+  let pitch = 0;
 
   function resize(){
     renderer.setSize(view.w, view.h, false);
@@ -1670,38 +1857,41 @@ function build(){
        they are always orthogonally adjacent, so this runs through
        the doorway rather than through a wall */
     tmpA.set(lerp(P[i0].x, P[i1].x, m), EYE, lerp(P[i0].z, P[i1].z, m));
-    pos.lerp(tmpA, clamp(dt*6.5, 0, 1));
+    pos.lerp(tmpA, clamp(dt*5.2, 0, 1));
 
-    /* heading: hold the current leg, then swing onto the next one
-       as you cross into the room */
+    /* where the corridor goes: hold this leg, swing onto the next */
     const dCur = dirAt(i0), dNext = dirAt(i1);
-    const turn = smooth(clamp((m - .5) / .45, 0, 1));
-    tmpB.set(lerp(dCur.x, dNext.x, turn), 0, lerp(dCur.z, dNext.z, turn));
-    if (tmpB.lengthSq() < .01) tmpB.copy(dCur);
-    tmpB.normalize();
-    dirNow.lerp(tmpB, k).normalize();
+    const yawCur  = Math.atan2(dCur.x,  dCur.z);
+    const yawNext = Math.atan2(dNext.x, dNext.z);
+    const turn    = smooth(clamp((m - .46) / .5, 0, 1));
+    const yawFwd  = yawCur + shortAngle(yawCur, yawNext) * turn;
 
-    /* look sideways at the piece when you are standing in the room */
-    const cw = Math.abs(Math.cos(Math.PI * m));
-    const ak = artKey[m < .5 ? i0 : i1];
-    const av = SIDEVEC[ak];
-
-    ptr.x += (ptr.tx - ptr.x) * clamp(dt*3,0,1);
-    ptr.y += (ptr.ty - ptr.y) * clamp(dt*3,0,1);
-
-    const bob = REDUCED ? 0 : Math.sin(t*.8)*.035;
-    camera.position.set(pos.x, pos.y + bob - ptr.y*.18, pos.z);
-
-    /* look down the corridor, easing across to the piece while you
-       are standing in the room, then back to straight ahead */
+    /* how much of the room you are standing in: 1 at a centre, 0 in a doorway */
+    const cw = .5 + .5*Math.cos(Math.PI*2*m);
     const rIdx = m < .5 ? i0 : i1;
-    const fx = pos.x + dirNow.x*11, fz = pos.z + dirNow.z*11;
+    const av = SIDEVEC[artKey[rIdx]];
     const gx = P[rIdx].x + av[0]*9.4, gz = P[rIdx].z + av[1]*9.4;
-    const w  = cw * .62;
+    const yawArt = Math.atan2(gx - pos.x, gz - pos.z);
+    const w = cw * .82;
+
+    const yawWant = yawFwd + shortAngle(yawFwd, yawArt) * w;
+    yaw += shortAngle(yaw, yawWant) * clamp(dt * 2.4, 0, 1);
+
+    const pitchWant = .052 * w;
+    pitch += (pitchWant - pitch) * clamp(dt * 2.4, 0, 1);
+
+    ptr.x += (ptr.tx - ptr.x) * clamp(dt*2.6,0,1);
+    ptr.y += (ptr.ty - ptr.y) * clamp(dt*2.6,0,1);
+
+    const bob = REDUCED ? 0 : Math.sin(t*.75)*.03;
+    const camY = EYE + bob - ptr.y*.14;
+    camera.position.set(pos.x, camY, pos.z);
+
+    const ay = yaw + ptr.x*.17, D = 13;
     lookAt.set(
-      lerp(fx, gx, w) + ptr.x*3.2,
-      lerp(EYE + .08, 3.15, w) - ptr.y*1.5,
-      lerp(fz, gz, w)
+      pos.x + Math.sin(ay)*D,
+      camY + Math.tan(pitch - ptr.y*.085)*D,
+      pos.z + Math.cos(ay)*D
     );
     camera.lookAt(lookAt);
 
