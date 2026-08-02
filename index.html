@@ -1187,13 +1187,15 @@ function build(){
   const THEMES = ['ENTRANCE HALL','BEDROOM','GAME ROOM','LIVING ROOM','WORKSHOP','STUDIO','SERVER ROOM','LIBRARY','DINING ROOM'];
   const mix = (base, tint, amt) => new THREE.Color(base).lerp(new THREE.Color(tint), amt).getHex();
   const ROOMS = P.map((_, i) => {
-    const t = TINT[i % 3], a = .05 + (i % 4) * .015;
+    const t = TINT[i % 3], a = .12 + (i % 4) * .028;
     return {
       icon:ICONS[i], theme:THEMES[i], tint:t,
-      wall: mix(0xF5F1E7, t, a),
-      floor:mix(0xD9D0BA, t, a*1.25),
-      ceil: mix(0xFBF9F3, t, a*.5),
-      rail: mix(0xE3DBC6, t, a*1.5)
+      wall: mix(0xEFE9DA, t, a),
+      floor:mix(0xC6BB9E, t, a*1.5),
+      ceil: mix(0xFAF7F0, t, a*.45),
+      rail: mix(0xD4C9AE, t, a*2.1),
+      art:  mix(0xE0D7C0, t, a*1.2),
+      obj:  mix(0xE9E1CD, t, a*.9)
     };
   });
 
@@ -1252,9 +1254,9 @@ function build(){
     brass: paper(0xB98A2E),
     red  : paper(0xC8442A),
     blue : paper(0x26406B),
-    warm : paper(0xD8C9A8),
-    warmD: paper(0xB39C74),
-    stone: paper(0xE4DFD2),
+    warm : paper(0xCDB98F),
+    warmD: paper(0xA08A63),
+    stone: paper(0xDCD5C2),
     white: paper(0xFAF7F0),
     cloth: paper(0xCDC5B2)
   };
@@ -1465,10 +1467,11 @@ function build(){
   ];
   const spinners = [];
   function pedestal(par, x, z, i){
-    BS(par, 1.5, 1.3, 1.5, M.stone, x, .65, z, .8);
+    BS(par, 1.5, 1.3, 1.5, paper(ROOMS[i].obj), x, .65, z, .85);
     const def = SCULPT[i % SCULPT.length]();
     const mat = new THREE.MeshToonMaterial({
-      color: (i % 3 === 1) ? TINT[i % 3] : 0xFCFAF4, gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide
+      color: (i % 3 === 1) ? TINT[i % 3] : mix(0xDCD1B6, TINT[i % 3], .30),
+      gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide
     });
     const m = new THREE.Mesh(def.g, mat);
     m.scale.setScalar(def.s * 1.05);
@@ -1608,7 +1611,7 @@ function build(){
 
     const frame = new THREE.Group();
     frame.position.set(ax, 0, az); frame.rotation.y = face; g.add(frame);
-    BS(frame, 5.6, 4.3, .12, M.white, 0, 3.5, 0, .7);
+    BS(frame, 5.9, 4.55, .16, paper(R.art), 0, 3.5, 0, .85);
     const art = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 3.64), new THREE.MeshBasicMaterial({ map:artTex[i] }));
     art.position.set(0, 3.5, .07); frame.add(art);
     const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.5, .8), new THREE.MeshBasicMaterial({ map:labTex[i] }));
@@ -1619,7 +1622,7 @@ function build(){
     const LX = av[1], LZ = -av[0];         /* along the art wall   */
     pedestal(g, p.x + AX*5.4 + LX*3.3, p.z + AZ*5.4 + LZ*3.3, i);
     plant(g,    p.x + AX*7.4 - LX*3.9, p.z + AZ*7.4 - LZ*3.9, R.tint);
-    if (!LOW) bench(g, p.x + AX*.4, p.z + AZ*.4, Math.atan2(AX, AZ));
+    if (!LOW) bench(g, p.x + AX*.2, p.z + AZ*.2, Math.atan2(AX, AZ));
   });
 
   /* redraw the artwork once the display face has actually arrived */
@@ -1634,9 +1637,10 @@ function build(){
   }
 
   /* ── light ────────────────────────────────────────────────── */
-  scene.add(new THREE.AmbientLight(0xFFFFFF, .38));
-  const key  = new THREE.DirectionalLight(0xFFF4E2, 1.12); key.position.set(9,14,10);   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xCFD9FF, .40);  fill.position.set(-10,6,-12); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xFFFFFF, .30));
+  const key  = new THREE.DirectionalLight(0xFFF4E2, 1.30); key.position.set(9,14,10);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xC5D2F0, .38);  fill.position.set(-10,6,-12); scene.add(fill);
+  const warm = new THREE.DirectionalLight(0xFFE3BE, .34);  warm.position.set(2,5,-16);   scene.add(warm);
 
   /* ── walking the house ────────────────────────────────────── */
   const ptr = { x:0, y:0, tx:0, ty:0 };
@@ -1693,10 +1697,17 @@ function build(){
 
     const bob = REDUCED ? 0 : Math.sin(t*.8)*.035;
     camera.position.set(pos.x, pos.y + bob - ptr.y*.18, pos.z);
+
+    /* look down the corridor, easing across to the piece while you
+       are standing in the room, then back to straight ahead */
+    const rIdx = m < .5 ? i0 : i1;
+    const fx = pos.x + dirNow.x*11, fz = pos.z + dirNow.z*11;
+    const gx = P[rIdx].x + av[0]*9.4, gz = P[rIdx].z + av[1]*9.4;
+    const w  = cw * .78;
     lookAt.set(
-      pos.x + dirNow.x*9 + av[0]*cw*7.5 + ptr.x*3.4,
-      EYE + .35 - ptr.y*1.4,
-      pos.z + dirNow.z*9 + av[1]*cw*7.5
+      lerp(fx, gx, w) + ptr.x*3.2,
+      lerp(EYE + .30, 3.30, w) - ptr.y*1.5,
+      lerp(fz, gz, w)
     );
     camera.lookAt(lookAt);
 
