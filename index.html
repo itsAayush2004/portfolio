@@ -1,1650 +1,1449 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Aayush Kumar — Game Developer &amp; AI Engineer</title>
-<meta name="description" content="Aayush Kumar — Game Developer, AI &amp; Backend Engineer. A nine-room house you scroll through: bedroom, game room, workshop, studio, server room, library, dining room.">
+<title>Aayush Kumar — Game Developer, AI &amp; Backend Engineer</title>
+<meta name="description" content="Aayush Kumar — game developer and AI/backend engineer. Procedural systems, Unity engine tooling, Blender pipeline add-ons and the platforms they ship on. Folded out of paper.">
 <meta name="author" content="Aayush Kumar">
-<meta property="og:title" content="Aayush Kumar — Game Developer &amp; AI Engineer">
-<meta property="og:description" content="A nine-room toon-shaded house you walk through by scrolling. 154 shipped games, procedural Unity systems, Blender tooling.">
+<meta name="theme-color" content="#F2EEE4">
+<link rel="canonical" href="https://itsaayush2004.github.io/portfolio/">
 <meta property="og:type" content="website">
+<meta property="og:title" content="Aayush Kumar — Game Developer, AI &amp; Backend Engineer">
+<meta property="og:description" content="Procedural systems, engine tooling, and the platforms they ship on. A portfolio folded out of paper.">
 <meta property="og:url" content="https://itsaayush2004.github.io/portfolio/">
-<meta property="og:image" content="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
-<meta name="theme-color" content="#f2f1ee">
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
-<link rel="preconnect" href="https://cdnjs.cloudflare.com">
-<link rel="preconnect" href="https://raw.githubusercontent.com">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F2EEE4'/%3E%3Cpath d='M6 24 L16 6 L26 24 L16 19 Z' fill='%23C8442A'/%3E%3C/svg%3E">
 
 <style>
+/* ════════════════════════════════════════════════════════════════
+   PAPERWORKS — a portfolio folded out of paper.
+   Single file. No build step. Three.js from CDN, everything else
+   drawn, folded and creased at runtime.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 1. TOKENS ────────────────────────────────────────────────── */
 :root{
-  --paper:#f2f1ee; --ink:#14140f; --mid:#3f3e38; --soft:#7c7a71;
-  --line:#cbc7bd; --accent:#c0472c; --grid:rgba(20,20,15,.055);
-  --glass:rgba(249,248,244,.86); --glass-line:rgba(255,255,255,.95);
-  --pixel:'Pixelify Sans','Courier New',monospace;
-  --body:'Helvetica Neue',Helvetica,Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  /* paper stock */
+  --paper:      #F2EEE4;
+  --paper-lo:   #E7E0D0;
+  --paper-hi:   #FCFAF5;
+  --paper-deep: #DCD3BF;
+
+  /* ink */
+  --ink:    #17150F;
+  --ink-2:  #454035;
+  --ink-3:  #837B6A;
+  --ink-4:  #A79E8B;
+
+  /* pigment */
+  --red:    #C8442A;
+  --red-lo: #E8663F;
+  --blue:   #26406B;
+  --gold:   #B98A2E;
+
+  --rule:   rgba(23,21,15,.13);
+  --rule-2: rgba(23,21,15,.07);
+
+  /* type */
+  --display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* motion */
+  --ease-out:  cubic-bezier(.16,1,.3,1);
+  --ease-fold: cubic-bezier(.2,.9,.25,1);
+  --ease-io:   cubic-bezier(.65,.05,.36,1);
+
+  /* rhythm */
+  --gut: clamp(20px, 5vw, 64px);
+  --max: 1240px;
 }
-/* pixel type carries every display element; body copy stays in a reading face */
-h1,h2,.room-kicker,.num,.chip,.cta,.meta .k,.statgrid .n2,.statgrid .l2,
-.chart .cap,.shots .cap,#brand span,#slider .cur,#cue,.loader-label,.loader-pct,
-.hero-links,.meta .v.big{
-  font-family:var(--pixel);
-  letter-spacing:.02em;
+/* ── 2. RESET ─────────────────────────────────────────────────── */
+*,*::before,*::after{ box-sizing:border-box }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth }
+body,h1,h2,h3,h4,p,ul,ol,figure,blockquote,dl,dd{ margin:0 }
+ul[class]{ list-style:none; padding:0 }
+img,svg,canvas{ display:block; max-width:100% }
+img{ height:auto }
+button,input,a{ font:inherit; color:inherit }
+button{ background:none; border:0; cursor:pointer; padding:0 }
+a{ color:inherit; text-decoration:none }
+
+html,body{ min-height:100% }
+body{
+  font-family:var(--body);
+  font-size:clamp(15.5px,.42vw + 14.4px,17.5px);
+  line-height:1.68;
+  color:var(--ink-2);
+  background:var(--paper);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+  font-feature-settings:"kern" 1,"liga" 1,"calt" 1;
 }
-h1,h2{font-weight:600}
-.statgrid .n2,.meta .v.big{font-weight:600}
-*{margin:0;padding:0;box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{background:var(--paper);color:var(--ink);
-  font-family:'Helvetica Neue',Helvetica,Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
-  line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
 
-/* ══ LOADER ══ */
-#loader{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
-  background-color:var(--paper);
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-  background-size:44px 44px;transition:opacity .7s ease,visibility .7s}
-#loader.done{opacity:0;visibility:hidden}
-.loader-inner{display:flex;flex-direction:column;align-items:center;gap:24px}
-.loader-face{position:relative;width:152px;height:152px}
-.loader-face img{width:100%;height:100%;display:block;border-radius:50%;object-fit:cover;
-  background:radial-gradient(circle,#e9e6dd,#d9d5c8);animation:lspin 9s linear infinite;transform-origin:50% 50%}
-.loader-face .ring{position:absolute;inset:-14px;border:1px solid rgba(20,20,15,.16);border-radius:50%}
-.loader-face .ring2{position:absolute;inset:-26px;border:1px dashed rgba(20,20,15,.1);border-radius:50%;
-  animation:lspin 24s linear infinite reverse}
-@keyframes lspin{to{transform:rotate(360deg)}}
-.loader-orbit{position:absolute;inset:-14px;animation:lorbit 1.6s linear infinite;transform-origin:50% 50%}
-@keyframes lorbit{to{transform:rotate(360deg)}}
-.loader-dot{position:absolute;top:-6px;left:50%;width:13px;height:13px;border-radius:50%;
-  background:var(--accent);transform:translateX(-50%);box-shadow:0 0 0 4px rgba(20,20,15,.07)}
-.loader-label{font-weight:600;font-size:13px;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--soft);display:flex;align-items:center;white-space:nowrap}
-.loader-dots{display:inline-flex;gap:3px;margin-left:6px}
-.loader-dots i{width:4px;height:4px;border-radius:50%;background:var(--soft);animation:lbounce 1.2s infinite}
-.loader-dots i:nth-child(2){animation-delay:.18s}.loader-dots i:nth-child(3){animation-delay:.36s}
-@keyframes lbounce{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
-.loader-bar{width:168px;height:3px;border-radius:3px;background:rgba(20,20,15,.1);overflow:hidden}
-.loader-bar span{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .3s ease}
-.loader-pct{font-size:11px;letter-spacing:.2em;color:var(--soft);font-variant-numeric:tabular-nums;font-weight:600}
-@media(prefers-reduced-motion:reduce){.loader-face img,.loader-orbit,.loader-dots i,.ring2{animation:none}}
+::selection{ background:var(--red); color:var(--paper-hi) }
 
-#scene{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
-#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.04;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
-#vig{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(125% 95% at 50% 45%,transparent 40%,rgba(20,20,15,.16) 100%)}
-#track{position:relative;z-index:2;height:1000vh}
-#stage{position:fixed;inset:0;z-index:3;pointer-events:none;display:flex;align-items:center}
-
-.panel{position:absolute;inset:0;display:flex;align-items:center;padding:0 clamp(18px,5vw,96px);visibility:hidden}
-.panel.on{visibility:visible}
-.panel.right{justify-content:flex-end}
-
-/* ══ GLASS CARD ══ */
-.inner{max-width:530px;width:100%;position:relative;
-  padding:clamp(22px,2.8vw,34px) clamp(20px,2.8vw,36px);
-  background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(155%);backdrop-filter:blur(22px) saturate(155%);
-  border:1px solid var(--glass-line);border-radius:3px;
-  box-shadow:0 28px 70px -34px rgba(20,20,15,.55),0 2px 10px -4px rgba(20,20,15,.14),inset 0 1px 0 rgba(255,255,255,.9);
-  opacity:0;transform:translateY(34px) scale(.955);
-  transition:opacity .5s ease,transform .5s cubic-bezier(.16,.9,.3,1);overflow:hidden}
-.panel.on .inner{opacity:1;transform:none;pointer-events:auto;
-  transition:opacity .72s cubic-bezier(.16,.9,.3,1) .06s,transform .82s cubic-bezier(.16,.9,.3,1) .06s}
-.inner::after{content:'';position:absolute;top:0;bottom:0;width:55%;pointer-events:none;
-  background:linear-gradient(105deg,transparent,rgba(255,255,255,.75),transparent);left:-70%;opacity:0}
-.panel.on .inner::after{animation:sheen 1.15s cubic-bezier(.3,.7,.3,1) .18s 1}
-@keyframes sheen{0%{left:-70%;opacity:0}18%{opacity:.9}100%{left:130%;opacity:0}}
-.inner::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent);
-  transform:scaleY(0);transform-origin:top;transition:transform .7s cubic-bezier(.16,.9,.3,1) .3s}
-.panel.on .inner::before{transform:scaleY(1)}
-.panel.on .inner > *{animation:rise .62s cubic-bezier(.16,.9,.3,1) both}
-.panel.on .inner > *:nth-child(1){animation-delay:.16s}
-.panel.on .inner > *:nth-child(2){animation-delay:.22s}
-.panel.on .inner > *:nth-child(3){animation-delay:.28s}
-.panel.on .inner > *:nth-child(4){animation-delay:.34s}
-.panel.on .inner > *:nth-child(5){animation-delay:.40s}
-.panel.on .inner > *:nth-child(6){animation-delay:.46s}
-.panel.on .inner > *:nth-child(7){animation-delay:.52s}
-.panel.on .inner > *:nth-child(8){animation-delay:.58s}
-@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-
-.room-kicker{display:inline-flex;align-items:center;gap:9px;font-size:9.5px;letter-spacing:.24em;
-  text-transform:uppercase;font-weight:700;color:var(--accent);margin-bottom:12px}
-.room-kicker b{width:16px;height:1.5px;background:var(--accent);display:block}
-.num{font-size:10px;letter-spacing:.34em;color:var(--soft);text-transform:uppercase;margin-bottom:14px;font-weight:600}
-h1{font-size:clamp(36px,6.4vw,72px);line-height:1.0;letter-spacing:-.01em}
-h1 em{font-style:normal;display:block;font-weight:700}
-h2{font-size:clamp(23px,3.4vw,36px);line-height:1.14;letter-spacing:-.005em;margin-bottom:14px}
-.lede{font-size:clamp(14.5px,1.5vw,17.5px);color:var(--mid);font-weight:400;line-height:1.62;margin-top:14px}
-p.body{font-size:14px;color:var(--mid);font-weight:400;line-height:1.68;margin-bottom:13px}
-ul.pts{list-style:none;margin:14px 0}
-ul.pts li{font-size:13.5px;color:var(--mid);font-weight:400;padding-left:17px;position:relative;margin-bottom:8px;line-height:1.58}
-ul.pts li::before{content:'';position:absolute;left:0;top:9px;width:8px;height:1px;background:var(--soft)}
-ul.pts li b{color:var(--ink);font-weight:600}
-.meta{display:flex;gap:24px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
-.meta div .k{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:4px;font-weight:600}
-.meta div .v{font-size:13px}
-.meta div .v.big{font-size:22px;font-weight:300;letter-spacing:-.02em}
-.stack{display:flex;flex-wrap:wrap;gap:5px;margin-top:14px}
-.chip{font-size:9px;letter-spacing:.11em;text-transform:uppercase;border:1px solid var(--line);
-  padding:5px 9px;color:var(--mid);font-weight:600;background:rgba(255,255,255,.5)}
-.chip.hi{border-color:var(--ink);color:var(--ink)}
-.shots{display:flex;gap:9px;margin-top:14px}
-.shots a{display:block;border:1.5px solid var(--ink);background:#fff;overflow:hidden;
-  transition:transform .3s cubic-bezier(.16,.84,.34,1);flex:1;max-width:148px}
-.shots a:hover{transform:translateY(-4px)}
-.shots img{display:block;width:100%;height:86px;object-fit:cover;object-position:top center}
-.shots .cap{font-size:8px;letter-spacing:.14em;text-transform:uppercase;padding:5px 6px;
-  border-top:1.5px solid var(--ink);font-weight:600;background:var(--paper)}
-.cta{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:11.5px;letter-spacing:.05em;
-  border-bottom:1.5px solid var(--ink);padding-bottom:3px;font-weight:600}
-.cta i{font-style:normal;transition:transform .3s}
-.cta:hover i{transform:translateX(6px)}
-.hero-links{display:flex;gap:17px;flex-wrap:wrap;margin-top:24px;font-size:11.5px;letter-spacing:.04em}
-.hero-links a{border-bottom:1px solid var(--line);padding-bottom:3px;transition:border-color .25s}
-.hero-links a:hover{border-color:var(--ink)}
-.dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:middle}
-.statgrid{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--ink);margin:16px 0}
-.statgrid .c{padding:12px 11px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(255,255,255,.4)}
-.statgrid .c:nth-child(3n){border-right:none}
-.statgrid .c:nth-child(n+4){border-bottom:none}
-.statgrid .n2{font-size:clamp(20px,2.5vw,29px);font-weight:300;letter-spacing:-.03em;line-height:1}
-.statgrid .l2{font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-top:6px;line-height:1.4;font-weight:600}
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
-.chart .cap{font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:7px;font-weight:600}
-.chart .box{position:relative;height:112px}
-
-#prog{position:fixed;left:0;top:0;height:2px;background:var(--ink);width:0;z-index:9}
-
-/* ══ SLIDER — one control, vertical on desktop, horizontal on phones ══ */
-/* a hairline rail with a small pixel knob — labels are anchored to the rail's
-   ends, never to the knob, so nothing can ever run off the edge of the screen */
-#slider{position:fixed;z-index:9;touch-action:none;-webkit-user-select:none;user-select:none;
-  right:clamp(14px,2.2vw,26px);top:50%;transform:translateY(-50%);
-  width:18px;height:min(40vh,340px);cursor:grab}
-#slider.drag{cursor:grabbing}
-#slider .rail{position:absolute;top:0;bottom:0;left:50%;width:1px;margin-left:-.5px;background:var(--line)}
-#slider .fill{position:absolute;top:0;left:50%;width:1px;margin-left:-.5px;background:var(--ink);height:0}
-#slider .ticks{position:absolute;inset:0;pointer-events:none}
-#slider .ticks i{position:absolute;left:50%;width:5px;height:1px;background:var(--line);transform:translate(-50%,-50%)}
-#slider .knob{position:absolute;left:50%;width:9px;height:9px;margin-left:-4.5px;margin-top:-4.5px;top:0;
-  border-radius:2px;background:var(--ink);transition:transform .18s,background .18s}
-#slider:hover .knob,#slider.drag .knob{transform:scale(1.4);background:var(--accent)}
-
-/* room name pinned above the rail, right-aligned so it grows inward */
-#slider .cur{position:absolute;top:-24px;right:0;white-space:nowrap;
-  font-size:9px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;
-  color:var(--ink);pointer-events:none;opacity:.85}
-#slider .cur em{font-style:normal;color:var(--accent);margin-right:6px}
-
-/* opening cue pinned below the rail, also right-aligned */
-#cue{position:fixed;z-index:9;right:clamp(14px,2.2vw,26px);
-  top:calc(50% + min(20vh,170px) + 14px);
-  font-size:9px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;
-  color:var(--soft);white-space:nowrap;transition:opacity .5s;
-  display:flex;align-items:center;gap:6px}
-#cue .arw{color:var(--accent)}
-#cue .arw{display:inline-block;animation:nudge 1.7s ease-in-out infinite}
-@keyframes nudge{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(5px);opacity:1}}
-#brand{position:fixed;left:clamp(16px,3vw,36px);top:clamp(16px,3vw,30px);z-index:8;
-  display:flex;align-items:center;gap:10px;background:rgba(250,249,246,.55);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,.8);border-radius:999px;padding:5px 14px 5px 5px;
-  box-shadow:0 10px 26px -18px rgba(20,20,15,.6)}
-#brand img{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#ddd9cf;display:block}
-#brand span{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:600}
-/* the slider already names the room, so this stays hidden */
-#roomtag{display:none}
-#hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:8;font-size:9.5px;
-  letter-spacing:.3em;text-transform:uppercase;color:var(--soft);transition:opacity .5s;
-  display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:600}
-#hint .bar{width:1.5px;height:24px;background:linear-gradient(var(--soft),transparent);animation:fall 1.9s infinite}
-@keyframes fall{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}
-  55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
-
-/* ══════════════ MOBILE ══════════════ */
-@media(max-width:860px){
-  #roomtag,#hint{display:none}
-  .charts{grid-template-columns:1fr;gap:12px}
-  .statgrid{grid-template-columns:repeat(2,1fr)}
-  .statgrid .c:nth-child(3n){border-right:1px solid var(--line)}
-  .statgrid .c:nth-child(2n){border-right:none}
-  .statgrid .c:nth-child(n+4){border-bottom:1px solid var(--line)}
-  .statgrid .c:nth-child(n+5){border-bottom:none}
-
-  /* cards dock to the bottom, rise on arrival, then drop back to a peek bar
-     so the room is never hidden for long */
-  #stage{align-items:flex-end}
-  .panel,.panel.right{padding:0;justify-content:center;align-items:flex-end}
-  .inner{max-width:100%;width:100%;border-radius:14px 14px 0 0;border-bottom:none;
-    padding:14px 16px calc(54px + env(safe-area-inset-bottom));
-    max-height:52vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    transform:translateY(100%);
-    transition:transform .55s cubic-bezier(.16,.9,.3,1),opacity .4s ease;
-    box-shadow:0 -18px 44px -26px rgba(20,20,15,.5),inset 0 1px 0 rgba(255,255,255,.9)}
-  .panel.on .inner{transform:translateY(0)}
-  /* collapsed: only the handle + room name stay on screen */
-  .panel.on.peek .inner{transform:translateY(calc(100% - 46px));overflow:hidden}
-  .inner::before{left:0;right:0;top:0;bottom:auto;width:auto;height:2px;
-    transform:scaleX(0);transform-origin:left}
-  .panel.on .inner::before{transform:scaleX(1)}
-  .inner::after{display:none}
-
-  /* grab handle — tap to expand or collapse */
-  .inner > .room-kicker{position:relative;padding-top:11px;margin-bottom:9px;
-    cursor:pointer;pointer-events:auto;font-size:9px;letter-spacing:.2em}
-  .inner > .room-kicker::before{content:'';position:absolute;top:1px;left:50%;transform:translateX(-50%);
-    width:34px;height:4px;border-radius:4px;background:var(--line)}
-  .inner > .room-kicker::after{content:'▾';margin-left:8px;font-size:11px;color:var(--soft);
-    transition:transform .35s;display:inline-block}
-  .panel.peek .inner > .room-kicker::after{transform:rotate(180deg)}
-
-  h1{font-size:clamp(28px,9vw,42px)}
-  h2{font-size:clamp(19px,5.4vw,25px)}
-  .num{font-size:9px;margin-bottom:9px}
-  .lede{font-size:13px;line-height:1.5;margin-top:10px}
-  p.body{font-size:12px;line-height:1.55;margin-bottom:9px}
-  ul.pts{margin:10px 0}
-  ul.pts li{font-size:11.5px;line-height:1.45;margin-bottom:5px;padding-left:14px}
-  ul.pts li::before{top:8px;width:6px}
-  .meta{gap:16px;margin-top:12px;padding-top:10px}
-  .meta div .v{font-size:11.5px}
-  .meta div .v.big{font-size:17px}
-  .meta div .k{font-size:8px;letter-spacing:.16em}
-  .stack{margin-top:10px;gap:4px}
-  .chip{font-size:8px;padding:4px 7px}
-  .hero-links{margin-top:14px;gap:12px;font-size:10.5px}
-  .cta{margin-top:11px;font-size:10.5px}
-  .shots{margin-top:10px;gap:7px}
-  .shots a{max-width:none}
-  .shots img{height:60px}
-  .shots .cap{font-size:7px;padding:4px 5px}
-  .statgrid{margin:11px 0}
-  .statgrid .c{padding:9px 8px}
-  .statgrid .n2{font-size:17px}
-  .statgrid .l2{font-size:7.5px;margin-top:4px}
-  .charts{margin-top:10px;gap:10px}
-  .chart .box{height:92px}
-  .chart .cap{font-size:7.5px;margin-bottom:5px}
-
-  /* slider becomes a bottom scrubber */
-  #slider{right:auto;left:50%;top:auto;bottom:calc(12px + env(safe-area-inset-bottom));
-    transform:translateX(-50%);width:min(70vw,300px);height:28px}
-  #slider .rail,#slider .fill{top:50%;left:0;right:0;bottom:auto;width:auto;height:1px;margin:-.5px 0 0}
-  #slider .fill{right:auto;width:0}
-  #slider .ticks{inset:0}
-  #slider .ticks i{top:50%;left:0;width:1px;height:5px;transform:translate(-50%,-50%)}
-  #slider .knob{top:50%;left:0;width:12px;height:12px;margin-left:-6px;margin-top:-6px;border-radius:3px}
-  #slider .cur{right:auto;left:50%;top:-19px;transform:translateX(-50%)}
-  #cue{right:auto;left:50%;transform:translateX(-50%);
-    top:auto;bottom:calc(46px + env(safe-area-inset-bottom))}
-  #cue .arw{animation:nudgeX 1.7s ease-in-out infinite}
-  @keyframes nudgeX{0%,100%{transform:translateX(0);opacity:.4}50%{transform:translateX(6px);opacity:1}}
-  #brand{padding:4px 12px 4px 4px}
-  #brand img{width:24px;height:24px}
-  #brand span{font-size:9.5px;letter-spacing:.2em}
+:focus-visible{
+  outline:2.5px solid var(--red);
+  outline-offset:4px;
+  border-radius:2px;
 }
-@media(prefers-reduced-motion:reduce){
-  .inner,.panel.on .inner{transition:opacity .2s}
-  .panel.on .inner > *,.panel.on .inner::after{animation:none}
-  #hint .bar{animation:none}
+
+.sr{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+.skip{
+  position:fixed; top:10px; left:10px; z-index:200;
+  padding:10px 16px; background:var(--ink); color:var(--paper-hi);
+  border-radius:2px; transform:translateY(-160%); transition:transform .25s var(--ease-out);
+}
+.skip:focus{ transform:none }
+
+/* ── 3. SUBSTRATE : grain, fibre, creases, vignette ───────────── */
+#scene{
+  position:fixed; inset:0; width:100%; height:100%;
+  z-index:0; pointer-events:none;
+  opacity:0; transition:opacity 1.4s ease .25s;
+}
+#scene.lit{ opacity:1 }
+
+.fibre,.grain,.creases,.vig{
+  position:fixed; inset:0; pointer-events:none; z-index:1;
+}
+/* long paper fibres */
+.fibre{
+  background-image:
+    repeating-linear-gradient(94deg,  rgba(23,21,15,.030) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(178deg, rgba(23,21,15,.022) 0 1px, transparent 1px 5px);
+  opacity:.55;
+  mix-blend-mode:multiply;
+}
+/* tooth / grain */
+.grain{
+  background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
+  background-size:180px 180px;
+  opacity:.5;
+  mix-blend-mode:multiply;
+  z-index:60;
+}
+/* the sheet is folded: two soft creases down the viewport */
+.creases{
+  z-index:2;
+  background:
+    linear-gradient(90deg, transparent calc(33.333% - 26px), rgba(23,21,15,.045) calc(33.333% - 1px), rgba(255,255,255,.7) 33.333%, transparent calc(33.333% + 26px)),
+    linear-gradient(90deg, transparent calc(66.666% - 26px), rgba(23,21,15,.038) calc(66.666% - 1px), rgba(255,255,255,.62) 66.666%, transparent calc(66.666% + 26px));
+  opacity:.85;
+}
+.vig{
+  z-index:59;
+  background:
+    radial-gradient(130% 95% at 50% 12%, transparent 42%, rgba(72,62,42,.10) 78%, rgba(48,40,26,.20) 100%);
+  mix-blend-mode:multiply;
+}
+
+/* ── 4. FURNITURE : mark, index rail, progress ────────────────── */
+.hud{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px;
+  padding:clamp(14px,2.2vw,26px) var(--gut);
+  pointer-events:none;
+  mix-blend-mode:multiply;
+}
+.hud > *{ pointer-events:auto }
+
+.mark{
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink);
+}
+.mark .glyph{
+  width:22px; height:22px; flex:none; display:block;
+  transition:transform .6s var(--ease-fold);
+}
+.mark:hover .glyph{ transform:rotate(-24deg) scale(1.08) }
+.mark b{ font-weight:500 }
+.mark .sep{ color:var(--ink-4) }
+.mark .role{ color:var(--ink-3); display:none }
+@media (min-width:620px){ .mark .role{ display:inline } }
+
+.hud-right{
+  display:flex; align-items:center; gap:clamp(10px,1.6vw,20px);
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+}
+.hud-right a{ position:relative; color:var(--ink-3); transition:color .3s }
+.hud-right a::after{
+  content:""; position:absolute; left:0; right:0; bottom:-4px; height:1.5px;
+  background:var(--red); transform:scaleX(0); transform-origin:0 50%;
+  transition:transform .42s var(--ease-out);
+}
+.hud-right a:hover{ color:var(--ink) }
+.hud-right a:hover::after{ transform:none }
+.hud-sep{ color:var(--ink-4); opacity:.5 }
+@media (max-width:560px){ .hud-right .opt{ display:none } }
+
+/* right-hand fold index */
+.index{
+  position:fixed; z-index:50; right:calc(var(--gut) - 6px); top:50%;
+  transform:translateY(-50%);
+  display:none; flex-direction:column; gap:2px;
+  mix-blend-mode:multiply;
+}
+@media (min-width:1080px){ .index{ display:flex } }
+.index a{
+  display:flex; align-items:center; justify-content:flex-end; gap:12px;
+  padding:5px 0; font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
+  color:var(--ink-4); transition:color .3s var(--ease-out);
+}
+.index .lbl{
+  max-width:0; overflow:hidden; white-space:nowrap; text-align:right;
+  opacity:0; transform:translateX(6px);
+  transition:max-width .5s var(--ease-out), opacity .35s, transform .5s var(--ease-out);
+  text-transform:uppercase;
+}
+.index .tick{
+  width:16px; height:1.5px; background:currentColor; flex:none;
+  transition:width .45s var(--ease-out), background .3s;
+}
+.index a:hover,.index a:focus-visible{ color:var(--ink) }
+.index a:hover .lbl,.index a:focus-visible .lbl{ max-width:190px; opacity:1; transform:none }
+.index a:hover .tick{ width:30px }
+.index a[aria-current="true"]{ color:var(--red) }
+.index a[aria-current="true"] .tick{ width:34px; height:2px; background:var(--red) }
+.index a[aria-current="true"] .lbl{ max-width:190px; opacity:1; transform:none }
+
+/* bottom progress — the fold gauge */
+.gauge{
+  position:fixed; left:0; right:0; bottom:0; z-index:50; height:3px;
+  background:rgba(23,21,15,.08);
+}
+.gauge i{
+  display:block; height:100%; width:0; background:var(--red);
+  transform-origin:0 50%;
+}
+@media (min-width:1080px){ .gauge{ height:2px } }
+
+/* ── 5. SHEET : the paper card ────────────────────────────────── */
+.stack{
+  position:relative; z-index:10;
+  max-width:var(--max); margin-inline:auto;
+  padding-inline:var(--gut);
+}
+
+.fold{
+  position:relative;
+  padding-block:clamp(64px,11vh,132px);
+  scroll-margin-top:80px;
+  /* the shadow lives here, not on .sheet — clip-path would eat it */
+  filter:drop-shadow(0 2px 2px rgba(23,21,15,.11))
+         drop-shadow(0 20px 34px rgba(58,48,28,.15));
+}
+
+.sheet{
+  position:relative;
+  background:
+    linear-gradient(148deg, var(--paper-hi) 0%, var(--paper) 46%, var(--paper-lo) 100%);
+  padding:clamp(28px,4.4vw,60px) clamp(24px,4.2vw,58px) clamp(34px,4.8vw,64px);
+  transform:perspective(1500px);
+  max-width:none;
+}
+/* laid texture inside the card */
+.sheet::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(23,21,15,.028) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(0deg,  rgba(23,21,15,.018) 0 1px, transparent 1px 6px);
+  mix-blend-mode:multiply; opacity:.8;
+}
+/* the light coming across the sheet */
+.sheet::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(112deg, rgba(255,255,255,.62) 0%, rgba(255,255,255,0) 34%, rgba(23,21,15,.035) 100%);
+  mix-blend-mode:soft-light;
+}
+.sheet > *{ position:relative; z-index:2 }
+
+/* coloured stock showing through the corner */
+.tab{
+  position:absolute; top:0; left:0; width:clamp(42px,5vw,66px); aspect-ratio:1;
+  z-index:3; pointer-events:none;
+  background:linear-gradient(135deg, var(--red) 0%, #A9331E 100%);
+  clip-path:polygon(0 0, 100% 0, 0 100%);
+  opacity:.94;
+}
+.tab.blue{ background:linear-gradient(135deg, var(--blue) 0%, #16283F 100%) }
+.tab.gold{ background:linear-gradient(135deg, var(--gold) 0%, #8A6417 100%) }
+.tab::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(255,255,255,.30), transparent 58%);
+}
+
+/* alternating skew — paper never lands square */
+.fold:nth-child(odd) { transform:rotate(-.34deg) }
+.fold:nth-child(even){ transform:rotate(.3deg) }
+
+/* ── 6. TYPE ──────────────────────────────────────────────────── */
+.kicker{
+  display:inline-flex; align-items:center; gap:11px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.19em; text-transform:uppercase;
+  color:var(--ink-3); margin-bottom:clamp(16px,2.4vw,26px);
+}
+.kicker b{ color:var(--red); font-weight:500 }
+.kicker .dash{ width:26px; height:1px; background:var(--ink-4); display:inline-block }
+
+h1,h2,h3{
+  font-family:var(--display); color:var(--ink);
+  font-weight:700; letter-spacing:-.022em; line-height:1.02;
+  font-variation-settings:"opsz" 128; text-wrap:balance;
+}
+h1{ font-size:clamp(44px,10.4vw,132px); line-height:.94; letter-spacing:-.038em }
+h2{ font-size:clamp(31px,5.6vw,66px); line-height:1.0; margin-bottom:clamp(16px,2.2vw,24px) }
+h3{ font-size:clamp(17px,1.5vw,21px); line-height:1.28; letter-spacing:-.008em; font-weight:600;
+    font-variation-settings:"opsz" 24 }
+
+.lede{
+  font-size:clamp(17px,1.5vw,22px); line-height:1.56; color:var(--ink-2);
+  max-width:38ch; font-weight:400; text-wrap:pretty;
+}
+.copy{ max-width:64ch; margin-bottom:1.05em; text-wrap:pretty }
+.copy:last-of-type{ margin-bottom:0 }
+.copy b,.pts b{ color:var(--ink); font-weight:600 }
+.dim{ color:var(--ink-3) }
+
+/* rough hand-inked underline */
+.ink-u{ position:relative; display:inline-block; white-space:nowrap }
+.ink-u svg{
+  position:absolute; left:-2%; bottom:-.22em; width:104%; height:.34em;
+  overflow:visible; pointer-events:none;
+}
+.ink-u path{
+  fill:none; stroke:var(--red); stroke-width:5; stroke-linecap:round;
+  stroke-dasharray:var(--len); stroke-dashoffset:var(--len);
+}
+.on .ink-u path{ transition:stroke-dashoffset 1.05s var(--ease-out) .45s; stroke-dashoffset:0 }
+
+/* ── 7. PARTS ─────────────────────────────────────────────────── */
+/* bullets as fold marks */
+.pts{ display:grid; gap:clamp(10px,1.3vw,14px); margin-top:clamp(20px,2.6vw,30px) }
+.pts li{
+  position:relative; padding-left:30px; max-width:66ch;
+  font-size:.965em; line-height:1.6;
+}
+.pts li::before{
+  content:""; position:absolute; left:0; top:.60em;
+  width:15px; height:9px;
+  background:var(--red);
+  clip-path:polygon(0 100%, 50% 0, 100% 100%, 50% 62%);
+  opacity:.85;
+}
+
+/* stamps */
+.stamps{ display:flex; flex-wrap:wrap; gap:8px; margin-top:clamp(22px,2.8vw,30px) }
+.chip{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+  padding:6px 11px; color:var(--ink-3);
+  border:1px dashed rgba(23,21,15,.26);
+  background:rgba(255,255,255,.42);
+  transition:color .3s, border-color .3s, background .3s, transform .3s var(--ease-out);
+}
+.chip:hover{ transform:translateY(-2px) rotate(-1deg) }
+.chip.hot{
+  color:var(--red); border:1px solid rgba(200,68,42,.42);
+  background:rgba(200,68,42,.07); font-weight:500;
+}
+
+/* spec table */
+.spec{
+  display:flex; flex-wrap:wrap; gap:clamp(22px,4vw,52px);
+  margin-top:clamp(26px,3.4vw,38px);
+  padding-top:clamp(20px,2.6vw,26px);
+  border-top:1px solid var(--rule);
+}
+.spec > div{ min-width:104px }
+.spec .k{
+  font-family:var(--mono); font-size:10px; letter-spacing:.17em; text-transform:uppercase;
+  color:var(--ink-4); margin-bottom:7px;
+}
+.spec .v{ font-family:var(--display); font-size:19px; color:var(--ink); font-weight:600;
+          font-variation-settings:"opsz" 24 }
+.spec .v.xl{ font-size:clamp(30px,3.4vw,42px); letter-spacing:-.02em; line-height:1 }
+
+/* prints tucked into the page */
+.prints{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:clamp(16px,2.4vw,26px); margin-top:clamp(26px,3.4vw,36px);
+}
+.print{
+  display:block; position:relative;
+  background:var(--paper-hi);
+  padding:10px 10px 40px;
+  box-shadow:0 1px 2px rgba(23,21,15,.14), 0 10px 22px rgba(58,48,28,.14);
+  transition:transform .55s var(--ease-fold), box-shadow .55s var(--ease-fold);
+  will-change:transform;
+}
+.print:nth-child(odd){ transform:rotate(-1.1deg) }
+.print:nth-child(even){ transform:rotate(.9deg) }
+.print:hover,.print:focus-visible{
+  transform:rotate(0deg) translateY(-7px) scale(1.018);
+  box-shadow:0 2px 4px rgba(23,21,15,.16), 0 22px 44px rgba(58,48,28,.22);
+  z-index:4;
+}
+.print img{
+  width:100%; aspect-ratio:16/10; object-fit:cover;
+  background:var(--paper-lo); filter:saturate(.92) contrast(1.03);
+}
+.print .cap{
+  position:absolute; left:0; right:0; bottom:12px; text-align:center;
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-3);
+}
+.print .pin{
+  position:absolute; top:-9px; left:50%; width:52px; height:19px;
+  transform:translateX(-50%) rotate(-2.4deg);
+  background:rgba(219,205,168,.72);
+  box-shadow:0 1px 2px rgba(23,21,15,.12);
+}
+.print .pin::after{
+  content:""; position:absolute; inset:0;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.34) 0 2px, transparent 2px 4px);
+}
+
+/* calls */
+.cta{
+  display:inline-flex; align-items:center; gap:11px;
+  margin-top:clamp(26px,3.2vw,34px);
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink); padding:14px 22px; position:relative;
+  border:1.5px solid var(--ink);
+  transition:color .34s var(--ease-out), border-color .34s;
+  overflow:hidden; min-height:46px;
+}
+.cta span{ position:relative; z-index:2 }
+.cta i{ position:relative; z-index:2; font-style:normal; transition:transform .4s var(--ease-out) }
+.cta::before{
+  content:""; position:absolute; inset:0; background:var(--ink);
+  transform:scaleY(0); transform-origin:50% 100%; z-index:1;
+  transition:transform .44s var(--ease-fold);
+}
+.cta:hover,.cta:focus-visible{ color:var(--paper-hi); border-color:var(--ink) }
+.cta:hover::before,.cta:focus-visible::before{ transform:scaleY(1) }
+.cta:hover i{ transform:translateX(5px) }
+
+.links{ display:flex; flex-wrap:wrap; gap:8px 26px; margin-top:clamp(26px,3.2vw,36px) }
+.links a{
+  position:relative; display:inline-flex; align-items:center; gap:9px;
+  font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-2); padding:9px 0; min-height:44px;
+  transition:color .3s;
+}
+.links a .dot{ width:6px; height:6px; background:var(--red); flex:none;
+               clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+               transition:transform .45s var(--ease-fold) }
+.links a::after{
+  content:""; position:absolute; left:0; right:0; bottom:6px; height:1.5px;
+  background:var(--ink); transform:scaleX(0); transform-origin:0 50%;
+  transition:transform .45s var(--ease-out);
+}
+.links a:hover{ color:var(--ink) }
+.links a:hover::after{ transform:none }
+.links a:hover .dot{ transform:rotate(180deg) scale(1.35) }
+
+/* torn strip divider */
+.tear{ display:block; width:100%; height:15px; overflow:visible; opacity:.5 }
+.tear path{ fill:none; stroke:var(--ink-3); stroke-width:1.4; stroke-linecap:round }
+
+/* ── 8. COVER ─────────────────────────────────────────────────── */
+.cover{
+  min-height:100vh;
+  min-height:100svh; display:flex; flex-direction:column; justify-content:center;
+  padding-block:clamp(96px,16vh,150px) clamp(64px,10vh,110px);
+}
+.cover-inner{ max-width:min(100%,880px) }
+.wordmark{ margin:clamp(14px,2vw,20px) 0 clamp(22px,3vw,32px) }
+.wordmark em{
+  font-style:normal; display:block; color:var(--red);
+  font-variation-settings:"opsz" 144; letter-spacing:-.045em;
+}
+.cover .lede{ max-width:46ch; font-size:clamp(16.5px,1.42vw,21px) }
+
+/* headline reveal machinery */
+.line{ display:block; overflow:hidden; padding-bottom:.06em }
+.line > span{
+  display:block;
+  transform:translateY(105%) rotate(3deg);
+  transition:transform 1.05s var(--ease-out);
+}
+.on .line > span{ transform:none }
+.on .line:nth-child(2) > span{ transition-delay:.09s }
+.on .line:nth-child(3) > span{ transition-delay:.18s }
+
+/* the little scroll prompt */
+.prompt{
+  display:inline-flex; align-items:center; gap:12px; margin-top:clamp(30px,4.4vw,48px);
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.19em; text-transform:uppercase;
+  color:var(--ink-3);
+}
+.prompt .rail{ position:relative; display:block; width:60px; height:1.5px; background:var(--rule) }
+.prompt .rail::after{
+  content:""; position:absolute; inset:0; background:var(--red);
+  transform-origin:0 50%; animation:sweep 2.6s var(--ease-io) infinite;
+}
+@keyframes sweep{
+  0%   { transform:scaleX(0);  transform-origin:0 50% }
+  46%  { transform:scaleX(1);  transform-origin:0 50% }
+  54%  { transform:scaleX(1);  transform-origin:100% 50% }
+  100% { transform:scaleX(0);  transform-origin:100% 50% }
+}
+
+/* ── 9. FIGURES ───────────────────────────────────────────────── */
+.tally{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px; margin-top:clamp(24px,3.2vw,34px);
+  background:var(--rule); border:1px solid var(--rule);
+}
+.tally .cell{ background:var(--paper); padding:clamp(18px,2.4vw,26px) clamp(14px,1.8vw,20px) }
+.tally .n{
+  font-family:var(--display); font-weight:700; color:var(--ink);
+  font-size:clamp(36px,4.6vw,58px); line-height:.92; letter-spacing:-.035em;
+  font-variation-settings:"opsz" 96; font-variant-numeric:tabular-nums;
+}
+.tally .n i{ font-style:normal; color:var(--red); font-size:.56em; vertical-align:.42em; margin-left:1px }
+.tally .l{
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-3); margin-top:11px; line-height:1.45;
+}
+
+.bars{ margin-top:clamp(28px,3.6vw,40px) }
+.bars .cap{
+  font-family:var(--mono); font-size:10px; letter-spacing:.17em; text-transform:uppercase;
+  color:var(--ink-4); padding-bottom:14px; border-bottom:1px solid var(--rule); margin-bottom:18px;
+}
+.bar{ display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:15px }
+.bar .top{ display:flex; justify-content:space-between; align-items:baseline; gap:14px }
+.bar .name{ font-size:.93em; color:var(--ink) }
+.bar .val{ font-family:var(--mono); font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums }
+.bar .trk{ height:9px; background:rgba(23,21,15,.055); position:relative; overflow:hidden }
+.bar .fil{
+  position:absolute; inset:0 auto 0 0; width:var(--w,0%);
+  background:repeating-linear-gradient(45deg, var(--red) 0 5px, #B03A22 5px 10px);
+  transform:scaleX(0); transform-origin:0 50%;
+  transition:transform 1.15s var(--ease-out);
+}
+.bar:nth-child(2) .fil{ transition-delay:.06s }
+.bar:nth-child(3) .fil{ transition-delay:.12s }
+.bar:nth-child(4) .fil{ transition-delay:.18s }
+.bar:nth-child(5) .fil{ transition-delay:.24s }
+.bar:nth-child(6) .fil{ transition-delay:.30s }
+.on .bar .fil{ transform:scaleX(1) }
+.bar.muted .fil{ background:repeating-linear-gradient(45deg, var(--ink-4) 0 5px, #928A78 5px 10px) }
+
+/* ── 10. CLOSER ───────────────────────────────────────────────── */
+.closer{ text-align:center }
+.closer .sheet{ text-align:center }
+.closer .kicker{ justify-content:center }
+.closer .copy{ margin-inline:auto }
+.closer .links{ justify-content:center }
+.closer .spec{ justify-content:center }
+.closer .spec > div{ text-align:center }
+.closer h2{ margin-bottom:18px }
+
+.colophon{
+  position:relative; z-index:10; max-width:var(--max); margin-inline:auto;
+  padding:clamp(30px,4vw,44px) var(--gut) clamp(52px,7vw,76px);
+  display:flex; flex-wrap:wrap; gap:12px 28px; justify-content:space-between; align-items:center;
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-4);
+}
+.colophon a{ color:var(--ink-3); border-bottom:1px solid transparent; transition:border-color .3s, color .3s }
+.colophon a:hover{ color:var(--ink); border-color:var(--red) }
+
+/* ── 11. REVEAL ───────────────────────────────────────────────── */
+.rv{
+  opacity:0;
+  transform:perspective(1500px) translateY(34px) rotateX(8deg);
+  transform-origin:50% 0%;
+  transition:opacity .82s var(--ease-out), transform 1.1s var(--ease-fold);
+  will-change:transform,opacity;
+}
+.rv.on{ opacity:1; transform:perspective(1500px) translateY(0) rotateX(0deg); will-change:auto }
+.stg > *{
+  opacity:0; transform:translateY(16px);
+  transition:opacity .7s var(--ease-out), transform .82s var(--ease-out);
+}
+.stg.on > *{ opacity:1; transform:none }
+.stg.on > *:nth-child(1){ transition-delay:.06s }
+.stg.on > *:nth-child(2){ transition-delay:.13s }
+.stg.on > *:nth-child(3){ transition-delay:.20s }
+.stg.on > *:nth-child(4){ transition-delay:.27s }
+.stg.on > *:nth-child(5){ transition-delay:.34s }
+.stg.on > *:nth-child(6){ transition-delay:.41s }
+.stg.on > *:nth-child(7){ transition-delay:.48s }
+.stg.on > *:nth-child(8){ transition-delay:.55s }
+.stg.on > *:nth-child(9){ transition-delay:.62s }
+
+/* ── 12. UNFOLD — the opening ─────────────────────────────────── */
+.veil{
+  position:fixed; inset:0; z-index:120; background:var(--paper);
+  display:grid; place-items:center;
+  transition:opacity .7s ease .35s, visibility .7s ease .35s;
+}
+.veil .fold-mark{ width:76px; height:76px; overflow:visible }
+.veil .fold-mark path{
+  fill:none; stroke:var(--ink); stroke-width:2.2; stroke-linejoin:round;
+  stroke-dasharray:280; stroke-dashoffset:280;
+  animation:draw 1.5s var(--ease-out) forwards;
+}
+.veil .fold-mark path.hot{ stroke:var(--red); animation-delay:.3s }
+@keyframes draw{ to{ stroke-dashoffset:0 } }
+body.open .veil{ opacity:0; visibility:hidden }
+/* belt and braces: if the script never runs, CSS lifts the veil anyway */
+.veil{ animation:veil-lift .9s var(--ease-out) 3.6s forwards }
+@keyframes veil-lift{ to{ opacity:0; visibility:hidden } }
+
+/* ── 13. RESPONSIVE ───────────────────────────────────────────── */
+@media (max-width:820px){
+  :root{ --gut:18px }
+  .fold{ filter:none }
+  .sheet{
+    box-shadow:0 1px 2px rgba(23,21,15,.10), 0 10px 22px rgba(58,48,28,.13);
+    clip-path:none !important;
+  }
+  .fold:nth-child(odd),
+  .fold:nth-child(even){ transform:none }
+  .creases{ display:none }
+  .prints{ grid-template-columns:1fr }
+  .print:nth-child(odd),.print:nth-child(even){ transform:none }
+  .tally{ grid-template-columns:repeat(2,1fr) }
+  .spec{ gap:20px 28px }
+  h1{ font-size:clamp(42px,13vw,74px) }
+}
+@media (max-width:420px){
+  .tally{ grid-template-columns:1fr }
+}
+
+/* pointer:coarse — no hover states that hide information */
+@media (hover:none){
+  .print:hover{ transform:none; box-shadow:0 1px 2px rgba(23,21,15,.14), 0 10px 22px rgba(58,48,28,.14) }
+  .chip:hover{ transform:none }
+}
+
+/* ── 14. NO WEBGL ─────────────────────────────────────────────── */
+body.flat #scene{ display:none }
+body.flat{
+  background:
+    radial-gradient(120% 80% at 78% 8%, rgba(200,68,42,.09), transparent 58%),
+    radial-gradient(100% 70% at 12% 92%, rgba(38,64,107,.08), transparent 62%),
+    var(--paper);
+  background-attachment:fixed;
+}
+
+/* ── 15. REDUCED MOTION ───────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto }
+  *,*::before,*::after{
+    animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important; scroll-behavior:auto !important;
+  }
+  .rv,.stg > *{ opacity:1 !important; transform:perspective(1500px) !important }
+  .line > span{ transform:none !important }
+  .bar .fil{ transform:scaleX(1) !important }
+  .ink-u path{ stroke-dashoffset:0 !important }
+  .veil{ display:none }
 }
 </style>
 </head>
 <body>
 
-<div id="loader">
-  <div class="loader-inner">
-    <div class="loader-face" aria-hidden="true">
-      <span class="ring"></span><span class="ring2"></span>
-      <img src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png"
-           alt="" loading="eager" onerror="this.style.visibility='hidden'">
-      <span class="loader-orbit"><i class="loader-dot"></i></span>
-    </div>
-    <div class="loader-label">Unlocking the house<span class="loader-dots"><i></i><i></i><i></i></span></div>
-    <div class="loader-bar"><span id="lbar"></span></div>
-    <div class="loader-pct" id="lpct">0%</div>
-  </div>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- opening fold -->
+<div class="veil" aria-hidden="true">
+  <svg class="fold-mark" viewBox="0 0 100 100">
+    <path d="M14 82 L50 12 L86 82 L50 63 Z"/>
+    <path class="hot" d="M50 12 L50 63"/>
+  </svg>
 </div>
 
-<canvas id="scene"></canvas>
-<div id="grain"></div>
-<div id="vig"></div>
-<div id="prog"></div>
-<div id="brand">
-  <img src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png"
-       alt="Aayush Kumar" onerror="this.style.display='none'">
-  <span>Aayush Kumar</span>
-</div>
-<div id="roomtag">Entrance Hall</div>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="fibre" aria-hidden="true"></div>
+<div class="creases" aria-hidden="true"></div>
+<div class="vig" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
 
-<div id="slider" role="slider" aria-label="Walk through the house"
-     aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" tabindex="0">
-  <span class="rail"></span><span class="fill" id="sFill"></span>
-  <span class="ticks" id="sTicks"></span>
-  <span class="knob" id="sKnob"></span>
-  <span class="cur" id="sCur"><em>00</em>Entrance Hall</span>
-</div>
-<div id="cue"><span class="arw">↓</span> Slide to explore</div>
+<header class="hud">
+  <a class="mark" href="#s0" aria-label="Aayush Kumar — top of page">
+    <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M4 27 L16 5 L28 27 L16 20 Z" fill="#C8442A"/>
+      <path d="M16 5 L16 20" stroke="#17150F" stroke-width="1.6"/>
+    </svg>
+    <b>Aayush Kumar</b>
+    <span class="sep">/</span>
+    <span class="role">Games · AI · Backend</span>
+  </a>
+  <nav class="hud-right" aria-label="Elsewhere">
+    <a class="opt" href="https://arthis.space" target="_blank" rel="noopener">Arthis.Space</a>
+    <span class="hud-sep opt" aria-hidden="true">·</span>
+    <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
+    <span class="hud-sep" aria-hidden="true">·</span>
+    <a href="mailto:akversebusiness@gmail.com">Email</a>
+  </nav>
+</header>
 
-<div id="stage">
+<nav class="index" id="index" aria-label="Sections"></nav>
 
-  <article class="panel" data-i="0" data-name="Entrance Hall">
-    <div class="inner">
-      <div class="room-kicker"><b></b>Entrance Hall</div>
-      <h1>Aayush<em>Kumar</em></h1>
-      <p class="lede">Game developer and AI&nbsp;/&nbsp;backend engineer. I build procedural systems, the editor tooling that drives them, and the platforms they ship on. Nine rooms, one house — keep scrolling.</p>
-      <div class="hero-links">
-        <a href="https://arthis.space" target="_blank" rel="noopener"><span class="dot"></span>arthis.space</a>
-        <a href="https://arthis.land" target="_blank" rel="noopener"><span class="dot"></span>arthis.land</a>
-        <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
+<div class="gauge" aria-hidden="true"><i id="gaugeFill"></i></div>
+
+<main id="main" class="stack">
+
+  <!-- ══ 00 ══════════════════════════════════════════════════ -->
+  <section class="fold cover" id="s0" data-name="Cover" aria-labelledby="t0">
+    <div class="sheet rv">
+      <span class="tab" aria-hidden="true"></span>
+      <div class="cover-inner">
+        <div class="kicker stg-item"><span class="dash"></span><b>Fold 00</b> — Portfolio, 2026</div>
+        <h1 class="wordmark" id="t0">
+          <span class="line"><span>Aayush</span></span>
+          <span class="line"><em><span>Kumar</span></em></span>
+        </h1>
+        <p class="lede">Game developer and AI&nbsp;/&nbsp;backend engineer. I build procedural
+          systems, the <span class="ink-u">editor tooling<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path style="--len:230" d="M2 8 C34 2, 58 11, 92 6 S150 2, 198 7"/></svg></span>
+          that drives them, and the platforms they ship on.</p>
+        <div class="links">
+          <a href="https://arthis.space" target="_blank" rel="noopener"><span class="dot"></span>arthis.space</a>
+          <a href="https://arthis.land" target="_blank" rel="noopener"><span class="dot"></span>arthis.land</a>
+          <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
+        </div>
+        <div class="prompt"><span class="rail"></span>Nine folds</div>
       </div>
     </div>
-  </article>
+  </section>
 
-  <article class="panel right" data-i="1" data-name="Bedroom">
-    <div class="inner">
-      <div class="room-kicker"><b></b>Bedroom</div>
-      <div class="num">01 — Where it starts</div>
-      <h2>154 shipped builds,<br>one throughline.</h2>
-      <p class="body">Final-year Electronics &amp; Communication student at NIT Jaipur. Most of what I make is systems that make other things easier to make — a hex terrain generator so level design stops being manual, a lip-sync add-on so animation stops being frame-by-frame, an agent layer so a game can start from a sentence.</p>
-      <p class="body">The output is wide by design: Unity and C# for engines, Python for Blender pipelines, JavaScript and Three.js for the web, FastAPI for the backend behind it all.</p>
-      <div class="meta">
-        <div><div class="k">Based</div><div class="v">Jaipur, India</div></div>
-        <div><div class="k">Education</div><div class="v">NIT Jaipur · B.Tech ECE</div></div>
-        <div><div class="k">Graduating</div><div class="v">2026</div></div>
+  <!-- ══ 01 ══════════════════════════════════════════════════ -->
+  <section class="fold" id="s1" data-name="Practice" aria-labelledby="t1">
+    <div class="sheet rv">
+      <span class="tab blue" aria-hidden="true"></span>
+      <div class="stg">
+        <div class="kicker"><span class="dash"></span><b>Fold 01</b> — Where it starts</div>
+        <h2 id="t1">154 shipped builds,<br>one throughline.</h2>
+        <p class="copy">Final-year Electronics &amp; Communication student at NIT Jaipur. Most of what
+          I make is <b>systems that make other things easier to make</b> — a hex terrain generator so
+          level design stops being manual, a lip-sync add-on so animation stops being frame-by-frame,
+          an agent layer so a game can start from a sentence.</p>
+        <p class="copy">The output is wide by design: Unity and C# for engines, Python for Blender
+          pipelines, JavaScript and Three.js for the web, FastAPI for the backend behind it all.</p>
+        <div class="spec">
+          <div><div class="k">Based</div><div class="v">Jaipur, India</div></div>
+          <div><div class="k">Education</div><div class="v">NIT Jaipur · B.Tech ECE</div></div>
+          <div><div class="k">Graduating</div><div class="v">2026</div></div>
+        </div>
       </div>
     </div>
-  </article>
+  </section>
 
-  <article class="panel" data-i="2" data-name="Game Room">
-    <div class="inner">
-      <div class="room-kicker"><b></b>Game Room</div>
-      <div class="num">02 — Live Platform</div>
-      <h2>Arthis.Space</h2>
-      <p class="body">A browser-based mini-games platform with a TikTok-style vertical feed. Open it and you're already playing — swipe up for the next game, no installs, solo or with friends.</p>
-      <ul class="pts">
-        <li>Infinite swipeable feed; each card is a complete mini-game loaded on demand</li>
-        <li>AI agents generate gameplay logic and 3D web content from prompts via <b>MCP-connected tools</b></li>
-        <li>Supabase / PostgreSQL backend scaled from <b>1 to 10,000 daily active users</b></li>
-        <li>Real-time rooms — host creates a code, others join, state stays in sync</li>
-      </ul>
-      <div class="shots">
-        <a href="https://arthis.space" target="_blank" rel="noopener">
-          <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.space/main/screenshot-2.png" alt="Fruit Blast mini-game" loading="lazy">
-          <div class="cap">Fruit Blast</div></a>
-        <a href="https://arthis.space" target="_blank" rel="noopener">
-          <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.space/main/screenshot-3.png" alt="Doodle Militia mini-game" loading="lazy">
-          <div class="cap">Doodle Militia</div></a>
-      </div>
-      <div class="stack">
-        <span class="chip hi">Supabase</span><span class="chip hi">PostgreSQL</span>
-        <span class="chip">LLM Agents</span><span class="chip">MCP</span><span class="chip">Realtime</span>
-      </div>
-      <a class="cta" href="https://arthis.space" target="_blank" rel="noopener">Visit arthis.space <i>→</i></a>
-    </div>
-  </article>
-
-  <article class="panel right" data-i="3" data-name="Living Room">
-    <div class="inner">
-      <div class="room-kicker"><b></b>Living Room</div>
-      <div class="num">03 — Live Platform</div>
-      <h2>Arthis.Land</h2>
-      <p class="body">"The Wall" — a handcrafted vertical city you climb and explore in the browser. Built in Unity, shipped to WebGL, and multiplayer: 2–4 people share a space in real time.</p>
-      <ul class="pts">
-        <li>Procedural engine assembles virtual rooms — <b>40+ live</b>, from Halcyon to Xeno&nbsp;Garden</li>
-        <li><b>Unity → WebGL</b> builds embedded straight into the wall</li>
-        <li>Room codes: one player hosts, others join with a 4-digit code</li>
-        <li>Backed by <b>arthisland-relay</b> — a zero-dependency TCP + WebSocket relay in pure Python</li>
-      </ul>
-      <div class="shots">
-        <a href="https://arthis.land" target="_blank" rel="noopener">
-          <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.land/main/preview.png" alt="Arthis.Land — The Wall" loading="lazy">
-          <div class="cap">The Wall</div></a>
-        <a href="https://arthis.land" target="_blank" rel="noopener">
-          <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.land/main/screenshot-2.png" alt="The Akverse Room" loading="lazy">
-          <div class="cap">Akverse Room</div></a>
-      </div>
-      <div class="stack">
-        <span class="chip hi">Unity</span><span class="chip hi">WebGL</span>
-        <span class="chip">Procedural Gen</span><span class="chip">Python Relay</span><span class="chip">WebSocket</span>
-      </div>
-      <a class="cta" href="https://arthis.land" target="_blank" rel="noopener">Enter The Wall <i>→</i></a>
-    </div>
-  </article>
-
-  <article class="panel" data-i="4" data-name="Workshop">
-    <div class="inner">
-      <div class="room-kicker"><b></b>Workshop</div>
-      <div class="num">04 — Unity Engine</div>
-      <h2>HexaBed</h2>
-      <p class="body">A procedural terrain system on a hexagonal grid, and the custom editor tooling that lets a designer build a world without opening a script.</p>
-      <ul class="pts">
-        <li>Generates <b>160+ hex tiles</b> into a single playable world with varied heights</li>
-        <li>Road generator picks straight / turn / ramp / pit assets from neighbouring tile heights</li>
-        <li><b>HexTileEditor</b> — a custom Unity inspector panel for visual world building</li>
-        <li>Pivot compensation, 60° rotation snapping, bounds-based prefab alignment</li>
-        <li>GLB export pipeline — 25+ generated world meshes</li>
-      </ul>
-      <div class="meta">
-        <div><div class="k">Scripts</div><div class="v big">14</div></div>
-        <div><div class="k">Lines of C#</div><div class="v big">3,705</div></div>
-        <div><div class="k">Engine</div><div class="v big">Unity</div></div>
+  <!-- ══ 02 ══════════════════════════════════════════════════ -->
+  <section class="fold" id="s2" data-name="Arthis.Space" aria-labelledby="t2">
+    <div class="sheet rv">
+      <span class="tab" aria-hidden="true"></span>
+      <div class="stg">
+        <div class="kicker"><span class="dash"></span><b>Fold 02</b> — Live platform</div>
+        <h2 id="t2">Arthis.Space</h2>
+        <p class="copy">A browser-based mini-games platform with a TikTok-style vertical feed. Open it
+          and you are already playing — swipe up for the next game, no installs, solo or with friends.</p>
+        <ul class="pts">
+          <li>Infinite swipeable feed; each card is a complete mini-game loaded on demand</li>
+          <li>AI agents generate gameplay logic and 3D web content from prompts via <b>MCP-connected tools</b></li>
+          <li>Supabase&nbsp;/&nbsp;PostgreSQL backend scaled from <b>1 to 10,000 daily active users</b></li>
+          <li>Real-time rooms — host creates a code, others join, state stays in sync</li>
+        </ul>
+        <div class="prints">
+          <a class="print" href="https://arthis.space" target="_blank" rel="noopener">
+            <span class="pin" aria-hidden="true"></span>
+            <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.space/main/screenshot-2.png"
+                 alt="Fruit Blast mini-game running in the Arthis.Space feed" loading="lazy" decoding="async"
+                 onerror="this.closest('.print').style.display='none'">
+            <span class="cap">Fruit Blast</span></a>
+          <a class="print" href="https://arthis.space" target="_blank" rel="noopener">
+            <span class="pin" aria-hidden="true"></span>
+            <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.space/main/screenshot-3.png"
+                 alt="Doodle Militia mini-game running in the Arthis.Space feed" loading="lazy" decoding="async"
+                 onerror="this.closest('.print').style.display='none'">
+            <span class="cap">Doodle Militia</span></a>
+        </div>
+        <div class="stamps">
+          <span class="chip hot">Supabase</span><span class="chip hot">PostgreSQL</span>
+          <span class="chip">LLM Agents</span><span class="chip">MCP</span><span class="chip">Realtime</span>
+        </div>
+        <a class="cta" href="https://arthis.space" target="_blank" rel="noopener"><span>Visit arthis.space</span><i aria-hidden="true">→</i></a>
       </div>
     </div>
-  </article>
+  </section>
 
-  <article class="panel right" data-i="5" data-name="Studio">
-    <div class="inner">
-      <div class="room-kicker"><b></b>Studio</div>
-      <div class="num">05 — Pipeline Tooling</div>
-      <h2>Blender Add-on Suite</h2>
-      <p class="body">Twenty-eight Python add-ons written to automate the animation and rendering pipeline behind a working content operation.</p>
-      <ul class="pts">
-        <li><b>lipsync_pro</b> — phoneme-driven lip-sync, Rhubarb CLI to bone animation, v1→v5 with CloudRig</li>
-        <li><b>camera_animator_pro</b> — 81 KB cinematic camera rig tool, six major versions</li>
-        <li><b>quick_bone_animator</b> / <b>arthis_auto_pose</b> — drag-based IK rigging and auto-posing</li>
-        <li><b>asset_spawner_pro</b>, <b>one_click_render_setup</b>, <b>smart_pose_interpolate</b></li>
-      </ul>
-      <div class="meta">
-        <div><div class="k">Add-ons</div><div class="v big">28</div></div>
-        <div><div class="k">Lines of Python</div><div class="v big">27,208</div></div>
+  <!-- ══ 03 ══════════════════════════════════════════════════ -->
+  <section class="fold" id="s3" data-name="Arthis.Land" aria-labelledby="t3">
+    <div class="sheet rv">
+      <span class="tab gold" aria-hidden="true"></span>
+      <div class="stg">
+        <div class="kicker"><span class="dash"></span><b>Fold 03</b> — Live platform</div>
+        <h2 id="t3">Arthis.Land</h2>
+        <p class="copy">“The Wall” — a handcrafted vertical city you climb and explore in the browser.
+          Built in Unity, shipped to WebGL, and multiplayer: 2–4 people share a space in real time.</p>
+        <ul class="pts">
+          <li>Procedural engine assembles virtual rooms — <b>40+ live</b>, from Halcyon to Xeno&nbsp;Garden</li>
+          <li><b>Unity → WebGL</b> builds embedded straight into the wall</li>
+          <li>Room codes: one player hosts, others join with a 4-digit code</li>
+          <li>Backed by <b>arthisland-relay</b> — a zero-dependency TCP + WebSocket relay in pure Python</li>
+        </ul>
+        <div class="prints">
+          <a class="print" href="https://arthis.land" target="_blank" rel="noopener">
+            <span class="pin" aria-hidden="true"></span>
+            <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.land/main/preview.png"
+                 alt="Arthis.Land — The Wall, a vertical city of rooms" loading="lazy" decoding="async"
+                 onerror="this.closest('.print').style.display='none'">
+            <span class="cap">The Wall</span></a>
+          <a class="print" href="https://arthis.land" target="_blank" rel="noopener">
+            <span class="pin" aria-hidden="true"></span>
+            <img src="https://raw.githubusercontent.com/itsAayush2004/arthis.land/main/screenshot-2.png"
+                 alt="The Akverse Room inside Arthis.Land" loading="lazy" decoding="async"
+                 onerror="this.closest('.print').style.display='none'">
+            <span class="cap">Akverse Room</span></a>
+        </div>
+        <div class="stamps">
+          <span class="chip hot">Unity</span><span class="chip hot">WebGL</span>
+          <span class="chip">Procedural Gen</span><span class="chip">Python Relay</span><span class="chip">WebSocket</span>
+        </div>
+        <a class="cta" href="https://arthis.land" target="_blank" rel="noopener"><span>Enter The Wall</span><i aria-hidden="true">→</i></a>
       </div>
     </div>
-  </article>
+  </section>
 
-  <article class="panel" data-i="6" data-name="Server Room">
-    <div class="inner">
-      <div class="room-kicker"><b></b>Server Room</div>
-      <div class="num">06 — AI &amp; Backend</div>
-      <h2>Systems &amp; Inference</h2>
-      <p class="body">Six months at <b style="font-weight:600">Clymora</b> as an on-campus AI backend engineering intern, building the services behind AI-driven product features — alongside first-principles model work.</p>
-      <ul class="pts">
-        <li>Built a <b>GPT-2 language model from scratch</b> — transformer blocks, tokenisation, training loop</li>
-        <li><b>RAG pipelines</b> with vector-database retrieval for context-aware responses</li>
-        <li>Async <b>FastAPI</b> inference endpoints tuned for low-latency real-time workloads</li>
-        <li>23 ComfyUI workflows — Flux, SDXL, Hunyuan3D, WAN VACE, LTX-2, VibeVoice</li>
-      </ul>
-      <div class="stack">
-        <span class="chip hi">FastAPI</span><span class="chip hi">RAG</span>
-        <span class="chip">Vector DB</span><span class="chip">Transformers</span>
-        <span class="chip">ComfyUI</span><span class="chip">n8n</span>
+  <!-- ══ 04 ══════════════════════════════════════════════════ -->
+  <section class="fold" id="s4" data-name="HexaBed" aria-labelledby="t4">
+    <div class="sheet rv">
+      <span class="tab blue" aria-hidden="true"></span>
+      <div class="stg">
+        <div class="kicker"><span class="dash"></span><b>Fold 04</b> — Unity engine</div>
+        <h2 id="t4">HexaBed</h2>
+        <p class="copy">A procedural terrain system on a hexagonal grid, and the custom editor tooling
+          that lets a designer build a world without opening a script.</p>
+        <ul class="pts">
+          <li>Generates <b>160+ hex tiles</b> into a single playable world with varied heights</li>
+          <li>Road generator picks straight / turn / ramp / pit assets from neighbouring tile heights</li>
+          <li><b>HexTileEditor</b> — a custom Unity inspector panel for visual world building</li>
+          <li>Pivot compensation, 60° rotation snapping, bounds-based prefab alignment</li>
+          <li>GLB export pipeline — 25+ generated world meshes</li>
+        </ul>
+        <div class="spec">
+          <div><div class="k">Scripts</div><div class="v xl">14</div></div>
+          <div><div class="k">Lines of C#</div><div class="v xl">3,705</div></div>
+          <div><div class="k">Engine</div><div class="v xl">Unity</div></div>
+        </div>
       </div>
     </div>
-  </article>
+  </section>
 
-  <article class="panel right" data-i="7" data-name="Library">
-    <div class="inner" style="max-width:640px">
-      <div class="room-kicker"><b></b>Library</div>
-      <div class="num">07 — Evidence</div>
-      <h2>By the numbers</h2>
-      <div class="statgrid">
-        <div class="c"><div class="n2" data-count="154">0</div><div class="l2">Interactive builds</div></div>
-        <div class="c"><div class="n2"><span data-count="141">0</span>K</div><div class="l2">Lines of game code</div></div>
-        <div class="c"><div class="n2" data-count="43">0</div><div class="l2">Three.js 3D builds</div></div>
-        <div class="c"><div class="n2" data-count="15">0</div><div class="l2">P2P multiplayer</div></div>
-        <div class="c"><div class="n2" data-count="28">0</div><div class="l2">Blender add-ons</div></div>
-        <div class="c"><div class="n2"><span data-count="21.9">0</span>K</div><div class="l2">YouTube subscribers</div></div>
-      </div>
-      <div class="charts">
-        <div class="chart"><div class="cap">Builds by genre</div><div class="box"><canvas id="cGenre"></canvas></div></div>
-        <div class="chart"><div class="cap">New projects per month</div><div class="box"><canvas id="cTime"></canvas></div></div>
-      </div>
-    </div>
-  </article>
-
-  <article class="panel" data-i="8" data-name="Dining Room">
-    <div class="inner" style="text-align:center;margin:0 auto;max-width:510px">
-      <div class="room-kicker" style="justify-content:center"><b></b>Dining Room</div>
-      <h2 style="text-align:center">Pull up a chair.</h2>
-      <p class="body" style="margin:0 auto 18px">Open to game development, graphics and AI engineering roles from 2026.</p>
-      <div class="hero-links" style="justify-content:center">
-        <a href="mailto:akversebusiness@gmail.com">akversebusiness@gmail.com</a>
-        <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://arthis.space" target="_blank" rel="noopener">arthis.space</a>
-        <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
-      </div>
-      <div class="meta" style="justify-content:center;margin-top:22px">
-        <div style="text-align:center"><div class="k">JEE Advanced</div><div class="v">AIR 8956</div></div>
-        <div style="text-align:center"><div class="k">JEE Main</div><div class="v">98.9 %ile</div></div>
-        <div style="text-align:center"><div class="k">Degree</div><div class="v">B.Tech ECE</div></div>
+  <!-- ══ 05 ══════════════════════════════════════════════════ -->
+  <section class="fold" id="s5" data-name="Blender Suite" aria-labelledby="t5">
+    <div class="sheet rv">
+      <span class="tab gold" aria-hidden="true"></span>
+      <div class="stg">
+        <div class="kicker"><span class="dash"></span><b>Fold 05</b> — Pipeline tooling</div>
+        <h2 id="t5">Blender Add-on Suite</h2>
+        <p class="copy">Twenty-eight Python add-ons written to automate the animation and rendering
+          pipeline behind a working content operation.</p>
+        <ul class="pts">
+          <li><b>lipsync_pro</b> — phoneme-driven lip-sync, Rhubarb CLI to bone animation, v1→v5 with CloudRig</li>
+          <li><b>camera_animator_pro</b> — 81&nbsp;KB cinematic camera rig tool, six major versions</li>
+          <li><b>quick_bone_animator</b> / <b>arthis_auto_pose</b> — drag-based IK rigging and auto-posing</li>
+          <li><b>asset_spawner_pro</b>, <b>one_click_render_setup</b>, <b>smart_pose_interpolate</b></li>
+        </ul>
+        <div class="spec">
+          <div><div class="k">Add-ons</div><div class="v xl">28</div></div>
+          <div><div class="k">Lines of Python</div><div class="v xl">27,208</div></div>
+        </div>
       </div>
     </div>
-  </article>
+  </section>
 
-</div>
+  <!-- ══ 06 ══════════════════════════════════════════════════ -->
+  <section class="fold" id="s6" data-name="Systems &amp; Inference" aria-labelledby="t6">
+    <div class="sheet rv">
+      <span class="tab" aria-hidden="true"></span>
+      <div class="stg">
+        <div class="kicker"><span class="dash"></span><b>Fold 06</b> — AI &amp; backend</div>
+        <h2 id="t6">Systems &amp; Inference</h2>
+        <p class="copy">Six months at <b>Clymora</b> as an on-campus AI backend engineering intern,
+          building the services behind AI-driven product features — alongside first-principles model work.</p>
+        <ul class="pts">
+          <li>Built a <b>GPT-2 language model from scratch</b> — transformer blocks, tokenisation, training loop</li>
+          <li><b>RAG pipelines</b> with vector-database retrieval for context-aware responses</li>
+          <li>Async <b>FastAPI</b> inference endpoints tuned for low-latency real-time workloads</li>
+          <li>23 ComfyUI workflows — Flux, SDXL, Hunyuan3D, WAN VACE, LTX-2, VibeVoice</li>
+        </ul>
+        <div class="stamps">
+          <span class="chip hot">FastAPI</span><span class="chip hot">RAG</span>
+          <span class="chip">Vector DB</span><span class="chip">Transformers</span>
+          <span class="chip">ComfyUI</span><span class="chip">n8n</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<div id="hint"><span>Scroll</span><span class="bar"></span></div>
-<div id="track"></div>
+  <!-- ══ 07 ══════════════════════════════════════════════════ -->
+  <section class="fold" id="s7" data-name="By the numbers" aria-labelledby="t7">
+    <div class="sheet rv">
+      <span class="tab blue" aria-hidden="true"></span>
+      <div class="stg">
+        <div class="kicker"><span class="dash"></span><b>Fold 07</b> — Evidence</div>
+        <h2 id="t7">By the numbers</h2>
+        <div class="tally">
+          <div class="cell"><div class="n" data-count="154">0</div><div class="l">Interactive builds</div></div>
+          <div class="cell"><div class="n" data-count="141" data-suffix="K">0</div><div class="l">Lines of game code</div></div>
+          <div class="cell"><div class="n" data-count="43">0</div><div class="l">Three.js 3D builds</div></div>
+          <div class="cell"><div class="n" data-count="15">0</div><div class="l">P2P multiplayer</div></div>
+          <div class="cell"><div class="n" data-count="28">0</div><div class="l">Blender add-ons</div></div>
+          <div class="cell"><div class="n" data-count="21.9" data-dec="1" data-suffix="K">0</div><div class="l">YouTube subscribers</div></div>
+        </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+        <div class="bars">
+          <div class="cap">Code volume — counted, not estimated</div>
+          <div class="bar"><div class="top"><span class="name">Game code across builds</span><span class="val">141,000 lines</span></div><div class="trk"><i class="fil" style="--w:100%"></i></div></div>
+          <div class="bar"><div class="top"><span class="name">Blender add-on suite · Python</span><span class="val">27,208 lines</span></div><div class="trk"><i class="fil" style="--w:19.3%"></i></div></div>
+          <div class="bar"><div class="top"><span class="name">HexaBed engine · C#</span><span class="val">3,705 lines</span></div><div class="trk"><i class="fil" style="--w:2.6%"></i></div></div>
+        </div>
+
+        <div class="bars">
+          <div class="cap">The 154 builds, split</div>
+          <div class="bar"><div class="top"><span class="name">Three.js&nbsp;/&nbsp;WebGL 3D</span><span class="val">43</span></div><div class="trk"><i class="fil" style="--w:27.9%"></i></div></div>
+          <div class="bar"><div class="top"><span class="name">Peer-to-peer multiplayer</span><span class="val">15</span></div><div class="trk"><i class="fil" style="--w:9.7%"></i></div></div>
+          <div class="bar muted"><div class="top"><span class="name">Other engines &amp; 2D</span><span class="val">96</span></div><div class="trk"><i class="fil" style="--w:62.3%"></i></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 08 ══════════════════════════════════════════════════ -->
+  <section class="fold closer" id="s8" data-name="Contact" aria-labelledby="t8">
+    <div class="sheet rv">
+      <span class="tab" aria-hidden="true"></span>
+      <div class="stg">
+        <div class="kicker"><span class="dash"></span><b>Fold 08</b> — Unfolded</div>
+        <h2 id="t8">Let us build something.</h2>
+        <p class="copy">Open to game development, graphics and AI engineering roles from 2026.</p>
+        <div class="links">
+          <a href="mailto:akversebusiness@gmail.com"><span class="dot"></span>akversebusiness@gmail.com</a>
+          <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://arthis.space" target="_blank" rel="noopener">arthis.space</a>
+          <a href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">YouTube</a>
+        </div>
+        <div class="spec">
+          <div><div class="k">JEE Advanced</div><div class="v">AIR 8956</div></div>
+          <div><div class="k">JEE Main</div><div class="v">98.9 %ile</div></div>
+          <div><div class="k">Degree</div><div class="v">B.Tech ECE</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="colophon">
+  <span>© 2026 Aayush Kumar</span>
+  <span>Folded in the browser — Three.js, no build step</span>
+  <span><a href="https://github.com/itsAayush2004/portfolio" target="_blank" rel="noopener">Source</a></span>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 <script>
 (function(){
 'use strict';
 
-/* ══════════════════════════════════════════════════════════
-   LAYOUT — nine rooms on a serpentine plan.
-   Straight, then left, then straight, then right, repeating.
-   ══════════════════════════════════════════════════════════ */
-const N     = 9;
-const ROOM  = 20;    // room footprint (centre to centre)
-const HALF  = ROOM/2;
-const H     = 7.4;   // ceiling
-const DW    = 2.3;   // half door width
-const DH     = 5.0;  // door height
-const T     = .34;   // wall thickness
-const EYE   = 2.05;
+/* ════════════════════════════════════════════════════════════════
+   0 — ENVIRONMENT
+   ════════════════════════════════════════════════════════════════ */
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MOBILE  = innerWidth < 860;
-const RAW = 'https://raw.githubusercontent.com/itsAayush2004/';
-const PX  = '"Pixelify Sans"';   // canvas textures use the pixel face too
+const COARSE  = matchMedia('(pointer: coarse)').matches;
+const isNarrow = () => innerWidth < 820;
 
-// grid coordinates: straight (-Z), left (-X), straight, right (+X), …
-const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4],[0,-4]];
-const P = CELL.map(c => ({x:c[0]*ROOM, z:c[1]*ROOM}));
+const clamp  = (v,a,b) => v < a ? a : v > b ? b : v;
+const lerp   = (a,b,t) => a + (b-a)*t;
+const easeIO = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
 
-const ROOMS = [
-  {shade:{wall:0xf0ede4,floor:0xd6d1c2,ceil:0xfbfaf5,rail:0xdedac9}, theme:'ENTRANCE HALL', t:'AAYUSH KUMAR', s:'Portfolio 2026',       spec:'Game dev · AI · 3D',        n:'',     icon:'intro',    kit:'foyer'},
-  {shade:{wall:0xf1e7e4,floor:0xd9c9c4,ceil:0xfcf6f4,rail:0xe4d2cc}, theme:'BEDROOM',       t:'PRACTICE',     s:'Systems and tooling',  spec:'154 builds · 2025–2026',    n:'154',  icon:'practice', kit:'bedroom'},
-  {shade:{wall:0xe6efe9,floor:0xc7d6cd,ceil:0xf5fbf7,rail:0xd2e0d7}, theme:'GAME ROOM',     t:'ARTHIS.SPACE', s:'Mini-games feed',      spec:'Live · Supabase · Realtime',n:'',     icon:'space',    kit:'game',
-   img:RAW+'arthis.space/main/screenshot-2.png', img2:RAW+'arthis.space/main/screenshot-3.png'},
-  {shade:{wall:0xf1ebdd,floor:0xd8cdb6,ceil:0xfcf8ee,rail:0xe2d6bf}, theme:'LIVING ROOM',   t:'ARTHIS.LAND',  s:'The Wall',             spec:'Live · Unity WebGL',        n:'',     icon:'land',     kit:'living',
-   img:RAW+'arthis.land/main/preview.png', img2:RAW+'arthis.land/main/screenshot-2.png'},
-  {shade:{wall:0xe7ebf1,floor:0xc9d0da,ceil:0xf6f9fd,rail:0xd4dbe4}, theme:'WORKSHOP',      t:'HEXABED',      s:'Hex terrain engine',   spec:'Unity · C# · 14 scripts',   n:'160',  icon:'hexa',     kit:'workshop'},
-  {shade:{wall:0xebe6f1,floor:0xd0c8da,ceil:0xf8f5fd,rail:0xdad2e4}, theme:'STUDIO',        t:'BLENDER SUITE',s:'Pipeline add-ons',     spec:'Python · 27,208 lines',     n:'28',   icon:'blender',  kit:'studio'},
-  {shade:{wall:0xe8eced,floor:0xcbd2d4,ceil:0xf7fafb,rail:0xd6dcde}, theme:'SERVER ROOM',   t:'AI SYSTEMS',   s:'RAG · FastAPI · GPT-2',spec:'Clymora · Jan–Jun 2026',    n:'',     icon:'ai',       kit:'server'},
-  {shade:{wall:0xedeee1,floor:0xd2d4c0,ceil:0xf9fbf1,rail:0xdcdecb}, theme:'LIBRARY',       t:'EVIDENCE',     s:'By the numbers',       spec:'Counted from source',       n:'141K', icon:'data',     kit:'library'},
-  {shade:{wall:0xf3e9e0,floor:0xdcccbd,ceil:0xfdf7f1,rail:0xe6d6c7}, theme:'DINING ROOM',   t:'CONTACT',      s:'Open to 2026 roles',   spec:'Jaipur, India',             n:'',     icon:'contact',  kit:'dining'}
-];
+const $  = (s,c) => (c||document).querySelector(s);
+const $$ = (s,c) => Array.prototype.slice.call((c||document).querySelectorAll(s));
 
-/* ══════════════════════════════════════════════════════════
-   SCROLL + POINTER
-   ══════════════════════════════════════════════════════════ */
-let target = 0, current = 0, active = -1;
-const maxScroll = () => Math.max(1, document.body.scrollHeight - innerHeight);
-const onScroll  = () => { target = Math.min(1, Math.max(0, scrollY / maxScroll())); };
-addEventListener('scroll', onScroll, {passive:true});
-addEventListener('resize', onScroll);
-onScroll();
-let px = 0, py = 0;
-addEventListener('pointermove', e => {
-  px = (e.clientX/innerWidth - .5)*2; py = (e.clientY/innerHeight - .5)*2;
-}, {passive:true});
+/* one clock for the whole page */
+const ticks = [];
+const onTick = fn => ticks.push(fn);
 
-/* ══════════════════════════════════════════════════════════
-   ICONS
-   ══════════════════════════════════════════════════════════ */
-function drawIcon(g, key, cx, cy, s){
-  g.save(); g.translate(cx, cy);
-  g.strokeStyle='#14140f'; g.fillStyle='#14140f';
-  g.lineWidth=s*.085; g.lineJoin='round'; g.lineCap='round';
-  const u=s/2;
-  switch(key){
-    case 'intro': g.beginPath(); g.arc(0,0,u*.8,0,7); g.stroke();
-      g.beginPath(); g.arc(0,0,u*.28,0,7); g.fill(); break;
-    case 'practice': [-.45,0,.45].forEach((o,i)=>{ g.beginPath();
-      g.moveTo(-u*.8,u*o); g.lineTo(u*(.8-i*.32),u*o); g.stroke(); }); break;
-    case 'space': g.beginPath(); g.rect(-u*.78,-u*.78,u*1.56,u*1.56); g.stroke();
-      g.beginPath(); g.moveTo(-u*.2,-u*.42); g.lineTo(u*.48,0); g.lineTo(-u*.2,u*.42);
-      g.closePath(); g.fill(); break;
-    case 'land': for(let r=0;r<3;r++) for(let c=0;c<3;c++){ const off=r%2?u*.18:0;
-      g.strokeRect(-u*.85+off+c*u*.58,-u*.78+r*u*.55,u*.5,u*.45); } break;
-    case 'hexa': [.82,.38].forEach(rr=>{ g.beginPath();
-      for(let k=0;k<6;k++){ const a=Math.PI/6+k*Math.PI/3;
-        const x=Math.cos(a)*u*rr,y=Math.sin(a)*u*rr; k?g.lineTo(x,y):g.moveTo(x,y);}
-      g.closePath(); g.stroke(); }); break;
-    case 'blender': g.beginPath(); g.arc(0,0,u*.72,0,7); g.stroke();
-      g.beginPath(); g.arc(0,0,u*.3,0,7); g.stroke();
-      for(let k=0;k<8;k++){ const a=k*Math.PI/4; g.beginPath();
-        g.moveTo(Math.cos(a)*u*.72,Math.sin(a)*u*.72);
-        g.lineTo(Math.cos(a)*u*.95,Math.sin(a)*u*.95); g.stroke(); } break;
-    case 'ai': { const pts=[[0,-.8],[-.75,-.1],[.75,-.1],[-.4,.75],[.4,.75]];
-      pts.forEach(a=>pts.forEach(b=>{ g.globalAlpha=.35; g.beginPath();
-        g.moveTo(a[0]*u,a[1]*u); g.lineTo(b[0]*u,b[1]*u); g.stroke(); }));
-      g.globalAlpha=1; pts.forEach(p=>{ g.beginPath(); g.arc(p[0]*u,p[1]*u,u*.15,0,7); g.fill(); }); break; }
-    case 'data': [[-.55,.5],[-.18,.85],[.19,.35],[.56,1.05]].forEach(b=>{
-      g.fillRect(b[0]*u-u*.13,u*.8-b[1]*u,u*.26,b[1]*u); }); break;
-    case 'contact': g.beginPath(); g.rect(-u*.85,-u*.55,u*1.7,u*1.1); g.stroke();
-      g.beginPath(); g.moveTo(-u*.85,-u*.55); g.lineTo(0,u*.16); g.lineTo(u*.85,-u*.55); g.stroke(); break;
+/* scroll state, read once per frame */
+const scroll = { y:0, max:1, p:0, damped:0 };
+const measured = { centers:[] };          /* section centres, cached */
+
+function measure(){
+  scroll.max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  const secs = document.querySelectorAll('main .fold');
+  const out = [];
+  for (let i = 0; i < secs.length; i++){
+    const r = secs[i].getBoundingClientRect();
+    out.push(r.top + (window.pageYOffset||0) + r.height/2);
   }
-  g.restore();
+  measured.centers = out;
 }
+function readScroll(){
+  scroll.y = window.pageYOffset || document.documentElement.scrollTop || 0;
+  scroll.p = clamp(scroll.y / scroll.max, 0, 1);
+}
+addEventListener('scroll', readScroll, { passive:true });
+let meaT;
+addEventListener('resize', () => { clearTimeout(meaT); meaT = setTimeout(() => { measure(); readScroll(); }, 160); }, { passive:true });
+addEventListener('load', () => { measure(); readScroll(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { measure(); readScroll(); });
+setTimeout(() => { measure(); readScroll(); }, 1200);
+measure(); readScroll();
 
-/* ══════════════════════════════════════════════════════════
-   THREE
-   ══════════════════════════════════════════════════════════ */
-let renderer, scene, camera, curve, ready = false;
-const spinners = [], doors = [];
-let RAMP;
+let running = true;
+document.addEventListener('visibilitychange', () => {
+  running = !document.hidden;
+  if (running){ last = performance.now(); requestAnimationFrame(frame); }
+});
 
-let PIXMAP, HULL;
-const GEO = new Map(), MATS = new Map();
-const SEG = MOBILE ? 2 : 3;
-const HULL_MIN = MOBILE ? .8 : .5;      // skip outlines on small detail parts
+let last = performance.now();
+function frame(now){
+  if (!running) return;
+  const dt = Math.min(.05, (now - last) / 1000);
+  last = now;
+  scroll.damped += (scroll.p - scroll.damped) * clamp(dt * 7.5, 0, 1);
+  for (let i = 0; i < ticks.length; i++) ticks[i](dt, now/1000);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
 
-/* every surface carries the same pixel wash — white plus two lighter shades —
-   which the material colour then multiplies, so each asset reads as its own
-   colour in pixels rather than flat plastic                                */
-function pixelMap(){
-  const c = document.createElement('canvas'); c.width = c.height = 32;
-  const g = c.getContext('2d');
-  const sh = ['#ffffff','#ffffff','#ffffff','#fcfcfa','#f7f7f4','#f2f2ee'];
-  for(let y=0;y<32;y++) for(let x=0;x<32;x++){
-    g.fillStyle = sh[(Math.random()*sh.length)|0];
-    g.fillRect(x,y,1,1);
+/* ════════════════════════════════════════════════════════════════
+   1 — OPENING FOLD
+   ════════════════════════════════════════════════════════════════ */
+function open(){
+  if (document.body.classList.contains('open')) return;
+  document.body.classList.add('open');
+  const cover = $('#s0 .sheet');
+  if (cover){
+    cover.classList.add('on');
+    const s = $('.stg', cover); if (s) s.classList.add('on');
   }
-  const t = new THREE.CanvasTexture(c);
-  t.magFilter = t.minFilter = THREE.NearestFilter;
-  t.generateMipmaps = false;
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(7, 7);          // fine enough that big planes read as texture, not blotches
-  return t;
+  setTimeout(() => { const v = $('.veil'); if (v) v.remove(); }, 1400);
 }
-/* pixel wash with a hard lattice drawn over it — floors get a tight tile grid,
-   walls a wider panel grid                                                  */
-function gridMap(repX, repY, strong, faint){
-  const c = document.createElement('canvas'); c.width = c.height = 64;
-  const g = c.getContext('2d');
-  const sh = ['#ffffff','#ffffff','#fbfbf9','#f5f5f1'];
-  for(let y=0;y<64;y++) for(let x=0;x<64;x++){
-    g.fillStyle = sh[(Math.random()*sh.length)|0]; g.fillRect(x,y,1,1);
-  }
-  g.fillStyle = 'rgba(20,20,15,'+strong+')';
-  g.fillRect(0,0,64,1); g.fillRect(0,0,1,64);
-  g.fillStyle = 'rgba(20,20,15,'+faint+')';
-  g.fillRect(0,32,64,1); g.fillRect(32,0,1,64);
-  const t = new THREE.CanvasTexture(c);
-  t.magFilter = t.minFilter = THREE.NearestFilter;
-  t.generateMipmaps = false;
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(repX, repY === undefined ? repX : repY);
-  return t;
-}
-function toon(hex, map){
-  const key = hex + '|' + (map ? 'g' : 'p');
-  if(!map && MATS.has(key)) return MATS.get(key);
-  const m = new THREE.MeshToonMaterial({color:hex, gradientMap:RAMP, map: map || PIXMAP});
-  if(!map) MATS.set(key, m);
-  return m;
-}
-function texFrom(c){ const t=new THREE.CanvasTexture(c); t.anisotropy=MOBILE?2:8; t.encoding=THREE.sRGBEncoding; return t; }
-
-/* soft-edged box: a subdivided cube whose vertices are pushed onto a rounded
-   shell, so nothing in the house has a razor corner                        */
-function roundedBox(w,h,d){
-  const key = w+'|'+h+'|'+d;
-  if(GEO.has(key)) return GEO.get(key);
-  const r = Math.min(.08, w*.24, h*.24, d*.24);
-  const g = new THREE.BoxGeometry(w,h,d,SEG,SEG,SEG);
-  const p = g.attributes.position;
-  const hx = w/2-r, hy = h/2-r, hz = d/2-r;
-  const v = new THREE.Vector3(), q = new THREE.Vector3();
-  for(let i=0;i<p.count;i++){
-    v.fromBufferAttribute(p,i);
-    q.set(Math.max(-hx,Math.min(hx,v.x)), Math.max(-hy,Math.min(hy,v.y)), Math.max(-hz,Math.min(hz,v.z)));
-    v.sub(q); const L = v.length();
-    if(L > 1e-6) v.multiplyScalar(r/L);
-    v.add(q); p.setXYZ(i, v.x, v.y, v.z);
-  }
-  p.needsUpdate = true; g.computeVertexNormals();
-  GEO.set(key, g); return g;
-}
-/* inverted-hull outline: works on curved geometry where edge detection can't */
-function addHull(par, mesh, w,h,d){
-  const t = .024;
-  const s = new THREE.Mesh(mesh.geometry, HULL);
-  s.position.copy(mesh.position); s.rotation.copy(mesh.rotation);
-  s.scale.set((w+t*2)/w, (h+t*2)/h, (d+t*2)/d);
-  par.add(s); return s;
-}
-function B(par, w,h,d, mat, x,y,z, o){
-  const m = new THREE.Mesh(roundedBox(w,h,d), mat);
-  m.position.set(x,y,z); par.add(m);
-  const str = (o === undefined) ? .72 : o;
-  if(str >= HULL_MIN) addHull(par, m, w,h,d);
-  return m;
-}
-function CYL(par, rt,rb,h,seg, mat, x,y,z, o){
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,Math.max(seg,MOBILE?8:12)), mat);
-  m.position.set(x,y,z); par.add(m);
-  const str = (o === undefined) ? .6 : o;
-  if(str >= HULL_MIN){
-    const r = Math.max(rt,rb)*2;
-    addHull(par, m, r, h, r);
-  }
-  return m;
-}
-// legacy call sites: outline(mesh, strength) — now a hull on the same parent
-function outline(mesh, o){ return null; }
-
-/* sharp-edged box — the gates keep crisp architectural corners while every
-   other asset in the house stays soft                                     */
-function BS(par, w,h,d, mat, x,y,z, o){
-  const key = 'S'+w+'|'+h+'|'+d;
-  let g = GEO.get(key);
-  if(!g){ g = new THREE.BoxGeometry(w,h,d); GEO.set(key,g); }
-  const m = new THREE.Mesh(g, mat);
-  m.position.set(x,y,z); par.add(m);
-  const str = (o === undefined) ? .72 : o;
-  if(str > 0){
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g, 20),
-      new THREE.LineBasicMaterial({color:0x14140f, transparent:true, opacity:Math.min(1,str)}));
-    e.position.copy(m.position); par.add(e);
-  }
-  return m;
+if (REDUCED){ open(); }
+else {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(open, 620));
+  setTimeout(open, 3000);            /* never trap the reader behind a loader */
 }
 
-function build(){
-  const canvas = document.getElementById('scene');
-  try{ renderer = new THREE.WebGLRenderer({canvas, antialias:!MOBILE, alpha:false, powerPreference:'high-performance'}); }
-  catch(e){ return false; }
-  if(!renderer.getContext()) return false;
+/* ════════════════════════════════════════════════════════════════
+   2 — TORN EDGES
+   Every sheet gets its own irregular silhouette. Percent based, so
+   it survives resize for free. Desktop only — on a phone the extra
+   compositing is not worth the 3px of deckle.
+   ════════════════════════════════════════════════════════════════ */
+function roughEdge(el, seed){
+  let s = seed * 9301 + 49297;
+  const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
 
-  renderer.setPixelRatio(Math.min(devicePixelRatio, MOBILE?1.5:2));
-  renderer.setSize(innerWidth, innerHeight);
+  const pts = [];
+  const push = (x,y) => pts.push(x.toFixed(2) + '% ' + y.toFixed(2) + '%');
+  const STEPS = 14;
+  const jx = 0.55, jy = 0.32;                    /* jitter, in % of each axis */
+
+  for (let i = 0; i <= STEPS; i++) push(i/STEPS*100, (rnd()-.35)*jy);            /* top    */
+  for (let i = 1; i <= STEPS; i++) push(100 - (rnd()-.35)*jx, i/STEPS*100);      /* right  */
+  for (let i = STEPS-1; i >= 0; i--) push(i/STEPS*100, 100 - (rnd()-.35)*jy);    /* bottom */
+  for (let i = STEPS-1; i >= 1; i--) push((rnd()-.35)*jx, i/STEPS*100);          /* left   */
+
+  el.style.clipPath = 'polygon(' + pts.join(',') + ')';
+}
+function dressSheets(){
+  const wide = !isNarrow();
+  $$('.sheet').forEach((el, i) => {
+    if (wide) roughEdge(el, i + 3);
+    else el.style.clipPath = '';
+  });
+}
+dressSheets();
+let rzT;
+addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(dressSheets, 220); }, { passive:true });
+
+/* ════════════════════════════════════════════════════════════════
+   3 — REVEAL
+   ════════════════════════════════════════════════════════════════ */
+if ('IntersectionObserver' in window && !REDUCED){
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('on');
+      const s = $('.stg', e.target); if (s) s.classList.add('on');
+      io.unobserve(e.target);
+    });
+  }, { rootMargin:'0px 0px -12% 0px', threshold:.08 });
+  $$('.rv').forEach(el => io.observe(el));
+} else {
+  $$('.rv').forEach(el => { el.classList.add('on'); const s = $('.stg', el); if (s) s.classList.add('on'); });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   4 — COUNTING UP
+   ════════════════════════════════════════════════════════════════ */
+function countUp(el){
+  const target = parseFloat(el.dataset.count);
+  const dec    = parseInt(el.dataset.dec || '0', 10);
+  const suffix = el.dataset.suffix ? '<i>' + el.dataset.suffix + '</i>' : '';
+  const dur    = 1500;
+  const t0     = performance.now();
+  const fmt    = n => dec ? n.toFixed(dec) : Math.round(n).toLocaleString('en-US');
+  if (REDUCED){ el.innerHTML = fmt(target) + suffix; return; }
+  (function step(now){
+    const t = clamp((now - t0) / dur, 0, 1);
+    el.innerHTML = fmt(target * easeIO(t)) + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  })(t0);
+}
+if ('IntersectionObserver' in window){
+  const io2 = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting){ countUp(e.target); io2.unobserve(e.target); } });
+  }, { threshold:.5 });
+  $$('[data-count]').forEach(el => io2.observe(el));
+} else {
+  $$('[data-count]').forEach(countUp);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   5 — INDEX RAIL + GAUGE
+   ════════════════════════════════════════════════════════════════ */
+const sections = $$('main .fold');
+const rail = $('#index');
+sections.forEach((sec, i) => {
+  const a = document.createElement('a');
+  a.href = '#' + sec.id;
+  a.innerHTML = '<span class="lbl">' + String(i).padStart(2,'0') + ' · ' + (sec.dataset.name || '') + '</span><span class="tick"></span>';
+  a.setAttribute('aria-label', 'Fold ' + String(i).padStart(2,'0') + ' — ' + (sec.dataset.name || ''));
+  rail.appendChild(a);
+});
+const railLinks = $$('a', rail);
+const gauge = $('#gaugeFill');
+
+let activeIdx = -1;
+onTick(() => {
+  gauge.style.width = (scroll.p * 100).toFixed(2) + '%';
+
+  const mid = scroll.y + innerHeight * .45;
+  const cs = measured.centers;
+  let best = 0, bestD = Infinity;
+  for (let i = 0; i < cs.length; i++){
+    const d = Math.abs(cs[i] - mid);
+    if (d < bestD){ bestD = d; best = i; }
+  }
+  if (best !== activeIdx){
+    activeIdx = best;
+    railLinks.forEach((a, i) => a.setAttribute('aria-current', i === best ? 'true' : 'false'));
+  }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   6 — THE PAPER, IN THREE DIMENSIONS
+   A Miura-ori sheet that folds as you read, plus loose shards and
+   two paper planes on long lazy arcs.
+   ════════════════════════════════════════════════════════════════ */
+function hasWebGL(){
+  try {
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+  } catch(e){ return false; }
+}
+
+function buildScene(){
+  if (!window.THREE || !hasWebGL()){ document.body.classList.add('flat'); return; }
+
+  const canvas = $('#scene');
+  const NARROW = isNarrow();
+  const LOW    = NARROW || (navigator.hardwareConcurrency || 8) <= 4;
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias:!LOW, alpha:true, powerPreference:'high-performance' });
+  } catch(e){ document.body.classList.add('flat'); return; }
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, LOW ? 1.5 : 2));
+  renderer.setSize(innerWidth, innerHeight, false);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf2f1ee);
-  scene.fog = new THREE.Fog(0xf2f1ee, 28, 88);
-  camera = new THREE.PerspectiveCamera(MOBILE ? 76 : 70, innerWidth/innerHeight, .1, 260);
+  const PAPER = 0xF2EEE4;
+  const scene  = new THREE.Scene();
+  scene.fog = new THREE.Fog(PAPER, 15, 42);
 
-  // toon ramp
-  const steps = new Uint8Array([86,150,210,255]);
-  RAMP = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
-  RAMP.minFilter = RAMP.magFilter = THREE.NearestFilter;
-  RAMP.generateMipmaps = false; RAMP.needsUpdate = true;
+  const camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, .1, 120);
+  camera.position.set(0, 0, 15);
 
-  PIXMAP = pixelMap();
-  HULL = new THREE.MeshBasicMaterial({color:0x14140f, side:THREE.BackSide});
+  /* ── light: one hard key so the creases actually read ─────── */
+  scene.add(new THREE.HemisphereLight(0xFFFDF7, 0xC4B79A, .70));
+  const key = new THREE.DirectionalLight(0xFFF4E2, 1.30); key.position.set(5.5, 8, 6);  scene.add(key);
+  const fil = new THREE.DirectionalLight(0xB9C7E2, 0.34); fil.position.set(-6, -1, -4); scene.add(fil);
+  const rim = new THREE.DirectionalLight(0xFFE9CC, 0.42); rim.position.set(-2, 5, -8);  scene.add(rim);
 
-  const M = {
-    wall  : toon(0xf1efe8), floor : toon(0xd4d0c4), ceil  : toon(0xfaf9f5),
-    dark  : toon(0x1b1b16), brass : toon(0xb4936a), wood  : toon(0xb9a481),
-    woodD : toon(0x8d7a5c), leaf  : toon(0x6f8a63), stone : toon(0xdedbd0),
-    cloth : toon(0xc9c3b4), red   : toon(0xc0472c), steel : toon(0x9aa0a6),
-    white : toon(0xf7f5f0), glass : toon(0xbfd0d6)
-  };
+  /* ── 6a. Miura-ori ─────────────────────────────────────────
+     Facets stay planar parallelograms at every fold angle, and
+     both edge lengths are constant — paper does not stretch.
+        S = a·cos φ    H = a·sin φ
+        ψ = asin(sin φ · sin α)
+        T = b·sin ψ    L = b·cos ψ
+     ────────────────────────────────────────────────────────── */
+  const COLS = LOW ? 12 : 17;
+  const ROWS = LOW ?  8 : 12;
+  const A = 0.62, B = 0.72, ALPHA = 1.02;   /* rad */
 
-  /* ---------- connections ---------- */
-  const dirOf = (a,b) => ({x:Math.sign(P[b].x-P[a].x), z:Math.sign(P[b].z-P[a].z)});
-  // per room: which sides have doors  (key: 'px','nx','pz','nz')
-  const sideKey = d => d.x>0?'px' : d.x<0?'nx' : d.z>0?'pz':'nz';
-  const opp = {px:'nx',nx:'px',pz:'nz',nz:'pz'};
-  const doorSides = P.map(()=>({}));
-  for(let i=0;i<N-1;i++){
-    const d = dirOf(i,i+1), k = sideKey(d);
-    doorSides[i][k] = true; doorSides[i+1][opp[k]] = true;
+  const quadCount = COLS * ROWS;
+  const meshPos = new Float32Array(quadCount * 6 * 3);
+  const meshGeo = new THREE.BufferGeometry();
+  meshGeo.setAttribute('position', new THREE.BufferAttribute(meshPos, 3));
+
+  const segCount = (COLS * (ROWS+1)) + ((COLS+1) * ROWS);
+  const linePos  = new Float32Array(segCount * 2 * 3);
+  const lineGeo  = new THREE.BufferGeometry();
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(linePos, 3));
+
+  const _v = [0,0,0];
+  let _S=0,_H=0,_T=0,_L=0,_ox=0,_oy=0;
+  function vert(i,j){
+    _v[0] = i*_S + (j & 1 ? _T : 0) - _ox;
+    _v[1] = -(j*_L - _oy);
+    _v[2] = (i & 1 ? _H : 0) - 0.5*_H;
+    return _v;
   }
+  function foldTo(phi){
+    _S = A*Math.cos(phi); _H = A*Math.sin(phi);
+    const psi = Math.asin(clamp(Math.sin(phi)*Math.sin(ALPHA), -1, 1));
+    _T = B*Math.sin(psi); _L = B*Math.cos(psi);
+    _ox = (COLS*_S + _T) * .5;
+    _oy = (ROWS*_L) * .5;
 
-  /* ---------- shell: floors, ceilings, walls (deduped), one shade per room ---------- */
-  const built = new Set();
-  P.forEach((p, i) => {
-    const sh = ROOMS[i].shade;
-    const wallM  = toon(sh.wall,  gridMap(5, 2, .13, .05));   // panel grid on the walls
-    const ceilM  = toon(sh.ceil,  gridMap(6, 6, .07, .03));
-    const floorM = toon(sh.floor, gridMap(10, 10, .20, .08)); // tighter tile grid underfoot
-
-    const fl = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), floorM);
-    fl.rotation.x = -Math.PI/2; fl.position.set(p.x, 0, p.z); scene.add(fl);
-    const ce = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), ceilM);
-    ce.rotation.x = Math.PI/2; ce.position.set(p.x, H, p.z); scene.add(ce);
-
-    [['px',1,0],['nx',-1,0],['pz',0,1],['nz',0,-1]].forEach(([k,sx,sz])=>{
-      const mx = p.x + sx*HALF, mz = p.z + sz*HALF;
-      const id = Math.round(mx*10)+'|'+Math.round(mz*10);
-      if(built.has(id)) return; built.add(id);
-      const alongZ = sx !== 0;              // wall runs along Z, normal along X
-      const hasDoor = !!doorSides[i][k];
-      const g = new THREE.Group(); scene.add(g);
-      if(!hasDoor){
-        B(g, alongZ?T:ROOM, H, alongZ?ROOM:T, wallM, mx, H/2, mz, .55);
-      } else {
-        const seg = HALF - DW;
-        [-1,1].forEach(s=>{
-          const off = s*(DW + seg/2);
-          B(g, alongZ?T:seg, DH, alongZ?seg:T, wallM,
-            mx + (alongZ?0:off), DH/2, mz + (alongZ?off:0), .7);
-        });
-        B(g, alongZ?T:ROOM, H-DH, alongZ?ROOM:T, wallM, mx, DH+(H-DH)/2, mz, .7);
-        buildGate(g, M, mx, mz, alongZ, i, wallM);
-      }
-      // skirting + a picture rail, both softened
-      const sk = alongZ ? [T+.03,.18,ROOM] : [ROOM,.18,T+.03];
-      B(g, sk[0],sk[1],sk[2], M.dark, mx, .09, mz, 0);
-      const rl = alongZ ? [T+.05,.07,ROOM] : [ROOM,.07,T+.05];
-      B(g, rl[0],rl[1],rl[2], toon(sh.rail), mx, 6.0, mz, 0);
-    });
-  });
-
-  /* ---------- gate frame + two swinging leaves ---------- */
-  function buildGate(g, M, mx, mz, alongZ, roomIdx, wallM){
-    const rotY = alongZ ? Math.PI/2 : 0;
-    const gate = new THREE.Group();
-    gate.position.set(mx, 0, mz); gate.rotation.y = rotY; g.add(gate);
-
-    /* The wall itself occupies z −T/2 … +T/2. Every part of the gate frame is
-       pushed clear of that slab (z ≥ 0.22) so nothing interpenetrates:
-         column  0.24 … 1.04     capital / base  0.22 … 1.06     beam  0.22 … 1.06  */
-    const CZ = .64, CD = .80, WD = .84;
-    [-1,1].forEach(s=>{
-      const cx = s*(DW + .23);
-      BS(gate, .46, DH,      CD, wallM,  cx, DH/2,      CZ, .95);   // column
-      BS(gate, .66, .24,     WD, wallM,  cx, .12,       CZ, .95);   // base
-      BS(gate, .66, .26,     WD, wallM,  cx, DH - .13,  CZ, .95);   // capital
-      BS(gate, .04, DH-.6,   .04, M.brass, cx, DH/2, CZ + CD/2 + .01, 0); // brass inlay on the face
-    });
-    BS(gate, DW*2 + .92, .54, WD, wallM, 0, DH + .27, CZ, .95);     // beam
-    BS(gate, DW*2 + .92, .1,  WD, M.brass, 0, DH + .01, CZ, 0);      // brass under-rail
-    BS(gate, DW*2, .05, .74, M.brass, 0, .025, CZ, 0);               // threshold
-
-    // medallion naming the next room
-    const nxt = ROOMS[roomIdx+1] || ROOMS[roomIdx];
-    const mc = document.createElement('canvas'); mc.width = mc.height = 300;
-    const mg = mc.getContext('2d');
-    mg.fillStyle='#f4f2ed'; mg.beginPath(); mg.arc(150,150,148,0,7); mg.fill();
-    mg.strokeStyle='#14140f'; mg.lineWidth=7; mg.beginPath(); mg.arc(150,150,136,0,7); mg.stroke();
-    mg.strokeStyle='#c0472c'; mg.lineWidth=3; mg.beginPath(); mg.arc(150,150,118,0,7); mg.stroke();
-    drawIcon(mg, nxt.icon, 150, 148, 138);
-    const med = new THREE.Mesh(new THREE.CircleGeometry(.27,30), new THREE.MeshBasicMaterial({map:texFrom(mc)}));
-    med.position.set(0, DH+.27, CZ + WD/2 + .01); gate.add(med);
-
-    // door leaves — hinged at the jambs, swung open on approach
-    [-1,1].forEach(s=>{
-      const hinge = new THREE.Group();
-      hinge.position.set(s*DW, 0, 0); gate.add(hinge);
-      const leaf = new THREE.Group(); hinge.add(leaf);
-      BS(leaf, DW, DH-.12, .1, M.woodD, -s*DW/2, (DH-.12)/2, 0, .85);
-      BS(leaf, DW*.62, DH*.42, .13, M.wood, -s*DW/2, DH*.30, .01, .7);
-      BS(leaf, DW*.62, DH*.28, .13, M.wood, -s*DW/2, DH*.70, .01, .7);
-      CYL(leaf, .05,.05,.26,8, M.brass, -s*DW*.9, DH*.5, .1, 0);
-      doors.push({hinge, s, wx:mx, wz:mz});
-    });
-  }
-
-  /* ---------- lighting ---------- */
-  scene.add(new THREE.AmbientLight(0xffffff, .34));
-  const key = new THREE.DirectionalLight(0xfff4e2, 1.15); key.position.set(9,14,10); scene.add(key);
-  const fill = new THREE.DirectionalLight(0xcfd9ff, .4); fill.position.set(-10,6,-12); scene.add(fill);
-
-  /* ══════════════════════════════════════════════════════
-     FURNITURE KITS
-     ══════════════════════════════════════════════════════ */
-  function rug(g, w, d, mat, x, z){ B(g, w, .04, d, mat, x, .02, z, .35); }
-
-  function chair(g, mat, x, z, rot){
-    const c = new THREE.Group(); c.position.set(x,0,z); c.rotation.y = rot||0; g.add(c);
-    B(c, .52,.08,.52, mat, 0,.46,0,.7);
-    B(c, .52,.62,.08, mat, 0,.77,-.22,.7);
-    [[-.22,-.22],[.22,-.22],[-.22,.22],[.22,.22]].forEach(p=>B(c,.07,.46,.07,mat,p[0],.23,p[1],.5));
-    return c;
-  }
-  function lampOn(g, mat, x, y, z){
-    CYL(g, .13,.2,.3,10, M.white, x, y+.28, z, .6);
-    CYL(g, .03,.03,.26,6, mat, x, y+.13, z, 0);
-  }
-  function shelfBooks(g, x, z, rotY){
-    const sh = new THREE.Group(); sh.position.set(x,0,z); sh.rotation.y = rotY||0; g.add(sh);
-    B(sh, 2.2, 2.6, .42, M.wood, 0, 1.3, 0, .85);
-    const cols=[0xc0472c,0x6f8a63,0x8d7a5c,0x9aa0a6,0x1b1b16,0xb4936a];
-    for(let r=0;r<4;r++){
-      B(sh, 2.0, .06, .38, M.woodD, 0, .45+r*.62, .02, .4);
-      let bx = -.92;
-      while(bx < .9){
-        const w = .07+Math.random()*.09, h = .3+Math.random()*.16;
-        B(sh, w, h, .3, toon(cols[(Math.random()*cols.length)|0]), bx+w/2, .48+r*.62+h/2, .03, .35);
-        bx += w + .012;
+    let p = 0;
+    for (let j = 0; j < ROWS; j++){
+      for (let i = 0; i < COLS; i++){
+        const a = vert(i,   j  ), a0=a[0],a1=a[1],a2=a[2];
+        const b = vert(i+1, j  ), b0=b[0],b1=b[1],b2=b[2];
+        const c = vert(i+1, j+1), c0=c[0],c1=c[1],c2=c[2];
+        const d = vert(i,   j+1), d0=d[0],d1=d[1],d2=d[2];
+        meshPos[p++]=a0; meshPos[p++]=a1; meshPos[p++]=a2;
+        meshPos[p++]=b0; meshPos[p++]=b1; meshPos[p++]=b2;
+        meshPos[p++]=c0; meshPos[p++]=c1; meshPos[p++]=c2;
+        meshPos[p++]=a0; meshPos[p++]=a1; meshPos[p++]=a2;
+        meshPos[p++]=c0; meshPos[p++]=c1; meshPos[p++]=c2;
+        meshPos[p++]=d0; meshPos[p++]=d1; meshPos[p++]=d2;
       }
     }
-    return sh;
-  }
-  function screenPanel(g, w, h, x, y, z, rotY, label){
-    const c = document.createElement('canvas'); c.width=512; c.height=Math.round(512*h/w);
-    const cg = c.getContext('2d');
-    cg.fillStyle='#14140f'; cg.fillRect(0,0,c.width,c.height);
-    cg.fillStyle='#1f2b30'; cg.fillRect(8,8,c.width-16,c.height-16);
-    cg.fillStyle='#6ee7d0'; cg.font='600 30px monospace';
-    (label||['>_ ready']).forEach((ln,i)=>cg.fillText(ln, 26, 54+i*40));
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({map:texFrom(c)}));
-    m.position.set(x,y,z); m.rotation.y = rotY||0; g.add(m);
-    return m;
-  }
-
-  /* Everything lives in the four corner quadrants (|x| and |z| both > ~4.2).
-     Doors sit at wall centres and the camera walks centre-to-centre, so a
-     corner-only rule guarantees nothing blocks a doorway, a swinging leaf,
-     or the line you walk. `a` is +1/-1: the side the feature artwork hangs on,
-     so the hero piece always sits underneath it.                        */
-  const KITS = {
-    foyer(g, a){
-      rug(g, 5.4, 4.4, M.cloth, 0, 0);
-      B(g, 3.0,1.0,.72, M.wood,  a*6.4,.5,-8.3,.85);          // reception desk
-      B(g, 3.2,.09,.88, M.woodD, a*6.4,1.03,-8.3,.7);
-      lampOn(g, M.dark, a*7.5, 1.03, -8.3);
-      CYL(g,.06,.06,1.9,8, M.dark, -a*7.6,.95,-8.0,.5);       // coat stand
-      CYL(g,.42,.42,.06,10, M.dark, -a*7.6,.05,-8.0,.5);
-      B(g, 2.6,.14,.7, M.woodD, -a*6.6,.46,7.2,.8);           // waiting bench
-      [[-1.0,6.9],[1.0,6.9],[-1.0,7.5],[1.0,7.5]].forEach(p=>B(g,.12,.46,.12,M.woodD,-a*6.6+p[0],.23,p[1],.5));
-      plant(g, a*8.2, 8.0); plant(g, -a*8.2, 8.0);
-    },
-    bedroom(g, a){
-      rug(g, 5.6, 4.6, M.cloth, 0, .4);
-      const b = new THREE.Group(); b.position.set(a*6.5,0,-6.6); g.add(b);
-      B(b, 3.0,.42,4.2, M.wood,  0,.24,0,.85);                // frame
-      B(b, 2.8,.34,3.9, M.white, 0,.6,.1,.6);                 // mattress
-      B(b, 2.8,.22,2.0, M.cloth, 0,.86,.9,.6);                // duvet
-      B(b, 1.1,.24,.5, M.white, -.65,.85,-1.6,.5);
-      B(b, 1.1,.24,.5, M.white,  .65,.85,-1.6,.5);
-      B(b, 3.1,1.9,.2, M.woodD, 0,.95,-2.15,.8);              // headboard
-      B(g, .6,.62,.6, M.wood, a*4.4,.31,-8.3,.75);            // nightstand
-      lampOn(g, M.dark, a*4.4,.62,-8.3);
-      B(g, 2.2,2.6,.72, M.woodD, -a*6.8,1.3,-8.3,.85);        // wardrobe
-      B(g, .05,2.3,.04, M.brass, -a*6.8,1.3,-7.92,0);
-      B(g, 2.0,.09,.82, M.wood, -a*6.6,.78,7.3,.8);           // desk
-      [[-.85,7.0],[.85,7.0],[-.85,7.6],[.85,7.6]].forEach(p=>B(g,.09,.78,.09,M.wood,-a*6.6+p[0],.39,p[1],.5));
-      screenPanel(g, 1.2,.74, -a*6.6,1.26,7.55, Math.PI, ['> unity build','> 154 games','> _']);
-      chair(g, M.woodD, -a*6.6, 5.9, 0);
-      plant(g, a*8.3, 8.0);
-    },
-    game(g, a){
-      rug(g, 5.4, 4.4, M.cloth, 0, .4);
-      [-1.25,1.25].forEach((k,i)=>{                            // arcade cabinets
-        const c = new THREE.Group(); c.position.set(a*6.4 + k*1.3, 0, -8.4); g.add(c);
-        B(c, 1.0,2.1,.9, M.dark, 0,1.05,0,.9);
-        B(c, .86,.62,.1, M.red, 0,1.5,.46,.6);
-        screenPanel(c, .74,.52, 0,1.5,.53, 0, ['SCORE 0'+(i+3)+'40','PLAYER 1']);
-        B(c, .9,.12,.42, M.red, 0,.96,.5,.6);
-        CYL(c,.07,.07,.16,8, M.red, -.2,1.06,.6,0);
-        CYL(c,.07,.07,.16,8, M.brass, .2,1.06,.6,0);
-      });
-      B(g, 2.4,.5,.55, M.woodD, -a*6.6,.25,-8.4,.8);           // tv unit
-      screenPanel(g, 3.0,1.7, -a*6.6,1.6,-8.05, 0, ['ARTHIS.SPACE','feed · multiplayer']);
-      CYL(g,.9,1.0,.7,12, M.red, a*6.8,.35,7.2,.7);            // beanbag
-      B(g, 1.6,.1,1.0, M.wood, -a*6.4,.42,7.0,.7);             // low table
-      [[-.65,6.6],[.65,6.6],[-.65,7.4],[.65,7.4]].forEach(p=>B(g,.08,.42,.08,M.wood,-a*6.4+p[0],.21,p[1],.4));
-      plant(g, -a*8.3, 8.0);
-    },
-    living(g, a){
-      rug(g, 6.0, 4.6, M.cloth, 0, .2);
-      const s = new THREE.Group(); s.position.set(a*6.4,0,-8.1); g.add(s);
-      B(s, 3.6,.5,1.15, M.cloth, 0,.32,0,.8);                  // sofa
-      B(s, 3.6,.8,.28, M.cloth, 0,.75,-.44,.8);
-      B(s, .28,.62,1.15, M.cloth, -1.66,.62,0,.7);
-      B(s, .28,.62,1.15, M.cloth,  1.66,.62,0,.7);
-      [[-1.5,.45],[1.5,.45],[-1.5,-.45],[1.5,-.45]].forEach(p=>B(s,.12,.14,.12,M.woodD,p[0],.07,p[1],0));
-      B(g, 1.8,.1,1.0, M.wood, a*6.4,.45,-5.7,.75);            // coffee table
-      [[-.75,-6.1],[.75,-6.1],[-.75,-5.3],[.75,-5.3]].forEach(p=>B(g,.09,.45,.09,M.wood,a*6.4+p[0],.22,p[1],.45));
-      B(g, 2.8,.5,.5, M.woodD, -a*6.6,.25,-8.4,.8);            // media unit
-      screenPanel(g, 3.2,1.8, -a*6.6,1.7,-8.05, 0, ['ARTHIS.LAND','the wall · unity webgl']);
-      CYL(g,.04,.04,1.7,8, M.dark, a*8.4,.85,-4.6,.5);         // floor lamp
-      CYL(g,.34,.24,.34,10, M.white, a*8.4,1.82,-4.6,.6);
-      chair(g, M.woodD, -a*6.6, 7.0, Math.PI);
-      plant(g, a*8.3, 8.0); plant(g, -a*8.3, 8.0);
-    },
-    workshop(g, a){
-      B(g, 4.0,.14,1.1, M.woodD, a*6.3,.98,-8.2,.85);          // bench
-      [[-1.8,-8.6],[1.8,-8.6],[-1.8,-7.8],[1.8,-7.8]].forEach(p=>B(g,.14,.98,.14,M.woodD,a*6.3+p[0],.49,p[1],.5));
-      B(g, 4.0,1.8,.09, M.stone, a*6.3,2.7,-8.86,.7);          // pegboard
-      for(let k=0;k<7;k++) B(g,.09,.5+((k*37)%50)/100,.09, M.steel, a*6.3-1.6+k*.53, 2.6, -8.75, .4);
-      for(let k=0;k<4;k++)                                      // hex tile stack
-        CYL(g,.42-k*.05,.42-k*.05,.16,6, k%2?M.stone:M.wood, a*6.3-1.2,1.13+k*.17,-8.2,.7);
-      const crate = new THREE.Group(); crate.position.set(-a*7.2,0,-7.8); g.add(crate);
-      [0,1,2].forEach(k=>B(crate,.9,.7,.9, M.wood, (k%2?.55:-.55),.35+(k>1?.7:0), 0,.7));
-      B(g, .5,.9,.5, M.woodD, a*6.3,.45,-6.1,.7);              // stool
-      shelfBooks(g, -a*6.6, 7.6, Math.PI);
-      plant(g, a*8.3, 7.8);
-    },
-    studio(g, a){
-      B(g, 4.0,.11,1.15, M.woodD, a*6.3,.79,-8.2,.85);         // desk
-      [[-1.8,-8.6],[1.8,-8.6],[-1.8,-7.8],[1.8,-7.8]].forEach(p=>B(g,.1,.79,.1,M.woodD,a*6.3+p[0],.4,p[1],.5));
-      screenPanel(g, 1.8,1.05, a*6.3-.8,1.42,-8.55, 0, ['lipsync_pro v5','phoneme → bone']);
-      screenPanel(g, 1.3,.8,  a*6.3+1.1,1.32,-8.5, -.3, ['render 240/300']);
-      chair(g, M.dark, a*6.3, -6.2, 0);
-      const trip = new THREE.Group(); trip.position.set(-a*7.4,0,-7.4); g.add(trip);
-      [0,1,2].forEach(k=>{ const q=k*Math.PI*2/3;
-        CYL(trip,.04,.04,1.9,6, M.dark, Math.cos(q)*.36,.9,Math.sin(q)*.36,.4); });
-      B(trip, .62,.4,1.0, M.dark, 0,2.05,0,.8);
-      CYL(trip,.17,.17,.3,12, M.steel, 0,2.05,.6,.6);
-      shelfBooks(g, -a*6.6, 7.6, Math.PI);
-      rug(g, 4.0,3.0, M.cloth, 0, .6);
-      plant(g, a*8.3, 8.0);
-    },
-    server(g, a){
-      [-1.6,0,1.6].forEach(k=>{                                 // racks along the free wall
-        const r = new THREE.Group(); r.position.set(a*6.4 + k*1.25, 0, -8.4); g.add(r);
-        B(r, 1.15,2.5,.95, M.dark, 0,1.25,0,.9);
-        for(let u=0;u<9;u++){
-          B(r, 1.0,.14,.06, M.steel, 0,.35+u*.24,.49, 0);
-          B(r, .05,.05,.03, u%3? M.red : M.leaf, .4,.35+u*.24,.53, 0);
-        }
-      });
-      B(g, 3.2,.1,1.0, M.steel, -a*6.5,.78,-8.3,.8);            // console desk
-      [[-1.4,-8.7],[1.4,-8.7],[-1.4,-7.9],[1.4,-7.9]].forEach(p=>B(g,.09,.78,.09,M.steel,-a*6.5+p[0],.39,p[1],.5));
-      screenPanel(g, 1.5,.9, -a*6.5-.7,1.35,-8.65, 0, ['POST /infer 200','p95  38ms','rag: 12 docs']);
-      screenPanel(g, 1.3,.8, -a*6.5+.9,1.3,-8.6, .28, ['gpt2 · step 4210','loss 2.13']);
-      chair(g, M.dark, -a*6.5, -6.3, 0);
-      B(g, 3.6,.12,.5, M.steel, a*6.4, 6.6, -8.2, .5);          // cable tray
-      rug(g, 4.0,3.0, M.cloth, 0, .6);
-    },
-    library(g, a){
-      shelfBooks(g, a*5.0, -8.5, 0);
-      shelfBooks(g, a*7.6, -8.5, 0);
-      shelfBooks(g, -a*5.2, -8.5, 0);
-      shelfBooks(g, -a*7.8, -8.5, 0);
-      rug(g, 5.0, 4.0, M.cloth, 0, .6);
-      B(g, 2.8,.12,1.4, M.woodD, a*6.4,.78,7.0,.85);            // reading table
-      [[-1.2,6.45],[1.2,6.45],[-1.2,7.55],[1.2,7.55]].forEach(p=>B(g,.11,.78,.11,M.woodD,a*6.4+p[0],.39,p[1],.5));
-      lampOn(g, M.dark, a*7.3,.84,7.0);
-      chair(g, M.woodD, a*4.6, 7.0, Math.PI/2);
-      chair(g, M.woodD, a*8.2, 7.0, -Math.PI/2);
-      plant(g, -a*8.3, 7.8);
-    },
-    dining(g, a){
-      rug(g, 5.6, 4.4, M.cloth, 0, 0);
-      const d = new THREE.Group(); d.position.set(a*6.4,0,-6.5); g.add(d);
-      B(d, 4.0,.14,1.8, M.wood, 0,.79,0,.9);                    // table
-      [[-1.75,-.7],[1.75,-.7],[-1.75,.7],[1.75,.7]].forEach(p=>B(d,.16,.79,.16,M.woodD,p[0],.4,p[1],.55));
-      [-1.25,0,1.25].forEach(x=>{ chair(d, M.woodD, x,-1.75, 0); chair(d, M.woodD, x,1.75, Math.PI); });
-      [-1.25,0,1.25].forEach(x=>{                                // pendants
-        CYL(d,.015,.015,1.7,6, M.dark, x, H-.85, 0, 0);
-        CYL(d,.12,.34,.4,12, M.white, x, H-1.85, 0, .6);
-      });
-      B(d, .3,.16,.3, M.white, -1.1,.9,.28,.5);
-      B(d, .3,.16,.3, M.white,  1.1,.9,-.28,.5);
-      CYL(d,.1,.14,.5,10, M.glass, 0,1.05,0,.5);
-      B(g, 3.0,.9,.55, M.woodD, -a*6.7,.45,-8.3,.85);           // sideboard
-      B(g, 3.1,.08,.62, M.wood,  -a*6.7,.92,-8.3,.6);
-      plant(g, -a*8.3, 8.0); plant(g, a*8.3, 8.0);
-    }
-  };
-
-  function plant(g, x, z){
-    const pl = new THREE.Group(); pl.position.set(x,0,z); g.add(pl);
-    CYL(pl,.32,.24,.5,10, M.wood, 0,.25,0,.75);
-    for(let k=0;k<5;k++){
-      const a = k*Math.PI*2/5 + x;
-      const leaf = new THREE.Mesh(new THREE.ConeGeometry(.19,1.05,5), M.leaf);
-      leaf.position.set(Math.cos(a)*.17, 1.0, Math.sin(a)*.17);
-      leaf.rotation.z = Math.cos(a)*.34; leaf.rotation.x = -Math.sin(a)*.34;
-      pl.add(leaf);
-      const e = new THREE.Mesh(leaf.geometry, HULL);
-      e.position.copy(leaf.position); e.rotation.copy(leaf.rotation);
-      e.scale.setScalar(1.05); pl.add(e);
-    }
-  }
-
-  /* ══════════════════════════════════════════════════════
-     ART on the free walls of every room
-     ══════════════════════════════════════════════════════ */
-  /* ---------- logos ---------- */
-  const FACE = 'https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png';
-  // shipped with the repo, so same-origin and safe to paint into a canvas
-  const LOGO_LAND  = 'arthis-land.png';
-  const LOGO_SPACE = 'arthis-space.png';
-  const logoFor = t => t === 'ARTHIS.LAND' ? LOGO_LAND : t === 'ARTHIS.SPACE' ? LOGO_SPACE : null;
-
-  // a single favicon-style tile: real logo if it loads, drawn pixel glyph if not
-  function logoTile(url, icon, label){
-    const c = document.createElement('canvas'); c.width = c.height = 256;
-    const g = c.getContext('2d');
-    const base = () => {
-      g.fillStyle='#fbfaf7'; g.fillRect(0,0,256,256);
-      g.strokeStyle='#14140f'; g.lineWidth=6; g.strokeRect(11,11,234,234);
-    };
-    const cap = () => {
-      g.fillStyle='#fbfaf7'; g.fillRect(16,182,224,58);
-      g.fillStyle='#14140f'; g.textAlign='center';
-      g.font='600 21px '+PX+', monospace';
-      g.fillText(label, 128, 214);
-      g.fillStyle='#c0472c'; g.fillRect(112,226,32,4);
-    };
-    base(); drawIcon(g, icon, 128, 104, 116); cap();
-    const t = texFrom(c);
-    if(url){
-      const im = new Image(); im.crossOrigin='anonymous';
-      im.onload = () => {
-        base();
-        const s = Math.min(150/im.width, 132/im.height);
-        g.drawImage(im, 128 - im.width*s/2, 104 - im.height*s/2, im.width*s, im.height*s);
-        cap(); t.needsUpdate = true;
-      };
-      im.onerror = () => {};
-      im.src = url;
-    }
-    return t;
-  }
-
-  // the same logo repeated across a frieze band
-  function logoFrieze(url, icon, cols){
-    const CS = 128;
-    const c = document.createElement('canvas'); c.width = cols*CS; c.height = CS;
-    const g = c.getContext('2d');
-    const paint = img => {
-      g.fillStyle='#fbfaf7'; g.fillRect(0,0,c.width,c.height);
-      g.fillStyle='#14140f'; g.fillRect(0,0,c.width,4); g.fillRect(0,CS-4,c.width,4);
-      for(let k=0;k<cols;k++){
-        const cx = k*CS + CS/2, cy = CS/2 + 2;
-        if(img){
-          const s = Math.min(74/img.width, 74/img.height);
-          g.drawImage(img, cx - img.width*s/2, cy - img.height*s/2, img.width*s, img.height*s);
-        } else drawIcon(g, icon, cx, cy, 68);
-        if(k < cols-1){ g.fillStyle='#c0472c'; g.fillRect(cx + CS/2 - 2, cy - 3, 5, 5); }
+    let q = 0;
+    for (let j = 0; j <= ROWS; j++){
+      for (let i = 0; i < COLS; i++){
+        const a = vert(i,j),   a0=a[0],a1=a[1],a2=a[2];
+        const b = vert(i+1,j), b0=b[0],b1=b[1],b2=b[2];
+        linePos[q++]=a0; linePos[q++]=a1; linePos[q++]=a2;
+        linePos[q++]=b0; linePos[q++]=b1; linePos[q++]=b2;
       }
-    };
-    paint(null);
-    const t = texFrom(c);
-    if(url){
-      const im = new Image(); im.crossOrigin='anonymous';
-      im.onload = () => { paint(im); t.needsUpdate = true; };
-      im.onerror = () => {};
-      im.src = url;
     }
-    return t;
-  }
-
-  // the logo, large, as a framed piece
-  function paintLogoArt(c, tex, url, title, sub){
-    const im = new Image();
-    im.onload = () => {
-      const g = c.getContext('2d');
-      g.fillStyle='#fbfaf7'; g.fillRect(0,0,900,1125);
-      g.strokeStyle='#14140f'; g.lineWidth=5; g.strokeRect(30,30,840,1065);
-      const s = Math.min(600/im.width, 560/im.height);
-      g.drawImage(im, 450 - im.width*s/2, 430 - im.height*s/2, im.width*s, im.height*s);
-      g.textAlign='center';
-      g.fillStyle='#14140f'; g.font='600 54px '+PX+', monospace'; g.fillText(title,450,830);
-      g.fillStyle='#8e8c82'; g.font='300 36px '+PX+', monospace'; g.fillText(sub,450,896);
-      g.fillStyle='#c0472c'; g.fillRect(415,952,70,5);
-      tex.needsUpdate = true;
-    };
-    im.onerror = () => {};
-    im.src = url;
-  }
-
-  function artCanvas(o){
-    const c = document.createElement('canvas'); c.width=900; c.height=1125;
-    const g = c.getContext('2d');
-    g.fillStyle='#fbfaf7'; g.fillRect(0,0,900,1125);
-    g.strokeStyle='#14140f'; g.lineWidth=5; g.strokeRect(30,30,840,1065);
-    g.textAlign='center';
-    if(o.n){ g.fillStyle='#14140f'; g.font='300 262px '+PX+', monospace'; g.fillText(o.n,450,590); }
-    else drawIcon(g, o.icon, 450, 470, 300);
-    g.fillStyle='#14140f'; g.font='600 54px '+PX+', monospace'; g.fillText(o.t,450,790);
-    g.fillStyle='#8e8c82'; g.font='300 36px '+PX+', monospace'; g.fillText(o.s,450,856);
-    g.fillStyle='#c0472c'; g.fillRect(415,930,70,5);
-    return c;
-  }
-  function capCanvas(o){
-    const c = document.createElement('canvas'); c.width=560; c.height=232;
-    const g = c.getContext('2d');
-    g.fillStyle='#14140f'; g.fillRect(0,0,560,232);
-    g.fillStyle='#fbfaf7'; g.fillRect(5,5,550,222);
-    g.textAlign='left';
-    g.fillStyle='#14140f'; g.font='600 40px '+PX+', monospace'; g.fillText(o.t,34,74);
-    g.fillStyle='#4f4e47'; g.font='300 29px '+PX+', monospace'; g.fillText(o.s,34,120);
-    g.fillStyle='#8e8c82'; g.font='600 21px '+PX+', monospace'; g.fillText(o.spec,34,176);
-    g.fillStyle='#c0472c'; g.fillRect(34,192,48,4);
-    return texFrom(c);
-  }
-  function themeSign(o, i){
-    const c = document.createElement('canvas'); c.width=900; c.height=250;
-    const g = c.getContext('2d');
-    g.fillStyle='#14140f'; g.fillRect(0,0,900,250);
-    g.fillStyle='#f4f2ed'; g.fillRect(6,6,888,238);
-    g.textAlign='center';
-    g.fillStyle='#8e8c82'; g.font='600 26px '+PX+', monospace';
-    g.fillText('ROOM ' + String(i).padStart(2,'0'), 450, 84);
-    g.fillStyle='#14140f'; g.font='600 76px '+PX+', monospace';
-    g.fillText(o.theme, 450, 166);
-    g.fillStyle='#c0472c'; g.fillRect(410,196,80,6);
-    return texFrom(c);
-  }
-  function paintShot(c, tex, url, title, sub){
-    const im = new Image(); im.crossOrigin='anonymous';
-    im.onload = () => {
-      const g = c.getContext('2d');
-      const bx=68, by=68, bw=764, bh=690;
-      g.fillStyle='#14140f'; g.fillRect(bx-7,by-7,bw+14,bh+14);
-      const r = Math.max(bw/im.width, bh/im.height);
-      g.save(); g.beginPath(); g.rect(bx,by,bw,bh); g.clip();
-      g.drawImage(im, bx+(bw-im.width*r)/2, by, im.width*r, im.height*r); g.restore();
-      g.fillStyle='#fbfaf7'; g.fillRect(40,782,820,300);
-      g.textAlign='center';
-      g.fillStyle='#14140f'; g.font='600 54px '+PX+', monospace'; g.fillText(title,450,862);
-      g.fillStyle='#8e8c82'; g.font='300 36px '+PX+', monospace'; g.fillText(sub,450,924);
-      g.fillStyle='#c0472c'; g.fillRect(415,986,70,5);
-      tex.needsUpdate = true;
-    };
-    im.onerror = () => {};
-    im.src = url;
-  }
-  // side → wall centre + facing rotation (into the room)
-  // lx = the wall's own left-to-right axis in world space
-  const SIDE = {
-    px:{x: HALF, z:0, rot:-Math.PI/2, lx:{x:0,z: 1}},
-    nx:{x:-HALF, z:0, rot: Math.PI/2, lx:{x:0,z:-1}},
-    pz:{x:0, z: HALF, rot: Math.PI,   lx:{x:-1,z:0}},
-    nz:{x:0, z:-HALF, rot: 0,         lx:{x: 1,z:0}}
-  };
-
-  const featureDir = [];   // unit vector from room centre toward its feature wall
-  P.forEach((p, i) => {
-    const o = ROOMS[i];
-    const g = new THREE.Group(); g.position.set(p.x, 0, p.z); scene.add(g);
-
-    // rooms are laid out with the kit facing -Z; rotate so free walls line up
-    // pick the free wall you are most facing as you travel through: never the
-    // one directly behind you, so the survey turn stays short
-    const nxt = P[Math.min(N-1, i+1)], prv = P[Math.max(0, i-1)];
-    const out = (i < N-1)
-      ? {x:Math.sign(nxt.x-P[i].x), z:Math.sign(nxt.z-P[i].z)}
-      : {x:Math.sign(P[i].x-prv.x), z:Math.sign(P[i].z-prv.z)};
-    const free = ['nz','px','pz','nx'].filter(k => !doorSides[i][k])
-      .sort((a,b) => (SIDE[b].x*out.x + SIDE[b].z*out.z) - (SIDE[a].x*out.x + SIDE[a].z*out.z));
-    const featKey = free[0] || 'nz';
-    const f = SIDE[featKey];
-    // slide the piece down the wall in the direction of travel, so it sits
-    // ahead-and-to-the-side as you come through the door rather than beside you
-    const AOFF = 5.4 * (out.x*f.lx.x + out.z*f.lx.z);
-    const wox = f.lx.x*AOFF, woz = f.lx.z*AOFF;
-    featureDir[i] = new THREE.Vector3(f.x + wox, 0, f.z + woz).normalize();
-
-    const c = artCanvas(o); const tex = texFrom(c);
-    if(o.img) paintShot(c, tex, o.img, o.t, o.s);
-    else if(logoFor(o.t)) paintLogoArt(c, tex, logoFor(o.t), o.t, o.s);
-    const wall = new THREE.Group();
-    wall.position.set(f.x, 0, f.z); wall.rotation.y = f.rot; g.add(wall);
-    // room 00's wall is the favicon grid instead of a single framed piece
-    if(i !== 0){
-      B(wall, 3.2,3.95,.14, M.dark, AOFF, 3.15, .24, .9);
-      const art = new THREE.Mesh(new THREE.PlaneGeometry(3.0,3.75), new THREE.MeshBasicMaterial({map:tex}));
-      art.position.set(AOFF,3.15,.32); wall.add(art);
+    for (let i = 0; i <= COLS; i++){
+      for (let j = 0; j < ROWS; j++){
+        const a = vert(i,j),   a0=a[0],a1=a[1],a2=a[2];
+        const b = vert(i,j+1), b0=b[0],b1=b[1],b2=b[2];
+        linePos[q++]=a0; linePos[q++]=a1; linePos[q++]=a2;
+        linePos[q++]=b0; linePos[q++]=b1; linePos[q++]=b2;
+      }
     }
-    const cap = new THREE.Mesh(new THREE.PlaneGeometry(1.6,.66), new THREE.MeshBasicMaterial({map:capCanvas(o)}));
-    cap.position.set(AOFF + (AOFF > 0 ? -2.75 : 2.75), 2.0, .28); wall.add(cap);
-    const sp = new THREE.SpotLight(0xfff4e2, MOBILE?3:4.6, 13, .5, .8, 1.2);
-    sp.position.set(f.x*.72 + wox, H-.7, f.z*.72 + woz);
-    sp.target.position.set(f.x + wox, 3.1, f.z + woz);
-    g.add(sp); g.add(sp.target);
-    B(wall, .95,.12,.3, M.dark, AOFF, H-.5, 2.2, .7);
+    meshGeo.attributes.position.needsUpdate = true;
+    lineGeo.attributes.position.needsUpdate = true;
+    meshGeo.computeVertexNormals();
+    meshGeo.computeBoundingSphere();
+    lineGeo.computeBoundingSphere();
+  }
 
-    // Everything readable hangs on the wall the camera pans to — nothing on
-    // the walls you never turn toward. Room name sits above the main piece,
-    // the detail shot further along the same wall.
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.4,.94),
-      new THREE.MeshBasicMaterial({map: themeSign(o,i)}));
-    sign.position.set(AOFF, 5.85, .32); wall.add(sign);
-    B(wall, 3.56,1.1,.1, M.dark, AOFF, 5.85, .26, .9);
-
-    if(o.img2){
-      const c2 = artCanvas({n:'', icon:o.icon, t:o.t, s:o.s});
-      const t2 = texFrom(c2); paintShot(c2, t2, o.img2, o.t, 'detail');
-      const dOff = AOFF - Math.sign(AOFF || 1) * 5.4;      // further down the same wall
-      B(wall, 2.5,3.1,.12, M.dark, dOff, 2.95, .24, .9);
-      const a2 = new THREE.Mesh(new THREE.PlaneGeometry(2.32,2.9), new THREE.MeshBasicMaterial({map:t2}));
-      a2.position.set(dOff, 2.95, .32); wall.add(a2);
-      const sp2 = new THREE.SpotLight(0xfff4e2, MOBILE?2.4:3.4, 12, .5, .8, 1.2);
-      sp2.position.set(f.x*.72 + f.lx.x*dOff, H-.7, f.z*.72 + f.lx.z*dOff);
-      sp2.target.position.set(f.x + f.lx.x*dOff, 2.9, f.z + f.lx.z*dOff);
-      g.add(sp2); g.add(sp2.target);
-      B(wall, .85,.12,.3, M.dark, dOff, H-.5, 2.2, .7);
-    }
-
-    /* ---- entrance hall: the wall of favicons IS the artwork, face on top.
-           Everything is centred on AOFF so it lands where the camera pans. ---- */
-    if(i === 0){
-      const tiles = ROOMS.slice(1, 9);               // one per room beyond this one
-      const pitch = .9, size = .78;
-      tiles.forEach((r, k) => {
-        const col = k % 4, rowN = (k / 4) | 0;
-        const tx = AOFF + (col - 1.5) * pitch;
-        const ty = 2.55 - rowN * pitch;
-        B(wall, size+.09, size+.09, .1, M.dark, tx, ty, .24, .85);
-        const tl = new THREE.Mesh(new THREE.PlaneGeometry(size, size),
-          new THREE.MeshBasicMaterial({map: logoTile(logoFor(r.t), r.icon, r.t.split('.')[0])}));
-        tl.position.set(tx, ty, .32); wall.add(tl);
-      });
-      // the face, larger, sitting above the grid
-      B(wall, 1.62, 1.62, .12, M.dark, AOFF, 4.35, .24, .95);
-      const fm = new THREE.Mesh(new THREE.PlaneGeometry(1.44, 1.44),
-        new THREE.MeshBasicMaterial({map: logoTile(FACE, 'intro', 'AAYUSH')}));
-      fm.position.set(AOFF, 4.35, .32); wall.add(fm);
-    }
-
-    /* ---- the two live platforms get their logo repeated as a frieze ---- */
-    if(o.t === 'ARTHIS.SPACE' || o.t === 'ARTHIS.LAND'){
-      const fr = new THREE.Mesh(new THREE.PlaneGeometry(9.6, .82),
-        new THREE.MeshBasicMaterial({map: logoFrieze(logoFor(o.t), o.icon, 12)}));
-      fr.position.set(0, 6.55, .3); wall.add(fr);
-      B(wall, 9.76, .96, .08, M.dark, 0, 6.55, .24, .85);
-    }
-
-    // furniture, rotated so its "back" sits against the feature wall
-    const kit = new THREE.Group();
-    const ky = Math.atan2(f.x, -f.z);         // -Z of the kit points at the feature wall
-    kit.rotation.y = ky; g.add(kit);
-    // which side of that wall the artwork ended up on, in kit-local terms
-    const artSide = Math.sign(wox*Math.cos(ky) + woz*(-Math.sin(ky))) || 1;
-    (KITS[o.kit] || KITS.foyer)(kit, artSide);
-
-    // floor numeral
-    const nc = document.createElement('canvas'); nc.width=nc.height=256;
-    const ng = nc.getContext('2d');
-    ng.fillStyle='rgba(20,20,15,.2)'; ng.textAlign='center';
-    ng.font='600 150px '+PX+', monospace';
-    ng.fillText(String(i).padStart(2,'0'),128,180);
-    const plate = new THREE.Mesh(new THREE.PlaneGeometry(1.7,1.7),
-      new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(nc), transparent:true}));
-    plate.rotation.x = -Math.PI/2; plate.position.set(0,.018,0); g.add(plate);
+  const matFront = new THREE.MeshStandardMaterial({
+    color:0xFAF7F0, roughness:.95, metalness:0, flatShading:true, side:THREE.FrontSide
   });
-
-  /* ---------- camera path: centres + doorways, smoothed ---------- */
-  const pts = [];
-  for(let i=0;i<N;i++){
-    pts.push(new THREE.Vector3(P[i].x, EYE, P[i].z));
-    if(i < N-1) pts.push(new THREE.Vector3((P[i].x+P[i+1].x)/2, EYE, (P[i].z+P[i+1].z)/2));
-  }
-  curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal', .5);
-  camera.position.copy(curve.getPoint(0));
-
-  window.__featureDir = featureDir;
-
-  addEventListener('resize', ()=>{
-    camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth, innerHeight);
+  const matBack = new THREE.MeshStandardMaterial({
+    color:0xC8442A, roughness:.97, metalness:0, flatShading:true, side:THREE.BackSide
   });
-  ready = true; return true;
-}
+  const creaseMat = new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.16 });
 
-/* ══════════════════════════════════════════════════════════
-   PANELS + NAV
-   ══════════════════════════════════════════════════════════ */
-const els   = [...document.querySelectorAll('.panel')];
-const tag   = document.getElementById('roomtag');
-const slider= document.getElementById('slider');
-const sFill = document.getElementById('sFill');
-const sKnob = document.getElementById('sKnob');
-const sCur  = document.getElementById('sCur');
-const cue   = document.getElementById('cue');
+  const miura = new THREE.Group();
+  miura.add(new THREE.Mesh(meshGeo, matFront));
+  miura.add(new THREE.Mesh(meshGeo, matBack));
+  miura.add(new THREE.LineSegments(lineGeo, creaseMat));
+  miura.scale.setScalar(NARROW ? .82 : 1.16);
+  scene.add(miura);
 
-// ticks, one per room
-{
-  const tk = document.getElementById('sTicks');
-  for(let i=0;i<N;i++){
-    const e = document.createElement('i');
-    e.dataset.i = i; tk.appendChild(e);
+  /* ── 6b. loose shards ──────────────────────────────────────── */
+  function foldedQuad(w,h,bend){
+    const g = new THREE.BufferGeometry();
+    const hw = w/2, hh = h/2;
+    const v = [
+      -hw,-hh,0,  0,-hh,bend,  0,hh,bend,
+      -hw,-hh,0,  0,hh,bend,  -hw,hh,0,
+       0,-hh,bend, hw,-hh,0,   hw,hh,0,
+       0,-hh,bend, hw,hh,0,    0,hh,bend
+    ];
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+    g.computeVertexNormals();
+    return g;
   }
-}
-const isVertical = () => innerWidth > 860;
-function layoutSlider(){
-  const ticks = document.getElementById('sTicks').children;
-  for(let i=0;i<N;i++){
-    const pc = (i/(N-1))*100 + '%';
-    if(isVertical()){ ticks[i].style.top = pc; ticks[i].style.left = '50%'; }
-    else            { ticks[i].style.left = pc; ticks[i].style.top = '50%'; }
-  }
-}
-layoutSlider(); addEventListener('resize', layoutSlider);
-
-function paintSlider(v){          // v is 0..1 — only the fill and knob move
-  const pc = v*100 + '%';
-  if(isVertical()){
-    sFill.style.height = pc; sFill.style.width = '1px';
-    sKnob.style.top = pc; sKnob.style.left = '50%';
-  } else {
-    sFill.style.width = pc; sFill.style.height = '1px';
-    sKnob.style.left = pc; sKnob.style.top = '50%';
-  }
-}
-// dragging the slider walks you through the house
-let dragging = false;
-function fromEvent(e){
-  const r = slider.getBoundingClientRect();
-  const v = isVertical() ? (e.clientY - r.top)/r.height : (e.clientX - r.left)/r.width;
-  return Math.max(0, Math.min(1, v));
-}
-function applyDrag(e){
-  const v = fromEvent(e);
-  scrollTo({top: v*maxScroll()});
-}
-slider.addEventListener('pointerdown', e=>{
-  dragging = true; slider.classList.add('drag');
-  slider.setPointerCapture(e.pointerId); applyDrag(e); e.preventDefault();
-});
-slider.addEventListener('pointermove', e=>{ if(dragging) applyDrag(e); });
-['pointerup','pointercancel'].forEach(t=>slider.addEventListener(t, e=>{
-  dragging = false; slider.classList.remove('drag');
-  try{ slider.releasePointerCapture(e.pointerId); }catch(_){}
-}));
-slider.addEventListener('keydown', e=>{
-  if(['ArrowDown','ArrowRight'].includes(e.key)){ e.preventDefault();
-    scrollTo({top:(Math.min(N-1,active+1)/(N-1))*maxScroll(), behavior:'smooth'}); }
-  if(['ArrowUp','ArrowLeft'].includes(e.key)){ e.preventDefault();
-    scrollTo({top:(Math.max(0,active-1)/(N-1))*maxScroll(), behavior:'smooth'}); }
-});
-
-/* ── mobile sheet: rises on arrival, drops to a peek bar a moment later,
-      and collapses out of the way the instant you start moving again ── */
-const isPhone = () => innerWidth <= 860;
-let peekTimer = 0;
-function collapseNow(){ if(isPhone()) els.forEach(el => el.classList.add('peek')); }
-function expandThenPeek(delay){
-  clearTimeout(peekTimer);
-  if(!isPhone()) return;
-  els.forEach(el => el.classList.remove('peek'));
-  peekTimer = setTimeout(collapseNow, delay === undefined ? 4200 : delay);
-}
-els.forEach(el => {
-  const k = el.querySelector('.room-kicker');
-  if(!k) return;
-  k.addEventListener('click', e => {
-    if(!isPhone()) return;
-    e.stopPropagation();
-    clearTimeout(peekTimer);
-    el.classList.toggle('peek');
+  const shardMat = new THREE.MeshStandardMaterial({
+    color:0xF7F3EA, roughness:.96, metalness:0, flatShading:true, side:THREE.DoubleSide
   });
-});
-let moveTimer = 0;
-addEventListener('scroll', () => {
-  if(!isPhone()) return;
-  collapseNow();
-  clearTimeout(moveTimer);
-  moveTimer = setTimeout(() => expandThenPeek(), 420);   // settle, then show
-}, {passive:true});
+  const shardMatRed = shardMat.clone(); shardMatRed.color.setHex(0xD9583C);
+  const shardMatBlue = shardMat.clone(); shardMatBlue.color.setHex(0x3B5480);
 
-let counted = false;
-function setActive(i){
-  if(i === active) return;
-  active = i;
-  if(i < 0 || i >= N){ els.forEach(el=>el.classList.remove('on')); return; }
-  expandThenPeek();
-  els.forEach((el,k)=> el.classList.toggle('on', k===i));
-  const label = '<em>' + String(i).padStart(2,'0') + '</em>' + ROOMS[i].theme;
-  sCur.innerHTML = label;
-  tag.innerHTML  = label;
-  slider.setAttribute('aria-valuenow', i);
-  slider.setAttribute('aria-valuetext', ROOMS[i].theme);
-  cue.style.opacity = i === 0 ? '1' : '0';
-  const h = document.getElementById('hint');
-  if(h) h.style.opacity = i === 0 ? '1' : '0';
-  if(i === 7 && !counted){ counted = true; runCounts(); }
-}
-function runCounts(){
-  document.querySelectorAll('[data-count]').forEach(el=>{
-    const to = parseFloat(el.dataset.count), dec = to%1!==0?1:0;
-    let v=0; const step=to/42;
-    const t=setInterval(()=>{ v+=step; if(v>=to){v=to;clearInterval(t);} el.textContent=v.toFixed(dec); },18);
-  });
-}
-addEventListener('keydown', e=>{
-  if(['ArrowDown','ArrowRight','PageDown'].includes(e.key)){
-    e.preventDefault(); scrollTo({top:(Math.min(N-1,active+1)/(N-1))*maxScroll(), behavior:'smooth'}); }
-  if(['ArrowUp','ArrowLeft','PageUp'].includes(e.key)){
-    e.preventDefault(); scrollTo({top:(Math.max(0,active-1)/(N-1))*maxScroll(), behavior:'smooth'}); }
-});
+  const SHARDS = LOW ? 11 : 26;
+  const shards = [];
+  const shardGeos = [foldedQuad(.9,.62,.15), foldedQuad(.62,.86,.2), foldedQuad(1.15,.5,.12)];
+  for (let i = 0; i < SHARDS; i++){
+    const m = new THREE.Mesh(
+      shardGeos[i % shardGeos.length],
+      i % 9 === 3 ? shardMatRed : (i % 11 === 5 ? shardMatBlue : shardMat)
+    );
+    const r = 7 + Math.random() * 10;
+    const th = Math.random() * Math.PI * 2;
+    m.position.set(Math.cos(th)*r*1.15, (Math.random()-.5)*14, -3 - Math.random()*14);
+    m.rotation.set(Math.random()*6.28, Math.random()*6.28, Math.random()*6.28);
+    m.scale.setScalar(.55 + Math.random()*1.05);
+    shards.push({ m, sp:.06 + Math.random()*.16, ax:new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize(), ph:Math.random()*6.28, amp:.25+Math.random()*.5 });
+    scene.add(m);
+  }
 
-/* ══════════════════════════════════════════════════════════
-   LOOP — follow the path, turn through corners,
-   survey each room, swing the doors open on approach
-   ══════════════════════════════════════════════════════════ */
-const smooth = t => t*t*(3-2*t);
-const clamp01 = v => v<0?0:v>1?1:v;
-let clk=0, mx=0, my=0, sweep=0;
-const camPos = new THREE.Vector3(), ahead = new THREE.Vector3(),
-      fwd = new THREE.Vector3(), look = new THREE.Vector3();
+  /* ── 6c. paper planes ──────────────────────────────────────── */
+  function planeGeo(){
+    const N=[0,.02,1.35], T=[0,0,-.95], L=[-1.0,.12,-.78], R=[1.0,.12,-.78], K=[0,-.38,-.62];
+    const v=[].concat(N,L,T, N,T,R, N,T,K);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
+    g.computeVertexNormals();
+    return g;
+  }
+  const pMat = new THREE.MeshStandardMaterial({ color:0xFDFBF6, roughness:.93, metalness:0, flatShading:true, side:THREE.DoubleSide });
+  const pGeo = planeGeo();
+  const planes = [];
+  const PLANES = LOW ? 1 : 2;
+  for (let i = 0; i < PLANES; i++){
+    const m = new THREE.Mesh(pGeo, i === 0 ? pMat : (function(){ const c=pMat.clone(); c.color.setHex(0xF2C9BC); return c; })());
+    m.scale.setScalar(.5 + i*.12);
+    planes.push({ m, t:i*.5, sp:.055 + i*.018, r:11 + i*3.5, y:2.6 - i*5.4, tilt:.5 - i*.9 });
+    scene.add(m);
+  }
 
-function loop(){
-  requestAnimationFrame(loop);
-  current += (target-current) * (REDUCED ? 1 : .07);
-  clk += .01; mx += (px-mx)*.05; my += (py-my)*.05;
+  /* ── 6d. one composition per fold ──────────────────────────── */
+  const STATES = [
+    { fold:.06, rx:-.30, ry: .58, rz:-.10, px: 3.2, py: .4, pz:-1.5, red:0xC8442A },
+    { fold:.30, rx: .26, ry:-.50, rz: .14, px:-3.6, py:-.6, pz:-2.5, red:0x26406B },
+    { fold:.52, rx:-.46, ry: .82, rz:-.18, px: 3.9, py: .8, pz:-2.0, red:0xC8442A },
+    { fold:.70, rx: .34, ry:-.90, rz: .22, px:-3.9, py:-.4, pz:-2.4, red:0xB98A2E },
+    { fold:.42, rx:-.20, ry: .34, rz:-.30, px: 3.3, py:-.9, pz:-1.8, red:0x26406B },
+    { fold:.86, rx: .52, ry:-.36, rz: .12, px:-3.4, py: .7, pz:-2.8, red:0xB98A2E },
+    { fold:.62, rx:-.58, ry: 1.05, rz:-.08, px: 3.6, py:-.5, pz:-2.2, red:0xC8442A },
+    { fold:.24, rx: .16, ry:-.66, rz: .26, px:-3.7, py: .3, pz:-2.6, red:0x26406B },
+    { fold:.02, rx:-.10, ry: .20, rz: .00, px: 0.0, py:-.2, pz:-1.2, red:0xC8442A }
+  ];
+  const cur = { fold:STATES[0].fold, rx:STATES[0].rx, ry:STATES[0].ry, rz:STATES[0].rz,
+                px:STATES[0].px, py:STATES[0].py, pz:STATES[0].pz };
+  const curRed = new THREE.Color(STATES[0].red);
+  const tgtRed = new THREE.Color(STATES[0].red);
 
-  const p = current*(N-1);
-  setActive(Math.round(p));
-  document.getElementById('prog').style.width = (current*100)+'%';
-  paintSlider(current);
+  /* pointer parallax — desktop only */
+  const ptr = { x:0, y:0, tx:0, ty:0 };
+  if (!COARSE){
+    addEventListener('pointermove', e => {
+      ptr.tx = (e.clientX / innerWidth  - .5) * 2;
+      ptr.ty = (e.clientY / innerHeight - .5) * 2;
+    }, { passive:true });
+  }
 
-  if(ready){
-    const t = clamp01(current);
-    curve.getPoint(t, camPos);
-    curve.getPoint(clamp01(t + .022), ahead);
-    if(ahead.distanceToSquared(camPos) < 1e-6) curve.getPoint(clamp01(t - .022), ahead).sub(camPos).negate().add(camPos);
+  function resize(){
+    renderer.setSize(innerWidth, innerHeight, false);
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, isNarrow() ? 1.5 : 2));
+    camera.aspect = innerWidth / innerHeight;
+    miura.scale.setScalar(isNarrow() ? .82 : 1.16);
+    camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize, { passive:true });
 
-    camera.position.copy(camPos);
-    if(!REDUCED){
-      camera.position.y = EYE + Math.sin(clk*.7)*.045 - my*.16;
-      camera.position.x += Math.sin(clk*.45)*.1;
+  let lastFold = -1;
+  function step(dt, t){
+    const k = clamp(dt * 2.6, 0, 1);
+
+    /* which fold are we in, and how far between it and the next */
+    const f  = scroll.damped * (STATES.length - 1);
+    const i0 = Math.floor(f), i1 = Math.min(STATES.length - 1, i0 + 1);
+    const m  = easeIO(clamp(f - i0, 0, 1));
+    const a = STATES[i0], b = STATES[i1];
+
+    const wobble = REDUCED ? 0 : 1;
+    cur.fold += (lerp(a.fold,b.fold,m) + Math.sin(t*.30)*.035*wobble - cur.fold) * k;
+    cur.rx   += (lerp(a.rx,  b.rx,  m) + Math.sin(t*.23)*.05 *wobble - cur.rx)   * k;
+    cur.ry   += (lerp(a.ry,  b.ry,  m) + Math.cos(t*.19)*.06 *wobble - cur.ry)   * k;
+    cur.rz   += (lerp(a.rz,  b.rz,  m) - cur.rz) * k;
+    cur.px   += (lerp(a.px,  b.px,  m) - cur.px) * k;
+    cur.py   += (lerp(a.py,  b.py,  m) + Math.sin(t*.26)*.22*wobble - cur.py) * k;
+    cur.pz   += (lerp(a.pz,  b.pz,  m) - cur.pz) * k;
+
+    const phi = clamp(cur.fold, 0, 1) * 1.46;
+    if (Math.abs(phi - lastFold) > 0.0016){ foldTo(phi); lastFold = phi; }
+
+    tgtRed.setHex(m < .5 ? a.red : b.red);
+    curRed.lerp(tgtRed, clamp(dt*1.6,0,1));
+    matBack.color.copy(curRed);
+
+    miura.rotation.set(cur.rx, cur.ry, cur.rz);
+    miura.position.set(cur.px, cur.py, cur.pz);
+
+    ptr.x += (ptr.tx - ptr.x) * clamp(dt*3,0,1);
+    ptr.y += (ptr.ty - ptr.y) * clamp(dt*3,0,1);
+    camera.position.x = ptr.x * .85;
+    camera.position.y = -ptr.y * .55 - scroll.damped * 1.1;
+    camera.lookAt(0, -scroll.damped * .5, 0);
+
+    for (let s = 0; s < shards.length; s++){
+      const o = shards[s];
+      if (!REDUCED){
+        o.m.rotateOnAxis(o.ax, dt * o.sp);
+        o.m.position.y += Math.sin(t * .32 + o.ph) * dt * o.amp;
+      }
     }
-
-    fwd.copy(ahead).sub(camPos); fwd.y = 0;
-    if(fwd.lengthSq() < 1e-6) fwd.set(0,0,-1);
-    fwd.normalize();
-
-    // survey: swing toward the room's feature wall at its centre, then back
-    const i = Math.round(p), d = Math.abs(p - i);
-    let want = 0;
-    if(d < .5 && window.__featureDir && window.__featureDir[i]){
-      const fd = window.__featureDir[i];
-      // signed angle between forward and the feature direction, capped
-      const cross = fwd.x*fd.z - fwd.z*fd.x;
-      const dot   = fwd.x*fd.x + fwd.z*fd.z;
-      const ang   = Math.atan2(-cross, dot);
-      want = Math.max(-.58, Math.min(.58, ang)) * smooth(1 - d/.5);
+    for (let p = 0; p < planes.length; p++){
+      const o = planes[p];
+      if (!REDUCED) o.t += dt * o.sp;
+      const th = o.t * Math.PI * 2;
+      o.m.position.set(Math.cos(th) * o.r, o.y + Math.sin(th * 2) * 1.5, Math.sin(th) * o.r * .55 - 5);
+      o.m.rotation.set(Math.sin(th*2) * .30, -th + Math.PI/2, o.tilt + Math.cos(th) * .28);
     }
-    sweep += (want - sweep) * (REDUCED ? 1 : .06);
-
-    const a = sweep + mx*.16;
-    const cs = Math.cos(a), sn = Math.sin(a);
-    look.set(fwd.x*cs + fwd.z*sn, 0, -fwd.x*sn + fwd.z*cs)
-        .multiplyScalar(9).add(camera.position);
-    look.y = 2.35 - my*.6;
-    camera.lookAt(look);
-
-    // doors open when you are near AND looking at them — walk up head-on and
-    // they swing; glance at a wall across the room and they stay shut
-    const vx = look.x - camera.position.x, vz = look.z - camera.position.z;
-    const vl = Math.hypot(vx, vz) || 1;
-    const gx = vx/vl, gz = vz/vl;
-    for(let k=0;k<doors.length;k++){
-      const dr = doors[k];
-      const dx = dr.wx - camera.position.x, dz = dr.wz - camera.position.z;
-      const dist = Math.hypot(dx, dz) || 1;
-      const facing = (dx/dist)*gx + (dz/dist)*gz;          // 1 = dead ahead
-      const near   = 1 - clamp01((dist - 3.2) / 3.2);      // right at it → always open
-      const range  = 1 - clamp01((dist - 5) / 9);
-      const aim    = smooth(clamp01((facing - .25) / .45));
-      const open   = Math.max(near, range * aim);
-      dr.hinge.rotation.y += (dr.s * -1.85 * open - dr.hinge.rotation.y) * .09;
-    }
-    for(let k=0;k<spinners.length;k++) spinners[k].rotation.y += .0042;
 
     renderer.render(scene, camera);
   }
+
+  foldTo(STATES[0].fold * 1.46);
+  step(0, 0);
+  canvas.classList.add('lit');
+
+  if (REDUCED){ onTick((dt,t) => { step(Math.min(dt,.033), 0); }); }
+  else onTick(step);
 }
 
-/* ══════════════════════════════════════════════════════════
-   BOOT
-   ══════════════════════════════════════════════════════════ */
-function start(){
-  const ok = (typeof THREE !== 'undefined') && build();
-  if(!ok) document.getElementById('scene').style.display='none';
-  loop(); drawCharts();
-}
-
-function boot(){
-  const bar = document.getElementById('lbar'), pct = document.getElementById('lpct');
-  let v = 0;
-
-  // the pixel face has to be resident before any canvas texture is painted,
-  // otherwise every sign bakes in the fallback and never repaints
-  const fontReady = (document.fonts && document.fonts.load)
-    ? Promise.race([
-        Promise.all([
-          document.fonts.load('600 64px "Pixelify Sans"'),
-          document.fonts.load('400 36px "Pixelify Sans"')
-        ]),
-        new Promise(r => setTimeout(r, 2500))
-      ])
-    : Promise.resolve();
-
-  let started = false;
-  fontReady.then(()=>{ if(!started){ started = true; start(); } })
-           .catch(()=>{ if(!started){ started = true; start(); } });
-  const tick = setInterval(()=>{
-    v = Math.min(started ? 100 : 82, v + 6 + Math.random()*10);
-    pct.textContent = Math.round(v)+'%'; bar.style.width = v+'%';
-    if(v >= 100){ clearInterval(tick);
-      setTimeout(()=>{ document.getElementById('loader').classList.add('done');
-        setActive(-1); setActive(0); }, 340); }
-  }, 95);
-}
-
-/* ══════════════════════════════════════════════════════════
-   CHARTS
-   ══════════════════════════════════════════════════════════ */
-function drawCharts(){
-  if(typeof Chart === 'undefined') return;
-  Chart.defaults.color = '#8e8c82';
-  Chart.defaults.font.family = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-  Chart.defaults.font.size = 9.5;
-  new Chart(document.getElementById('cGenre'), {
-    type:'bar',
-    data:{labels:['Arcade','Sports','Board','Sim','FX','Other','Tools','3D'],
-      datasets:[{data:[34,28,27,26,21,13,10,8],
-        backgroundColor:'#14140f', hoverBackgroundColor:'#c0472c', barPercentage:.62}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#14140f',padding:9,cornerRadius:0,
-        displayColors:false,callbacks:{label:c=>c.raw+' builds'}}},
-      scales:{x:{grid:{display:false},border:{color:'#d8d5cd'},ticks:{font:{size:8.5}}},
-              y:{grid:{color:'#eae8e2'},border:{display:false},ticks:{maxTicksLimit:4}}}}
-  });
-  new Chart(document.getElementById('cTime'), {
-    type:'line',
-    data:{labels:['Nov 25','Dec','Jan 26','Feb','Mar','Apr','May','Jun','Jul'],
-      datasets:[{data:[9,10,27,113,39,29,6,3,1],
-        borderColor:'#14140f',borderWidth:1.5,tension:.34,
-        pointBackgroundColor:'#f2f1ee',pointBorderColor:'#14140f',pointBorderWidth:1.5,
-        pointRadius:2.6,pointHoverRadius:5,fill:true,backgroundColor:'rgba(20,20,15,.05)'}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#14140f',padding:9,cornerRadius:0,
-        displayColors:false,callbacks:{label:c=>c.raw+' new projects'}}},
-      scales:{x:{grid:{display:false},border:{color:'#d8d5cd'},ticks:{font:{size:8.5}}},
-              y:{grid:{color:'#eae8e2'},border:{display:false},ticks:{maxTicksLimit:4}}}}
-  });
-}
-
-if(document.readyState === 'loading') addEventListener('DOMContentLoaded', boot);
-else boot();
+if (window.THREE) buildScene();
+else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildScene);
+else buildScene();
 
 })();
 </script>
-  <script src="car.js"></script>
-  <script src="decor.js"></script>
 </body>
 </html>
