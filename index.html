@@ -6,7 +6,7 @@
 <title>Aayush Kumar — Game Developer, AI &amp; Backend Engineer</title>
 <meta name="description" content="Aayush Kumar — game developer and AI/backend engineer. A pop-up book of nine paper rooms: procedural systems, Unity engine tooling, Blender pipeline add-ons and the platforms they ship on.">
 <meta name="author" content="Aayush Kumar">
-<meta name="theme-color" content="#F2EEE4">
+<meta name="theme-color" content="#F4F4F3">
 <link rel="canonical" href="https://itsaayush2004.github.io/portfolio/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Aayush Kumar — Game Developer, AI &amp; Backend Engineer">
@@ -31,21 +31,21 @@
 
 /* ── 1. TOKENS ────────────────────────────────────────────────── */
 :root{
-  --paper:      #F2EEE4;
-  --paper-lo:   #E7E0D0;
-  --paper-hi:   #FCFAF5;
+  --paper:      #F4F4F3;
+  --paper-lo:   #E6E6E5;
+  --paper-hi:   #FCFCFC;
 
-  --ink:    #17150F;
-  --ink-2:  #454035;
-  --ink-3:  #837B6A;
-  --ink-4:  #A79E8B;
+  --ink:    #141414;
+  --ink-2:  #3D3D3D;
+  --ink-3:  #7A7A7A;
+  --ink-4:  #A5A5A5;
 
   --red:    #E0472C;
-  --blue:   #2C5FA8;
-  --gold:   #E0A32B;
-  --green:  #3F9E70;
+  --blue:   #141414;
+  --gold:   #E0472C;
+  --green:  #141414;
 
-  --rule:   rgba(23,21,15,.13);
+  --rule:   rgba(20,20,20,.14);
 
   --display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -109,7 +109,7 @@ body{
 }
 .vig{
   z-index:58; mix-blend-mode:multiply;
-  background:radial-gradient(128% 92% at 50% 16%, transparent 32%, rgba(72,62,42,.16) 70%, rgba(44,36,22,.32) 100%);
+  background:radial-gradient(128% 92% at 50% 16%, transparent 32%, rgba(24,24,24,.15) 70%, rgba(14,14,14,.30) 100%);
 }
 .grain{
   z-index:59; opacity:.46; mix-blend-mode:multiply;
@@ -284,8 +284,8 @@ body{
   background:linear-gradient(135deg, var(--red) 0%, #A9331E 100%);
   clip-path:polygon(0 0, 100% 0, 0 100%);
 }
-.tab.blue{ background:linear-gradient(135deg, var(--blue) 0%, #16283F 100%) }
-.tab.gold{ background:linear-gradient(135deg, var(--gold) 0%, #8A6417 100%) }
+.tab.blue{ background:linear-gradient(135deg, #2B2B2B 0%, #0D0D0D 100%) }
+.tab.gold{ background:linear-gradient(135deg, var(--red) 0%, #A9331E 100%) }
 .tab::after{ content:""; position:absolute; inset:0; background:linear-gradient(135deg, rgba(255,255,255,.3), transparent 58%) }
 
 /* ── FLOW MODE (phones, short windows) ── */
@@ -324,11 +324,11 @@ body.panel .sheet{
   overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none;
   padding:24px 26px 28px;
   border-radius:16px;
-  background:linear-gradient(152deg, rgba(255,253,248,.60) 0%, rgba(243,238,226,.40) 100%);
+  background:linear-gradient(152deg, rgba(255,255,255,.62) 0%, rgba(240,240,239,.42) 100%);
   -webkit-backdrop-filter:blur(22px) saturate(1.25);
   backdrop-filter:blur(22px) saturate(1.25);
   border:1px solid rgba(255,255,255,.55);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 4px rgba(20,16,8,.16), 0 22px 48px rgba(20,16,8,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 2px 4px rgba(0,0,0,.14), 0 22px 48px rgba(0,0,0,.30);
   transform-origin:50% 100%;
   transform:perspective(1100px) translateY(64px) rotateX(-13deg) scale(.97);
   opacity:0; visibility:hidden;
@@ -1550,7 +1550,7 @@ function build(){
   renderer.setSize(view.w, view.h, false);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
-  const PAPER = 0xF3EFE4;
+  const PAPER = 0xF4F4F3;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(PAPER);
   scene.fog = new THREE.Fog(PAPER, 30, 96);
@@ -1562,8 +1562,8 @@ function build(){
   const P = CELL.map(c => ({ x:c[0]*ROOM, z:c[1]*ROOM }));
 
   /* brighter, more cartoon than before */
-  const TINT   = [0xE0472C, 0x2C5FA8, 0xE0A32B, 0x3F9E70];
-  const HEXC   = ['#E0472C','#2C5FA8','#E0A32B','#3F9E70'];
+  const TINT   = [0xE0472C];
+  const HEXC   = ['#E0472C'];
   const ICONS  = ['intro','practice','space','hexa','blender','ai','data','contact'];
   const THEMES = ['LOBBY','BEDROOM','GAME ROOM','WORKSHOP','STUDIO','SERVER ROOM','LIBRARY','DINING ROOM'];
   const DEV = 'https://cdn.jsdelivr.net/gh/devicons/devicon@master/icons/';
@@ -1578,16 +1578,18 @@ function build(){
     [[DEV+'threejs/threejs-original.svg','Three.js'], [DEV+'github/github-original.svg','GitHub'],             [DEV+'javascript/javascript-original.svg','JavaScript']]
   ];
   const mix = (base, tint, amt) => new THREE.Color(base).lerp(new THREE.Color(tint), amt).getHex();
+  /* one accent only; rooms separate by value, not hue */
+  const INK = 0x141414;
   const ROOMS = P.map((_, i) => {
-    const t = TINT[i % TINT.length], a = .17 + (i % 4) * .035;
+    const v = (i % 4) * .038;
     return {
-      icon:ICONS[i], theme:THEMES[i], tint:t, hex:HEXC[i % HEXC.length],
-      wall: mix(0xEAE3D2, t, a*.42),
-      floor:mix(0xA79C85, t, a*1.15),
-      ceil: mix(0xE9E2D1, t, a*.55),
-      rail: mix(0xBFB08F, t, a*2.5),
-      art:  mix(0xCEC2A3, t, a*1.6),
-      obj:  mix(0xE0D6BE, t, a*1.3)
+      icon:ICONS[i], theme:THEMES[i], tint:TINT[0], hex:HEXC[0],
+      wall: mix(0xF2F2F1, INK, v*.55),
+      floor:mix(0xC9C9C7, INK, v),
+      ceil: mix(0xF8F8F7, INK, v*.3),
+      rail: mix(0x9C9C9A, INK, v),
+      art:  mix(0xDEDEDC, INK, v*.7),
+      obj:  mix(0xEAEAE8, INK, v*.5)
     };
   });
 
@@ -1636,12 +1638,12 @@ function build(){
     MATS.set(k, m); return m;
   }
   const M = {
-    dark : paper(0x1B1B16),
-    brass: paper(0xD3A33B),
-    warm : paper(0xCFB68C),
-    warmD: paper(0xA98F63),
-    stone: paper(0xDDD6C2),
-    white: paper(0xFBF8F1),
+    dark : paper(0x141414),
+    brass: paper(0xE0472C),
+    warm : paper(0xDCDCDA),
+    warmD: paper(0x4A4A48),
+    stone: paper(0xE4E4E2),
+    white: paper(0xFCFCFC),
     leafA: paper2(0x4FA772),
     leafB: paper2(0x3B8A5C),
     leafC: paper2(0x77BE84),
@@ -1651,7 +1653,7 @@ function build(){
 
   /* ── geometry helpers ─────────────────────────────────────── */
   const GEO = new Map();
-  const HULL = new THREE.MeshBasicMaterial({ color:0x17150F, side:THREE.BackSide });
+  const HULL = new THREE.MeshBasicMaterial({ color:0x141414, side:THREE.BackSide });
   const SEG = LOW ? 2 : 3;
   const HULL_MIN = LOW ? .8 : .5;
   const OUT_T = LOW ? .022 : .032;
@@ -2057,14 +2059,13 @@ function build(){
     const c = document.createElement('canvas'); c.width = W; c.height = Hh;
     const g = c.getContext('2d'), r = rng(77);
     const grad = g.createLinearGradient(0,0,0,Hh);
-    grad.addColorStop(0,   '#8FC4E8');
-    grad.addColorStop(.55, '#BFDFF2');
-    grad.addColorStop(1,   '#EAF4FA');
+    grad.addColorStop(0,   '#C9C9C7');
+    grad.addColorStop(.55, '#E4E4E2');
+    grad.addColorStop(1,   '#F7F7F6');
     g.fillStyle = grad; g.fillRect(0,0,W,Hh);
     /* a paper sun */
-    g.fillStyle = '#FFE9A8';
-    tornPoly(g, W*.74, Hh*.24, 62, 60, 5, '#FFE9A8');
-    tornPoly(g, W*.74, Hh*.24, 40, 39, 9, '#FFF6D2');
+    tornPoly(g, W*.74, Hh*.24, 62, 60, 5, '#E0472C');
+    tornPoly(g, W*.74, Hh*.24, 40, 39, 9, '#F0765F');
     /* torn-paper clouds */
     for (let k = 0; k < 7; k++){
       const cx = r()*W, cy = Hh*(.12 + r()*.76), s = .6 + r()*1.1;
@@ -2189,9 +2190,9 @@ function build(){
     const S = 128, c = document.createElement('canvas'); c.width = c.height = S;
     const g = c.getContext('2d');
     const rg = g.createRadialGradient(S/2, S/2, 0, S/2, S/2, S/2);
-    rg.addColorStop(0,   'rgba(255,222,168,.55)');
-    rg.addColorStop(.35, 'rgba(255,206,142,.17)');
-    rg.addColorStop(1,   'rgba(255,206,142,0)');
+    rg.addColorStop(0,   'rgba(255,252,246,.55)');
+    rg.addColorStop(.35, 'rgba(252,246,238,.17)');
+    rg.addColorStop(1,   'rgba(252,246,238,0)');
     g.fillStyle = rg; g.fillRect(0,0,S,S);
     return new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(c),
       transparent:true, blending:THREE.AdditiveBlending, depthWrite:false });
@@ -2209,7 +2210,7 @@ function build(){
     const shade = new THREE.Mesh(new THREE.CylinderGeometry(.22, .56, .68, 10, 1, true), paper2(0xFBF3DE));
     shade.position.set(x, y, z); g.add(shade);
     CYL(g, .57, .57, .05, 10, paper(tintHex), x, y - .30, z, false);
-    CYL(g, .56, .56, .04, 10, paper(0xFFE9BE), x, y - .34, z, false);
+    CYL(g, .56, .56, .04, 10, paper(0xFFFDF7), x, y - .34, z, false);
     /* the bulb's bloom, drawn not lit */
     const gm = GLOW_MAT.clone();
     gm.opacity = 0;
@@ -2331,8 +2332,11 @@ function build(){
     const floorM = new THREE.MeshToonMaterial({ color:R.floor, gradientMap:RAMP, map:gridMap(10) });
     const g = new THREE.Group(); scene.add(g); roomGroups.push(g);
 
-    const fl = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), floorM);
-    fl.rotation.x = -Math.PI/2; fl.position.set(p.x, 0, p.z); g.add(fl);
+    /* a slab exactly one room wide, top face at y=0. Neighbouring rooms
+       abut without overlapping, and any outline that would dip below the
+       floor is buried inside it rather than hanging under the world. */
+    const fl = new THREE.Mesh(new THREE.BoxGeometry(ROOM, .7, ROOM), floorM);
+    fl.position.set(p.x, -.35, p.z); g.add(fl);
 
     /* the lobby opens to the sky; every other ceiling is plain */
     if (i === 0){
@@ -2429,10 +2433,10 @@ function build(){
      you — so the room you are standing in is the lit one.
      ──────────────────────────────────────────────────────────── */
   scene.add(new THREE.AmbientLight(0xFFFFFF, .13));
-  const key  = new THREE.DirectionalLight(0xFFF1DC, .30); key.position.set(9,16,10);   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xB9CCEC, .13); fill.position.set(-10,7,-12); scene.add(fill);
-  const bulbA = new THREE.PointLight(0xFFCE8E, 0, 20, 1.6); scene.add(bulbA);
-  const bulbB = new THREE.PointLight(0xFFCE8E, 0, 18, 1.8); scene.add(bulbB);
+  const key  = new THREE.DirectionalLight(0xFFFFFF, .32); key.position.set(9,16,10);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xDCE4F0, .14); fill.position.set(-10,7,-12); scene.add(fill);
+  const bulbA = new THREE.PointLight(0xFFF8EE, 0, 20, 1.6); scene.add(bulbA);
+  const bulbB = new THREE.PointLight(0xFFF8EE, 0, 18, 1.8); scene.add(bulbB);
 
   /* ── walking ─────────────────────────────────────────────── */
   const shortAngle = (a, b) => {
@@ -2614,13 +2618,20 @@ function build(){
     const swing   = smooth(clamp((m - .20) / .66, 0, 1));
     const yawFwd  = yawCur + shortAngle(yawCur, yawNext) * swing;
 
-    /* straight down the corridor — the pieces come to you instead */
-    const yawWant = yawFwd;
+    /* ease across to the piece while you stand in the room, then back
+       to straight ahead — damped on legs that are already turning */
+    const cw   = .5 + .5*Math.cos(Math.PI*2*m);
+    const rIdx = m < .5 ? i0 : i1;
+    const ease = 1 - clamp(TURN[rIdx] / (Math.PI/2), 0, 1) * .58;
+    const av   = SIDEVEC[artKey[rIdx]];
+    const gx = P[rIdx].x + av[0]*9.4, gz = P[rIdx].z + av[1]*9.4;
+    const w  = cw * .78 * ease;
+    const yawWant = yawFwd + shortAngle(yawFwd, Math.atan2(gx - pos.x, gz - pos.z)) * w;
 
     const K = 4.2, C = 2 * Math.sqrt(K) * 1.06;
     yawV   += (shortAngle(yaw, yawWant) * K - yawV * C) * dt;
     yaw    += yawV * dt;
-    const pitchWant = 0;
+    const pitchWant = .075 * w;
     pitchV += ((pitchWant - pitch) * K - pitchV * C) * dt;
     pitch  += pitchV * dt;
 
