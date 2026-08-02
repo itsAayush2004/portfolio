@@ -18,7 +18,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F2EEE4'/%3E%3Cpath d='M6 24 L16 6 L26 24 L16 19 Z' fill='%23C8442A'/%3E%3C/svg%3E">
+<link rel="icon" href="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
 
 <style>
 /* ════════════════════════════════════════════════════════════════
@@ -105,7 +107,7 @@ body{
 }
 .vig{
   z-index:58; mix-blend-mode:multiply;
-  background:radial-gradient(132% 96% at 50% 14%, transparent 40%, rgba(72,62,42,.11) 76%, rgba(48,40,26,.22) 100%);
+  background:radial-gradient(128% 92% at 50% 16%, transparent 32%, rgba(72,62,42,.16) 70%, rgba(44,36,22,.32) 100%);
 }
 .grain{
   z-index:59; opacity:.46; mix-blend-mode:multiply;
@@ -130,8 +132,12 @@ body{
   font-family:var(--mono); font-size:11.5px; letter-spacing:.13em;
   text-transform:uppercase; color:var(--ink);
 }
-.mark .glyph{ width:22px; height:22px; flex:none; transition:transform .6s var(--ease-fold) }
-.mark:hover .glyph{ transform:rotate(-24deg) scale(1.08) }
+.mark .face{
+  width:27px; height:27px; flex:none; border-radius:50%; object-fit:cover;
+  background:var(--paper-lo); box-shadow:0 0 0 1.5px var(--ink);
+  transition:transform .6s var(--ease-fold);
+}
+.mark:hover .face{ transform:scale(1.09) rotate(-6deg) }
 .mark b{ font-weight:500 }
 .mark .sep{ color:var(--ink-4) }
 .mark .role{ color:var(--ink-3); display:none }
@@ -312,15 +318,13 @@ body.panel .fold.active{ opacity:1; visibility:visible; pointer-events:auto }
 body.panel .sheet{
   width:min(46vw, 620px);
   max-height:calc(100vh - 190px);
-  overflow-y:auto;
-  scrollbar-width:thin; scrollbar-color:var(--ink-4) transparent;
+  overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none;
   filter:drop-shadow(0 2px 2px rgba(23,21,15,.12)) drop-shadow(0 22px 40px rgba(58,48,28,.20));
   transform:perspective(1500px) translateY(26px) rotateX(5deg);
   transform-origin:50% 0%; opacity:0;
   transition:opacity .5s var(--ease-out), transform .78s var(--ease-fold);
 }
-body.panel .sheet::-webkit-scrollbar{ width:5px }
-body.panel .sheet::-webkit-scrollbar-thumb{ background:rgba(23,21,15,.2) }
+body.panel .sheet::-webkit-scrollbar{ width:0; height:0 }
 body.panel .fold.active .sheet{ opacity:1; transform:perspective(1500px) translateY(0) rotateX(0deg) }
 body.panel .fold.right{ justify-content:flex-end }
 body.panel .fold:nth-child(odd)  .sheet{ rotate:-.4deg }
@@ -506,10 +510,23 @@ body.flow .sheet.on{ opacity:1; transform:perspective(1500px) translateY(0) rota
 .veil{ position:fixed; inset:0; z-index:200; background:var(--paper); display:grid; place-items:center;
   transition:opacity .7s ease .3s, visibility .7s ease .3s;
   animation:veil-lift .9s var(--ease-out) 3.6s forwards }
-.veil .fold-mark{ width:74px; height:74px; overflow:visible }
-.veil .fold-mark path{ fill:none; stroke:var(--ink); stroke-width:2.2; stroke-linejoin:round; stroke-dasharray:280; stroke-dashoffset:280; animation:draw 1.5s var(--ease-out) forwards }
-.veil .fold-mark path.hot{ stroke:var(--red); animation-delay:.3s }
-@keyframes draw{ to{ stroke-dashoffset:0 } }
+.veil-inner{ display:grid; place-items:center; gap:20px }
+.veil-face{ position:relative; width:96px; height:96px; display:grid; place-items:center }
+.veil-face img{ width:66px; height:66px; border-radius:50%; object-fit:cover; background:var(--paper-lo) }
+.veil-face .ring{ position:absolute; inset:6px; border:1.5px solid rgba(23,21,15,.16); border-radius:50% }
+.veil-face .orbit{ position:absolute; inset:-4px; animation:spin 2.6s linear infinite }
+.veil-face .orbit i{
+  position:absolute; top:0; left:50%; width:9px; height:9px; margin-left:-4.5px;
+  background:var(--red); clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+}
+@keyframes spin{ to{ transform:rotate(360deg) } }
+.veil-label{
+  font-family:var(--mono); font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-3);
+}
+.veil-label i{ font-style:normal; animation:blink 1.4s steps(1) infinite }
+.veil-label i:nth-child(2){ animation-delay:.2s }
+.veil-label i:nth-child(3){ animation-delay:.4s }
+@keyframes blink{ 0%,50%{ opacity:1 } 51%,100%{ opacity:.15 } }
 @keyframes veil-lift{ to{ opacity:0; visibility:hidden } }
 body.open .veil{ opacity:0; visibility:hidden }
 
@@ -554,10 +571,14 @@ body.noweb{
 <a class="skip" href="#main">Skip to content</a>
 
 <div class="veil" aria-hidden="true">
-  <svg class="fold-mark" viewBox="0 0 100 100">
-    <path d="M14 82 L50 12 L86 82 L50 63 Z"/>
-    <path class="hot" d="M50 12 L50 63"/>
-  </svg>
+  <div class="veil-inner">
+    <div class="veil-face">
+      <span class="ring"></span>
+      <img src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png" alt="" loading="eager" onerror="this.style.visibility='hidden'">
+      <span class="orbit"><i></i></span>
+    </div>
+    <div class="veil-label">Unlocking the house<i>.</i><i>.</i><i>.</i></div>
+  </div>
 </div>
 
 <canvas id="scene" aria-hidden="true"></canvas>
@@ -567,10 +588,7 @@ body.noweb{
 
 <header class="hud">
   <a class="mark" href="#s0" aria-label="Aayush Kumar — back to the first room">
-    <svg class="glyph" viewBox="0 0 32 32" aria-hidden="true">
-      <path d="M4 27 L16 5 L28 27 L16 20 Z" fill="#C8442A"/>
-      <path d="M16 5 L16 20" stroke="#17150F" stroke-width="1.6"/>
-    </svg>
+    <img class="face" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png" alt="" loading="eager" onerror="this.style.display='none'">
     <b>Aayush Kumar</b><span class="sep">/</span><span class="role">Games · AI · Backend</span>
   </a>
   <nav class="hud-right" aria-label="Elsewhere">
@@ -1090,9 +1108,9 @@ onTick(() => {
 });
 
 /* ════════════════════════════════════════════════════════════════
-   6 — THE POP-UP BOOK
-   Nine rooms folded from paper. Walls hinge up off the floor as you
-   arrive and lie back down once you have passed.
+   6 — THE HOUSE
+   Nine rooms on a serpentine plan — straight, left, straight, right.
+   Same bones as before; every surface is now paper.
    ════════════════════════════════════════════════════════════════ */
 function hasWebGL(){
   try {
@@ -1101,14 +1119,52 @@ function hasWebGL(){
   } catch(e){ return false; }
 }
 
+/* the room icons, kept from the old house */
+function drawIcon(g, key, cx, cy, s){
+  g.save(); g.translate(cx, cy);
+  g.strokeStyle='#17150F'; g.fillStyle='#17150F';
+  g.lineWidth=s*.085; g.lineJoin='round'; g.lineCap='round';
+  const u=s/2;
+  switch(key){
+    case 'intro': g.beginPath(); g.arc(0,0,u*.8,0,7); g.stroke();
+      g.beginPath(); g.arc(0,0,u*.28,0,7); g.fill(); break;
+    case 'practice': [-.45,0,.45].forEach((o,i)=>{ g.beginPath();
+      g.moveTo(-u*.8,u*o); g.lineTo(u*(.8-i*.32),u*o); g.stroke(); }); break;
+    case 'space': g.beginPath(); g.rect(-u*.78,-u*.78,u*1.56,u*1.56); g.stroke();
+      g.beginPath(); g.moveTo(-u*.2,-u*.42); g.lineTo(u*.48,0); g.lineTo(-u*.2,u*.42);
+      g.closePath(); g.fill(); break;
+    case 'land': for(let r=0;r<3;r++) for(let c=0;c<3;c++){ const off=r%2?u*.18:0;
+      g.strokeRect(-u*.85+off+c*u*.58,-u*.78+r*u*.55,u*.5,u*.45); } break;
+    case 'hexa': [.82,.38].forEach(rr=>{ g.beginPath();
+      for(let k=0;k<6;k++){ const a=Math.PI/6+k*Math.PI/3;
+        const x=Math.cos(a)*u*rr,y=Math.sin(a)*u*rr; k?g.lineTo(x,y):g.moveTo(x,y);}
+      g.closePath(); g.stroke(); }); break;
+    case 'blender': g.beginPath(); g.arc(0,0,u*.72,0,7); g.stroke();
+      g.beginPath(); g.arc(0,0,u*.3,0,7); g.stroke();
+      for(let k=0;k<8;k++){ const a=k*Math.PI/4; g.beginPath();
+        g.moveTo(Math.cos(a)*u*.72,Math.sin(a)*u*.72);
+        g.lineTo(Math.cos(a)*u*.95,Math.sin(a)*u*.95); g.stroke(); } break;
+    case 'ai': { const pts=[[0,-.8],[-.75,-.1],[.75,-.1],[-.4,.75],[.4,.75]];
+      pts.forEach(a=>pts.forEach(b=>{ g.globalAlpha=.35; g.beginPath();
+        g.moveTo(a[0]*u,a[1]*u); g.lineTo(b[0]*u,b[1]*u); g.stroke(); }));
+      g.globalAlpha=1; pts.forEach(p=>{ g.beginPath(); g.arc(p[0]*u,p[1]*u,u*.15,0,7); g.fill(); }); break; }
+    case 'data': [[-.55,.5],[-.18,.85],[.19,.35],[.56,1.05]].forEach(b=>{
+      g.fillRect(b[0]*u-u*.13,u*.8-b[1]*u,u*.26,b[1]*u); }); break;
+    case 'contact': g.beginPath(); g.rect(-u*.85,-u*.55,u*1.7,u*1.1); g.stroke();
+      g.beginPath(); g.moveTo(-u*.85,-u*.55); g.lineTo(0,u*.16); g.lineTo(u*.85,-u*.55); g.stroke(); break;
+  }
+  g.restore();
+}
+
 function build(){
   if (!window.THREE || !hasWebGL()){ document.body.classList.add('noweb'); return; }
   const canvas = $('#scene');
   const LOW = innerWidth < 900 || (navigator.hardwareConcurrency || 8) <= 4;
 
   let renderer;
-  try { renderer = new THREE.WebGLRenderer({ canvas, antialias:!LOW, alpha:true, powerPreference:'high-performance' }); }
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias:!LOW, alpha:false, powerPreference:'high-performance' }); }
   catch(e){ document.body.classList.add('noweb'); return; }
+  if (!renderer.getContext()){ document.body.classList.add('noweb'); return; }
 
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, LOW ? 1.5 : 2));
   renderer.setSize(view.w, view.h, false);
@@ -1116,377 +1172,551 @@ function build(){
 
   const PAPER = 0xF2EEE4;
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(PAPER, 16, 64);
+  scene.background = new THREE.Color(PAPER);
+  scene.fog = new THREE.Fog(PAPER, 26, 86);
+  const camera = new THREE.PerspectiveCamera(LOW ? 78 : 70, view.w/view.h, .1, 260);
 
-  const camera = new THREE.PerspectiveCamera(44, view.w/view.h, .1, 200);
+  /* ── plan ───────────────────────────────────────────────────
+     straight, then left, then straight, then right, repeating   */
+  const ROOM = 20, HALF = ROOM/2, H = 7.4, DW = 2.3, DH = 5.0, T = .34, EYE = 2.05;
+  const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4],[0,-4]];
+  const P = CELL.map(c => ({ x:c[0]*ROOM, z:c[1]*ROOM }));
 
-  scene.add(new THREE.HemisphereLight(0xFFFDF7, 0xC9BCA0, .78));
-  const key  = new THREE.DirectionalLight(0xFFF4E2, 1.15); key.position.set(6, 12, 6);   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xBECBE4, 0.30); fill.position.set(-7, 4, -3);  scene.add(fill);
-  const rim  = new THREE.DirectionalLight(0xFFE7C8, 0.38); rim.position.set(0, 6, -12);   scene.add(rim);
-
-  /* ── 6a. paper stock ─────────────────────────────────────── */
-  function paperTexture(){
-    const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
-    const g = c.getContext('2d');
-    g.fillStyle = '#F7F3EA'; g.fillRect(0,0,S,S);
-    const r = rng(7);
-    for (let i = 0; i < 5200; i++){
-      const v = r();
-      g.fillStyle = v > .5 ? 'rgba(120,108,86,.055)' : 'rgba(255,255,255,.075)';
-      g.fillRect(r()*S, r()*S, 1, 1);
-    }
-    for (let i = 0; i < 130; i++){          /* long fibres */
-      g.strokeStyle = r() > .5 ? 'rgba(120,108,86,.045)' : 'rgba(255,255,255,.06)';
-      g.lineWidth = r() > .8 ? 1.3 : .7;
-      const x = r()*S, y = r()*S, a = (r()-.5)*.7, L = 12 + r()*46;
-      g.beginPath(); g.moveTo(x,y); g.lineTo(x + Math.cos(a)*L, y + Math.sin(a)*L); g.stroke();
-    }
-    const t = new THREE.CanvasTexture(c);
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    return t;
-  }
-  const stock = paperTexture();
-  stock.repeat.set(4,4);
-
-  function paperMat(hex, rough){
-    const m = new THREE.MeshStandardMaterial({
-      color:hex, roughness: rough === undefined ? .96 : rough, metalness:0,
-      side:THREE.DoubleSide, map:stock
-    });
-    if (!LOW){ m.bumpMap = stock; m.bumpScale = .012; }
-    return m;
-  }
-  const matWall  = paperMat(0xFAF7F0);
-  const matSide  = paperMat(0xF0EBDF);
-  const matFloor = paperMat(0xEBE4D4);
-  const matPlain = paperMat(0xF7F3EA);
-  const inkMat   = new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.20 });
-
-  const PALETTE = [0xC8442A, 0x26406B, 0xB98A2E];
-  const accentMats = PALETTE.map(h => {
-    const m = paperMat(h, .97); m.color.setHex(h); return m;
+  const TINT = [0xC8442A, 0x26406B, 0xB98A2E];
+  const ICONS = ['intro','practice','space','land','hexa','blender','ai','data','contact'];
+  const THEMES = ['ENTRANCE HALL','BEDROOM','GAME ROOM','LIVING ROOM','WORKSHOP','STUDIO','SERVER ROOM','LIBRARY','DINING ROOM'];
+  const mix = (base, tint, amt) => new THREE.Color(base).lerp(new THREE.Color(tint), amt).getHex();
+  const ROOMS = P.map((_, i) => {
+    const t = TINT[i % 3], a = .05 + (i % 4) * .015;
+    return {
+      icon:ICONS[i], theme:THEMES[i], tint:t,
+      wall: mix(0xF5F1E7, t, a),
+      floor:mix(0xD9D0BA, t, a*1.25),
+      ceil: mix(0xFBF9F3, t, a*.5),
+      rail: mix(0xE3DBC6, t, a*1.5)
+    };
   });
 
-  /* ── 6b. torn panels ─────────────────────────────────────── */
-  function tornShape(w, h, seed, amp){
-    const r = rng(seed);
-    const s = new THREE.Shape();
-    s.moveTo(0,0); s.lineTo(w,0);
-    const teeth = Math.max(5, Math.round(w / (LOW ? 2.4 : 1.5)));
-    for (let i = teeth; i >= 0; i--){
-      s.lineTo(w*i/teeth, h - r()*amp - (i & 1 ? amp*.3 : 0));
+  /* ── paper stock, banded like a toon ramp ─────────────────── */
+  const steps = new Uint8Array([96, 158, 214, 255]);
+  const RAMP = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
+  RAMP.minFilter = RAMP.magFilter = THREE.NearestFilter;
+  RAMP.generateMipmaps = false; RAMP.needsUpdate = true;
+
+  function paperMap(rep){
+    const S = 64, c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d');
+    const r = rng(19);
+    const sh = ['#ffffff','#ffffff','#fdfcf9','#f8f6f0','#f3f0e8','#eeeade'];
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++){
+      g.fillStyle = sh[(r()*sh.length)|0]; g.fillRect(x,y,1,1);
     }
-    s.lineTo(0,0);
-    return s;
+    for (let i = 0; i < 60; i++){        /* laid fibres */
+      g.strokeStyle = r() > .5 ? 'rgba(150,138,112,.22)' : 'rgba(255,255,255,.5)';
+      g.lineWidth = 1;
+      const x = r()*S, y = r()*S, L = 6 + r()*20, a = (r()-.5)*.5;
+      g.beginPath(); g.moveTo(x,y); g.lineTo(x+Math.cos(a)*L, y+Math.sin(a)*L); g.stroke();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.magFilter = t.minFilter = THREE.NearestFilter;
+    t.generateMipmaps = false;
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(rep, rep);
+    return t;
   }
-  function tornPanel(w, h, seed, mat, amp){
-    const geo = new THREE.ShapeGeometry(tornShape(w, h, seed, amp === undefined ? .5 : amp));
-    geo.computeVertexNormals();
-    const g = new THREE.Group();
-    g.add(new THREE.Mesh(geo, mat));
-    if (!LOW) g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 12), inkMat));
-    return g;
+  function gridMap(rep){
+    const S = 64, c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d');
+    const r = rng(31);
+    const sh = ['#ffffff','#fbfaf6','#f4f2ea'];
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++){ g.fillStyle = sh[(r()*sh.length)|0]; g.fillRect(x,y,1,1); }
+    g.fillStyle = 'rgba(23,21,15,.20)'; g.fillRect(0,0,S,1); g.fillRect(0,0,1,S);
+    g.fillStyle = 'rgba(23,21,15,.08)'; g.fillRect(0,S/2,S,1); g.fillRect(S/2,0,1,S);
+    const t = new THREE.CanvasTexture(c);
+    t.magFilter = t.minFilter = THREE.NearestFilter;
+    t.generateMipmaps = false;
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(rep, rep);
+    return t;
   }
-  /* a hinge that lies flat and swings upright */
-  function hinge(x, y, z, yaw){
-    const h = new THREE.Group();
-    h.position.set(x, y, z);
-    h.rotation.y = yaw;
-    const flap = new THREE.Group();
-    h.add(flap);
-    h.userData.flap = flap;
-    return h;
+  const STOCK = paperMap(7);
+  const MATS = new Map();
+  function paper(hex, map){
+    if (!map && MATS.has(hex)) return MATS.get(hex);
+    const m = new THREE.MeshToonMaterial({ color:hex, gradientMap:RAMP, map: map || STOCK });
+    if (!map) MATS.set(hex, m);
+    return m;
+  }
+  const M = {
+    dark : paper(0x1B1B16),
+    brass: paper(0xB98A2E),
+    red  : paper(0xC8442A),
+    blue : paper(0x26406B),
+    warm : paper(0xD8C9A8),
+    warmD: paper(0xB39C74),
+    stone: paper(0xE4DFD2),
+    white: paper(0xFAF7F0),
+    cloth: paper(0xCDC5B2)
+  };
+
+  /* ── geometry helpers ─────────────────────────────────────── */
+  const GEO = new Map();
+  const HULL = new THREE.MeshBasicMaterial({ color:0x17150F, side:THREE.BackSide });
+  const SEG = LOW ? 2 : 3;
+  const HULL_MIN = LOW ? .8 : .5;
+
+  function roundedBox(w,h,d){
+    const key = w+'|'+h+'|'+d;
+    if (GEO.has(key)) return GEO.get(key);
+    const r = Math.min(.08, w*.24, h*.24, d*.24);
+    const g = new THREE.BoxGeometry(w,h,d,SEG,SEG,SEG);
+    const p = g.attributes.position;
+    const hx = w/2-r, hy = h/2-r, hz = d/2-r;
+    const v = new THREE.Vector3(), q = new THREE.Vector3();
+    for (let i = 0; i < p.count; i++){
+      v.fromBufferAttribute(p,i);
+      q.set(Math.max(-hx,Math.min(hx,v.x)), Math.max(-hy,Math.min(hy,v.y)), Math.max(-hz,Math.min(hz,v.z)));
+      v.sub(q); const L = v.length();
+      if (L > 1e-6) v.multiplyScalar(r/L);
+      v.add(q); p.setXYZ(i, v.x, v.y, v.z);
+    }
+    p.needsUpdate = true; g.computeVertexNormals();
+    GEO.set(key,g); return g;
+  }
+  function B(par, w,h,d, mat, x,y,z, o){
+    const m = new THREE.Mesh(roundedBox(w,h,d), mat);
+    m.position.set(x,y,z); par.add(m);
+    const str = (o === undefined) ? .72 : o;
+    if (str >= HULL_MIN){
+      const t = .026;
+      const s = new THREE.Mesh(m.geometry, HULL);
+      s.position.copy(m.position);
+      s.scale.set((w+t*2)/w, (h+t*2)/h, (d+t*2)/d);
+      par.add(s);
+    }
+    return m;
+  }
+  function BS(par, w,h,d, mat, x,y,z, o){
+    const key = 'S'+w+'|'+h+'|'+d;
+    let g = GEO.get(key);
+    if (!g){ g = new THREE.BoxGeometry(w,h,d); GEO.set(key,g); }
+    const m = new THREE.Mesh(g, mat);
+    m.position.set(x,y,z); par.add(m);
+    const str = (o === undefined) ? .72 : o;
+    if (str > 0 && !LOW){
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(g, 20),
+        new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:Math.min(.85, str) }));
+      e.position.copy(m.position); par.add(e);
+    }
+    return m;
+  }
+  function CYL(par, rt,rb,h,seg, mat, x,y,z){
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,Math.max(seg, LOW?8:12)), mat);
+    m.position.set(x,y,z); par.add(m); return m;
+  }
+  function texFrom(c){ const t = new THREE.CanvasTexture(c); t.anisotropy = LOW?2:8; t.encoding = THREE.sRGBEncoding; return t; }
+
+  /* ── which walls have doorways ────────────────────────────── */
+  const sideKey = d => d.x > 0 ? 'px' : d.x < 0 ? 'nx' : d.z > 0 ? 'pz' : 'nz';
+  const opp = { px:'nx', nx:'px', pz:'nz', nz:'pz' };
+  const SIDEVEC = { px:[1,0], nx:[-1,0], pz:[0,1], nz:[0,-1] };
+  const doorSides = P.map(() => ({}));
+  for (let i = 0; i < N-1; i++){
+    const d = { x:Math.sign(P[i+1].x - P[i].x), z:Math.sign(P[i+1].z - P[i].z) };
+    const k = sideKey(d);
+    doorSides[i][k] = true; doorSides[i+1][opp[k]] = true;
   }
 
-  /* ── 6c. folded sculptures ───────────────────────────────── */
-  function miuraGeo(cols, rows, a, b, alpha, phi){
-    const S = a*Math.cos(phi), H = a*Math.sin(phi);
-    const psi = Math.asin(clamp(Math.sin(phi)*Math.sin(alpha), -1, 1));
-    const T = b*Math.sin(psi), L = b*Math.cos(psi);
-    const ox = (cols*S + T)*.5, oy = (rows*L)*.5;
-    const V = (i,j) => [ i*S + (j&1?T:0) - ox, (j*L - oy), (i&1?H:0) - H*.5 ];
-    const v = [];
-    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++){
-      const A = V(i,j), B = V(i+1,j), C = V(i+1,j+1), D = V(i,j+1);
-      v.push.apply(v, A); v.push.apply(v, B); v.push.apply(v, C);
-      v.push.apply(v, A); v.push.apply(v, C); v.push.apply(v, D);
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
-    g.computeVertexNormals();
-    return g;
+  /* travel direction of each leg, and the "right hand" of it */
+  const legDir = [];
+  for (let i = 0; i < N-1; i++){
+    legDir.push(new THREE.Vector3(Math.sign(P[i+1].x-P[i].x), 0, Math.sign(P[i+1].z-P[i].z)));
   }
-  function kreslingGeo(n, r0, h, twist){
-    const v = [];
-    const P = (k, top) => {
-      const a = k/n * Math.PI*2 + (top ? twist : 0);
-      const rr = top ? r0*.78 : r0;
-      return [ Math.cos(a)*rr, top ? h : 0, Math.sin(a)*rr ];
-    };
-    for (let k = 0; k < n; k++){
-      const b0 = P(k,false), b1 = P(k+1,false), t0 = P(k,true), t1 = P(k+1,true);
-      v.push.apply(v, b0); v.push.apply(v, b1); v.push.apply(v, t0);
-      v.push.apply(v, b1); v.push.apply(v, t1); v.push.apply(v, t0);
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
-    g.computeVertexNormals();
-    return g;
-  }
-  function dartGeo(){
-    const Nn=[0,.03,1.5], T=[0,0,-1.05], L=[-1.12,.14,-.86], R=[1.12,.14,-.86], K=[0,-.42,-.68];
-    const v = [].concat(Nn,L,T, Nn,T,R, Nn,T,K);
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
-    g.computeVertexNormals();
-    return g;
-  }
-  function fanGeo(blades, r0, r1, rise){
-    const v = [];
-    for (let k = 0; k < blades; k++){
-      const a0 = k/blades*Math.PI*1.55 - Math.PI*.775;
-      const a1 = (k+1)/blades*Math.PI*1.55 - Math.PI*.775;
-      const z = (k & 1) ? rise : 0;
-      const i0=[Math.cos(a0)*r0, 0, Math.sin(a0)*r0], i1=[Math.cos(a1)*r0, 0, Math.sin(a1)*r0];
-      const o0=[Math.cos(a0)*r1, z, Math.sin(a0)*r1], o1=[Math.cos(a1)*r1, z, Math.sin(a1)*r1];
-      v.push.apply(v,i0); v.push.apply(v,o0); v.push.apply(v,o1);
-      v.push.apply(v,i0); v.push.apply(v,o1); v.push.apply(v,i1);
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
-    g.computeVertexNormals();
-    return g;
+  legDir.push(legDir[legDir.length-1].clone());
+  const dirAt = i => legDir[clamp(i, 0, legDir.length-1)];
+
+  /* the main piece hangs opposite the text panel: even rooms right, odd rooms left */
+  const artKey = [];
+  for (let i = 0; i < N; i++){
+    const d = dirAt(Math.max(0, i-1));
+    const right = new THREE.Vector3(-d.z, 0, d.x);
+    const want = (i % 2 === 0) ? right : right.clone().negate();
+    let best = null, bestDot = -9;
+    ['px','nx','pz','nz'].forEach(k => {
+      if (doorSides[i][k]) return;
+      const v = SIDEVEC[k];
+      const dot = v[0]*want.x + v[1]*want.z;
+      if (dot > bestDot){ bestDot = dot; best = k; }
+    });
+    artKey.push(best || 'nz');
   }
 
-  const SCULPT = [
-    () => miuraGeo(LOW?7:9, LOW?5:7, .21, .24, 1.02, .82),
-    () => kreslingGeo(7, .62, 1.25, .58),
-    () => dartGeo(),
-    () => fanGeo(LOW?7:11, .18, .92, .34),
-    () => kreslingGeo(5, .55, 1.5, -.72)
-  ];
-
-  function sculpture(kind, accentIdx){
-    const g = new THREE.Group();
-    const mat = kind % 3 === 1
-      ? (function(){ const c = accentMats[accentIdx].clone(); c.flatShading = true; c.side = THREE.DoubleSide; return c; })()
-      : new THREE.MeshStandardMaterial({ color:0xFCFAF4, roughness:.95, metalness:0, flatShading:true, side:THREE.DoubleSide, map:stock });
-    const geo = SCULPT[kind % SCULPT.length]();
-    const m = new THREE.Mesh(geo, mat);
-    if (kind % SCULPT.length === 2) m.scale.setScalar(.62);
-    if (kind % SCULPT.length === 0) m.scale.setScalar(1.5);
-    g.add(m);
-    if (!LOW) g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 22), inkMat));
-    return g;
-  }
-
-  /* ── 6d. artwork drawn on paper ──────────────────────────── */
+  /* ── artwork ──────────────────────────────────────────────── */
+  const HEXC = ['#C8442A','#26406B','#B98A2E'];
   function tornPoly(g, cx, cy, rx, ry, seed, fill){
-    const r = rng(seed);
-    g.beginPath();
-    const K = 26;
-    for (let i = 0; i <= K; i++){
-      const a = i/K*Math.PI*2;
-      const j = .86 + r()*.28;
+    const r = rng(seed); g.beginPath();
+    for (let i = 0; i <= 26; i++){
+      const a = i/26*Math.PI*2, j = .86 + r()*.28;
       const x = cx + Math.cos(a)*rx*j, y = cy + Math.sin(a)*ry*j;
       i ? g.lineTo(x,y) : g.moveTo(x,y);
     }
     g.closePath(); g.fillStyle = fill; g.fill();
   }
-  const HEX = ['#C8442A','#26406B','#B98A2E'];
-  function artTexture(i, accentIdx){
-    const W = 512, H = 372;
-    const c = document.createElement('canvas'); c.width = W; c.height = H;
+  function artCanvas(i){
+    const W = 512, Hh = 380;
+    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
     const g = c.getContext('2d');
-    const acc = HEX[accentIdx];
-    const r = rng(101 + i*37);
-    g.fillStyle = '#F7F3EA'; g.fillRect(0,0,W,H);
-    for (let k = 0; k < 900; k++){ g.fillStyle = r()>.5?'rgba(120,108,86,.05)':'rgba(255,255,255,.07)'; g.fillRect(r()*W, r()*H, 1, 1); }
-
-    tornPoly(g, W*(.22+r()*.2), H*(.34+r()*.2), 96+r()*54, 82+r()*44, i*13+3, acc);
-    tornPoly(g, W*(.62+r()*.2), H*(.5+r()*.2),  74+r()*54, 66+r()*40, i*13+9, 'rgba(23,21,15,.86)');
-    tornPoly(g, W*(.48+r()*.2), H*(.28+r()*.2), 52+r()*38, 46+r()*30, i*13+17, '#E7E0D0');
-
+    const acc = HEXC[i % 3], r = rng(101 + i*37);
+    g.fillStyle = '#F8F5EC'; g.fillRect(0,0,W,Hh);
+    for (let k = 0; k < 1100; k++){ g.fillStyle = r()>.5?'rgba(140,128,104,.06)':'rgba(255,255,255,.08)'; g.fillRect(r()*W, r()*Hh, 1, 1); }
+    tornPoly(g, W*(.24+r()*.16), Hh*(.36+r()*.16), 98+r()*52, 84+r()*42, i*13+3,  acc);
+    tornPoly(g, W*(.64+r()*.16), Hh*(.5 +r()*.16), 76+r()*50, 68+r()*38, i*13+9,  'rgba(23,21,15,.88)');
+    tornPoly(g, W*(.48+r()*.14), Hh*(.30+r()*.14), 54+r()*36, 48+r()*28, i*13+17, '#E7E0D0');
+    drawIcon(g, ICONS[i], W-84, 78, 96);
     g.strokeStyle = 'rgba(23,21,15,.5)'; g.lineWidth = 2;
-    g.beginPath(); g.moveTo(28, H-46); g.lineTo(W-28, H-46); g.stroke();
-    g.fillStyle = '#17150F';
-    g.font = '700 78px Fraunces, Georgia, "Times New Roman", serif';
-    g.textBaseline = 'alphabetic';
-    g.fillText(String(i).padStart(2,'0'), 28, H-64);
-    g.fillStyle = acc;
-    g.font = '500 15px "JetBrains Mono", ui-monospace, monospace';
-    g.fillText((NAMES[i] || '').toUpperCase(), 28, H-18);
-
-    const t = new THREE.CanvasTexture(c);
-    t.encoding = THREE.sRGBEncoding;
-    t.anisotropy = LOW ? 1 : 4;
-    return t;
+    g.beginPath(); g.moveTo(30, Hh-50); g.lineTo(W-30, Hh-50); g.stroke();
+    g.fillStyle = '#17150F'; g.font = '700 76px Fraunces, Georgia, serif';
+    g.fillText(String(i).padStart(2,'0'), 30, Hh-66);
+    g.fillStyle = acc; g.font = '500 15px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText(THEMES[i], 30, Hh-20);
+    return c;
   }
-  const artTextures = [];
+  function labelCanvas(i){
+    const W = 400, Hh = 128;
+    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
+    const g = c.getContext('2d');
+    g.fillStyle = '#FAF7F0'; g.fillRect(0,0,W,Hh);
+    g.strokeStyle = 'rgba(23,21,15,.24)'; g.lineWidth = 2; g.strokeRect(2,2,W-4,Hh-4);
+    g.fillStyle = HEXC[i%3]; g.font = '500 17px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText('ROOM ' + String(i).padStart(2,'0'), 22, 40);
+    g.fillStyle = '#17150F'; g.font = '700 33px Fraunces, Georgia, serif';
+    g.fillText((NAMES[i]||'').slice(0,24), 22, 86);
+    return c;
+  }
+  function numeralCanvas(i){
+    const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d');
+    g.clearRect(0,0,S,S);
+    g.fillStyle = 'rgba(23,21,15,.13)';
+    g.font = '700 168px Fraunces, Georgia, serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(String(i).padStart(2,'0'), S/2, S/2 + 8);
+    return c;
+  }
+  const artTex = [], labTex = [], numTex = [];
 
-  /* ── 6e. build the nine rooms ────────────────────────────── */
-  const SPACING = 26, HALF_W = 8.6, WALL_H = 9.4, DEPTH = 26;
-  const DOOR_W = 5.4, DOOR_H = 6.2, EYE = 2.05;
+  /* ── folded sculptures ────────────────────────────────────── */
+  function miuraGeo(cols, rows, a, b, alpha, phi){
+    const S = a*Math.cos(phi), Hz = a*Math.sin(phi);
+    const psi = Math.asin(clamp(Math.sin(phi)*Math.sin(alpha), -1, 1));
+    const Tt = b*Math.sin(psi), L = b*Math.cos(psi);
+    const ox = (cols*S + Tt)*.5, oy = (rows*L)*.5;
+    const V = (i,j) => [ i*S + (j&1?Tt:0) - ox, (j*L - oy), (i&1?Hz:0) - Hz*.5 ];
+    const v = [];
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++){
+      const A=V(i,j), Bv=V(i+1,j), C=V(i+1,j+1), D=V(i,j+1);
+      v.push.apply(v,A); v.push.apply(v,Bv); v.push.apply(v,C);
+      v.push.apply(v,A); v.push.apply(v,C);  v.push.apply(v,D);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
+    g.computeVertexNormals(); return g;
+  }
+  function kreslingGeo(n, r0, h, twist){
+    const v = [];
+    const Pt = (k, top) => { const a = k/n*Math.PI*2 + (top?twist:0), rr = top ? r0*.78 : r0;
+      return [Math.cos(a)*rr, top?h:0, Math.sin(a)*rr]; };
+    for (let k = 0; k < n; k++){
+      const b0=Pt(k,0), b1=Pt(k+1,0), t0=Pt(k,1), t1=Pt(k+1,1);
+      v.push.apply(v,b0); v.push.apply(v,b1); v.push.apply(v,t0);
+      v.push.apply(v,b1); v.push.apply(v,t1); v.push.apply(v,t0);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
+    g.computeVertexNormals(); return g;
+  }
+  function dartGeo(){
+    const Nn=[0,.03,1.5], Tt=[0,0,-1.05], L=[-1.12,.14,-.86], R=[1.12,.14,-.86], K=[0,-.42,-.68];
+    const v = [].concat(Nn,L,Tt, Nn,Tt,R, Nn,Tt,K);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
+    g.computeVertexNormals(); return g;
+  }
+  function fanGeo(blades, r0, r1, rise){
+    const v = [];
+    for (let k = 0; k < blades; k++){
+      const a0 = k/blades*Math.PI*1.6 - Math.PI*.8, a1 = (k+1)/blades*Math.PI*1.6 - Math.PI*.8;
+      const z = (k&1) ? rise : 0;
+      const i0=[Math.cos(a0)*r0,0,Math.sin(a0)*r0], i1=[Math.cos(a1)*r0,0,Math.sin(a1)*r0];
+      const o0=[Math.cos(a0)*r1,z,Math.sin(a0)*r1], o1=[Math.cos(a1)*r1,z,Math.sin(a1)*r1];
+      v.push.apply(v,i0); v.push.apply(v,o0); v.push.apply(v,o1);
+      v.push.apply(v,i0); v.push.apply(v,o1); v.push.apply(v,i1);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
+    g.computeVertexNormals(); return g;
+  }
+  const SCULPT = [
+    () => ({ g:miuraGeo(LOW?7:10, LOW?5:7, .22, .25, 1.02, .84), s:1.5 }),
+    () => ({ g:kreslingGeo(7, .58, 1.2, .58), s:1 }),
+    () => ({ g:dartGeo(), s:.62 }),
+    () => ({ g:fanGeo(LOW?7:11, .16, .9, .34), s:1.05 }),
+    () => ({ g:kreslingGeo(5, .5, 1.45, -.72), s:1 })
+  ];
+  const spinners = [];
+  function pedestal(par, x, z, i){
+    BS(par, 1.5, 1.3, 1.5, M.stone, x, .65, z, .8);
+    const def = SCULPT[i % SCULPT.length]();
+    const mat = new THREE.MeshToonMaterial({
+      color: (i % 3 === 1) ? TINT[i % 3] : 0xFCFAF4, gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide
+    });
+    const m = new THREE.Mesh(def.g, mat);
+    m.scale.setScalar(def.s * 1.05);
+    m.position.set(x, 1.3 + .55, z);
+    par.add(m);
+    if (!LOW){
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(def.g, 22),
+        new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.32 }));
+      e.scale.copy(m.scale); e.position.copy(m.position); par.add(e);
+      spinners.push(e);
+    }
+    spinners.push(m);
+  }
+  function plant(par, x, z, tint){
+    CYL(par, .3, .38, .5, 6, paper(mix(0xEDE7D9, tint, .18)), x, .25, z);
+    const v = [], K = 7;
+    for (let i = 0; i < K; i++){
+      const a = i/K*Math.PI*2, tipR = .5 + (i%2)*.24, tipY = 1 + (i%3)*.34;
+      v.push(0,0,0, Math.cos(a)*tipR, tipY, Math.sin(a)*tipR,
+             Math.cos(a+.55)*tipR*.6, tipY*.5, Math.sin(a+.55)*tipR*.6);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, new THREE.MeshToonMaterial({ color:0xF6F2E8, gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide }));
+    m.position.set(x, .48, z); m.scale.setScalar(1.15); par.add(m);
+  }
+  function bench(par, x, z, rot){
+    const g = new THREE.Group(); g.position.set(x,0,z); g.rotation.y = rot; par.add(g);
+    B(g, 2.9, .18, .9, M.warm, 0, .62, 0, .8);
+    [-1.2, 1.2].forEach(o => B(g, .18, .56, .8, M.warmD, o, .3, 0, .7));
+  }
 
-  const rooms = [];
-  for (let i = 0; i < N; i++){
-    const cz = -i * SPACING;
-    const accentIdx = i % 3;
-    const side = (i % 2 === 0) ? 1 : -1;      /* artwork sits opposite the text panel */
+  /* ── the gate: columns, beam, brass threshold, medallion, leaves ── */
+  const doors = [];
+  function buildGate(g, mx, mz, alongZ, roomIdx, wallM){
+    const gate = new THREE.Group();
+    gate.position.set(mx, 0, mz);
+    gate.rotation.y = alongZ ? Math.PI/2 : 0;
+    g.add(gate);
+
+    const CZ = .64, CD = .80, WD = .84;
+    [-1,1].forEach(s => {
+      const cx = s*(DW + .23);
+      BS(gate, .46, DH,    CD, wallM,   cx, DH/2,     CZ, .95);   /* column  */
+      BS(gate, .66, .24,   WD, wallM,   cx, .12,      CZ, .95);   /* base    */
+      BS(gate, .66, .26,   WD, wallM,   cx, DH - .13, CZ, .95);   /* capital */
+      BS(gate, .05, DH-.6, .05, M.brass, cx, DH/2, CZ + CD/2 + .015, 0);
+    });
+    BS(gate, DW*2 + .92, .54, WD, wallM,  0, DH + .27, CZ, .95);  /* beam        */
+    BS(gate, DW*2 + .92, .10, WD, M.brass, 0, DH + .01, CZ, 0);   /* under-rail  */
+    BS(gate, DW*2,       .05, .74, M.brass, 0, .025,    CZ, 0);   /* threshold   */
+
+    /* medallion naming whatever is next door */
+    const nxtI = Math.min(roomIdx + 1, N - 1);
+    const mc = document.createElement('canvas'); mc.width = mc.height = 300;
+    const mg = mc.getContext('2d');
+    mg.fillStyle = '#F6F3EC'; mg.beginPath(); mg.arc(150,150,148,0,7); mg.fill();
+    mg.strokeStyle = '#17150F'; mg.lineWidth = 7; mg.beginPath(); mg.arc(150,150,136,0,7); mg.stroke();
+    mg.strokeStyle = HEXC[nxtI % 3]; mg.lineWidth = 3; mg.beginPath(); mg.arc(150,150,118,0,7); mg.stroke();
+    drawIcon(mg, ICONS[nxtI], 150, 148, 138);
+    const med = new THREE.Mesh(new THREE.CircleGeometry(.28, 30), new THREE.MeshBasicMaterial({ map:texFrom(mc), transparent:true }));
+    med.position.set(0, DH + .27, CZ + WD/2 + .015);
+    gate.add(med);
+
+    /* two leaves, hinged at the jambs, swung open as you approach */
+    [-1,1].forEach(s => {
+      const hg = new THREE.Group();
+      hg.position.set(s*DW, 0, 0); gate.add(hg);
+      const leaf = new THREE.Group(); hg.add(leaf);
+      BS(leaf, DW, DH-.12, .10, M.warmD, -s*DW/2, (DH-.12)/2, 0, .85);
+      BS(leaf, DW*.62, DH*.42, .13, M.warm, -s*DW/2, DH*.30, .012, .7);
+      BS(leaf, DW*.62, DH*.28, .13, M.warm, -s*DW/2, DH*.70, .012, .7);
+      CYL(leaf, .05,.05,.26, 8, M.brass, -s*DW*.9, DH*.5, .1);
+      doors.push({ hinge:hg, s:s, wx:mx, wz:mz });
+    });
+  }
+
+  /* ── raise the house ──────────────────────────────────────── */
+  const roomGroups = [];
+  const built = new Set();
+  P.forEach((p, i) => {
+    const R = ROOMS[i];
+    const wallM = paper(R.wall), ceilM = paper(R.ceil), railM = paper(R.rail);
+    const floorM = new THREE.MeshToonMaterial({ color:R.floor, gradientMap:RAMP, map:gridMap(10) });
+
     const g = new THREE.Group();
     scene.add(g);
+    roomGroups.push(g);
 
-    /* floor */
-    const floorGeo = new THREE.PlaneGeometry(HALF_W*2, DEPTH);
-    const floor = new THREE.Mesh(floorGeo, matFloor);
-    floor.rotation.x = -Math.PI/2;
-    floor.position.set(0, 0, cz);
-    g.add(floor);
+    const fl = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), floorM);
+    fl.rotation.x = -Math.PI/2; fl.position.set(p.x, 0, p.z); g.add(fl);
+    const ce = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), ceilM);
+    ce.rotation.x = Math.PI/2; ce.position.set(p.x, H, p.z); g.add(ce);
 
-    /* a coloured runner down the middle */
-    const runner = new THREE.Mesh(new THREE.PlaneGeometry(2.1, DEPTH*.86), accentMats[accentIdx]);
-    runner.rotation.x = -Math.PI/2;
-    runner.position.set(0, .012, cz);
-    g.add(runner);
+    /* the room number, laid into the floor */
+    numTex.push(texFrom(numeralCanvas(i)));
+    const num = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), new THREE.MeshBasicMaterial({ map:numTex[i], transparent:true }));
+    num.rotation.x = -Math.PI/2;
+    num.position.set(p.x - SIDEVEC[artKey[i]][0]*6.4, .015, p.z - SIDEVEC[artKey[i]][1]*6.4);
+    g.add(num);
 
-    /* side walls — hinged along the floor line */
-    const wl = hinge(-HALF_W, 0, cz + DEPTH/2, Math.PI/2);
-    wl.userData.flap.add(tornPanel(DEPTH, WALL_H, i*11+1, matSide));
-    g.add(wl);
-    const wr = hinge(HALF_W, 0, cz - DEPTH/2, -Math.PI/2);
-    wr.userData.flap.add(tornPanel(DEPTH, WALL_H, i*11+5, matSide));
-    g.add(wr);
+    [['px',1,0],['nx',-1,0],['pz',0,1],['nz',0,-1]].forEach(function(w){
+      const k = w[0], sx = w[1], sz = w[2];
+      const mx = p.x + sx*HALF, mz = p.z + sz*HALF;
+      const id = Math.round(mx*10) + '|' + Math.round(mz*10);
+      if (built.has(id)) return; built.add(id);
+      const alongZ = sx !== 0;
+      const hasDoor = !!doorSides[i][k];
 
-    /* back wall — two jambs and a lintel, so there is a doorway through */
-    const back = hinge(-HALF_W, 0, cz - DEPTH/2, 0);
-    const jambW = HALF_W - DOOR_W/2;
-    const left  = tornPanel(jambW, WALL_H, i*11+3, matWall);
-    const right = tornPanel(jambW, WALL_H, i*11+7, matWall);
-    right.position.x = HALF_W + DOOR_W/2;
-    const lintel = tornPanel(DOOR_W, WALL_H - DOOR_H, i*11+13, matWall, .38);
-    lintel.position.set(jambW, DOOR_H, 0);
-    back.userData.flap.add(left, right, lintel);
+      if (!hasDoor){
+        B(g, alongZ?T:ROOM, H, alongZ?ROOM:T, wallM, mx, H/2, mz, .55);
+      } else {
+        const seg = HALF - DW;
+        [-1,1].forEach(s => {
+          const off = s*(DW + seg/2);
+          B(g, alongZ?T:seg, DH, alongZ?seg:T, wallM,
+            mx + (alongZ?0:off), DH/2, mz + (alongZ?off:0), .7);
+        });
+        B(g, alongZ?T:ROOM, H-DH, alongZ?ROOM:T, wallM, mx, DH + (H-DH)/2, mz, .7);
+        buildGate(g, mx, mz, alongZ, i, wallM);
+      }
+      /* skirting and a picture rail */
+      const sk = alongZ ? [T+.04,.20,ROOM] : [ROOM,.20,T+.04];
+      B(g, sk[0],sk[1],sk[2], M.dark, mx, .10, mz, 0);
+      const rl = alongZ ? [T+.06,.08,ROOM] : [ROOM,.08,T+.06];
+      B(g, rl[0],rl[1],rl[2], railM, mx, 5.9, mz, 0);
+    });
 
-    /* artwork, mounted on whichever jamb faces the reader */
-    const art = new THREE.Group();
-    const tex = artTexture(i, accentIdx);
-    artTextures.push(tex);
-    const mount = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 3.27), new THREE.MeshStandardMaterial({ map:tex, roughness:.95, metalness:0 }));
-    const matte = new THREE.Mesh(new THREE.PlaneGeometry(5.1, 3.9), matPlain);
-    matte.position.z = -.02;
-    art.add(matte, mount);
-    art.position.set(side > 0 ? HALF_W + DOOR_W/2 + jambW/2 : jambW/2, 4.5, .06);
-    back.userData.flap.add(art);
+    /* the main piece, on whichever wall has no doorway */
+    const ak = artKey[i], av = SIDEVEC[ak];
+    const ax = p.x + av[0]*(HALF - T*.5 - .06);
+    const az = p.z + av[1]*(HALF - T*.5 - .06);
+    const face = Math.atan2(-av[0], -av[1]);
+    artTex.push(texFrom(artCanvas(i)));
+    labTex.push(texFrom(labelCanvas(i)));
 
-    /* the caption card */
-    const cap = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .82), matPlain);
-    cap.position.set(art.position.x, 2.1, .06);
-    back.userData.flap.add(cap);
-    g.add(back);
+    const frame = new THREE.Group();
+    frame.position.set(ax, 0, az); frame.rotation.y = face; g.add(frame);
+    BS(frame, 5.6, 4.3, .12, M.white, 0, 3.5, 0, .7);
+    const art = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 3.64), new THREE.MeshBasicMaterial({ map:artTex[i] }));
+    art.position.set(0, 3.5, .07); frame.add(art);
+    const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.5, .8), new THREE.MeshBasicMaterial({ map:labTex[i] }));
+    lab.position.set(0, .95, .07); frame.add(lab);
 
-    /* pedestal and the folded piece on it */
-    const ped = new THREE.Group();
-    const pedGeo = new THREE.BoxGeometry(1.5, 1.4, 1.5);
-    ped.add(new THREE.Mesh(pedGeo, matPlain));
-    if (!LOW) ped.add(new THREE.LineSegments(new THREE.EdgesGeometry(pedGeo), inkMat));
-    ped.position.set(-side * 3.6, .7, cz - 5.2);
-    g.add(ped);
+    /* dressing, arranged in front of the piece */
+    const AX = av[0], AZ = av[1];          /* toward the art wall  */
+    const LX = av[1], LZ = -av[0];         /* along the art wall   */
+    pedestal(g, p.x + AX*5.4 + LX*3.3, p.z + AZ*5.4 + LZ*3.3, i);
+    plant(g,    p.x + AX*7.4 - LX*3.9, p.z + AZ*7.4 - LZ*3.9, R.tint);
+    if (!LOW) bench(g, p.x + AX*.4, p.z + AZ*.4, Math.atan2(AX, AZ));
+  });
 
-    const sc = sculpture(i, accentIdx);
-    sc.position.set(-side * 3.6, 1.4 + .55, cz - 5.2);
-    sc.scale.setScalar(1.15);
-    g.add(sc);
-
-    rooms.push({ g, cz, side, walls:[wl, wr, back], sculpt:sc, art });
-  }
-
-  /* redraw the artwork once the display face has actually loaded */
+  /* redraw the artwork once the display face has actually arrived */
   if (document.fonts && document.fonts.ready){
     document.fonts.ready.then(() => {
       for (let i = 0; i < N; i++){
-        const t = artTexture(i, i % 3);
-        artTextures[i].image = t.image;
-        artTextures[i].needsUpdate = true;
+        artTex[i].image = artCanvas(i); artTex[i].needsUpdate = true;
+        labTex[i].image = labelCanvas(i); labTex[i].needsUpdate = true;
+        numTex[i].image = numeralCanvas(i); numTex[i].needsUpdate = true;
       }
     }).catch(() => {});
   }
 
-  /* ── 6f. paper caught in the air ─────────────────────────── */
-  const moteMat = new THREE.MeshStandardMaterial({ color:0xFBF8F1, roughness:.95, metalness:0, flatShading:true, side:THREE.DoubleSide });
-  const moteGeo = new THREE.PlaneGeometry(.3, .21);
-  const MOTES = LOW ? 9 : 22;
-  const motes = [];
-  for (let i = 0; i < MOTES; i++){
-    const m = new THREE.Mesh(moteGeo, moteMat);
-    m.rotation.set(Math.random()*6.28, Math.random()*6.28, Math.random()*6.28);
-    m.scale.setScalar(.6 + Math.random()*1.5);
-    motes.push({ m, x:(Math.random()-.5)*15, y:Math.random()*7 + .6, z:Math.random(), sp:.1+Math.random()*.3, ph:Math.random()*6.28 });
-    scene.add(m);
-  }
+  /* ── light ────────────────────────────────────────────────── */
+  scene.add(new THREE.AmbientLight(0xFFFFFF, .38));
+  const key  = new THREE.DirectionalLight(0xFFF4E2, 1.12); key.position.set(9,14,10);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xCFD9FF, .40);  fill.position.set(-10,6,-12); scene.add(fill);
 
-  /* ── 6g. walking ─────────────────────────────────────────── */
+  /* ── walking the house ────────────────────────────────────── */
   const ptr = { x:0, y:0, tx:0, ty:0 };
   if (!COARSE){
     addEventListener('pointermove', e => {
-      ptr.tx = (e.clientX/view.w - .5) * 2;
-      ptr.ty = (e.clientY/view.h - .5) * 2;
+      ptr.tx = (e.clientX/view.w - .5)*2;
+      ptr.ty = (e.clientY/view.h - .5)*2;
     }, { passive:true });
   }
 
-  const camZ = { v:5 };
-  const look = { x:0, y:EYE - .1 };
+  const pos    = new THREE.Vector3(P[0].x, EYE, P[0].z);
+  const dirNow = dirAt(0).clone();
+  const lookAt = new THREE.Vector3();
+  const tmpA   = new THREE.Vector3(), tmpB = new THREE.Vector3();
 
   function resize(){
     renderer.setSize(view.w, view.h, false);
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, innerWidth < 900 ? 1.5 : 2));
     camera.aspect = view.w / view.h;
-    camera.fov = innerWidth < 900 ? 56 : 44;
+    camera.fov = innerWidth < 900 ? 78 : 70;
     camera.updateProjectionMatrix();
   }
   addEventListener('resize', () => { measure(); resize(); }, { passive:true });
   resize();
 
   function step(dt, t){
-    const k = clamp(dt * 3.4, 0, 1);
+    const k = clamp(dt * 3.6, 0, 1);
     const f = scroll.damped * (N - 1);
+    const i0 = clamp(Math.floor(f), 0, N-1), i1 = Math.min(N-1, i0+1);
+    const m  = clamp(f - i0, 0, 1);
 
-    const targetZ = -f * SPACING + 5;
-    camZ.v += (targetZ - camZ.v) * clamp(dt*5.5, 0, 1);
+    /* position: straight lerp between neighbouring room centres —
+       they are always orthogonally adjacent, so this runs through
+       the doorway rather than through a wall */
+    tmpA.set(lerp(P[i0].x, P[i1].x, m), EYE, lerp(P[i0].z, P[i1].z, m));
+    pos.lerp(tmpA, clamp(dt*6.5, 0, 1));
 
-    /* turn toward whichever wall the artwork hangs on */
-    const i0 = Math.floor(f), i1 = Math.min(N-1, i0+1), m = smooth(f - i0);
-    const sideMix = lerp(rooms[i0].side, rooms[i1].side, m);
-    const turn = Math.abs(Math.sin(Math.PI * (f - i0)));      /* strongest mid-room, straight in the doorways */
-    look.x += (sideMix * 3.1 * (1 - turn*.55) - look.x) * k;
+    /* heading: hold the current leg, then swing onto the next one
+       as you cross into the room */
+    const dCur = dirAt(i0), dNext = dirAt(i1);
+    const turn = smooth(clamp((m - .5) / .45, 0, 1));
+    tmpB.set(lerp(dCur.x, dNext.x, turn), 0, lerp(dCur.z, dNext.z, turn));
+    if (tmpB.lengthSq() < .01) tmpB.copy(dCur);
+    tmpB.normalize();
+    dirNow.lerp(tmpB, k).normalize();
+
+    /* look sideways at the piece when you are standing in the room */
+    const cw = Math.abs(Math.cos(Math.PI * m));
+    const ak = artKey[m < .5 ? i0 : i1];
+    const av = SIDEVEC[ak];
 
     ptr.x += (ptr.tx - ptr.x) * clamp(dt*3,0,1);
     ptr.y += (ptr.ty - ptr.y) * clamp(dt*3,0,1);
 
-    camera.position.set(sideMix * 1.1 + ptr.x * .55, EYE + (REDUCED ? 0 : Math.sin(t*.5)*.045) - ptr.y*.22, camZ.v);
-    camera.lookAt(look.x, look.y - ptr.y*.5, camZ.v - 14);
+    const bob = REDUCED ? 0 : Math.sin(t*.8)*.035;
+    camera.position.set(pos.x, pos.y + bob - ptr.y*.18, pos.z);
+    lookAt.set(
+      pos.x + dirNow.x*9 + av[0]*cw*7.5 + ptr.x*3.4,
+      EYE + .35 - ptr.y*1.4,
+      pos.z + dirNow.z*9 + av[1]*cw*7.5
+    );
+    camera.lookAt(lookAt);
 
-    /* pop the rooms up and lay them back down */
+    /* only draw what is nearby */
     for (let i = 0; i < N; i++){
-      const R = rooms[i];
-      const d = (camZ.v - 5 - R.cz) / SPACING;
-      const near = Math.abs(d) <= (LOW ? 1.6 : 2.4);
-      R.g.visible = near;
-      if (!near) continue;
-      const pop = outC(clamp(1 - Math.abs(d) * .58, 0, 1));
-      const a = -Math.PI/2 * (1 - pop);
-      R.walls[0].userData.flap.rotation.x = a;
-      R.walls[1].userData.flap.rotation.x = a;
-      R.walls[2].userData.flap.rotation.x = a;
-      R.sculpt.scale.setScalar(1.15 * (.35 + pop*.65));
-      if (!REDUCED) R.sculpt.rotation.y += dt * (.22 + (i % 3) * .07);
+      const dx = (P[i].x - pos.x)/ROOM, dz = (P[i].z - pos.z)/ROOM;
+      roomGroups[i].visible = (dx*dx + dz*dz) < (LOW ? 3.4 : 6.2);
     }
 
-    for (let i = 0; i < motes.length; i++){
-      const o = motes[i];
-      const zz = camZ.v - 4 - ((o.z + t*.02*o.sp*10) % 1) * 26;
-      o.m.position.set(o.x, o.y + Math.sin(t*.4 + o.ph)*.35, zz);
-      if (!REDUCED){ o.m.rotation.y += dt*o.sp; o.m.rotation.x += dt*o.sp*.6; }
+    /* doors swing open when you get close */
+    for (let i = 0; i < doors.length; i++){
+      const d = doors[i];
+      const ddx = d.wx - pos.x, ddz = d.wz - pos.z;
+      const near = clamp((14.5 - Math.sqrt(ddx*ddx + ddz*ddz)) / 7.5, 0, 1);
+      const want = -d.s * outC(near) * 1.62;
+      d.hinge.rotation.y += (want - d.hinge.rotation.y) * clamp(dt*3.2, 0, 1);
+    }
+
+    if (!REDUCED){
+      for (let i = 0; i < spinners.length; i++) spinners[i].rotation.y += dt * .3;
     }
 
     renderer.render(scene, camera);
