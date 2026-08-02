@@ -1191,8 +1191,8 @@ function build(){
     return {
       icon:ICONS[i], theme:THEMES[i], tint:t,
       wall: mix(0xE6DECA, t, a),
-      floor:mix(0xB9AD8C, t, a*1.5),
-      ceil: mix(0xF6F2E8, t, a*.5),
+      floor:mix(0xA89B78, t, a*1.5),
+      ceil: mix(0xE5DDC9, t, a*1.1),
       rail: mix(0xC7B996, t, a*2.2),
       art:  mix(0xD3C7A9, t, a*1.3),
       obj:  mix(0xE2D8C0, t, a*1.0)
@@ -1697,10 +1697,10 @@ function build(){
     const rIdx = m < .5 ? i0 : i1;
     const fx = pos.x + dirNow.x*11, fz = pos.z + dirNow.z*11;
     const gx = P[rIdx].x + av[0]*9.4, gz = P[rIdx].z + av[1]*9.4;
-    const w  = cw * .78;
+    const w  = cw * .62;
     lookAt.set(
       lerp(fx, gx, w) + ptr.x*3.2,
-      lerp(EYE + .30, 3.30, w) - ptr.y*1.5,
+      lerp(EYE + .08, 3.15, w) - ptr.y*1.5,
       lerp(fz, gz, w)
     );
     camera.lookAt(lookAt);
