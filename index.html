@@ -653,6 +653,11 @@ body.docked .arcade-bar{ opacity:1; transform:none }
   box-shadow:0 0 0 2px rgba(23,21,15,.9), 0 26px 60px rgba(0,0,0,.45);
 }
 body.docked #arcadeFrame{ opacity:1 }
+body.fallback #arcadeFrame{
+  left:0 !important; width:100% !important;
+  top:52px !important; height:calc(100% - 52px) !important;
+  box-shadow:none;
+}
 .dock-note{
   position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
   pointer-events:none; opacity:0; transition:opacity .5s var(--ease-out) .5s;
@@ -1319,6 +1324,16 @@ function openGame(i){
   arcHint.textContent  = gm.hint;
   arcade.hidden = false;
   document.body.classList.add('playing');
+  /* if the flight never lands — a throttled tab, a stalled frame —
+     drop back to a full-screen game rather than stranding anyone */
+  setTimeout(function(){
+    if (playing && !loaded){
+      loaded = true;
+      arcFrame.src = GAMES[playing.room].file;
+      arcFrame.removeAttribute('style');
+      document.body.classList.add('docked', 'fallback');
+    }
+  }, 4200);
 }
 function closeGame(){
   if (!playing) return;
@@ -2435,7 +2450,7 @@ function build(){
      exactly the distance that frames it, and the game is laid over
      the rectangle the screen projects to. ──────────────────────── */
   const dock = {
-    on:false, exit:false, screen:null, t:0,
+    on:false, exit:false, screen:null, t:0, t0:0,
     camFrom:new THREE.Vector3(), camTo:new THREE.Vector3(),
     lookFrom:new THREE.Vector3(), lookTo:new THREE.Vector3()
   };
@@ -2460,6 +2475,7 @@ function build(){
     dock.camTo.copy(_c).addScaledVector(_n, frameDistance(sc.w, sc.h));
     dock.lookTo.copy(_c);
     dock.t = 0;
+    dock.t0 = performance.now();
     dock.exit = false;
     dock.on = true;
     return true;
@@ -2472,6 +2488,7 @@ function build(){
     dock.camTo.set(pos.x, EYE, pos.z);
     dock.lookTo.set(pos.x + Math.sin(yaw)*13, EYE + Math.tan(pitch)*13, pos.z + Math.cos(yaw)*13);
     dock.t = 0;
+    dock.t0 = performance.now();
     dock.exit = true;
   }
   dockFn   = dockTo;
@@ -2526,7 +2543,7 @@ function build(){
 
   function step(dt, t){
     if (dock.on){
-      dock.t = Math.min(1, dock.t + dt / 1.15);
+      dock.t = clamp((performance.now() - dock.t0) / 1150, 0, 1);
       const e = smooth(dock.t);
       camera.position.lerpVectors(dock.camFrom, dock.camTo, e);
       lookAt.lerpVectors(dock.lookFrom, dock.lookTo, e);
