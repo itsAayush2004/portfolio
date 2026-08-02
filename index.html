@@ -2083,7 +2083,8 @@ function build(){
     CYL(g, .1, .1, .16, 8, M.dark, x, y + .52, z, false);
     const shade = new THREE.Mesh(new THREE.CylinderGeometry(.34, .86, 1.0, 10, 1, true), paper2(0xFBF3DE));
     shade.position.set(x, y, z); g.add(shade);
-    CYL(g, .88, .88, .06, 10, paper(tintHex), x, y - .5, z, false);
+    CYL(g, .87, .87, .07, 10, paper(tintHex), x, y - .44, z, false);
+    CYL(g, .86, .86, .05, 10, paper(0xFFE9BE), x, y - .5, z, false);
     /* the bulb's bloom, drawn not lit */
     const glow = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 3.1), GLOW_MAT);
     glow.position.set(x, y - .35, z);
