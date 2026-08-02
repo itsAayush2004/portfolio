@@ -1730,8 +1730,9 @@ function build(){
   const M = {
     dark : paper(0x141414),
     brass: paper(0xD62222),
-    warm : paper(0xDCDCDA),
-    warmD: paper(0x4A4A48),
+    warm : paper(0xF0F0EE),
+    warmD: paper(0xD2D2D0),
+    gate : paper(0xFCFCFC),
     stone: paper(0xE4E4E2),
     white: paper(0xFCFCFC),
     leafA: paper2(0x4FA772),
@@ -2250,8 +2251,8 @@ function build(){
     gate.rotation.y = alongZ ? Math.PI/2 : 0;
     g.add(gate);
     const CZ = .62, JW = .44, JD = .62, GH = DH + .52;
-    [-1,1].forEach(s => BS(gate, JW, GH, JD, wallM, s*(DW + JW/2 + .04), GH/2, CZ, .9));
-    BS(gate, DW*2 + JW*2 + .08, .46, JD, wallM, 0, GH - .23, CZ, .9);
+    [-1,1].forEach(s => BS(gate, JW, GH, JD, M.gate, s*(DW + JW/2 + .04), GH/2, CZ, .9));
+    BS(gate, DW*2 + JW*2 + .08, .46, JD, M.gate, 0, GH - .23, CZ, .9);
     BS(gate, DW*2, .07, JD, M.brass, 0, .035, CZ, 0);
 
     const nxtI = Math.min(roomIdx + 1, N - 1);
@@ -2555,9 +2556,9 @@ function build(){
     const d = dirAt(0), a0 = SIDEVEC[artKey[0]];
     const yf = Math.atan2(d.x, d.z);
     const ya = Math.atan2(a0[0]*9.4, a0[1]*9.4);
-    return yf + shortAngle(yf, ya) * .78;
+    return yf + shortAngle(yf, ya);
   })();
-  const HOME_PITCH = .075 * .78;
+  const HOME_PITCH = .085;
   let yaw = HOME_YAW, yawV = 0, pitch = HOME_PITCH, pitchV = 0;
 
   /* called when the reader enters, so a restored scroll position or a
@@ -2723,23 +2724,25 @@ function build(){
     const dCur = dirAt(i0), dNext = dirAt(i1);
     const yawCur  = Math.atan2(dCur.x,  dCur.z);
     const yawNext = Math.atan2(dNext.x, dNext.z);
-    const swing   = smooth(clamp((m - .20) / .66, 0, 1));
+    const swing   = smooth(clamp((m - .30) / .56, 0, 1));
     const yawFwd  = yawCur + shortAngle(yawCur, yawNext) * swing;
 
-    /* ease across to the piece while you stand in the room, then back
-       to straight ahead — damped on legs that are already turning */
-    const cw   = .5 + .5*Math.cos(Math.PI*2*m);
+    /* Arriving in a room you face its piece square on and hold it.
+       Leaving, the look releases to straight ahead well before the
+       doorway, so the corridor swing never fights the wall turn. */
+    const raw  = .5 + .5*Math.cos(Math.PI*2*m);
+    const cw   = smooth(clamp((raw - .18) / .62, 0, 1));
     const rIdx = m < .5 ? i0 : i1;
-    const ease = 1 - clamp(TURN[rIdx] / (Math.PI/2), 0, 1) * .58;
+    const ease = 1 - clamp(TURN[rIdx] / (Math.PI/2), 0, 1) * .18;
     const av   = SIDEVEC[artKey[rIdx]];
     const gx = P[rIdx].x + av[0]*9.4, gz = P[rIdx].z + av[1]*9.4;
-    const w  = cw * .78 * ease;
+    const w  = cw * ease;
     const yawWant = yawFwd + shortAngle(yawFwd, Math.atan2(gx - pos.x, gz - pos.z)) * w;
 
     const K = 4.2, C = 2 * Math.sqrt(K) * 1.06;
     yawV   += (shortAngle(yaw, yawWant) * K - yawV * C) * dt;
     yaw    += yawV * dt;
-    const pitchWant = .075 * w;
+    const pitchWant = .085 * w;
     pitchV += ((pitchWant - pitch) * K - pitchV * C) * dt;
     pitch  += pitchV * dt;
 
