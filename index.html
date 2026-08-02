@@ -1349,7 +1349,11 @@ function closeGame(){
 if (playBtn){
   $('#arcadeClose').addEventListener('click', closeGame);
   addEventListener('keydown', e => { if (e.key === 'Escape') closeGame(); });
-  playBtn.addEventListener('click', () => openGame(activeIdx));
+  playBtn.addEventListener('click', () => {
+    /* activeIdx is -1 until the first frame ticks; derive it if needed */
+    const idx = (activeIdx >= 0) ? activeIdx : clamp(Math.round(scroll.p * (N - 1)), 0, N - 1);
+    openGame(idx);
+  });
 }
 
 /* the lobby: one door per room */
