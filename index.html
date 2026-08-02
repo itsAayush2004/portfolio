@@ -40,9 +40,10 @@
   --ink-3:  #837B6A;
   --ink-4:  #A79E8B;
 
-  --red:    #C8442A;
-  --blue:   #26406B;
-  --gold:   #B98A2E;
+  --red:    #E0472C;
+  --blue:   #2C5FA8;
+  --gold:   #E0A32B;
+  --green:  #3F9E70;
 
   --rule:   rgba(23,21,15,.13);
 
@@ -94,7 +95,7 @@ body{
 /* ── 3. SUBSTRATE ─────────────────────────────────────────────── */
 #scene{
   position:fixed; inset:0; width:100%; height:100%; z-index:0;
-  pointer-events:none; opacity:0; transition:opacity 1.5s ease .2s;
+  opacity:0; transition:opacity 1.5s ease .2s;
 }
 #scene.lit{ opacity:1 }
 
@@ -313,7 +314,7 @@ body.panel .fold{
   padding:88px var(--gut) clamp(30px,5vh,58px);
   pointer-events:none;
 }
-body.panel .fold.active{ pointer-events:auto }
+body.panel .fold.active .sheet{ pointer-events:auto }
 
 /* the card: a slip of paper that slides up off the floor */
 body.panel .sheet{
@@ -573,29 +574,113 @@ body.flow .sheet.on{ opacity:1; transform:perspective(1500px) translateY(0) rota
 .stg.on > *:nth-child(8){ transition-delay:.33s }
 .stg.on > *:nth-child(9){ transition-delay:.36s }
 
-/* ── 11. OPENING FOLD ─────────────────────────────────────────── */
-.veil{ position:fixed; inset:0; z-index:200; background:var(--paper); display:grid; place-items:center;
-  transition:opacity .7s ease .3s, visibility .7s ease .3s;
-  animation:veil-lift .9s var(--ease-out) 3.6s forwards }
-.veil-inner{ display:grid; place-items:center; gap:20px }
-.veil-face{ position:relative; width:96px; height:96px; display:grid; place-items:center }
-.veil-face img{ width:66px; height:66px; border-radius:50%; object-fit:cover; background:var(--paper-lo) }
-.veil-face .ring{ position:absolute; inset:6px; border:1.5px solid rgba(23,21,15,.16); border-radius:50% }
-.veil-face .orbit{ position:absolute; inset:-4px; animation:spin 2.6s linear infinite }
-.veil-face .orbit i{
-  position:absolute; top:0; left:50%; width:9px; height:9px; margin-left:-4.5px;
-  background:var(--red); clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);
+/* ── 10b. THE ARCADE ──────────────────────────────────────────── */
+.play-btn{
+  position:fixed; z-index:80; right:calc(var(--gut) + 46px); bottom:clamp(22px,4vh,40px);
+  display:inline-flex; align-items:center; gap:10px;
+  padding:14px 20px; min-height:50px;
+  background:var(--ink); color:var(--paper-hi);
+  font-family:var(--mono); font-size:11px; letter-spacing:.15em; text-transform:uppercase;
+  box-shadow:0 2px 0 rgba(23,21,15,.5), 0 12px 26px rgba(58,48,28,.32);
+  transition:transform .3s var(--ease-fold), box-shadow .3s;
+  animation:nudge 2.8s var(--ease-io) infinite;
 }
-@keyframes spin{ to{ transform:rotate(360deg) } }
-.veil-label{
-  font-family:var(--mono); font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-3);
+.play-btn i{ font-style:normal; color:var(--red); font-size:13px }
+.play-btn:hover{ transform:translateY(-3px); box-shadow:0 4px 0 rgba(23,21,15,.5), 0 18px 34px rgba(58,48,28,.4) }
+.play-btn[hidden]{ display:none }
+@keyframes nudge{ 0%,88%,100%{ transform:none } 92%{ transform:translateY(-4px) } 96%{ transform:translateY(-1px) } }
+@media (max-width:900px){
+  .play-btn{ left:50%; right:auto; transform:translateX(-50%); bottom:14px; animation:none }
+  .play-btn:hover{ transform:translateX(-50%) }
 }
-.veil-label i{ font-style:normal; animation:blink 1.4s steps(1) infinite }
-.veil-label i:nth-child(2){ animation-delay:.2s }
-.veil-label i:nth-child(3){ animation-delay:.4s }
-@keyframes blink{ 0%,50%{ opacity:1 } 51%,100%{ opacity:.15 } }
-@keyframes veil-lift{ to{ opacity:0; visibility:hidden } }
-body.open .veil{ opacity:0; visibility:hidden }
+
+#arcade{
+  position:fixed; inset:0; z-index:180; background:var(--ink);
+  display:flex; flex-direction:column;
+}
+#arcade[hidden]{ display:none }
+.arcade-bar{
+  flex:none; display:flex; align-items:center; gap:14px;
+  padding:10px clamp(12px,2vw,22px);
+  padding-top:calc(10px + env(safe-area-inset-top));
+  background:var(--ink); color:var(--paper-hi);
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+  border-bottom:1px solid rgba(251,248,241,.16);
+}
+.arcade-title{ color:var(--paper-hi); font-weight:500 }
+.arcade-hint{ color:rgba(251,248,241,.55); flex:1; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.arcade-close{
+  flex:none; display:inline-flex; align-items:center; gap:8px;
+  padding:9px 15px; min-height:42px; color:var(--paper-hi);
+  border:1px solid rgba(251,248,241,.32);
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+  transition:background .25s, border-color .25s;
+}
+.arcade-close:hover{ background:rgba(251,248,241,.12); border-color:var(--paper-hi) }
+.arcade-close i{ font-style:normal; color:var(--red) }
+#arcadeFrame{ flex:1; width:100%; border:0; background:#fff; display:block }
+@media (max-width:600px){ .arcade-hint{ display:none } }
+
+body.playing .hud,body.playing .scrub,body.playing .scrub-hint,
+body.playing .play-btn,body.playing .grain,body.playing .vig,body.playing .fibre{ display:none }
+
+/* ── 11. THE ENTRANCE ─────────────────────────────────────────── */
+.gate{
+  position:fixed; inset:0; z-index:200; background:var(--paper);
+  display:grid; place-items:center; padding:26px;
+  transition:opacity .9s var(--ease-out), visibility .9s;
+}
+body.entered .gate{ opacity:0; visibility:hidden; pointer-events:none }
+.gate-in{ width:min(100%,470px); text-align:center }
+.gate-face{
+  width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto 22px;
+  background:var(--paper-lo); box-shadow:0 0 0 1.5px var(--ink);
+}
+.gate-mark{
+  font-family:var(--mono); font-size:10px; letter-spacing:.26em; text-transform:uppercase;
+  color:var(--ink-4); margin-bottom:14px;
+}
+.gate-name{
+  font-family:var(--display); font-weight:700; color:var(--ink);
+  font-size:clamp(34px,7vw,54px); line-height:1.0; letter-spacing:-.03em;
+  font-variation-settings:"opsz" 96; margin-bottom:18px;
+}
+.gate-name em{ font-style:normal; color:var(--red) }
+.gate-say{
+  font-size:14.5px; line-height:1.62; color:var(--ink-2);
+  max-width:34ch; margin:0 auto 30px; text-wrap:pretty;
+}
+.gate-rule{ position:relative; height:2px; background:rgba(23,21,15,.12); overflow:hidden }
+.gate-rule i{
+  position:absolute; inset:0 auto 0 0; width:100%; background:var(--red);
+  transform:scaleX(0); transform-origin:0 50%; will-change:transform;
+}
+.gate-pct{
+  display:flex; justify-content:space-between; align-items:baseline;
+  font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--ink-4); margin-top:10px;
+}
+.gate-enter{
+  margin-top:30px; width:100%; min-height:54px;
+  display:inline-flex; align-items:center; justify-content:center; gap:11px;
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--ink); border:1.5px solid var(--ink); position:relative; overflow:hidden;
+  transition:color .34s var(--ease-out), opacity .4s;
+}
+.gate-enter i{ font-style:normal; position:relative; z-index:2; transition:transform .4s var(--ease-out) }
+.gate-enter span{ position:relative; z-index:2 }
+.gate-enter::before{
+  content:""; position:absolute; inset:0; background:var(--ink); z-index:1;
+  transform:scaleY(0); transform-origin:50% 100%; transition:transform .44s var(--ease-fold);
+}
+.gate-enter:hover:not(:disabled){ color:var(--paper-hi) }
+.gate-enter:hover:not(:disabled)::before{ transform:scaleY(1) }
+.gate-enter:hover:not(:disabled) i{ transform:translateX(5px) }
+.gate-enter:disabled{ opacity:.32; cursor:default; border-color:var(--ink-4); color:var(--ink-4) }
+.gate-enter.ready{ animation:breathe 2.6s var(--ease-io) infinite }
+@keyframes breathe{ 0%,100%{ box-shadow:0 0 0 0 rgba(224,71,44,0) } 50%{ box-shadow:0 0 0 5px rgba(224,71,44,.10) } }
+body:not(.entered){ overflow:hidden }
 
 /* ── 12. RESPONSIVE ───────────────────────────────────────────── */
 @media (max-width:820px){
@@ -637,14 +722,18 @@ body.noweb{
 
 <a class="skip" href="#main">Skip to content</a>
 
-<div class="veil" aria-hidden="true">
-  <div class="veil-inner">
-    <div class="veil-face">
-      <span class="ring"></span>
-      <img src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png" alt="" loading="eager" onerror="this.style.visibility='hidden'">
-      <span class="orbit"><i></i></span>
-    </div>
-    <div class="veil-label">Unlocking the house<i>.</i><i>.</i><i>.</i></div>
+<div class="gate" id="gate">
+  <div class="gate-in">
+    <img class="gate-face" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png" alt="" loading="eager" onerror="this.style.visibility='hidden'">
+    <div class="gate-mark">Aayush Kumar · Portfolio 2026</div>
+    <h1 class="gate-name">The Paper<em>House</em></h1>
+    <p class="gate-say">Eight rooms, folded not downloaded. Every wall, every piece
+      and every fold is drawn in your browser while you read this.</p>
+    <div class="gate-rule"><i id="gateFill"></i></div>
+    <div class="gate-pct"><span>Folding</span><span id="gatePct">00%</span></div>
+    <button class="gate-enter" id="gateEnter" type="button" disabled>
+      <span>Enter the house</span><i aria-hidden="true">&#8594;</i>
+    </button>
   </div>
 </div>
 
@@ -738,7 +827,7 @@ body.noweb{
         <ul class="pts">
           <li>Infinite swipeable feed; each card is a complete mini-game loaded on demand</li>
           <li>AI agents generate gameplay logic and 3D web content from prompts via <b>MCP-connected tools</b></li>
-          <li>Supabase&nbsp;/&nbsp;PostgreSQL backend scaled from <b>1 to 10,000 daily active users</b></li>
+          <li>PostgreSQL backend scaled from <b>1 to 10,000 daily active users</b></li>
         </ul>
         <p class="copy"><b>Arthis.Land</b> — “The Wall”, a handcrafted vertical city you climb in the browser.
           Unity, shipped to WebGL, 2–4 people sharing a space in real time.</p>
@@ -762,8 +851,8 @@ body.noweb{
             <span class="cap">The Wall</span></a>
         </div>
         <div class="stamps">
-          <span class="chip hot">Unity</span><span class="chip hot">WebGL</span><span class="chip hot">Supabase</span>
-          <span class="chip">PostgreSQL</span><span class="chip">LLM Agents</span><span class="chip">MCP</span>
+          <span class="chip hot">Unity</span><span class="chip hot">WebGL</span>
+          <span class="chip hot">PostgreSQL</span><span class="chip">LLM Agents</span><span class="chip">MCP</span>
           <span class="chip">Python Relay</span><span class="chip">WebSocket</span>
         </div>
         <div class="cta-row">
@@ -901,6 +990,19 @@ body.noweb{
 
 </main>
 
+<button class="play-btn" id="playBtn" type="button" hidden>
+  <i aria-hidden="true">&#9654;</i> Play <span></span>
+</button>
+
+<div id="arcade" hidden role="dialog" aria-modal="true" aria-label="Playable game">
+  <div class="arcade-bar">
+    <span class="arcade-title" id="arcadeTitle"></span>
+    <span class="arcade-hint" id="arcadeHint"></span>
+    <button class="arcade-close" id="arcadeClose" type="button">Close <i aria-hidden="true">&#10005;</i></button>
+  </div>
+  <iframe id="arcadeFrame" title="Playable game" allow="autoplay; fullscreen; gamepad"></iframe>
+</div>
+
 <div id="track" aria-hidden="true"></div>
 
 <footer class="colophon">
@@ -959,7 +1061,7 @@ document.addEventListener('visibilitychange', () => {
 function frame(now){
   if (!running) return;
   const dt = Math.min(.05, (now - last)/1000); last = now;
-  scroll.damped += (scroll.p - scroll.damped) * clamp(dt * 6.2, 0, 1);
+  scroll.damped += (scroll.p - scroll.damped) * clamp(dt * 4.6, 0, 1);
   for (let i = 0; i < ticks.length; i++) ticks[i](dt, now/1000);
   requestAnimationFrame(frame);
 }
@@ -1010,16 +1112,55 @@ measure(); readScroll();
 /* ════════════════════════════════════════════════════════════════
    2 — OPENING
    ════════════════════════════════════════════════════════════════ */
-function openBook(){
-  if (document.body.classList.contains('open')) return;
-  document.body.classList.add('open');
-  setTimeout(() => { const v = $('.veil'); if (v) v.remove(); }, 1500);
+const gate     = $('#gate');
+const gateFill = $('#gateFill');
+const gatePct  = $('#gatePct');
+const gateGo   = $('#gateEnter');
+
+/* honest progress: real milestones, eased so the number never jumps */
+const STAGES = { three:.24, fonts:.18, scene:.42, frame:.16 };
+const stageDone = {};
+let pTarget = 0, pShown = 0, gateReady = false;
+
+function progressStep(k){
+  if (stageDone[k] || !(k in STAGES)) return;
+  stageDone[k] = 1;
+  pTarget = Math.min(1, pTarget + STAGES[k]);
+  if (pTarget > .995) armGate();
 }
-if (REDUCED) openBook();
-else {
-  document.addEventListener('DOMContentLoaded', () => setTimeout(openBook, 640));
-  setTimeout(openBook, 3000);
+function armGate(){
+  if (gateReady) return;
+  gateReady = true;
+  if (gateGo){ gateGo.disabled = false; gateGo.classList.add('ready'); }
 }
+onTick(dt => {
+  if (!gateFill) return;
+  pShown += (pTarget - pShown) * clamp(dt * 2.2, 0, 1);
+  gateFill.style.transform = 'scaleX(' + pShown.toFixed(4) + ')';
+  gatePct.textContent = String(Math.round(pShown * 100)).padStart(2,'0') + '%';
+});
+
+function enter(){
+  if (document.body.classList.contains('entered')) return;
+  document.body.classList.add('entered');
+  const cover = $('#s0 .sheet');
+  if (cover){ cover.classList.add('on'); const gg = $('.stg', cover); if (gg) gg.classList.add('on'); }
+  setTimeout(() => { if (gate && gate.parentNode) gate.remove(); }, 1100);
+}
+if (gateGo) gateGo.addEventListener('click', enter);
+addEventListener('keydown', e => {
+  if (!gateReady || document.body.classList.contains('entered')) return;
+  if (e.key === 'Enter'){ e.preventDefault(); enter(); }
+});
+
+/* never leave anyone stuck on the doorstep */
+setTimeout(armGate, 7000);
+setTimeout(function(){ if (!document.body.classList.contains('entered')) enter(); }, 16000);
+if (REDUCED){ armGate(); enter(); }
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => progressStep('fonts'));
+else progressStep('fonts');
+addEventListener('load', () => progressStep('three'));
+document.addEventListener('DOMContentLoaded', () => { if (window.THREE) progressStep('three'); });
 
 /* ════════════════════════════════════════════════════════════════
    3 — COUNTERS
@@ -1064,6 +1205,38 @@ for (let i = 0; i < N; i++){
   rules.appendChild(b);
 }
 const ruleBtns = $$('button', rules);
+
+/* ── the arcade: tap a screen, or the button, to play ─────────── */
+const arcade   = $('#arcade');
+const arcFrame = $('#arcadeFrame');
+const arcTitle = $('#arcadeTitle');
+const arcHint  = $('#arcadeHint');
+const playBtn  = $('#playBtn');
+const playName = playBtn ? $('span', playBtn) : null;
+let playing = false;
+
+function openGame(i){
+  const gm = (typeof GAMES !== 'undefined') ? GAMES[i] : null;
+  if (!gm || playing) return;
+  playing = true;
+  arcTitle.textContent = gm.name;
+  arcHint.textContent  = gm.hint;
+  arcFrame.src = gm.file;
+  arcade.hidden = false;
+  document.body.classList.add('playing');
+}
+function closeGame(){
+  if (!playing) return;
+  playing = false;
+  arcade.hidden = true;
+  arcFrame.src = 'about:blank';
+  document.body.classList.remove('playing');
+}
+if (playBtn){
+  $('#arcadeClose').addEventListener('click', closeGame);
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeGame(); });
+  playBtn.addEventListener('click', () => openGame(activeIdx));
+}
 
 /* the lobby: one door per room */
 (function buildLobby(){
@@ -1169,15 +1342,23 @@ onTick(() => {
       for (let i = 0; i < sections.length; i++) sections[i].classList.toggle('active', i === idx);
       litUp($('.sheet', sections[idx]));
     }
-    if (idx >= 6) maybeCount();
+    if (idx >= 5) maybeCount();
+
+    if (playBtn){
+      const gm = (typeof GAMES !== 'undefined') ? GAMES[idx] : null;
+      if (gm && !playing){ playBtn.hidden = false; if (playName) playName.textContent = gm.name; }
+      else playBtn.hidden = true;
+    }
   }
   if (MODE === 'flow' && !counted && scroll.p > .6) maybeCount();
 });
 
 /* ════════════════════════════════════════════════════════════════
    6 — THE HOUSE
-   Nine rooms on a serpentine plan — straight, left, straight, right.
-   Same bones as before; every surface is now paper.
+   Eight rooms on a serpentine plan, cut and folded out of paper.
+   Every floor object is registered in a footprint table before it is
+   placed; anything that would overlap is refused, so nothing in the
+   house ever intersects anything else.  See PLAN.md.
    ════════════════════════════════════════════════════════════════ */
 function hasWebGL(){
   try {
@@ -1186,7 +1367,6 @@ function hasWebGL(){
   } catch(e){ return false; }
 }
 
-/* the room icons, kept from the old house */
 function drawIcon(g, key, cx, cy, s){
   g.save(); g.translate(cx, cy);
   g.strokeStyle='#17150F'; g.fillStyle='#17150F';
@@ -1223,6 +1403,14 @@ function drawIcon(g, key, cx, cy, s){
   g.restore();
 }
 
+/* which room has which cabinet on its wall */
+const GAMES = {
+  0: { file:'game-flappy.html', name:'Flappy Fird',    hint:'Tap, or press Space, to flap' },
+  1: { file:'game-runner.html', name:'Trigger Runner', hint:'Tap, or press Space, to jump' },
+  2: { file:'game-3072.html',   name:'3072',           hint:'Swipe, or use the arrow keys' },
+  6: { file:'game-sudoku.html', name:'Sudoku',         hint:'Tap a cell, then tap a number' }
+};
+
 function build(){
   if (!window.THREE || !hasWebGL()){ document.body.classList.add('noweb'); return; }
   const canvas = $('#scene');
@@ -1237,28 +1425,27 @@ function build(){
   renderer.setSize(view.w, view.h, false);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
-  const PAPER = 0xF2EEE4;
+  const PAPER = 0xF3EFE4;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(PAPER);
-  scene.fog = new THREE.Fog(PAPER, 26, 86);
-  const camera = new THREE.PerspectiveCamera(LOW ? 78 : 70, view.w/view.h, .1, 260);
+  scene.fog = new THREE.Fog(PAPER, 30, 96);
+  const camera = new THREE.PerspectiveCamera(LOW ? 78 : 70, view.w/view.h, .1, 300);
 
-  /* ── plan ───────────────────────────────────────────────────
-     straight, then left, then straight, then right, repeating   */
+  /* ── the plan ─────────────────────────────────────────────── */
   const ROOM = 20, HALF = ROOM/2, H = 7.4, DW = 2.3, DH = 5.0, T = .34, EYE = 2.05;
   const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4]];
   const P = CELL.map(c => ({ x:c[0]*ROOM, z:c[1]*ROOM }));
 
-  const TINT = [0xC8442A, 0x26406B, 0xB98A2E];
+  /* brighter, more cartoon than before */
+  const TINT   = [0xE0472C, 0x2C5FA8, 0xE0A32B, 0x3F9E70];
+  const HEXC   = ['#E0472C','#2C5FA8','#E0A32B','#3F9E70'];
   const ICONS  = ['intro','practice','space','hexa','blender','ai','data','contact'];
   const THEMES = ['LOBBY','BEDROOM','GAME ROOM','WORKSHOP','STUDIO','SERVER ROOM','LIBRARY','DINING ROOM'];
-
-  /* what hangs on the free wall of each room */
   const DEV = 'https://cdn.jsdelivr.net/gh/devicons/devicon@master/icons/';
   const WALLSET = [
     [[DEV+'threejs/threejs-original.svg','Three.js'], [DEV+'javascript/javascript-original.svg','JavaScript'], [DEV+'github/github-original.svg','GitHub']],
     [[DEV+'unity/unity-original.svg','Unity'],        [DEV+'python/python-original.svg','Python'],             [DEV+'csharp/csharp-original.svg','C#']],
-    [['./arthis-space.png','Arthis.Space'],           ['./arthis-land.png','Arthis.Land'],                     [DEV+'supabase/supabase-original.svg','Supabase']],
+    [['./arthis-space.png','Arthis.Space'],           ['./arthis-land.png','Arthis.Land'],                     [DEV+'postgresql/postgresql-original.svg','Postgres']],
     [[DEV+'unity/unity-original.svg','Unity'],        [DEV+'csharp/csharp-original.svg','C#'],                 [DEV+'blender/blender-original.svg','Blender']],
     [[DEV+'blender/blender-original.svg','Blender'],  [DEV+'python/python-original.svg','Python'],             [DEV+'numpy/numpy-original.svg','NumPy']],
     [[DEV+'fastapi/fastapi-original.svg','FastAPI'],  [DEV+'pytorch/pytorch-original.svg','PyTorch'],          [DEV+'postgresql/postgresql-original.svg','Postgres']],
@@ -1267,32 +1454,29 @@ function build(){
   ];
   const mix = (base, tint, amt) => new THREE.Color(base).lerp(new THREE.Color(tint), amt).getHex();
   const ROOMS = P.map((_, i) => {
-    const t = TINT[i % 3], a = .16 + (i % 4) * .035;
+    const t = TINT[i % TINT.length], a = .17 + (i % 4) * .035;
     return {
-      icon:ICONS[i], theme:THEMES[i], tint:t,
-      wall: mix(0xE9E2D1, t, a*.40),
+      icon:ICONS[i], theme:THEMES[i], tint:t, hex:HEXC[i % HEXC.length],
+      wall: mix(0xEAE3D2, t, a*.42),
       floor:mix(0xA79C85, t, a*1.15),
-      ceil: mix(0xE8E1D0, t, a*.55),
-      rail: mix(0xC0B191, t, a*2.4),
-      art:  mix(0xCFC3A5, t, a*1.5),
-      obj:  mix(0xE0D6BE, t, a*1.2)
+      ceil: mix(0xE9E2D1, t, a*.55),
+      rail: mix(0xBFB08F, t, a*2.5),
+      art:  mix(0xCEC2A3, t, a*1.6),
+      obj:  mix(0xE0D6BE, t, a*1.3)
     };
   });
 
-  /* ── paper stock, banded like a toon ramp ─────────────────── */
-  const steps = new Uint8Array([74, 152, 236]);
+  /* ── paper stock ──────────────────────────────────────────── */
+  const steps = new Uint8Array([72, 150, 236]);
   const RAMP = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
   RAMP.minFilter = RAMP.magFilter = THREE.NearestFilter;
   RAMP.generateMipmaps = false; RAMP.needsUpdate = true;
 
   function paperMap(rep){
     const S = 64, c = document.createElement('canvas'); c.width = c.height = S;
-    const g = c.getContext('2d');
-    const r = rng(19);
+    const g = c.getContext('2d'), r = rng(19);
     const sh = ['#ffffff','#ffffff','#fdfcf9','#f8f6f0','#f3f0e8','#eeeade'];
-    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++){
-      g.fillStyle = sh[(r()*sh.length)|0]; g.fillRect(x,y,1,1);
-    }
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++){ g.fillStyle = sh[(r()*sh.length)|0]; g.fillRect(x,y,1,1); }
     const t = new THREE.CanvasTexture(c);
     t.magFilter = t.minFilter = THREE.NearestFilter;
     t.generateMipmaps = false;
@@ -1302,12 +1486,11 @@ function build(){
   }
   function gridMap(rep){
     const S = 64, c = document.createElement('canvas'); c.width = c.height = S;
-    const g = c.getContext('2d');
-    const r = rng(31);
+    const g = c.getContext('2d'), r = rng(31);
     const sh = ['#ffffff','#fbfaf6','#f4f2ea'];
     for (let y = 0; y < S; y++) for (let x = 0; x < S; x++){ g.fillStyle = sh[(r()*sh.length)|0]; g.fillRect(x,y,1,1); }
-    g.fillStyle = 'rgba(23,21,15,.20)'; g.fillRect(0,0,S,1); g.fillRect(0,0,1,S);
-    g.fillStyle = 'rgba(23,21,15,.08)'; g.fillRect(0,S/2,S,1); g.fillRect(S/2,0,1,S);
+    g.fillStyle = 'rgba(23,21,15,.22)'; g.fillRect(0,0,S,1); g.fillRect(0,0,1,S);
+    g.fillStyle = 'rgba(23,21,15,.09)'; g.fillRect(0,S/2,S,1); g.fillRect(S/2,0,1,S);
     const t = new THREE.CanvasTexture(c);
     t.magFilter = t.minFilter = THREE.NearestFilter;
     t.generateMipmaps = false;
@@ -1317,22 +1500,29 @@ function build(){
   }
   const STOCK = paperMap(13);
   const MATS = new Map();
-  function paper(hex, map){
-    if (!map && MATS.has(hex)) return MATS.get(hex);
-    const m = new THREE.MeshToonMaterial({ color:hex, gradientMap:RAMP, map: map || STOCK });
-    if (!map) MATS.set(hex, m);
-    return m;
+  function paper(hex){
+    if (MATS.has(hex)) return MATS.get(hex);
+    const m = new THREE.MeshToonMaterial({ color:hex, gradientMap:RAMP, map:STOCK });
+    MATS.set(hex, m); return m;
+  }
+  function paper2(hex){                       /* double sided, flat, for folded sheets */
+    const k = 'D' + hex;
+    if (MATS.has(k)) return MATS.get(k);
+    const m = new THREE.MeshToonMaterial({ color:hex, gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide });
+    MATS.set(k, m); return m;
   }
   const M = {
     dark : paper(0x1B1B16),
-    brass: paper(0xB98A2E),
-    red  : paper(0xC8442A),
-    blue : paper(0x26406B),
-    warm : paper(0xC9B692),
-    warmD: paper(0xAB9670),
-    stone: paper(0xDCD5C2),
-    white: paper(0xFAF7F0),
-    cloth: paper(0xCDC5B2)
+    brass: paper(0xD3A33B),
+    warm : paper(0xCFB68C),
+    warmD: paper(0xA98F63),
+    stone: paper(0xDDD6C2),
+    white: paper(0xFBF8F1),
+    leafA: paper2(0x4FA772),
+    leafB: paper2(0x3B8A5C),
+    leafC: paper2(0x77BE84),
+    bark : paper(0xB79E76),
+    sky  : paper(0xBFD9EC)
   };
 
   /* ── geometry helpers ─────────────────────────────────────── */
@@ -1340,6 +1530,7 @@ function build(){
   const HULL = new THREE.MeshBasicMaterial({ color:0x17150F, side:THREE.BackSide });
   const SEG = LOW ? 2 : 3;
   const HULL_MIN = LOW ? .8 : .5;
+  const OUT_T = LOW ? .05 : .09;
 
   function roundedBox(w,h,d){
     const key = w+'|'+h+'|'+d;
@@ -1362,12 +1553,10 @@ function build(){
   function B(par, w,h,d, mat, x,y,z, o){
     const m = new THREE.Mesh(roundedBox(w,h,d), mat);
     m.position.set(x,y,z); par.add(m);
-    const str = (o === undefined) ? .72 : o;
-    if (str >= HULL_MIN){
-      const t = LOW ? .05 : .085;
+    if ((o === undefined ? .72 : o) >= HULL_MIN){
       const s = new THREE.Mesh(m.geometry, HULL);
       s.position.copy(m.position);
-      s.scale.set((w+t*2)/w, (h+t*2)/h, (d+t*2)/d);
+      s.scale.set((w+OUT_T*2)/w, (h+OUT_T*2)/h, (d+OUT_T*2)/d);
       par.add(s);
     }
     return m;
@@ -1380,10 +1569,9 @@ function build(){
     m.position.set(x,y,z); par.add(m);
     const str = (o === undefined) ? .72 : o;
     if (str > 0){
-      const t = LOW ? .045 : .075;
       const s = new THREE.Mesh(g, HULL);
       s.position.copy(m.position);
-      s.scale.set((w+t*2)/w, (h+t*2)/h, (d+t*2)/d);
+      s.scale.set((w+OUT_T*2)/w, (h+OUT_T*2)/h, (d+OUT_T*2)/d);
       par.add(s);
       if (!LOW){
         const e = new THREE.LineSegments(new THREE.EdgesGeometry(g, 20),
@@ -1393,102 +1581,226 @@ function build(){
     }
     return m;
   }
-  function CYL(par, rt,rb,h,seg, mat, x,y,z){
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,Math.max(seg, LOW?8:12)), mat);
-    m.position.set(x,y,z); par.add(m); return m;
+  function CYL(par, rt,rb,h,seg, mat, x,y,z, hull){
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,Math.max(seg, LOW?6:10)), mat);
+    m.position.set(x,y,z); par.add(m);
+    if (hull !== false){
+      const r = Math.max(rt,rb)*2, s = new THREE.Mesh(m.geometry, HULL);
+      s.position.copy(m.position);
+      s.scale.set((r+OUT_T*2)/r, (h+OUT_T*2)/h, (r+OUT_T*2)/r);
+      par.add(s);
+    }
+    return m;
+  }
+  function tri(par, verts, mat, outline){
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(verts,3));
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, mat); par.add(m);
+    if (outline !== false && !LOW){
+      par.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 18),
+        new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.4 })));
+    }
+    return m;
   }
   function texFrom(c){ const t = new THREE.CanvasTexture(c); t.anisotropy = LOW?2:8; t.encoding = THREE.sRGBEncoding; return t; }
 
-  /* ── which walls have doorways ────────────────────────────── */
-  const sideKey = d => d.x > 0 ? 'px' : d.x < 0 ? 'nx' : d.z > 0 ? 'pz' : 'nz';
-  const opp = { px:'nx', nx:'px', pz:'nz', nz:'pz' };
+  /* ══════════════════════════════════════════════════════════
+     FOOTPRINTS — the reason nothing in this house overlaps
+     ══════════════════════════════════════════════════════════ */
   const SIDEVEC = { px:[1,0], nx:[-1,0], pz:[0,1], nz:[0,-1] };
-  const doorSides = P.map(() => ({}));
-  for (let i = 0; i < N-1; i++){
-    const d = { x:Math.sign(P[i+1].x - P[i].x), z:Math.sign(P[i+1].z - P[i].z) };
-    const k = sideKey(d);
-    doorSides[i][k] = true; doorSides[i+1][opp[k]] = true;
-  }
-
-  /* travel direction of each leg, and the "right hand" of it */
-  const legDir = [];
-  for (let i = 0; i < N-1; i++){
-    legDir.push(new THREE.Vector3(Math.sign(P[i+1].x-P[i].x), 0, Math.sign(P[i+1].z-P[i].z)));
-  }
-  legDir.push(legDir[legDir.length-1].clone());
-  const dirAt = i => legDir[clamp(i, 0, legDir.length-1)];
-
-  /* the main piece hangs opposite the text panel: even rooms right, odd rooms left */
-  const artKey = [];
-  for (let i = 0; i < N; i++){
-    const d = dirAt(Math.max(0, i-1));
-    const right = new THREE.Vector3(-d.z, 0, d.x);
-    const want = (i % 2 === 0) ? right : right.clone().negate();
-    let best = null, bestDot = -9;
-    ['px','nx','pz','nz'].forEach(k => {
-      if (doorSides[i][k]) return;
-      const v = SIDEVEC[k];
-      const dot = v[0]*want.x + v[1]*want.z;
-      if (dot > bestDot){ bestDot = dot; best = k; }
-    });
-    artKey.push(best || 'nz');
-  }
-
-  /* ── artwork ──────────────────────────────────────────────── */
-  const HEXC = ['#C8442A','#26406B','#B98A2E'];
-  function tornPoly(g, cx, cy, rx, ry, seed, fill){
-    const r = rng(seed); g.beginPath();
-    for (let i = 0; i <= 26; i++){
-      const a = i/26*Math.PI*2, j = .86 + r()*.28;
-      const x = cx + Math.cos(a)*rx*j, y = cy + Math.sin(a)*ry*j;
-      i ? g.lineTo(x,y) : g.moveTo(x,y);
+  let refused = 0;
+  function Plot(p, doors){
+    const taken = [];
+    const chans = [];
+    ['px','nx','pz','nz'].forEach(k => { if (doors[k]) chans.push(SIDEVEC[k]); });
+    function free(x, z, r){
+      const dx = x - p.x, dz = z - p.z;
+      if (Math.sqrt(dx*dx + dz*dz) < 3.2 + r) return false;                 /* walk disc  */
+      if (Math.max(Math.abs(dx), Math.abs(dz)) + r > 8.9) return false;     /* wall band  */
+      for (let i = 0; i < chans.length; i++){
+        const c = chans[i];
+        const along = dx*c[0] + dz*c[1];
+        const perp  = Math.abs(dx*(-c[1]) + dz*c[0]);
+        if (along > -.5 && perp < 1.9 + r) return false;                    /* doorway    */
+      }
+      for (let i = 0; i < taken.length; i++){
+        const s = taken[i], ex = x - s.x, ez = z - s.z;
+        if (Math.sqrt(ex*ex + ez*ez) < s.r + r) return false;               /* neighbours */
+      }
+      return true;
     }
-    g.closePath(); g.fillStyle = fill; g.fill();
+    return {
+      claim: function(x, z, r){
+        if (!free(x, z, r)){ refused++; return false; }
+        taken.push({ x:x, z:z, r:r });
+        return true;
+      }
+    };
   }
-  function artCanvas(i){
-    const W = 512, Hh = 380;
-    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
-    const g = c.getContext('2d');
-    const acc = HEXC[i % 3], r = rng(101 + i*37);
-    g.fillStyle = '#F8F5EC'; g.fillRect(0,0,W,Hh);
-    for (let k = 0; k < 1100; k++){ g.fillStyle = r()>.5?'rgba(140,128,104,.06)':'rgba(255,255,255,.08)'; g.fillRect(r()*W, r()*Hh, 1, 1); }
-    tornPoly(g, W*(.24+r()*.16), Hh*(.36+r()*.16), 98+r()*52, 84+r()*42, i*13+3,  acc);
-    tornPoly(g, W*(.64+r()*.16), Hh*(.5 +r()*.16), 76+r()*50, 68+r()*38, i*13+9,  'rgba(23,21,15,.88)');
-    tornPoly(g, W*(.48+r()*.14), Hh*(.30+r()*.14), 54+r()*36, 48+r()*28, i*13+17, '#E7E0D0');
-    drawIcon(g, ICONS[i], W-84, 78, 96);
-    g.strokeStyle = 'rgba(23,21,15,.5)'; g.lineWidth = 2;
-    g.beginPath(); g.moveTo(30, Hh-50); g.lineTo(W-30, Hh-50); g.stroke();
-    g.fillStyle = '#17150F'; g.font = '700 76px Fraunces, Georgia, serif';
-    g.fillText(String(i).padStart(2,'0'), 30, Hh-66);
-    g.fillStyle = acc; g.font = '500 15px "JetBrains Mono", ui-monospace, monospace';
-    g.fillText(THEMES[i], 30, Hh-20);
-    return c;
-  }
-  function labelCanvas(i){
-    const W = 400, Hh = 128;
-    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
-    const g = c.getContext('2d');
-    g.fillStyle = '#FAF7F0'; g.fillRect(0,0,W,Hh);
-    g.strokeStyle = 'rgba(23,21,15,.24)'; g.lineWidth = 2; g.strokeRect(2,2,W-4,Hh-4);
-    g.fillStyle = HEXC[i%3]; g.font = '500 17px "JetBrains Mono", ui-monospace, monospace';
-    g.fillText('ROOM ' + String(i).padStart(2,'0'), 22, 40);
-    g.fillStyle = '#17150F'; g.font = '700 33px Fraunces, Georgia, serif';
-    g.fillText((NAMES[i]||'').slice(0,24), 22, 86);
-    return c;
-  }
-  function numeralCanvas(i){
-    const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
-    const g = c.getContext('2d');
-    g.clearRect(0,0,S,S);
-    g.fillStyle = 'rgba(23,21,15,.13)';
-    g.font = '700 168px Fraunces, Georgia, serif';
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(String(i).padStart(2,'0'), S/2, S/2 + 8);
-    return c;
-  }
-  const artTex = [], labTex = [], numTex = [];
 
-  /* ── folded sculptures ────────────────────────────────────── */
+  /* ══════════════════════════════════════════════════════════
+     ORIGAMI — everything folded from one flat sheet
+     ══════════════════════════════════════════════════════════ */
+
+  /* a leaf creased down its spine */
+  function leafVerts(len, wid, lift){
+    const B=[0,0,0], ML=[-wid/2,0,len*.45], MR=[wid/2,0,len*.45],
+          S=[0,lift,len*.45], Tp=[0,lift*.35,len];
+    return [].concat(B,ML,S,  B,S,MR,  S,ML,Tp,  S,Tp,MR);
+  }
+  function leaf(par, len, wid, lift, mat){
+    return tri(par, leafVerts(len, wid, lift), mat, false);
+  }
+
+  function palm(par, x, z, h, mat){
+    const g = new THREE.Group(); g.position.set(x, 0, z); par.add(g);
+    CYL(g, .17, .28, h, 6, M.bark, 0, h/2, 0);
+    CYL(g, .62, .78, .32, 8, M.stone, 0, .16, 0);
+    const n = LOW ? 5 : 7;
+    for (let k = 0; k < n; k++){
+      const f = new THREE.Group();
+      f.position.y = h;
+      f.rotation.y = k / n * Math.PI * 2 + (x + z) * .3;
+      f.rotation.x = .62 + (k % 3) * .13;
+      g.add(f);
+      leaf(f, 2.2 + (k % 3) * .38, .82, .3, k % 2 ? mat : M.leafB);
+    }
+    return g;
+  }
+  function fern(par, x, z, mat){
+    const g = new THREE.Group(); g.position.set(x, 0, z); par.add(g);
+    CYL(g, .38, .5, .56, 8, M.stone, 0, .28, 0);
+    const n = LOW ? 6 : 9;
+    for (let k = 0; k < n; k++){
+      const f = new THREE.Group();
+      f.position.y = .5;
+      f.rotation.y = k / n * Math.PI * 2;
+      f.rotation.x = .92 + (k % 4) * .1;
+      g.add(f);
+      leaf(f, 1.15 + (k % 3) * .22, .5, .18, k % 3 ? mat : M.leafC);
+    }
+    return g;
+  }
+  function bamboo(par, x, z){
+    const g = new THREE.Group(); g.position.set(x, 0, z); par.add(g);
+    const spots = [[0,0,4.3],[.52,.3,3.4],[-.44,.36,3.9],[.18,-.5,2.8]];
+    for (let k = 0; k < spots.length; k++){
+      if (LOW && k > 1) break;
+      const s = spots[k];
+      CYL(g, .13, .15, s[2], 6, M.leafB, s[0], s[2]/2, s[1]);
+      for (let j = 1; j < 4; j++)
+        CYL(g, .17, .17, .09, 6, M.leafA, s[0], s[2]*j/4, s[1], false);
+      const f = new THREE.Group();
+      f.position.set(s[0], s[2] - .3, s[1]);
+      f.rotation.y = k * 1.7; f.rotation.x = .9;
+      g.add(f);
+      leaf(f, 1.0, .34, .12, M.leafC);
+    }
+    CYL(g, .74, .86, .42, 8, M.stone, 0, .21, 0);
+    return g;
+  }
+
+  /* a paper dragon, folded from a single strip and hung from the ceiling */
+  function dragon(par, tintHex){
+    const g = new THREE.Group();
+    const body = paper2(tintHex), fin = paper2(0xFBF8F1);
+    const SEGN = LOW ? 6 : 9;
+    const spine = [], rad = [];
+    for (let k = 0; k <= SEGN; k++){
+      const t = k / SEGN;
+      spine.push([ Math.sin(t*3.6)*1.35, Math.cos(t*2.3)*.5 - .5, -t*7.2 ]);
+      rad.push(.52 * Math.pow(1 - t, .75) + .045);
+    }
+    const ring = (k) => {
+      const c = spine[k], r = rad[k], out = [];
+      for (let a = 0; a < 3; a++){
+        const th = a / 3 * Math.PI * 2 + Math.PI/2;
+        out.push([ c[0] + Math.cos(th)*r, c[1] + Math.sin(th)*r, c[2] ]);
+      }
+      return out;
+    };
+    const v = [];
+    for (let k = 0; k < SEGN; k++){
+      const A = ring(k), Bn = ring(k+1);
+      for (let a = 0; a < 3; a++){
+        const b = (a + 1) % 3;
+        v.push.apply(v, A[a]); v.push.apply(v, A[b]); v.push.apply(v, Bn[a]);
+        v.push.apply(v, A[b]); v.push.apply(v, Bn[b]); v.push.apply(v, Bn[a]);
+      }
+    }
+    tri(g, v, body);
+
+    /* snout */
+    const nose = [spine[0][0], spine[0][1], spine[0][2] + 1.25];
+    const h0 = ring(0);
+    const hv = [];
+    for (let a = 0; a < 3; a++){
+      const b = (a + 1) % 3;
+      hv.push.apply(hv, h0[a]); hv.push.apply(hv, h0[b]); hv.push.apply(hv, nose);
+    }
+    tri(g, hv, body);
+
+    /* horns */
+    [-1, 1].forEach(s => {
+      const c = new THREE.Mesh(new THREE.ConeGeometry(.09, .62, 4), fin);
+      c.position.set(spine[0][0] + s*.22, spine[0][1] + .42, spine[0][2] + .3);
+      c.rotation.set(-.5, 0, -s*.32);
+      g.add(c);
+    });
+
+    /* two folded wings */
+    [-1, 1].forEach(s => {
+      const w = new THREE.Group();
+      const c = spine[2];
+      w.position.set(c[0] + s*.28, c[1] + .2, c[2]);
+      w.rotation.set(-.28, 0, s * 1.16);
+      w.scale.set(s, 1, 1);
+      g.add(w);
+      leaf(w, 3.4, 2.2, .55, fin);
+    });
+
+    /* tail fin */
+    const tl = spine[SEGN];
+    tri(g, [ tl[0], tl[1], tl[2],
+             tl[0]-.62, tl[1]+.52, tl[2]-.95,
+             tl[0]+.62, tl[1]+.34, tl[2]-1.05 ], fin);
+    return g;
+  }
+
+  /* three cranes on threads */
+
+  /* the craft table: scissors, glue, a roll of paper, offcuts */
+  const STEEL = paper(0xC6CAD1);
+
+  /* small corner furniture */
+  function propLamp(par, x, z, tintHex){
+    CYL(par, .07,.09,2.5, 8, M.dark, x, 1.25, z);
+    B(par, .52,.07,.52, M.dark, x, .035, z, .6);
+    const sh = new THREE.Mesh(new THREE.ConeGeometry(.64, .8, 10, 1, true), paper2(tintHex));
+    sh.position.set(x, 2.66, z); par.add(sh);
+  }
+  function propStack(par, x, z, tintHex){
+    B(par, 1.15,.30,.86, M.white, x, .15, z, .8);
+    B(par, 1.05,.26,.78, paper(tintHex), x+.09, .43, z-.06, .8);
+    B(par, .95,.24,.7,  M.white, x-.07, .68, z+.05, .8);
+  }
+  function propStool(par, x, z){
+    B(par, .84,.14,.84, M.warm, x, .62, z, .8);
+    [[-.3,-.3],[.3,-.3],[-.3,.3],[.3,.3]].forEach(o => B(par, .1,.6,.1, M.warmD, x+o[0], .3, z+o[1], .6));
+  }
+  function propColumn(par, x, z, tintHex){
+    CYL(par, .34,.42,3.1, 6, paper(tintHex), x, 1.55, z);
+    B(par, 1.0,.2,1.0, M.stone, x, .1, z, .8);
+    B(par, .9,.18,.9,  M.stone, x, 3.2, z, .8);
+  }
+  function propVase(par, x, z, tintHex){
+    CYL(par, .18,.42,.9, 8, paper(tintHex), x, .45, z);
+    const c = new THREE.Mesh(new THREE.ConeGeometry(.44, 1.3, 5), M.white);
+    c.position.set(x, 1.5, z); par.add(c);
+  }
+
+  /* ── folded sculptures on pedestals ───────────────────────── */
   function miuraGeo(cols, rows, a, b, alpha, phi){
     const S = a*Math.cos(phi), Hz = a*Math.sin(phi);
     const psi = Math.asin(clamp(Math.sin(phi)*Math.sin(alpha), -1, 1));
@@ -1518,13 +1830,6 @@ function build(){
     g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
     g.computeVertexNormals(); return g;
   }
-  function dartGeo(){
-    const Nn=[0,.03,1.5], Tt=[0,0,-1.05], L=[-1.12,.14,-.86], R=[1.12,.14,-.86], K=[0,-.42,-.68];
-    const v = [].concat(Nn,L,Tt, Nn,Tt,R, Nn,Tt,K);
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
-    g.computeVertexNormals(); return g;
-  }
   function fanGeo(blades, r0, r1, rise){
     const v = [];
     for (let k = 0; k < blades; k++){
@@ -1542,17 +1847,16 @@ function build(){
   const SCULPT = [
     () => ({ g:miuraGeo(LOW?7:10, LOW?5:7, .22, .25, 1.02, .84), s:1.5 }),
     () => ({ g:kreslingGeo(7, .58, 1.2, .58), s:1 }),
-    () => ({ g:dartGeo(), s:.62 }),
     () => ({ g:fanGeo(LOW?7:11, .16, .9, .34), s:1.05 }),
     () => ({ g:kreslingGeo(5, .5, 1.45, -.72), s:1 })
   ];
-  const spinners = [];
-  function pedestal(par, x, z, i){
-    BS(par, 1.5, 1.3, 1.5, paper(ROOMS[i].obj), x, .65, z, .85);
+  const spinners = [], hangers = [];
+  function pedestal(par, x, z, i, R){
+    BS(par, 1.5, 1.3, 1.5, paper(R.obj), x, .65, z, .85);
     const def = SCULPT[i % SCULPT.length]();
     const mat = new THREE.MeshToonMaterial({
-      color: (i % 3 === 1) ? TINT[i % 3] : mix(0xDCD1B6, TINT[i % 3], .30),
-      gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide
+      color: (i % 2) ? R.tint : mix(0xE8DCBE, R.tint, .34),
+      gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide, flatShading:true
     });
     const m = new THREE.Mesh(def.g, mat);
     m.scale.setScalar(def.s * 1.05);
@@ -1560,39 +1864,118 @@ function build(){
     par.add(m);
     if (!LOW){
       const e = new THREE.LineSegments(new THREE.EdgesGeometry(def.g, 22),
-        new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.32 }));
+        new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.36 }));
       e.scale.copy(m.scale); e.position.copy(m.position); par.add(e);
       spinners.push(e);
     }
     spinners.push(m);
   }
-  function plant(par, x, z, tint){
-    CYL(par, .3, .38, .5, 6, paper(mix(0xEDE7D9, tint, .18)), x, .25, z);
-    const v = [], K = 7;
-    for (let i = 0; i < K; i++){
-      const a = i/K*Math.PI*2, tipR = .5 + (i%2)*.24, tipY = 1 + (i%3)*.34;
-      v.push(0,0,0, Math.cos(a)*tipR, tipY, Math.sin(a)*tipR,
-             Math.cos(a+.55)*tipR*.6, tipY*.5, Math.sin(a+.55)*tipR*.6);
+
+  /* ── painted things ───────────────────────────────────────── */
+  function tornPoly(g, cx, cy, rx, ry, seed, fill){
+    const r = rng(seed); g.beginPath();
+    for (let i = 0; i <= 26; i++){
+      const a = i/26*Math.PI*2, j = .86 + r()*.28;
+      const x = cx + Math.cos(a)*rx*j, y = cy + Math.sin(a)*ry*j;
+      i ? g.lineTo(x,y) : g.moveTo(x,y);
     }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(v,3));
-    g.computeVertexNormals();
-    const m = new THREE.Mesh(g, new THREE.MeshToonMaterial({ color:0xF6F2E8, gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide }));
-    m.position.set(x, .48, z); m.scale.setScalar(1.15); par.add(m);
+    g.closePath(); g.fillStyle = fill; g.fill();
   }
-  /* a framed tile: paper card, image dropped in when it arrives */
+  function artCanvas(i){
+    const W = 512, Hh = 380;
+    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
+    const g = c.getContext('2d');
+    const acc = HEXC[i % HEXC.length], r = rng(101 + i*37);
+    g.fillStyle = '#F9F6ED'; g.fillRect(0,0,W,Hh);
+    for (let k = 0; k < 1100; k++){ g.fillStyle = r()>.5?'rgba(140,128,104,.055)':'rgba(255,255,255,.08)'; g.fillRect(r()*W, r()*Hh, 1, 1); }
+    tornPoly(g, W*(.24+r()*.16), Hh*(.36+r()*.16), 98+r()*52, 84+r()*42, i*13+3,  acc);
+    tornPoly(g, W*(.64+r()*.16), Hh*(.5 +r()*.16), 76+r()*50, 68+r()*38, i*13+9,  'rgba(23,21,15,.86)');
+    tornPoly(g, W*(.48+r()*.14), Hh*(.30+r()*.14), 54+r()*36, 48+r()*28, i*13+17, '#E7E0D0');
+    drawIcon(g, ICONS[i], W-84, 78, 96);
+    g.strokeStyle = 'rgba(23,21,15,.5)'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(30, Hh-50); g.lineTo(W-30, Hh-50); g.stroke();
+    g.fillStyle = '#17150F'; g.font = '700 76px Fraunces, Georgia, serif'; g.textAlign = 'left';
+    g.fillText(String(i).padStart(2,'0'), 30, Hh-66);
+    g.fillStyle = acc; g.font = '500 15px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText(THEMES[i], 30, Hh-20);
+    return c;
+  }
+  function labelCanvas(i){
+    const W = 400, Hh = 128;
+    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
+    const g = c.getContext('2d');
+    g.fillStyle = '#FBF8F1'; g.fillRect(0,0,W,Hh);
+    g.strokeStyle = 'rgba(23,21,15,.24)'; g.lineWidth = 2; g.strokeRect(2,2,W-4,Hh-4);
+    g.fillStyle = HEXC[i % HEXC.length]; g.textAlign = 'left';
+    g.font = '500 17px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText('ROOM ' + String(i).padStart(2,'0'), 22, 40);
+    g.fillStyle = '#17150F'; g.font = '700 33px Fraunces, Georgia, serif';
+    g.fillText((NAMES[i]||'').slice(0,24), 22, 86);
+    return c;
+  }
+  function numeralCanvas(i){
+    const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d');
+    g.fillStyle = 'rgba(23,21,15,.13)';
+    g.font = '700 168px Fraunces, Georgia, serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(String(i).padStart(2,'0'), S/2, S/2 + 8);
+    return c;
+  }
+  function skyCanvas(){
+    const W = 512, Hh = 512;
+    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
+    const g = c.getContext('2d'), r = rng(77);
+    const grad = g.createLinearGradient(0,0,0,Hh);
+    grad.addColorStop(0,   '#8FC4E8');
+    grad.addColorStop(.55, '#BFDFF2');
+    grad.addColorStop(1,   '#EAF4FA');
+    g.fillStyle = grad; g.fillRect(0,0,W,Hh);
+    /* a paper sun */
+    g.fillStyle = '#FFE9A8';
+    tornPoly(g, W*.74, Hh*.24, 62, 60, 5, '#FFE9A8');
+    tornPoly(g, W*.74, Hh*.24, 40, 39, 9, '#FFF6D2');
+    /* torn-paper clouds */
+    for (let k = 0; k < 7; k++){
+      const cx = r()*W, cy = Hh*(.12 + r()*.76), s = .6 + r()*1.1;
+      tornPoly(g, cx, cy, 78*s, 34*s, 20+k*7, 'rgba(255,255,255,.92)');
+      tornPoly(g, cx + 44*s, cy + 10*s, 52*s, 26*s, 40+k*7, 'rgba(255,255,255,.86)');
+      tornPoly(g, cx - 40*s, cy + 12*s, 44*s, 22*s, 60+k*7, 'rgba(255,255,255,.8)');
+    }
+    return c;
+  }
+  function screenCanvas(i, gm){
+    const W = 512, Hh = 340;
+    const c = document.createElement('canvas'); c.width = W; c.height = Hh;
+    const g = c.getContext('2d');
+    const acc = HEXC[i % HEXC.length];
+    g.fillStyle = '#17150F'; g.fillRect(0,0,W,Hh);
+    g.fillStyle = '#211F18'; for (let y = 0; y < Hh; y += 4) g.fillRect(0,y,W,2);
+    g.fillStyle = acc; g.fillRect(0,0,W,7); g.fillRect(0,Hh-7,W,7);
+    g.textAlign = 'center';
+    g.fillStyle = '#FBF8F1'; g.font = '700 54px Fraunces, Georgia, serif';
+    g.fillText(gm.name, W/2, 122);
+    g.fillStyle = acc; g.font = '500 15px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText('PLAYABLE  ·  RIGHT HERE', W/2, 156);
+    g.fillStyle = '#FBF8F1';
+    g.beginPath(); g.moveTo(W/2-22, 200); g.lineTo(W/2+30, 232); g.lineTo(W/2-22, 264); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(251,248,241,.75)'; g.font = '500 14px "JetBrains Mono", ui-monospace, monospace';
+    g.fillText('TAP THE SCREEN TO PLAY', W/2, 306);
+    return c;
+  }
+
+  /* a framed tile: paper card first, logo dropped in when it arrives */
   function tilePanel(url, label, tint){
     const W = 256, Hh = 256;
     const c = document.createElement('canvas'); c.width = W; c.height = Hh;
     const g = c.getContext('2d');
     function base(){
-      g.fillStyle = '#F9F6ED'; g.fillRect(0,0,W,Hh);
-      g.strokeStyle = 'rgba(23,21,15,.28)'; g.lineWidth = 4; g.strokeRect(6,6,W-12,Hh-12);
-      g.fillStyle = tint; g.fillRect(6, Hh-46, W-12, 3);
-      g.fillStyle = '#17150F';
+      g.fillStyle = '#FAF7EF'; g.fillRect(0,0,W,Hh);
+      g.strokeStyle = 'rgba(23,21,15,.30)'; g.lineWidth = 5; g.strokeRect(7,7,W-14,Hh-14);
+      g.fillStyle = tint; g.fillRect(7, Hh-48, W-14, 4);
+      g.fillStyle = '#17150F'; g.textAlign = 'center';
       g.font = '500 17px "JetBrains Mono", ui-monospace, monospace';
-      g.textAlign = 'center';
-      g.fillText(label.toUpperCase().slice(0,14), W/2, Hh-16);
+      g.fillText(label.toUpperCase().slice(0,14), W/2, Hh-17);
     }
     base();
     const tex = new THREE.CanvasTexture(c);
@@ -1601,129 +1984,249 @@ function build(){
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = function(){
-      try {
-        base();
-        const box = 150, x = (W-box)/2, y = 34;
-        g.drawImage(img, x, y, box, box);
-        tex.needsUpdate = true;
-      } catch(e){}
+      try { base(); g.drawImage(img, 53, 34, 150, 150); tex.needsUpdate = true; } catch(e){}
     };
     img.onerror = function(){};
     img.src = url;
     return tex;
   }
 
-  /* corner furniture — five pieces, cycled so no two corners match */
-  function propLamp(par, x, z, tint){
-    CYL(par, .07,.09,2.5, 8, M.dark, x, 1.25, z);
-    B(par, .5,.06,.5, M.dark, x, .03, z, .6);
-    const shade = new THREE.Mesh(new THREE.ConeGeometry(.62, .78, 10, 1, true), paper(tint));
-    shade.position.set(x, 2.66, z); par.add(shade);
+  const SKY_MAT = new THREE.MeshBasicMaterial({ map:texFrom(skyCanvas()) });
+
+  /* ── which walls carry doorways ───────────────────────────── */
+  const sideKey = d => d.x > 0 ? 'px' : d.x < 0 ? 'nx' : d.z > 0 ? 'pz' : 'nz';
+  const opp = { px:'nx', nx:'px', pz:'nz', nz:'pz' };
+  const doorSides = P.map(() => ({}));
+  for (let i = 0; i < N-1; i++){
+    const k = sideKey({ x:Math.sign(P[i+1].x - P[i].x), z:Math.sign(P[i+1].z - P[i].z) });
+    doorSides[i][k] = true; doorSides[i+1][opp[k]] = true;
   }
-  function propStack(par, x, z, tint){
-    B(par, 1.15,.30,.86, M.white, x, .15, z, .8);
-    B(par, 1.05,.26,.78, paper(tint), x+.09, .43, z-.06, .8);
-    B(par, .95,.24,.7,  M.white, x-.07, .68, z+.05, .8);
-  }
-  function propStool(par, x, z){
-    B(par, .82,.14,.82, M.warm, x, .62, z, .8);
-    [[-.29,-.29],[.29,-.29],[-.29,.29],[.29,.29]].forEach(o =>
-      B(par, .1,.6,.1, M.warmD, x+o[0], .3, z+o[1], .6));
-  }
-  function propColumn(par, x, z, tint){
-    CYL(par, .34,.42,3.1, 6, paper(tint), x, 1.55, z);
-    B(par, 1.0,.2,1.0, M.stone, x, .1, z, .8);
-    B(par, .9,.18,.9,  M.stone, x, 3.2, z, .8);
-  }
-  function propVase(par, x, z, tint){
-    CYL(par, .18,.42,.9, 8, paper(tint), x, .45, z);
-    const g = new THREE.Mesh(new THREE.ConeGeometry(.44, 1.3, 5), M.white);
-    g.position.set(x, 1.5, z); par.add(g);
-  }
-  const PROPS = [propLamp, propStack, propStool, propColumn, propVase];
-  function corners(par, p, i, tint){
-    const d = HALF - 2.2;
-    const spots = [[-d,-d],[d,-d],[-d,d],[d,d]];
-    for (let k = 0; k < spots.length; k++){
-      if (LOW && (k & 1)) continue;
-      PROPS[(i + k) % PROPS.length](par, p.x + spots[k][0], p.z + spots[k][1], tint);
-    }
+  const legDir = [];
+  for (let i = 0; i < N-1; i++)
+    legDir.push(new THREE.Vector3(Math.sign(P[i+1].x-P[i].x), 0, Math.sign(P[i+1].z-P[i].z)));
+  legDir.push(legDir[legDir.length-1].clone());
+  const dirAt = i => legDir[clamp(i, 0, legDir.length-1)];
+
+  const artKey = [];
+  for (let i = 0; i < N; i++){
+    const d = dirAt(Math.max(0, i-1));
+    const right = new THREE.Vector3(-d.z, 0, d.x);
+    const want = (i % 2 === 0) ? right : right.clone().negate();
+    let best = null, bestDot = -9;
+    ['px','nx','pz','nz'].forEach(k => {
+      if (doorSides[i][k]) return;
+      const v = SIDEVEC[k], dot = v[0]*want.x + v[1]*want.z;
+      if (dot > bestDot){ bestDot = dot; best = k; }
+    });
+    artKey.push(best || 'nz');
   }
 
-  function bench(par, x, z, rot){
-    const g = new THREE.Group(); g.position.set(x,0,z); g.rotation.y = rot; par.add(g);
-    B(g, 2.9, .18, .9, M.warm, 0, .62, 0, .8);
-    [-1.2, 1.2].forEach(o => B(g, .18, .56, .8, M.warmD, o, .3, 0, .7));
-  }
-
-  /* ── the gate: columns, beam, brass threshold, medallion, leaves ── */
+  /* ── the gate ─────────────────────────────────────────────── */
   const doors = [];
   function buildGate(g, mx, mz, alongZ, roomIdx, wallM){
     const gate = new THREE.Group();
     gate.position.set(mx, 0, mz);
     gate.rotation.y = alongZ ? Math.PI/2 : 0;
     g.add(gate);
-
     const CZ = .64, CD = .80, WD = .84;
     [-1,1].forEach(s => {
       const cx = s*(DW + .23);
-      BS(gate, .46, DH,    CD, wallM,   cx, DH/2,     CZ, .95);   /* column  */
-      BS(gate, .66, .24,   WD, wallM,   cx, .12,      CZ, .95);   /* base    */
-      BS(gate, .66, .26,   WD, wallM,   cx, DH - .13, CZ, .95);   /* capital */
+      BS(gate, .46, DH,    CD, wallM,   cx, DH/2,     CZ, .95);
+      BS(gate, .66, .24,   WD, wallM,   cx, .12,      CZ, .95);
+      BS(gate, .66, .26,   WD, wallM,   cx, DH - .13, CZ, .95);
       BS(gate, .05, DH-.6, .05, M.brass, cx, DH/2, CZ + CD/2 + .015, 0);
     });
-    BS(gate, DW*2 + .92, .54, WD, wallM,  0, DH + .27, CZ, .95);  /* beam        */
-    BS(gate, DW*2 + .92, .10, WD, M.brass, 0, DH + .01, CZ, 0);   /* under-rail  */
-    BS(gate, DW*2,       .05, .74, M.brass, 0, .025,    CZ, 0);   /* threshold   */
+    BS(gate, DW*2 + .92, .54, WD, wallM,  0, DH + .27, CZ, .95);
+    BS(gate, DW*2 + .92, .10, WD, M.brass, 0, DH + .01, CZ, 0);
+    BS(gate, DW*2,       .05, .74, M.brass, 0, .025,    CZ, 0);
 
-    /* medallion naming whatever is next door */
     const nxtI = Math.min(roomIdx + 1, N - 1);
     const mc = document.createElement('canvas'); mc.width = mc.height = 300;
     const mg = mc.getContext('2d');
-    mg.fillStyle = '#F6F3EC'; mg.beginPath(); mg.arc(150,150,148,0,7); mg.fill();
-    mg.strokeStyle = '#17150F'; mg.lineWidth = 7; mg.beginPath(); mg.arc(150,150,136,0,7); mg.stroke();
-    mg.strokeStyle = HEXC[nxtI % 3]; mg.lineWidth = 3; mg.beginPath(); mg.arc(150,150,118,0,7); mg.stroke();
+    mg.fillStyle = '#F7F4ED'; mg.beginPath(); mg.arc(150,150,148,0,7); mg.fill();
+    mg.strokeStyle = '#17150F'; mg.lineWidth = 8; mg.beginPath(); mg.arc(150,150,136,0,7); mg.stroke();
+    mg.strokeStyle = HEXC[nxtI % HEXC.length]; mg.lineWidth = 4; mg.beginPath(); mg.arc(150,150,118,0,7); mg.stroke();
     drawIcon(mg, ICONS[nxtI], 150, 148, 138);
     const med = new THREE.Mesh(new THREE.CircleGeometry(.28, 30), new THREE.MeshBasicMaterial({ map:texFrom(mc), transparent:true }));
     med.position.set(0, DH + .27, CZ + WD/2 + .015);
     gate.add(med);
 
-    /* two leaves, hinged at the jambs, swung open as you approach */
     [-1,1].forEach(s => {
       const hg = new THREE.Group();
       hg.position.set(s*DW, 0, 0); gate.add(hg);
-      const leaf = new THREE.Group(); hg.add(leaf);
-      BS(leaf, DW, DH-.12, .10, M.warmD, -s*DW/2, (DH-.12)/2, 0, .85);
-      BS(leaf, DW*.62, DH*.42, .13, M.warm, -s*DW/2, DH*.30, .012, .7);
-      BS(leaf, DW*.62, DH*.28, .13, M.warm, -s*DW/2, DH*.70, .012, .7);
-      CYL(leaf, .05,.05,.26, 8, M.brass, -s*DW*.9, DH*.5, .1);
+      const leaf2 = new THREE.Group(); hg.add(leaf2);
+      BS(leaf2, DW, DH-.12, .10, M.warmD, -s*DW/2, (DH-.12)/2, 0, .85);
+      BS(leaf2, DW*.62, DH*.42, .13, M.warm, -s*DW/2, DH*.30, .012, .7);
+      BS(leaf2, DW*.62, DH*.28, .13, M.warm, -s*DW/2, DH*.70, .012, .7);
+      CYL(leaf2, .05,.05,.26, 8, M.brass, -s*DW*.9, DH*.5, .1, false);
       doors.push({ hinge:hg, s:s, wx:mx, wz:mz });
     });
   }
 
+  /* the bloom around every bulb — one shared additive sprite */
+  const GLOW_MAT = (function(){
+    const S = 128, c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d');
+    const rg = g.createRadialGradient(S/2, S/2, 0, S/2, S/2, S/2);
+    rg.addColorStop(0,   'rgba(255,222,168,.85)');
+    rg.addColorStop(.35, 'rgba(255,206,142,.30)');
+    rg.addColorStop(1,   'rgba(255,206,142,0)');
+    g.fillStyle = rg; g.fillRect(0,0,S,S);
+    return new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(c),
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false });
+  })();
+
+  /* ── a hanging paper lantern: the light that makes each room ── */
+  const lanterns = [];
+  function lantern(g, x, z, tintHex){
+    const y = 5.35;
+    const cord = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, y + .52, z), new THREE.Vector3(x, H, z)]),
+      new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.4 }));
+    g.add(cord);
+    CYL(g, .1, .1, .16, 8, M.dark, x, y + .52, z, false);
+    const shade = new THREE.Mesh(new THREE.CylinderGeometry(.34, .86, 1.0, 10, 1, true), paper2(0xFBF3DE));
+    shade.position.set(x, y, z); g.add(shade);
+    CYL(g, .88, .88, .06, 10, paper(tintHex), x, y - .5, z, false);
+    /* the bulb's bloom, drawn not lit */
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 4.6), GLOW_MAT);
+    glow.position.set(x, y - .35, z);
+    g.add(glow);
+    lanterns.push({ x:x, y:y - .35, z:z, glow:glow });
+  }
+
+  /* ── one hero per room, so every doorway frames something ──── */
+  function plinth(g, x, z, R, w){
+    BS(g, w||1.7, 1.15, w||1.7, paper(R.obj), x, .575, z, .85);
+    BS(g, (w||1.7)+.26, .14, (w||1.7)+.26, M.stone, x, 1.2, z, .85);
+  }
+  function sculptOn(g, x, y, z, geo, mat, sc){
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z); m.scale.setScalar(sc); g.add(m);
+    if (!LOW){
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 22),
+        new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.38 }));
+      e.position.copy(m.position); e.scale.copy(m.scale); g.add(e);
+      spinners.push(e);
+    }
+    spinners.push(m);
+    return m;
+  }
+  function toonMat(hex, flat){
+    return new THREE.MeshToonMaterial({ color:hex, gradientMap:RAMP, map:STOCK,
+      side:THREE.DoubleSide, flatShading:flat !== false });
+  }
+
+  function hero(i, g, p, A, L, R){
+    const W = (a, l) => ({ x: p.x + A[0]*a + L[0]*l, z: p.z + A[1]*a + L[1]*l });
+    const s = W(5.6, 3.4);
+    const warm = mix(0xE8DCBE, R.tint, .32);
+
+    if (i === 0){                                            /* a crane, folded large */
+      plinth(g, s.x, s.z, R);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(
+        [0,.03,1.5, -1.12,.14,-.86, 0,0,-1.05,
+         0,.03,1.5,  0,0,-1.05,     1.12,.14,-.86,
+         0,.03,1.5,  0,0,-1.05,     0,-.42,-.68], 3));
+      geo.computeVertexNormals();
+      sculptOn(g, s.x, 2.25, s.z, geo, toonMat(0xFCFAF4), 1.15);
+    }
+    else if (i === 1){                                       /* the corrugation */
+      plinth(g, s.x, s.z, R);
+      sculptOn(g, s.x, 2.15, s.z, miuraGeo(11, 8, .26, .3, 1.02, .84), toonMat(warm), 1.5);
+    }
+    else if (i === 2){                                       /* the dragon, coiling */
+      const d = dragon(g, R.tint);
+      const dp = W(2.0, .5);                       /* over the room, clear of every wall */
+      d.position.set(dp.x, 5.0, dp.z);
+      d.rotation.set(.1, Math.atan2(L[0], L[1]) + .55, .08);
+      d.scale.setScalar(LOW ? .5 : .62);
+      g.add(d);
+      hangers.push({ o:d, y:5.0, ph:i * 1.3, sw:.6 });
+      plinth(g, s.x, s.z, R, 1.5);
+      sculptOn(g, s.x, 2.1, s.z, kreslingGeo(6, .5, 1.1, .62), toonMat(warm), 1);
+    }
+    else if (i === 3){                                       /* hex terrain on a bench */
+      BS(g, 3.2, .16, 2.4, M.warm, s.x, 1.02, s.z, .85);
+      [[-1.1,-.75],[1.1,-.75],[-1.1,.75],[1.1,.75]].forEach(o =>
+        B(g, .14,1.0,.14, M.warmD, s.x+o[0], .5, s.z+o[1], .6));
+      const HR = .34;
+      for (let q = -3; q <= 3; q++) for (let r = -2; r <= 2; r++){
+        const hx = s.x + (q + r/2) * HR * 1.74;
+        const hz = s.z + r * HR * 1.5;
+        if (Math.abs(q + r/2) > 3.2 || Math.abs(r) > 2.2) continue;
+        const ht = .18 + ((q*7 + r*13) % 5) * .17;
+        CYL(g, HR, HR, ht, 6, paper(mix(0xE4D9BC, R.tint, ((q+r)%3)*.16)), hx, 1.1 + ht/2, hz, false);
+      }
+    }
+    else if (i === 4){                                       /* the paper jungle */
+      palm(g, s.x, s.z, 4.1, M.leafA);
+      const b = W(4.2, -4.2); bamboo(g, b.x, b.z);
+      const f = W(7.4, -4.4); palm(g, f.x, f.z, 3.1, M.leafC);
+      const q = W(3.0, -7.0); fern(g, q.x, q.z, M.leafB);
+    }
+    else if (i === 5){                                       /* a rack of twisted towers */
+      plinth(g, s.x, s.z, R, 2.1);
+      const off = [[-.62,-.5,1.0],[.6,-.42,1.35],[0,.62,1.15]];
+      for (let k = 0; k < off.length; k++)
+        sculptOn(g, s.x + off[k][0], 1.27 + off[k][2]/2, s.z + off[k][1],
+          kreslingGeo(6, .42, off[k][2], .5 + k*.2), toonMat(k === 1 ? R.tint : warm), 1);
+    }
+    else if (i === 6){                                       /* stacks of paper */
+      plinth(g, s.x, s.z, R, 2.0);
+      const st = [[-.5,-.4,5],[.55,-.3,7],[-.1,.55,4]];
+      for (let k = 0; k < st.length; k++)
+        for (let j = 0; j < st[k][2]; j++)
+          BS(g, 1.0 - j*.03, .11, .72 - j*.02,
+            j % 2 ? M.white : paper(warm),
+            s.x + st[k][0] + Math.sin(j*1.7)*.06, 1.32 + j*.115, s.z + st[k][1] + Math.cos(j*1.3)*.05, .6);
+    }
+    else {                                                   /* a table laid for two */
+      BS(g, 3.6, .18, 1.9, M.warm, s.x, 1.06, s.z, .85);
+      [[-1.5,-.6],[1.5,-.6],[-1.5,.6],[1.5,.6]].forEach(o =>
+        B(g, .15,1.06,.15, M.warmD, s.x+o[0], .53, s.z+o[1], .6));
+      [-1, 1].forEach(sd => {
+        const c = new THREE.Mesh(new THREE.ConeGeometry(.36, .5, 4), toonMat(R.tint));
+        c.position.set(s.x + sd*.95, 1.4, s.z); c.rotation.y = .8; g.add(c);
+        BS(g, .62,.03,.62, M.white, s.x + sd*.95, 1.16, s.z, .5);
+        propStool(g, s.x + sd*2.1, s.z);
+      });
+    }
+    lantern(g, s.x, s.z, R.tint);
+    return s;
+  }
+
   /* ── raise the house ──────────────────────────────────────── */
-  const roomGroups = [];
+  const roomGroups = [], screens = [], artTex = [], labTex = [];
   const built = new Set();
+
   P.forEach((p, i) => {
     const R = ROOMS[i];
-    const wallM = paper(R.wall), ceilM = paper(R.ceil), railM = paper(R.rail);
+    const wallM = paper(R.wall), railM = paper(R.rail);
     const floorM = new THREE.MeshToonMaterial({ color:R.floor, gradientMap:RAMP, map:gridMap(10) });
-
-    const g = new THREE.Group();
-    scene.add(g);
-    roomGroups.push(g);
+    const g = new THREE.Group(); scene.add(g); roomGroups.push(g);
+    const plot = Plot(p, doorSides[i]);
 
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), floorM);
     fl.rotation.x = -Math.PI/2; fl.position.set(p.x, 0, p.z); g.add(fl);
-    const ce = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), ceilM);
-    ce.rotation.x = Math.PI/2; ce.position.set(p.x, H, p.z); g.add(ce);
 
-    /* the room number, laid into the floor */
-    numTex.push(texFrom(numeralCanvas(i)));
-    const num = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), new THREE.MeshBasicMaterial({ map:numTex[i], transparent:true }));
-    num.rotation.x = -Math.PI/2;
-    num.position.set(p.x - SIDEVEC[artKey[i]][0]*6.4, .015, p.z - SIDEVEC[artKey[i]][1]*6.4);
-    g.add(num);
+    /* the lobby opens to the sky; every other ceiling is plain */
+    if (i === 0){
+      const cm = paper(R.ceil);
+      [[ROOM,6,0,7],[ROOM,6,0,-7],[6,8,-7,0],[6,8,7,0]].forEach(t => {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(t[0], t[1]), cm);
+        m.rotation.x = Math.PI/2; m.position.set(p.x + t[2], H, p.z + t[3]); g.add(m);
+      });
+      const WELL = 1.25;
+      [[8,WELL,.2,0,4],[8,WELL,.2,0,-4],[.2,WELL,8,4,0],[.2,WELL,8,-4,0]].forEach(w =>
+        B(g, w[0],w[1],w[2], M.white, p.x+w[3], H+WELL/2, p.z+w[4], 0));
+      const sky = new THREE.Mesh(new THREE.PlaneGeometry(8.2, 8.2), SKY_MAT);
+      sky.rotation.x = Math.PI/2; sky.position.set(p.x, H + WELL, p.z); g.add(sky);
+    } else {
+      const ce = new THREE.Mesh(new THREE.PlaneGeometry(ROOM, ROOM), paper(R.ceil));
+      ce.rotation.x = Math.PI/2; ce.position.set(p.x, H, p.z); g.add(ce);
+    }
 
     [['px',1,0],['nx',-1,0],['pz',0,1],['nz',0,-1]].forEach(function(w){
       const k = w[0], sx = w[1], sz = w[2];
@@ -1731,9 +2234,7 @@ function build(){
       const id = Math.round(mx*10) + '|' + Math.round(mz*10);
       if (built.has(id)) return; built.add(id);
       const alongZ = sx !== 0;
-      const hasDoor = !!doorSides[i][k];
-
-      if (!hasDoor){
+      if (!doorSides[i][k]){
         B(g, alongZ?T:ROOM, H, alongZ?ROOM:T, wallM, mx, H/2, mz, .55);
       } else {
         const seg = HALF - DW;
@@ -1745,67 +2246,96 @@ function build(){
         B(g, alongZ?T:ROOM, H-DH, alongZ?ROOM:T, wallM, mx, DH + (H-DH)/2, mz, .7);
         buildGate(g, mx, mz, alongZ, i, wallM);
       }
-      /* skirting and a picture rail */
-      const sk = alongZ ? [T+.04,.20,ROOM] : [ROOM,.20,T+.04];
-      B(g, sk[0],sk[1],sk[2], M.dark, mx, .10, mz, 0);
-      const rl = alongZ ? [T+.06,.08,ROOM] : [ROOM,.08,T+.06];
+      const sk = alongZ ? [T+.04,.22,ROOM] : [ROOM,.22,T+.04];
+      B(g, sk[0],sk[1],sk[2], M.dark, mx, .11, mz, 0);
+      const rl = alongZ ? [T+.06,.09,ROOM] : [ROOM,.09,T+.06];
       B(g, rl[0],rl[1],rl[2], railM, mx, 5.9, mz, 0);
     });
 
-    /* the main piece, on whichever wall has no doorway */
-    const ak = artKey[i], av = SIDEVEC[ak];
-    const ax = p.x + av[0]*(HALF - T*.5 - .06);
-    const az = p.z + av[1]*(HALF - T*.5 - .06);
-    const face = Math.atan2(-av[0], -av[1]);
+    /* the piece on the wall — frame, canvas, caption. Nothing else. */
+    const A = SIDEVEC[artKey[i]], L = [A[1], -A[0]];
     artTex.push(texFrom(artCanvas(i)));
     labTex.push(texFrom(labelCanvas(i)));
-
     const frame = new THREE.Group();
-    frame.position.set(ax, 0, az); frame.rotation.y = face; g.add(frame);
-    BS(frame, 5.9, 4.55, .16, paper(R.art), 0, 4.55, 0, .85);
-    const art = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 3.64), new THREE.MeshBasicMaterial({ map:artTex[i] }));
-    art.position.set(0, 4.55, .14); frame.add(art);
-    const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.5, .8), new THREE.MeshBasicMaterial({ map:labTex[i] }));
-    lab.position.set(0, 2.55, .14); frame.add(lab);
+    frame.position.set(p.x + A[0]*(HALF - T*.5 - .06), 0, p.z + A[1]*(HALF - T*.5 - .06));
+    frame.rotation.y = Math.atan2(-A[0], -A[1]);
+    g.add(frame);
+    BS(frame, 6.5, 5.0, .18, paper(R.art), 0, 3.85, 0, .9);
+    const art = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 4.08), new THREE.MeshBasicMaterial({ map:artTex[i] }));
+    art.position.set(0, 4.05, .15); frame.add(art);
+    const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .82), new THREE.MeshBasicMaterial({ map:labTex[i] }));
+    lab.position.set(0, 1.62, .15); frame.add(lab);
 
-    /* three framed tiles under the piece, on a shelf */
-    const set = WALLSET[i % WALLSET.length];
-    for (let k = 0; k < set.length; k++){
-      const ox = (k - 1) * 2.15;
-      BS(frame, 1.92, 1.92, .12, paper(R.art), ox, 1.20, 0, .8);
-      const tl = new THREE.Mesh(new THREE.PlaneGeometry(1.56, 1.56),
-        new THREE.MeshBasicMaterial({ map:tilePanel(set[k][0], set[k][1], HEXC[i % 3]) }));
-      tl.position.set(ox, 1.20, .11); frame.add(tl);
+    /* a cabinet, where there is a game to play */
+    const spare = ['px','nx','pz','nz'].filter(k => !doorSides[i][k] && k !== artKey[i]);
+    if (GAMES[i] && spare.length){
+      const sv = SIDEVEC[spare[0]];
+      const cab = new THREE.Group();
+      cab.position.set(p.x + sv[0]*(HALF - T*.5 - .06), 0, p.z + sv[1]*(HALF - T*.5 - .06));
+      cab.rotation.y = Math.atan2(-sv[0], -sv[1]);
+      g.add(cab);
+      BS(cab, 6.2, 4.3, .34, M.dark, 0, 3.75, .14, .9);
+      BS(cab, 6.6, .34, .58, paper(R.tint), 0, 6.05, .2, .9);
+      const scr = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 3.58),
+        new THREE.MeshBasicMaterial({ map:texFrom(screenCanvas(i, GAMES[i])) }));
+      scr.position.set(0, 3.78, .33); cab.add(scr);
+      screens.push({ mesh:scr, room:i });
+      BS(cab, 6.2, .5, .9, M.warmD, 0, 1.28, .34, .85);
+      [-2.4, 2.4].forEach(o => CYL(cab, .16,.2,1.28, 8, M.warmD, o, .64, .34));
     }
-    BS(frame, 7.2, .16, .5, M.warmD, 0, .16, .2, .8);
 
-    /* dressing, arranged in front of the piece */
-    const AX = av[0], AZ = av[1];          /* toward the art wall  */
-    const LX = av[1], LZ = -av[0];         /* along the art wall   */
-    pedestal(g, p.x + AX*5.4 + LX*3.3, p.z + AZ*5.4 + LZ*3.3, i);
-    plant(g,    p.x + AX*7.4 - LX*3.9, p.z + AZ*7.4 - LZ*3.9, R.tint);
-    if (!LOW) bench(g, p.x + AX*.2, p.z + AZ*.2, Math.atan2(AX, AZ));
-    corners(g, p, i, R.obj);
+    /* hero, then two quiet corners behind it */
+    const s = hero(i, g, p, A, L, R);
+    plot.claim(s.x, s.z, 2.7);
+    if (i === 4){
+      const b = p.x + A[0]*4.2 + L[0]*-4.2, bz = p.z + A[1]*4.2 + L[1]*-4.2;
+      plot.claim(b, bz, 1.7);
+      plot.claim(p.x + A[0]*7.4 + L[0]*-4.4, p.z + A[1]*7.4 + L[1]*-4.4, 1.15);
+      plot.claim(p.x + A[0]*3.0 + L[0]*-7.0, p.z + A[1]*3.0 + L[1]*-7.0, .7);
+    }
+    const FAR = [[-7.4,7.4],[7.4,7.4]];
+    const PROPS = [propLamp, propStack, propStool, propColumn, propVase];
+    for (let k = 0; k < FAR.length; k++){
+      const cx = p.x + A[0]*FAR[k][0] + L[0]*FAR[k][1];
+      const cz = p.z + A[1]*FAR[k][0] + L[1]*FAR[k][1];
+      if (plot.claim(cx, cz, 1.15)) PROPS[(i + k) % PROPS.length](g, cx, cz, R.obj);
+    }
   });
 
-  /* redraw the artwork once the display face has actually arrived */
+  if (refused > 0 && window.console) console.warn('[house] placements refused:', refused);
+
+  /* redraw the painted things once the display face has arrived */
   if (document.fonts && document.fonts.ready){
-    document.fonts.ready.then(() => {
+    document.fonts.ready.then(function(){
       for (let i = 0; i < N; i++){
-        artTex[i].image = artCanvas(i); artTex[i].needsUpdate = true;
+        artTex[i].image = artCanvas(i);   artTex[i].needsUpdate = true;
         labTex[i].image = labelCanvas(i); labTex[i].needsUpdate = true;
-        numTex[i].image = numeralCanvas(i); numTex[i].needsUpdate = true;
       }
-    }).catch(() => {});
+    }).catch(function(){});
   }
 
-  /* ── light ────────────────────────────────────────────────── */
-  scene.add(new THREE.AmbientLight(0xFFFFFF, .30));
-  const key  = new THREE.DirectionalLight(0xFFF4E2, 1.30); key.position.set(9,14,10);   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xC5D2F0, .38);  fill.position.set(-10,6,-12); scene.add(fill);
-  const warm = new THREE.DirectionalLight(0xFFE3BE, .34);  warm.position.set(2,5,-16);   scene.add(warm);
+  /* ── light ────────────────────────────────────────────────────
+     Low ambient, one cool key, and two warm bulbs that travel with
+     you — so the room you are standing in is the lit one.
+     ──────────────────────────────────────────────────────────── */
+  scene.add(new THREE.AmbientLight(0xFFFFFF, .26));
+  const key  = new THREE.DirectionalLight(0xFFF1DC, .62); key.position.set(9,16,10);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xB9CCEC, .24); fill.position.set(-10,7,-12); scene.add(fill);
+  const bulbA = new THREE.PointLight(0xFFCE8E, 2.5, 18, 1.7); scene.add(bulbA);
+  const bulbB = new THREE.PointLight(0xFFCE8E, 1.5, 15, 1.9); scene.add(bulbB);
 
-  /* ── walking the house ────────────────────────────────────── */
+  /* ── walking ─────────────────────────────────────────────── */
+  const shortAngle = (a, b) => {
+    let d = (b - a + Math.PI) % (Math.PI*2);
+    if (d < 0) d += Math.PI*2;
+    return d - Math.PI;
+  };
+  const TURN = [];
+  for (let i = 0; i < N; i++){
+    const a = dirAt(Math.max(0, i-1)), b = dirAt(Math.min(i, N-2));
+    TURN.push(Math.abs(shortAngle(Math.atan2(a.x,a.z), Math.atan2(b.x,b.z))));
+  }
+
   const ptr = { x:0, y:0, tx:0, ty:0 };
   if (!COARSE){
     addEventListener('pointermove', e => {
@@ -1814,19 +2344,28 @@ function build(){
     }, { passive:true });
   }
 
-  const pos    = new THREE.Vector3(P[0].x, EYE, P[0].z);
-  const lookAt = new THREE.Vector3();
-  const tmpA   = new THREE.Vector3();
+  const pos = new THREE.Vector3(P[0].x, EYE, P[0].z);
+  const lookAt = new THREE.Vector3(), tmpA = new THREE.Vector3();
+  let yaw = Math.atan2(dirAt(0).x, dirAt(0).z), yawV = 0, pitch = 0, pitchV = 0;
 
-  /* the camera is steered by a single damped heading angle, so turning
-     a corner and swinging across to a wall are the same smooth motion */
-  const shortAngle = (a, b) => {
-    let d = (b - a + Math.PI) % (Math.PI*2);
-    if (d < 0) d += Math.PI*2;
-    return d - Math.PI;
-  };
-  let yaw   = Math.atan2(dirAt(0).x, dirAt(0).z);
-  let pitch = 0;
+  const ray = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  let downAt = null;
+  canvas.style.pointerEvents = 'auto';
+  canvas.addEventListener('pointerdown', e => { downAt = { x:e.clientX, y:e.clientY }; });
+  canvas.addEventListener('pointerup', e => {
+    if (!downAt) return;
+    const moved = Math.abs(e.clientX - downAt.x) + Math.abs(e.clientY - downAt.y);
+    downAt = null;
+    if (moved > 12 || !screens.length) return;
+    ndc.x = (e.clientX / view.w) * 2 - 1;
+    ndc.y = -(e.clientY / view.h) * 2 + 1;
+    ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObjects(screens.map(s => s.mesh), false)[0];
+    if (!hit) return;
+    for (let i = 0; i < screens.length; i++)
+      if (screens[i].mesh === hit.object){ openGame(screens[i].room); break; }
+  });
 
   function resize(){
     renderer.setSize(view.w, view.h, false);
@@ -1839,78 +2378,86 @@ function build(){
   resize();
 
   function step(dt, t){
-    const k = clamp(dt * 3.6, 0, 1);
-    const f = scroll.damped * (N - 1);
+    const f  = scroll.damped * (N - 1);
     const i0 = clamp(Math.floor(f), 0, N-1), i1 = Math.min(N-1, i0+1);
     const m  = clamp(f - i0, 0, 1);
 
-    /* position: straight lerp between neighbouring room centres —
-       they are always orthogonally adjacent, so this runs through
-       the doorway rather than through a wall */
     tmpA.set(lerp(P[i0].x, P[i1].x, m), EYE, lerp(P[i0].z, P[i1].z, m));
-    pos.lerp(tmpA, clamp(dt*5.2, 0, 1));
+    pos.lerp(tmpA, clamp(dt*3.6, 0, 1));
 
-    /* where the corridor goes: hold this leg, swing onto the next */
     const dCur = dirAt(i0), dNext = dirAt(i1);
     const yawCur  = Math.atan2(dCur.x,  dCur.z);
     const yawNext = Math.atan2(dNext.x, dNext.z);
-    const turn    = smooth(clamp((m - .46) / .5, 0, 1));
-    const yawFwd  = yawCur + shortAngle(yawCur, yawNext) * turn;
+    const swing   = smooth(clamp((m - .20) / .66, 0, 1));
+    const yawFwd  = yawCur + shortAngle(yawCur, yawNext) * swing;
 
-    /* how much of the room you are standing in: 1 at a centre, 0 in a doorway */
-    const cw = .5 + .5*Math.cos(Math.PI*2*m);
+    const cw   = .5 + .5*Math.cos(Math.PI*2*m);
     const rIdx = m < .5 ? i0 : i1;
-    const av = SIDEVEC[artKey[rIdx]];
+    const ease = 1 - clamp(TURN[rIdx] / (Math.PI/2), 0, 1) * .58;
+    const av   = SIDEVEC[artKey[rIdx]];
     const gx = P[rIdx].x + av[0]*9.4, gz = P[rIdx].z + av[1]*9.4;
-    const yawArt = Math.atan2(gx - pos.x, gz - pos.z);
-    const w = cw * .82;
+    const w  = cw * .78 * ease;
+    const yawWant = yawFwd + shortAngle(yawFwd, Math.atan2(gx - pos.x, gz - pos.z)) * w;
 
-    const yawWant = yawFwd + shortAngle(yawFwd, yawArt) * w;
-    yaw += shortAngle(yaw, yawWant) * clamp(dt * 2.4, 0, 1);
+    const K = 4.2, C = 2 * Math.sqrt(K) * 1.06;
+    yawV   += (shortAngle(yaw, yawWant) * K - yawV * C) * dt;
+    yaw    += yawV * dt;
+    const pitchWant = .075 * w;
+    pitchV += ((pitchWant - pitch) * K - pitchV * C) * dt;
+    pitch  += pitchV * dt;
 
-    const pitchWant = .085 * w;
-    pitch += (pitchWant - pitch) * clamp(dt * 2.4, 0, 1);
+    ptr.x += (ptr.tx - ptr.x) * clamp(dt*2.2,0,1);
+    ptr.y += (ptr.ty - ptr.y) * clamp(dt*2.2,0,1);
 
-    ptr.x += (ptr.tx - ptr.x) * clamp(dt*2.6,0,1);
-    ptr.y += (ptr.ty - ptr.y) * clamp(dt*2.6,0,1);
-
-    const bob = REDUCED ? 0 : Math.sin(t*.75)*.03;
-    const camY = EYE + bob - ptr.y*.14;
+    const bob  = REDUCED ? 0 : Math.sin(t*.7)*.028;
+    const camY = EYE + bob - ptr.y*.13;
     camera.position.set(pos.x, camY, pos.z);
-
-    const ay = yaw + ptr.x*.17, D = 13;
-    lookAt.set(
-      pos.x + Math.sin(ay)*D,
-      camY + Math.tan(pitch - ptr.y*.085)*D,
-      pos.z + Math.cos(ay)*D
-    );
+    const ay = yaw + ptr.x*.16, D = 13;
+    lookAt.set(pos.x + Math.sin(ay)*D, camY + Math.tan(pitch - ptr.y*.08)*D, pos.z + Math.cos(ay)*D);
     camera.lookAt(lookAt);
 
-    /* only draw what is nearby */
+    /* the two nearest bulbs travel with you */
+    let n1 = 0, n2 = 1, d1 = Infinity, d2 = Infinity;
+    for (let i = 0; i < lanterns.length; i++){
+      const L2 = lanterns[i];
+      const dd = (L2.x - pos.x)*(L2.x - pos.x) + (L2.z - pos.z)*(L2.z - pos.z);
+      if (dd < d1){ d2 = d1; n2 = n1; d1 = dd; n1 = i; }
+      else if (dd < d2){ d2 = dd; n2 = i; }
+    }
+    if (lanterns[n1]) bulbA.position.set(lanterns[n1].x, lanterns[n1].y, lanterns[n1].z);
+    if (lanterns[n2]) bulbB.position.set(lanterns[n2].x, lanterns[n2].y, lanterns[n2].z);
+
     for (let i = 0; i < N; i++){
       const dx = (P[i].x - pos.x)/ROOM, dz = (P[i].z - pos.z)/ROOM;
-      roomGroups[i].visible = (dx*dx + dz*dz) < (LOW ? 3.4 : 6.2);
+      roomGroups[i].visible = (dx*dx + dz*dz) < (LOW ? 3.0 : 5.2);
     }
+    for (let i = 0; i < lanterns.length; i++)
+      if (lanterns[i].glow.parent && lanterns[i].glow.parent.visible)
+        lanterns[i].glow.quaternion.copy(camera.quaternion);
 
-    /* doors swing open when you get close */
     for (let i = 0; i < doors.length; i++){
       const d = doors[i];
       const ddx = d.wx - pos.x, ddz = d.wz - pos.z;
       const near = clamp((14.5 - Math.sqrt(ddx*ddx + ddz*ddz)) / 7.5, 0, 1);
       const want = -d.s * outC(near) * 1.62;
-      d.hinge.rotation.y += (want - d.hinge.rotation.y) * clamp(dt*3.2, 0, 1);
+      d.hinge.rotation.y += (want - d.hinge.rotation.y) * clamp(dt*3.0, 0, 1);
     }
-
     if (!REDUCED){
-      for (let i = 0; i < spinners.length; i++) spinners[i].rotation.y += dt * .3;
+      for (let i = 0; i < spinners.length; i++) spinners[i].rotation.y += dt * .22;
+      for (let i = 0; i < hangers.length; i++){
+        const h = hangers[i];
+        h.o.position.y = h.y + Math.sin(t*.5 + h.ph) * .2;
+        if (h.sw) h.o.rotation.z = Math.sin(t*.38 + h.ph) * .07 * h.sw;
+      }
     }
-
     renderer.render(scene, camera);
+    if (typeof progressStep === 'function') progressStep('frame');
   }
 
   step(0, 0);
   canvas.classList.add('lit');
   onTick(step);
+  if (typeof progressStep === 'function') progressStep('scene');
 }
 
 if (window.THREE) build();

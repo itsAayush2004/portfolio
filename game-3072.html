@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>3072</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #FFF5E0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #bg-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    filter: blur(4px);
+  }
+
+  /* ══════════════════════════════════
+     START SCREEN
+  ══════════════════════════════════ */
+  .start-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    padding: 20px;
+  }
+
+  .start-screen.hidden {
+    opacity: 0;
+    transform: scale(1.05);
+    pointer-events: none;
+  }
+
+  .start-title {
+    font-family: 'Lilita One', cursive;
+    font-size: 80px;
+    color: #CC6600;
+    text-shadow: 3px 3px 0 #E07020, 6px 6px 0 rgba(204,102,0,0.12);
+    margin-bottom: 8px;
+    animation: titleBounce 2s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+  }
+
+  .start-subtitle {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: #E07020;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 2;
+    opacity: 0.8;
+  }
+
+  @keyframes titleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .video-placeholder {
+    width: 260px; height: 260px;
+    max-width: 65vw; max-height: 65vw;
+    background: rgba(255,240,214,0.85);
+    border: 3px dashed #E07020;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .video-placeholder .play-icon {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, #E07020, #F59200);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(224,112,32,0.4);
+    transition: transform 0.2s;
+  }
+  .video-placeholder .play-icon:hover { transform: scale(1.08); }
+
+  .video-placeholder .play-icon::after {
+    content: '';
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 13px 0 13px 23px;
+    border-color: transparent transparent transparent #fff;
+    margin-left: 5px;
+  }
+
+  .video-placeholder span {
+    font-size: 12px;
+    font-weight: 900;
+    color: #CC6600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .start-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .btn-start {
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    border: none;
+    border-radius: 16px;
+    padding: 16px 44px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .btn-start:active { transform: scale(0.95) !important; }
+
+  .btn-play {
+    background: linear-gradient(135deg, #E07020, #F59200);
+    color: #fff;
+    box-shadow: 0 6px 25px rgba(224,112,32,0.45);
+  }
+  .btn-play:hover { box-shadow: 0 8px 35px rgba(224,112,32,0.6); transform: translateY(-2px); }
+
+  .btn-rules-start {
+    background: rgba(255,255,255,0.9);
+    color: #CC6600;
+    border: 2.5px solid #E07020;
+    box-shadow: 0 4px 15px rgba(204,102,0,0.12);
+  }
+  .btn-rules-start:hover { background: #fff; transform: translateY(-2px); }
+
+  /* ══════════════════════════════════
+     RULES POPUP
+  ══════════════════════════════════ */
+  .rules-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(204,102,0,0.35);
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+  }
+  .rules-overlay.active { opacity: 1; pointer-events: all; }
+
+  .rules-modal {
+    background: #fff;
+    border-radius: 24px;
+    padding: 32px 28px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(204,102,0,0.3);
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.3s ease;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .rules-overlay.active .rules-modal { transform: translateY(0) scale(1); }
+
+  .rules-modal h2 {
+    font-family: 'Lilita One', cursive;
+    font-size: 28px;
+    color: #CC6600;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  .rule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .rule-num {
+    background: linear-gradient(135deg, #F59200, #FDB930);
+    color: #fff;
+    font-weight: 900;
+    font-size: 14px;
+    width: 28px; height: 28px; min-width: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rule-text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #6B4400;
+    padding-top: 3px;
+  }
+
+  .btn-close-rules {
+    display: block;
+    margin: 22px auto 0;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #E07020, #F59200);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 40px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    box-shadow: 0 4px 15px rgba(224,112,32,0.35);
+  }
+  .btn-close-rules:active { transform: scale(0.95); }
+
+  /* ══════════════════════════════════
+     GAME SCREEN
+  ══════════════════════════════════ */
+  .game-wrapper {
+    width: 460px;
+    max-width: 94vw;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .game-title {
+    font-family: 'Lilita One', cursive;
+    font-size: 46px;
+    color: #CC6600;
+    text-shadow: 2px 2px 0 rgba(204,102,0,0.12);
+    line-height: 1;
+  }
+
+  .scores { display: flex; gap: 8px; }
+
+  .score-box {
+    background: linear-gradient(135deg, #F59200, #FDB930);
+    border-radius: 12px;
+    padding: 6px 16px;
+    text-align: center;
+    min-width: 75px;
+    box-shadow: 0 3px 10px rgba(245,146,0,0.25);
+  }
+
+  .score-box .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 700;
+  }
+
+  .score-box .value {
+    font-size: 22px;
+    font-weight: 900;
+    color: #fff;
+  }
+
+  .score-pop { animation: scorePop 0.3s ease-out; }
+  @keyframes scorePop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .grid-container {
+    position: relative;
+    background: #CC6600;
+    border-radius: 18px;
+    padding: 10px;
+    box-shadow: 0 10px 40px rgba(204,102,0,0.35);
+  }
+
+  .grid-sizer {
+    width: 100%;
+    padding-bottom: 100%;
+    position: relative;
+  }
+
+  .grid-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .cell-bg {
+    background: rgba(255,255,255,0.18);
+    border-radius: 12px;
+  }
+
+  .tile-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+  }
+
+  /* ── Tiles ── */
+  .tile {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-family: 'Lilita One', cursive;
+    z-index: 1;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    will-change: transform, top, left;
+  }
+
+  .tile-sliding {
+    transition: top 0.14s ease-in-out, left 0.14s ease-in-out;
+  }
+
+  .tile-new {
+    animation: tileAppear 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  }
+  @keyframes tileAppear {
+    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+    60% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .tile-merged {
+    animation: tileMerge 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    z-index: 3;
+  }
+  @keyframes tileMerge {
+    0%   { transform: scale(1); }
+    20%  { transform: scale(1.35); }
+    50%  { transform: scale(0.88); }
+    75%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Per-value idle breathing ── */
+  .tile-idle-3    { animation: p3 3.0s ease-in-out infinite; }
+  .tile-idle-6    { animation: p6 2.8s ease-in-out infinite; }
+  .tile-idle-12   { animation: p12 2.6s ease-in-out infinite; }
+  .tile-idle-24   { animation: p24 2.4s ease-in-out infinite; }
+  .tile-idle-48   { animation: p48 2.2s ease-in-out infinite; }
+  .tile-idle-96   { animation: p96 2.0s ease-in-out infinite; }
+  .tile-idle-192  { animation: g192 1.8s ease-in-out infinite; }
+  .tile-idle-384  { animation: g384 1.7s ease-in-out infinite; }
+  .tile-idle-768  { animation: g768 1.6s ease-in-out infinite; }
+  .tile-idle-1536 { animation: g1536 1.4s ease-in-out infinite; }
+  .tile-idle-3072 { animation: g3072 1.2s ease-in-out infinite; }
+  .tile-idle-super{ animation: gS 1.0s ease-in-out infinite; }
+
+  @keyframes p3   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
+  @keyframes p6   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.025)} }
+  @keyframes p12  { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+  @keyframes p24  { 0%,100%{transform:scale(1)} 50%{transform:scale(1.035)} }
+  @keyframes p48  { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+  @keyframes p96  { 0%,100%{transform:scale(1)} 50%{transform:scale(1.045)} }
+  @keyframes g192 { 0%,100%{transform:scale(1);box-shadow:0 0 10px rgba(253,185,48,0.3)} 50%{transform:scale(1.04);box-shadow:0 0 22px rgba(253,185,48,0.55)} }
+  @keyframes g384 { 0%,100%{transform:scale(1);box-shadow:0 0 12px rgba(245,146,0,0.3)} 50%{transform:scale(1.045);box-shadow:0 0 26px rgba(245,146,0,0.55)} }
+  @keyframes g768 { 0%,100%{transform:scale(1);box-shadow:0 0 14px rgba(224,112,32,0.35)} 50%{transform:scale(1.05);box-shadow:0 0 30px rgba(224,112,32,0.6)} }
+  @keyframes g1536{ 0%,100%{transform:scale(1);box-shadow:0 0 16px rgba(204,102,0,0.4)} 50%{transform:scale(1.05);box-shadow:0 0 36px rgba(204,102,0,0.65)} }
+  @keyframes g3072{ 0%,100%{transform:scale(1);box-shadow:0 0 20px rgba(204,102,0,0.4)} 50%{transform:scale(1.06);box-shadow:0 0 45px rgba(245,146,0,0.75)} }
+  @keyframes gS   { 0%,100%{transform:scale(1);box-shadow:0 0 25px rgba(204,102,0,0.5)} 50%{transform:scale(1.06);box-shadow:0 0 50px rgba(204,102,0,0.8)} }
+
+  /* ── Tile Colors (3-based values) ── */
+  .tile-3    { background: #FFF0D6; color: #CC6600; }
+  .tile-6    { background: #FFE4B8; color: #CC6600; }
+  .tile-12   { background: #FDC96A; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .tile-24   { background: #FDB930; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+  .tile-48   { background: #F59200; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+  .tile-96   { background: #E07020; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+  .tile-192  { background: #CC6600; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+  .tile-384  { background: #B35500; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .tile-768  { background: #994400; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .tile-1536 { background: linear-gradient(135deg, #CC6600, #F59200); color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .tile-3072 { background: linear-gradient(135deg, #E07020, #FDB930, #F59200); color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.35); }
+  .tile-super{ background: linear-gradient(135deg, #994400, #CC6600, #E07020); color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.35); }
+
+  /* ── Overlays ── */
+  .overlay {
+    position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .overlay.active { opacity: 1; pointer-events: all; }
+  .overlay-win    { background: rgba(245,146,0,0.92); }
+  .overlay-lose   { background: rgba(204,102,0,0.92); }
+  .overlay-pause  { background: rgba(102,51,0,0.88); }
+
+  .overlay h2 {
+    font-family: 'Lilita One', cursive;
+    font-size: 36px;
+    color: #fff;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  }
+  .overlay p { color: rgba(255,255,255,0.9); font-size: 15px; font-weight: 700; }
+
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 900;
+    letter-spacing: 1px; text-transform: uppercase;
+    border: none; border-radius: 12px;
+    padding: 10px 24px; cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-primary { background: #fff; color: #CC6600; box-shadow: 0 3px 12px rgba(0,0,0,0.15); }
+  .btn-ghost   { background: rgba(255,255,255,0.2); color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+
+  .controls { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+  .btn-game {
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px; font-weight: 900;
+    letter-spacing: 1px; text-transform: uppercase;
+    border: none; border-radius: 12px;
+    padding: 10px 14px; cursor: pointer;
+    transition: transform 0.15s ease;
+    background: #F59200; color: #fff;
+    box-shadow: 0 3px 10px rgba(245,146,0,0.3);
+  }
+  .btn-game:active { transform: scale(0.95); }
+
+  .hint { font-size: 12px; color: #CC6600; font-weight: 700; letter-spacing: 0.5px; opacity: 0.7; }
+
+  .score-float {
+    position: absolute;
+    font-family: 'Lilita One', cursive;
+    font-size: 22px;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    z-index: 50;
+    pointer-events: none;
+    animation: floatUp 0.8s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-55px) scale(1.4); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- START SCREEN -->
+<div class="start-screen" id="startScreen">
+  <div class="start-title">3072</div>
+  <div class="start-subtitle">The Triple Challenge</div>
+  <div class="video-placeholder" id="videoPlaceholder">
+    <div class="play-icon"></div>
+    <span>Game Preview</span>
+  </div>
+  <div class="start-buttons">
+    <button class="btn-start btn-play" onclick="startGame()">Play</button>
+    <button class="btn-start btn-rules-start" onclick="showRules()">Rules</button>
+  </div>
+</div>
+
+<!-- RULES POPUP -->
+<div class="rules-overlay" id="rulesOverlay" onclick="closeRulesOutside(event)">
+  <div class="rules-modal">
+    <h2>How to Play 3072</h2>
+    <div class="rule-item"><div class="rule-num">1</div><div class="rule-text">Swipe or use arrow keys to slide all tiles in one direction.</div></div>
+    <div class="rule-item"><div class="rule-num">2</div><div class="rule-text">When two tiles with the same number collide, they merge into one with their combined value. <strong style="color:#E07020">3 + 3 = 6, 6 + 6 = 12</strong>, and so on!</div></div>
+    <div class="rule-item"><div class="rule-num">3</div><div class="rule-text">After every move, a new tile (<strong>3</strong> or occasionally <strong>6</strong>) appears in a random empty spot.</div></div>
+    <div class="rule-item"><div class="rule-num">4</div><div class="rule-text">Reach the <strong style="color:#E07020">3072</strong> tile to win! Keep going to beat your high score.</div></div>
+    <div class="rule-item"><div class="rule-num">5</div><div class="rule-text">The sequence goes: 3 → 6 → 12 → 24 → 48 → 96 → 192 → 384 → 768 → 1536 → <strong style="color:#E07020">3072</strong></div></div>
+    <div class="rule-item"><div class="rule-num">6</div><div class="rule-text">Game ends when the board is full and no merges are possible.</div></div>
+    <button class="btn-close-rules" onclick="closeRules()">Got It!</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="game-wrapper" id="gameWrapper" style="display:none;">
+  <div class="header">
+    <div class="game-title">3072</div>
+    <div class="scores">
+      <div class="score-box"><div class="label">Score</div><div class="value" id="score">0</div></div>
+      <div class="score-box"><div class="label">Best</div><div class="value" id="best">0</div></div>
+    </div>
+  </div>
+
+  <div class="grid-container" id="gridContainer">
+    <div class="grid-sizer">
+      <div class="grid-bg">
+        <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+        <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+        <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+        <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      </div>
+      <div class="tile-layer" id="tileLayer"></div>
+      <div class="overlay overlay-win" id="winOverlay">
+        <h2>🎉 You Win!</h2><p>You reached 3072!</p>
+        <div style="display:flex;gap:10px"><button class="btn btn-ghost" onclick="keepPlaying()">Keep Going</button><button class="btn btn-primary" onclick="restartGame()">New Game</button></div>
+      </div>
+      <div class="overlay overlay-lose" id="loseOverlay">
+        <h2>Game Over</h2><p>No more moves!</p>
+        <button class="btn btn-primary" onclick="restartGame()">Try Again</button>
+      </div>
+      <div class="overlay overlay-pause" id="pauseOverlay">
+        <h2>⏸ Paused</h2><p>Take your time!</p>
+        <div style="display:flex;gap:10px"><button class="btn btn-primary" onclick="resumeGame()">Resume</button><button class="btn btn-ghost" onclick="restartGame()">Restart</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <span class="hint">Arrow keys / swipe</span>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-game" onclick="pauseGame()">⏸ Pause</button>
+      <button class="btn-game" onclick="restartGame()">↺ New</button>
+      <button class="btn-game" onclick="goHome()">⌂ Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  ANIMATED BACKGROUND – Falling tiles with 3-based numbers
+// ════════════════════════════════════════════════════════════════
+(function() {
+  var canvas = document.getElementById('bg-canvas');
+  var ctx = canvas.getContext('2d');
+
+  /* Background tile colors matching the 3-based game palette */
+  var BG_COLORS = {
+    3:    { bg: '#FFF0D6', fg: '#CC6600' },
+    6:    { bg: '#FFE4B8', fg: '#CC6600' },
+    12:   { bg: '#FDC96A', fg: '#fff' },
+    24:   { bg: '#FDB930', fg: '#fff' },
+    48:   { bg: '#F59200', fg: '#fff' },
+    96:   { bg: '#E07020', fg: '#fff' },
+    192:  { bg: '#CC6600', fg: '#fff' },
+    384:  { bg: '#B35500', fg: '#fff' },
+    768:  { bg: '#994400', fg: '#fff' },
+    1536: { bg: '#CC6600', fg: '#fff' },
+    3072: { bg: '#E07020', fg: '#fff' }
+  };
+  var BG_VALUES = [3,6,12,24,48,96,192,384,768,1536,3072];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function BgTile() { this.reset(true); }
+
+  BgTile.prototype.reset = function(initial) {
+    this.size = Math.random() * 55 + 45;
+    this.x = Math.random() * (canvas.width + this.size * 2) - this.size;
+    this.y = initial ? Math.random() * canvas.height : -this.size - 20;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = Math.random() * 0.7 + 0.25;
+    this.rotation = (Math.random() - 0.5) * 0.3;
+    this.vrot = (Math.random() - 0.5) * 0.007;
+    this.value = BG_VALUES[Math.floor(Math.random() * BG_VALUES.length)];
+    this.alpha = 0;
+    this.fadeIn = true;
+    this.scale = 0.1;
+    this.born = Date.now();
+  };
+
+  BgTile.prototype.update = function() {
+    if (this.scale < 1) this.scale += (1 - this.scale) * 0.1;
+    if (this.fadeIn && this.alpha < 0.45) {
+      this.alpha += 0.02;
+      if (this.alpha >= 0.45) { this.alpha = 0.45; this.fadeIn = false; }
+    }
+    this.x += this.vx;
+    this.y += this.vy;
+    this.rotation += this.vrot;
+    var t = (Date.now() - this.born) / 1000;
+    this.currentScale = this.scale * (1 + Math.sin(t * 1.5) * 0.04);
+    if (this.y > canvas.height + this.size + 20) this.reset(false);
+  };
+
+  BgTile.prototype.draw = function() {
+    var c = BG_COLORS[this.value];
+    var s = this.size * this.currentScale;
+    var r = s * 0.15;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+    ctx.globalAlpha = this.alpha;
+    ctx.shadowColor = 'rgba(0,0,0,0.1)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 3;
+    ctx.fillStyle = c.bg;
+    ctx.beginPath();
+    ctx.moveTo(-s/2 + r, -s/2);
+    ctx.lineTo(s/2 - r, -s/2);
+    ctx.arcTo(s/2, -s/2, s/2, -s/2 + r, r);
+    ctx.lineTo(s/2, s/2 - r);
+    ctx.arcTo(s/2, s/2, s/2 - r, s/2, r);
+    ctx.lineTo(-s/2 + r, s/2);
+    ctx.arcTo(-s/2, s/2, -s/2, s/2 - r, r);
+    ctx.lineTo(-s/2, -s/2 + r);
+    ctx.arcTo(-s/2, -s/2, -s/2 + r, -s/2, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+    var fontSize = this.value >= 1536 ? s * 0.24 : this.value >= 192 ? s * 0.30 : s * 0.38;
+    ctx.font = 'bold ' + fontSize + 'px Lilita One, cursive';
+    ctx.fillStyle = c.fg;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.value, 0, 0);
+    ctx.restore();
+  };
+
+  var bgTiles = [];
+  for (var i = 0; i < 24; i++) bgTiles.push(new BgTile());
+
+  function drawBg() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#FFF5E0';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(204,153,80,0.12)';
+    var sp = 55;
+    for (var x = sp/2; x < canvas.width; x += sp)
+      for (var y = sp/2; y < canvas.height; y += sp) {
+        ctx.beginPath();
+        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    for (var i = 0; i < bgTiles.length; i++) { bgTiles[i].update(); bgTiles[i].draw(); }
+    requestAnimationFrame(drawBg);
+  }
+  drawBg();
+})();
+
+// ════════════════════════════════════════════════════════════════
+//  3072 GAME – Multiples of 3: 3,6,12,24,48,96,192,384,768,1536,3072
+// ════════════════════════════════════════════════════════════════
+
+var SIZE = 4;
+var GRID_GAP = 10;
+
+/* ── Key difference from 2048: spawns 3 (90%) or 6 (10%) ── */
+var SPAWN_LOW = 3;
+var SPAWN_HIGH = 6;
+var WIN_VALUE = 3072;
+
+/* ── Valid tile values for CSS class lookup ── */
+var KNOWN_VALUES = [3,6,12,24,48,96,192,384,768,1536,3072];
+
+var grid = [];
+var score = 0;
+var best = 0;
+var won = false;
+var keepPlayingMode = false;
+var isAnimating = false;
+var isPaused = false;
+var gameStarted = false;
+
+var tileLayer = document.getElementById('tileLayer');
+var scoreEl = document.getElementById('score');
+var bestEl = document.getElementById('best');
+var winOverlay = document.getElementById('winOverlay');
+var loseOverlay = document.getElementById('loseOverlay');
+var pauseOverlay = document.getElementById('pauseOverlay');
+
+/* Use separate localStorage key so 2048 and 3072 scores don't clash */
+try { best = parseInt(localStorage.getItem('3072_best') || '0', 10); } catch(e) {}
+bestEl.textContent = best;
+
+// ── Navigation ──
+function startGame() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('gameWrapper').style.display = 'flex';
+  gameStarted = true;
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { initGrid(); });
+  });
+}
+
+function goHome() {
+  gameStarted = false; isPaused = false;
+  document.getElementById('gameWrapper').style.display = 'none';
+  document.getElementById('startScreen').classList.remove('hidden');
+}
+
+function showRules()  { document.getElementById('rulesOverlay').classList.add('active'); }
+function closeRules() { document.getElementById('rulesOverlay').classList.remove('active'); }
+function closeRulesOutside(e) { if (e.target === document.getElementById('rulesOverlay')) closeRules(); }
+
+function pauseGame()  { if (!gameStarted || isPaused) return; isPaused = true; pauseOverlay.classList.add('active'); }
+function resumeGame() { isPaused = false; pauseOverlay.classList.remove('active'); }
+
+// ── Grid init ──
+function initGrid() {
+  grid = [];
+  for (var r = 0; r < SIZE; r++) { grid[r] = []; for (var c = 0; c < SIZE; c++) grid[r][c] = 0; }
+  score = 0; won = false; keepPlayingMode = false; isPaused = false;
+  updateScore();
+  winOverlay.classList.remove('active');
+  loseOverlay.classList.remove('active');
+  pauseOverlay.classList.remove('active');
+  spawnTile(); spawnTile();
+  renderStatic();
+}
+
+// ── Spawn: 90% → 3, 10% → 6 ──
+function spawnTile() {
+  var empty = [];
+  for (var r = 0; r < SIZE; r++)
+    for (var c = 0; c < SIZE; c++)
+      if (grid[r][c] === 0) empty.push({ r: r, c: c });
+  if (empty.length === 0) return null;
+  var cell = empty[Math.floor(Math.random() * empty.length)];
+  grid[cell.r][cell.c] = Math.random() < 0.9 ? SPAWN_LOW : SPAWN_HIGH;
+  return cell;
+}
+
+// ── Tile pixel metrics ──
+function getTileMetrics() {
+  var containerW = 0;
+  var rect = tileLayer.getBoundingClientRect();
+  if (rect && rect.width > 0) containerW = rect.width;
+  if (containerW <= 0) containerW = tileLayer.offsetWidth || 0;
+  if (containerW <= 0) {
+    var s = tileLayer.parentElement;
+    if (s) { var sr = s.getBoundingClientRect(); if (sr.width > 0) containerW = sr.width; }
+  }
+  if (containerW <= 0) {
+    var gc = document.querySelector('.grid-container');
+    if (gc) { var gcr = gc.getBoundingClientRect(); if (gcr.width > 0) containerW = gcr.width - 20; }
+  }
+  if (containerW <= 0) return null;
+  var tileSize = (containerW - GRID_GAP * (SIZE - 1)) / SIZE;
+  if (tileSize <= 0) return null;
+  return { tileSize: tileSize, gap: GRID_GAP };
+}
+
+function lineToGrid(lineNum, idx, dir) {
+  if (dir === 'left')  return { r: lineNum, c: idx };
+  if (dir === 'right') return { r: lineNum, c: SIZE - 1 - idx };
+  if (dir === 'up')    return { r: idx, c: lineNum };
+  if (dir === 'down')  return { r: SIZE - 1 - idx, c: lineNum };
+}
+
+// ── Process a line: compact, merge, track movements ──
+function processLineTracked(line) {
+  var items = [];
+  for (var i = 0; i < line.length; i++)
+    if (line[i] !== 0) items.push({ val: line[i], orig: i });
+
+  var result = [];
+  var movements = [];
+  var mergeIndices = [];
+  var points = 0;
+  var idx = 0;
+  var pos = 0;
+
+  while (idx < items.length) {
+    if (idx + 1 < items.length && items[idx].val === items[idx + 1].val) {
+      var merged = items[idx].val * 2;
+      result.push(merged);
+      movements.push({ from: items[idx].orig, to: pos, value: items[idx].val });
+      movements.push({ from: items[idx + 1].orig, to: pos, value: items[idx + 1].val });
+      mergeIndices.push(pos);
+      points += merged;
+      idx += 2;
+    } else {
+      result.push(items[idx].val);
+      movements.push({ from: items[idx].orig, to: pos, value: items[idx].val });
+      idx++;
+    }
+    pos++;
+  }
+
+  while (result.length < SIZE) result.push(0);
+  return { line: result, movements: movements, mergeIndices: mergeIndices, points: points };
+}
+
+// ── Move with proper sliding animation ──
+function move(direction) {
+  if (isPaused) return false;
+
+  var allMovements = [];
+  var mergedGridCells = [];
+  var moved = false;
+  var totalPoints = 0;
+
+  function getLine(index, dir) {
+    if (dir === 'left')  return [grid[index][0], grid[index][1], grid[index][2], grid[index][3]];
+    if (dir === 'right') return [grid[index][3], grid[index][2], grid[index][1], grid[index][0]];
+    if (dir === 'up')    return [grid[0][index], grid[1][index], grid[2][index], grid[3][index]];
+    if (dir === 'down')  return [grid[3][index], grid[2][index], grid[1][index], grid[0][index]];
+  }
+
+  function setLine(index, line, dir) {
+    if (dir === 'left')  for (var c = 0; c < SIZE; c++) grid[index][c] = line[c];
+    if (dir === 'right') for (var c = 0; c < SIZE; c++) grid[index][c] = line[SIZE-1-c];
+    if (dir === 'up')    for (var r = 0; r < SIZE; r++) grid[r][index] = line[r];
+    if (dir === 'down')  for (var r = 0; r < SIZE; r++) grid[r][index] = line[SIZE-1-r];
+  }
+
+  for (var i = 0; i < SIZE; i++) {
+    var original = getLine(i, direction);
+    var result = processLineTracked(original);
+    for (var j = 0; j < SIZE; j++)
+      if (original[j] !== result.line[j]) { moved = true; break; }
+    setLine(i, result.line, direction);
+    totalPoints += result.points;
+
+    for (var m = 0; m < result.movements.length; m++) {
+      var mv = result.movements[m];
+      var fromPos = lineToGrid(i, mv.from, direction);
+      var toPos = lineToGrid(i, mv.to, direction);
+      allMovements.push({ fromR: fromPos.r, fromC: fromPos.c, toR: toPos.r, toC: toPos.c, value: mv.value });
+    }
+
+    for (var mi = 0; mi < result.mergeIndices.length; mi++) {
+      var mpos = lineToGrid(i, result.mergeIndices[mi], direction);
+      mergedGridCells.push({ r: mpos.r, c: mpos.c, val: result.line[result.mergeIndices[mi]] });
+    }
+  }
+
+  if (!moved) return false;
+
+  score += totalPoints;
+  updateScore();
+
+  /* Phase 1: place tiles at OLD positions */
+  isAnimating = true;
+  var metrics = getTileMetrics();
+  if (!metrics) { renderStatic(); isAnimating = false; return true; }
+
+  tileLayer.innerHTML = '';
+  var slidingElements = [];
+
+  for (var i = 0; i < allMovements.length; i++) {
+    var mv = allMovements[i];
+    var el = makeTileElement(mv.value, mv.fromR, mv.fromC, metrics);
+    tileLayer.appendChild(el);
+    slidingElements.push({ el: el, toR: mv.toR, toC: mv.toC });
+  }
+
+  /* Phase 2: animate slide to NEW positions */
+  requestAnimationFrame(function() {
+    for (var i = 0; i < slidingElements.length; i++) {
+      var s = slidingElements[i];
+      s.el.classList.add('tile-sliding');
+      s.el.style.top = (s.toR * (metrics.tileSize + metrics.gap)) + 'px';
+      s.el.style.left = (s.toC * (metrics.tileSize + metrics.gap)) + 'px';
+    }
+
+    for (var i = 0; i < mergedGridCells.length; i++) {
+      var mc = mergedGridCells[i];
+      showFloatPoint(mc.r, mc.c, mc.val, metrics);
+    }
+
+    /* Phase 3: render final state with spawn + merge animations */
+    setTimeout(function() {
+      var spawned = spawnTile();
+      renderFinal(mergedGridCells, spawned);
+
+      if (!won && !keepPlayingMode) {
+        for (var r = 0; r < SIZE; r++)
+          for (var c = 0; c < SIZE; c++)
+            if (grid[r][c] === WIN_VALUE) { won = true; winOverlay.classList.add('active'); }
+      }
+
+      if (isGameOver()) loseOverlay.classList.add('active');
+      isAnimating = false;
+    }, 155);
+  });
+
+  return true;
+}
+
+// ── Determine CSS color class for a tile value ──
+function getColorClass(val) {
+  for (var i = 0; i < KNOWN_VALUES.length; i++) {
+    if (val === KNOWN_VALUES[i]) return 'tile-' + val;
+  }
+  return 'tile-super';
+}
+
+// ── Determine idle animation class ──
+function getIdleClass(val) {
+  for (var i = 0; i < KNOWN_VALUES.length; i++) {
+    if (val === KNOWN_VALUES[i]) return 'tile-idle-' + val;
+  }
+  return 'tile-idle-super';
+}
+
+// ── Create tile DOM element ──
+function makeTileElement(value, row, col, metrics) {
+  var el = document.createElement('div');
+  el.className = 'tile ' + getColorClass(value);
+  el.style.width = metrics.tileSize + 'px';
+  el.style.height = metrics.tileSize + 'px';
+  el.style.top = (row * (metrics.tileSize + metrics.gap)) + 'px';
+  el.style.left = (col * (metrics.tileSize + metrics.gap)) + 'px';
+
+  var len = String(value).length;
+  var fs = len <= 2 ? metrics.tileSize * 0.42 : len === 3 ? metrics.tileSize * 0.34 : len === 4 ? metrics.tileSize * 0.27 : metrics.tileSize * 0.21;
+  el.style.fontSize = fs + 'px';
+  el.textContent = value;
+  return el;
+}
+
+// ── Floating score ──
+function showFloatPoint(row, col, val, metrics) {
+  var el = document.createElement('div');
+  el.className = 'score-float';
+  el.textContent = '+' + val;
+  el.style.left = (col * (metrics.tileSize + metrics.gap) + metrics.tileSize / 2 - 20) + 'px';
+  el.style.top = (row * (metrics.tileSize + metrics.gap)) + 'px';
+  tileLayer.appendChild(el);
+  setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 800);
+}
+
+// ── Final render after slide ──
+function renderFinal(mergedCells, spawnedCell) {
+  mergedCells = mergedCells || [];
+  spawnedCell = spawnedCell || null;
+  tileLayer.innerHTML = '';
+  var metrics = getTileMetrics();
+  if (!metrics) return;
+
+  for (var r = 0; r < SIZE; r++) {
+    for (var c = 0; c < SIZE; c++) {
+      if (grid[r][c] === 0) continue;
+      var val = grid[r][c];
+      var el = makeTileElement(val, r, c, metrics);
+
+      var isSpawn = spawnedCell && spawnedCell.r === r && spawnedCell.c === c;
+      var isMerge = false;
+      for (var m = 0; m < mergedCells.length; m++)
+        if (mergedCells[m].r === r && mergedCells[m].c === c) { isMerge = true; break; }
+
+      if (isSpawn) el.classList.add('tile-new');
+      else if (isMerge) el.classList.add('tile-merged');
+      else el.classList.add(getIdleClass(val));
+
+      tileLayer.appendChild(el);
+    }
+  }
+}
+
+// ── Static render (init / restart) ──
+function renderStatic() {
+  tileLayer.innerHTML = '';
+  var metrics = getTileMetrics();
+  if (!metrics) return;
+  for (var r = 0; r < SIZE; r++) {
+    for (var c = 0; c < SIZE; c++) {
+      if (grid[r][c] === 0) continue;
+      var val = grid[r][c];
+      var el = makeTileElement(val, r, c, metrics);
+      el.classList.add(getIdleClass(val));
+      el.classList.add('tile-new');
+      tileLayer.appendChild(el);
+    }
+  }
+}
+
+// ── Game-over ──
+function isGameOver() {
+  for (var r = 0; r < SIZE; r++)
+    for (var c = 0; c < SIZE; c++) {
+      if (grid[r][c] === 0) return false;
+      if (c < SIZE-1 && grid[r][c] === grid[r][c+1]) return false;
+      if (r < SIZE-1 && grid[r][c] === grid[r+1][c]) return false;
+    }
+  return true;
+}
+
+// ── Score ──
+function updateScore() {
+  scoreEl.textContent = score;
+  scoreEl.classList.remove('score-pop');
+  scoreEl.offsetWidth;
+  scoreEl.classList.add('score-pop');
+  if (score > best) {
+    best = score; bestEl.textContent = best;
+    try { localStorage.setItem('3072_best', best); } catch(e) {}
+  }
+}
+
+function keepPlaying() { keepPlayingMode = true; winOverlay.classList.remove('active'); }
+function restartGame() { initGrid(); }
+
+// ── Keyboard ──
+document.addEventListener('keydown', function(e) {
+  if (!gameStarted || isAnimating) return;
+  if (e.key === 'Escape') { if (isPaused) resumeGame(); else pauseGame(); return; }
+  if (isPaused) return;
+  var dir = null;
+  if (e.key === 'ArrowUp'    || e.key === 'w') dir = 'up';
+  if (e.key === 'ArrowDown'  || e.key === 's') dir = 'down';
+  if (e.key === 'ArrowLeft'  || e.key === 'a') dir = 'left';
+  if (e.key === 'ArrowRight' || e.key === 'd') dir = 'right';
+  if (dir) { e.preventDefault(); move(dir); }
+});
+
+// ── Touch ──
+var touchStartX = 0, touchStartY = 0;
+document.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }, false);
+document.addEventListener('touchend', function(e) {
+  if (!gameStarted || isAnimating || isPaused) return;
+  var dx = e.changedTouches[0].clientX - touchStartX;
+  var dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+  if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'right' : 'left');
+  else move(dy > 0 ? 'down' : 'up');
+}, false);
+
+// ── Resize ──
+window.addEventListener('resize', function() { if (gameStarted && !isAnimating) renderFinal(); });
+</script>
+
+</body>
+</html>

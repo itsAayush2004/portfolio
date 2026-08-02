@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Flappy Fird</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#fff;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-tap-highlight-color:transparent;overscroll-behavior:none;touch-action:manipulation}
+  #root{width:100%;height:100%}
+  #boot{position:fixed;inset:0;display:grid;place-items:center;font:500 12px/1.6 ui-monospace,monospace;
+    letter-spacing:.18em;text-transform:uppercase;color:#837B6A;background:#F2EEE4;z-index:9}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.2/babel.min.js" crossorigin></script>
+</head>
+<body>
+<div id="root"></div>
+<div id="boot">Loading Flappy Fird</div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffect,
+        useReducer, useContext, createContext, memo, Fragment, forwardRef } = React;
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 🎬 BACKEND CONFIG — change this YouTube ID to update the video panel.
+//    Users never see or touch this value; it lives only in the source code.
+// ─────────────────────────────────────────────────────────────────────────────
+const VIDEO_YOUTUBE_ID = 'jNQXAC9IVRw';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pixelated sky hook — drives an offscreen canvas used as page background
+// ─────────────────────────────────────────────────────────────────────────────
+const useSkyCanvas = (ref) => {
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const PS = 6, RW = 160, RH = 120;
+    canvas.width  = RW * PS;
+    canvas.height = RH * PS;
+
+    const SKY = { r: 91, g: 206, b: 250 };
+    const adj = (c, p) => ({
+      r: Math.min(255, Math.floor(c.r + (255 - c.r) * p)),
+      g: Math.min(255, Math.floor(c.g + (255 - c.g) * p)),
+      b: Math.min(255, Math.floor(c.b + (255 - c.b) * p)),
+    });
+    const rgb = c => `rgb(${c.r},${c.g},${c.b})`;
+
+    const PATTERNS = [
+      [[0,0,0,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,0],
+       [1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1]],
+      [[0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+       [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+       [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+      [[0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
+       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+       [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+       [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+       [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+      [[0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0],
+       [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+       [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+       [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],
+    ];
+
+    class Cloud {
+      constructor(rndX = true) {
+        const pat = PATTERNS[Math.floor(Math.random() * PATTERNS.length)];
+        this.pixels = [];
+        for (let y = 0; y < pat.length; y++)
+          for (let x = 0; x < pat[y].length; x++)
+            if (pat[y][x]) this.pixels.push({ x, y });
+        this.maxX  = Math.max(...this.pixels.map(p => p.x));
+        this.x     = rndX ? Math.random() * RW - 20 : -this.maxX - 10;
+        this.y     = Math.random() * (RH * 0.5);
+        this.speed = 0.02 + Math.random() * 0.05;
+      }
+      update() {
+        this.x += this.speed;
+        if (this.x > RW + 5) { this.x = -this.maxX - 10; this.y = Math.random() * (RH * 0.5); }
+      }
+      draw(color) {
+        this.pixels.forEach(({ x, y }) => {
+          const px = this.x + x, py = this.y + y;
+          if (px >= 0 && px < RW && py >= 0 && py < RH) {
+            ctx.fillStyle = color;
+            ctx.fillRect(Math.floor(px) * PS, Math.floor(py) * PS, PS, PS);
+          }
+        });
+      }
+    }
+
+    const clouds = Array.from({ length: 10 }, () => new Cloud(true));
+    let raf;
+    const loop = () => {
+      ctx.fillStyle = rgb(SKY);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const cc = rgb(adj(SKY, 0.78));
+      clouds.forEach(c => { c.update(); c.draw(cc); });
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+    return () => cancelAnimationFrame(raf);
+  }, [ref]);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main game component
+// ─────────────────────────────────────────────────────────────────────────────
+const FlappyFird = () => {
+  const [gameState, setGameState] = useState('start');
+  const [birdY, setBirdY]             = useState(300);
+  const [birdVelocity, setBirdVelocity] = useState(0);
+  const [pipes, setPipes]             = useState([]);
+  const [score, setScore]             = useState(0);
+  const [highScore, setHighScore]     = useState(0);
+  const [shake, setShake]             = useState(0);
+  const [showRules, setShowRules]     = useState(false);
+  const frameRef = useRef(0);
+  const skyRef   = useRef(null);
+
+  useSkyCanvas(skyRef);
+
+  const GRAVITY = 0.38, JUMP = -7;
+  const BIRD_X = 80, BIRD_R = 14;
+  const W = 400, H = 600;
+  const PIPE_W = 52, PIPE_SPEED = 2.5, PIPE_SPACING = 220;
+  const START_GAP = 170, MIN_GAP = 65;
+
+  const getGap = useCallback(s => Math.max(MIN_GAP, START_GAP - s * 3.5), []);
+
+  const startGame = useCallback(() => {
+    setGameState('playing'); setBirdY(300); setBirdVelocity(JUMP);
+    setPipes([]); setScore(0); frameRef.current = 0;
+  }, []);
+
+  const jump = useCallback(() => {
+    if (gameState === 'dead') startGame();
+    else if (gameState === 'playing') setBirdVelocity(JUMP);
+  }, [gameState, startGame]);
+
+  const togglePause = useCallback(e => {
+    e.stopPropagation();
+    setGameState(g => g === 'playing' ? 'paused' : 'playing');
+  }, []);
+
+  useEffect(() => {
+    const onKey = e => {
+      if (e.code === 'Space') { e.preventDefault(); jump(); }
+      if ((e.code === 'Escape' || e.code === 'KeyP') && (gameState === 'playing' || gameState === 'paused'))
+        setGameState(g => g === 'playing' ? 'paused' : 'playing');
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [jump, gameState]);
+
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    const loop = setInterval(() => {
+      frameRef.current++;
+      setBirdVelocity(v => Math.min(v + GRAVITY, 10));
+      setBirdY(y => {
+        const next = y + birdVelocity;
+        if (next < BIRD_R || next > H - BIRD_R) {
+          setGameState('dead'); setHighScore(h => Math.max(h, score)); setShake(10);
+        }
+        return Math.max(BIRD_R, Math.min(H - BIRD_R, next));
+      });
+      setPipes(prev => {
+        let next = prev.map(p => ({
+          ...p, x: p.x - PIPE_SPEED,
+          gap: Math.max(MIN_GAP, p.gap - (0.12 + score * 0.008)),
+        })).filter(p => p.x > -PIPE_W);
+        const lastX = next.length ? next[next.length - 1].x : 0;
+        if (lastX < W - PIPE_SPACING)
+          next.push({ id: frameRef.current, x: W + 20, gapY: 130 + Math.random() * (H - 260), gap: getGap(score), passed: false });
+        return next;
+      });
+      setShake(s => s * 0.85);
+    }, 1000 / 60);
+    return () => clearInterval(loop);
+  }, [gameState, birdVelocity, score, getGap]);
+
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    for (const p of pipes) {
+      if (BIRD_X + BIRD_R > p.x && BIRD_X - BIRD_R < p.x + PIPE_W) {
+        const top = p.gapY - p.gap / 2, bot = p.gapY + p.gap / 2;
+        if (birdY - BIRD_R < top || birdY + BIRD_R > bot) {
+          setGameState('dead'); setHighScore(h => Math.max(h, score)); setShake(12); return;
+        }
+      }
+      if (!p.passed && p.x + PIPE_W < BIRD_X - BIRD_R) { p.passed = true; setScore(s => s + 1); }
+    }
+  }, [birdY, pipes, gameState, score]);
+
+  const rotation = Math.min(70, Math.max(-20, birdVelocity * 4));
+  const wingY    = Math.sin(frameRef.current * 0.5) * 3;
+
+  return (
+    <>
+      <style>{`
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        html,body,#root{width:100%;height:100%;overflow:hidden;background:#020617}
+
+        @keyframes pulse{0%,100%{opacity:1;transform:translateX(-50%) scale(1)}50%{opacity:.5;transform:translateX(-50%) scale(.8)}}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+        .sky-bg{
+          position:fixed;inset:0;width:100%;height:100%;
+          image-rendering:pixelated;image-rendering:crisp-edges;
+          object-fit:cover;
+          filter:blur(3.5px) brightness(1) saturate(1.1);
+          transform:scale(1.05);
+          z-index:0;
+        }
+        .page{
+          position:fixed;inset:0;display:flex;flex-direction:column;
+          align-items:center;justify-content:center;
+          font-family:monospace;user-select:none;-webkit-user-select:none;
+          touch-action:manipulation;z-index:1;
+        }
+        .play-btn{
+          background:#3b82f6;border:none;color:#fff;
+          font-size:15px;font-weight:700;font-family:monospace;
+          letter-spacing:.12em;padding:14px 40px;border-radius:10px;
+          cursor:pointer;transition:background .15s,transform .1s,box-shadow .15s;
+          box-shadow:0 4px 24px rgba(59,130,246,.45);
+        }
+        .play-btn:hover{background:#2563eb;transform:translateY(-2px);box-shadow:0 8px 32px rgba(59,130,246,.55)}
+        .play-btn:active{transform:translateY(0)}
+        .rules-btn{
+          background:transparent;border:1px solid rgba(255,255,255,.12);color:#94a3b8;
+          font-size:13px;font-family:monospace;padding:10px 24px;
+          border-radius:8px;cursor:pointer;transition:all .15s;letter-spacing:.08em;
+        }
+        .rules-btn:hover{border-color:rgba(255,255,255,.22);color:#e2e8f0;background:rgba(255,255,255,.05)}
+        .pause-btn{
+          position:absolute;top:12px;right:12px;z-index:10;
+          background:rgba(15,23,42,.75);border:1px solid rgba(255,255,255,.08);
+          color:#94a3b8;width:36px;height:36px;border-radius:8px;
+          cursor:pointer;display:flex;align-items:center;justify-content:center;
+          font-size:14px;backdrop-filter:blur(4px);
+          transition:background .15s,color .15s;
+        }
+        .pause-btn:hover{background:rgba(30,41,59,.95);color:#fff}
+      `}</style>
+
+      {/* Pixelated sky canvas as blurred background */}
+      <canvas ref={skyRef} className="sky-bg" />
+
+      <div className="page">
+
+        {/* ══════════════════════ START SCREEN ════════════════════════════ */}
+        {gameState === 'start' && (
+          <div style={{
+            display:'flex',flexDirection:'column',alignItems:'center',
+            animation:'fadeIn .4s ease',width:'100%',maxWidth:320,padding:'0 16px',
+          }}>
+
+            {/* Logo */}
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:18}}>
+              <span style={{fontSize:28,animation:'float 2s ease-in-out infinite'}}>🐤</span>
+              <div>
+                <div style={{fontSize:22,fontWeight:700,color:'#fff',letterSpacing:'-.02em'}}>
+                  flappy <span style={{color:'#3b82f6'}}>fird</span>
+                </div>
+                <div style={{fontSize:11,color:'#94a3b8',letterSpacing:'.1em'}}>tunnels collapse over time</div>
+              </div>
+            </div>
+
+            {/* ── Video panel — URL set via VIDEO_YOUTUBE_ID constant above ── */}
+            <div style={{
+              width:260,height:146,borderRadius:10,overflow:'hidden',marginBottom:16,
+              border:'1.5px solid rgba(59,130,246,.4)',
+              boxShadow:'0 0 28px rgba(59,130,246,.18)',
+            }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${VIDEO_YOUTUBE_ID}?rel=0&modestbranding=1`}
+                style={{width:'100%',height:'100%',border:'none',display:'block'}}
+                allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
+                allowFullScreen
+                title="Game preview"
+              />
+            </div>
+
+            {/* Rules toggle */}
+            <button className="rules-btn" style={{marginBottom:12}} onClick={() => setShowRules(r => !r)}>
+              {showRules ? '▲ hide rules' : '▼ how to play'}
+            </button>
+
+            {showRules && (
+              <div style={{
+                animation:'fadeIn .2s ease',
+                background:'rgba(10,16,30,.88)',backdropFilter:'blur(10px)',
+                border:'1px solid rgba(255,255,255,.07)',borderRadius:12,
+                padding:'16px 20px',width:260,marginBottom:14,
+              }}>
+                <div style={{color:'#e2e8f0',fontSize:11,letterSpacing:'.12em',marginBottom:10,textTransform:'uppercase'}}>
+                  Rules
+                </div>
+                {[
+                  ['Tap / Space','flap the bird'],
+                  ['P / Esc',   'pause game'],
+                  ['Blue pipes','normal gap'],
+                  ['Orange',    'tight gap — careful'],
+                  ['Red',       'critical — brace!'],
+                  ['Score ↑',   'gaps keep shrinking'],
+                ].map(([k,v]) => (
+                  <div key={k} style={{display:'flex',gap:8,marginBottom:5}}>
+                    <span style={{color:'#60a5fa',fontSize:11,minWidth:86}}>{k}</span>
+                    <span style={{color:'#64748b',fontSize:11}}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button className="play-btn" onClick={startGame}>▶ PLAY</button>
+
+            <div style={{display:'flex',alignItems:'center',gap:8,marginTop:16}}>
+              <span style={{color:'#3b82f6',fontSize:9}}>●</span>
+              <span style={{color:'#475569',fontSize:10}}>→</span>
+              <span style={{color:'#d97706',fontSize:9}}>●</span>
+              <span style={{color:'#475569',fontSize:10}}>→</span>
+              <span style={{color:'#dc2626',fontSize:9}}>●</span>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════ GAME SCREEN ═════════════════════════════ */}
+        {(gameState === 'playing' || gameState === 'paused' || gameState === 'dead') && (
+          <>
+            <div style={{
+              display:'flex',alignItems:'center',justifyContent:'center',
+              gap:40,marginBottom:16,fontSize:18,fontFamily:'monospace',
+            }}>
+              <span style={{color:'#f1f5f9',textShadow:'0 2px 10px rgba(0,0,0,.8)'}}>{score}</span>
+              <span style={{color:'#94a3b8',textShadow:'0 2px 10px rgba(0,0,0,.8)'}}>best {highScore}</span>
+            </div>
+
+            <div
+              onClick={jump}
+              onTouchStart={e => { e.preventDefault(); jump(); }}
+              style={{
+                position:'relative',
+                width:'min(400px, 85vw)',
+                height:'min(600px, 70vh)',
+                maxHeight:'calc(100vh - 140px)',
+                borderRadius:16,overflow:'hidden',cursor:'pointer',
+                boxShadow:'0 0 0 1px rgba(255,255,255,.06),0 25px 60px -12px rgba(0,0,0,.7)',
+                transform:`translate(${(Math.random()-.5)*shake}px,${(Math.random()-.5)*shake}px)`,
+                touchAction:'none',
+              }}
+            >
+              <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice"
+                style={{display:'block',width:'100%',height:'100%'}}>
+                <defs>
+                  <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%"   stopColor="#0d1b2e" stopOpacity="0.84" />
+                    <stop offset="100%" stopColor="#1a2d44" stopOpacity="0.90" />
+                  </linearGradient>
+                </defs>
+                <rect width={W} height={H} fill="url(#bg)" />
+
+                {pipes.map(p => {
+                  const top = p.gapY - p.gap/2, bot = p.gapY + p.gap/2;
+                  const danger = p.gap < 110, critical = p.gap < 85;
+                  const col = critical ? '#dc2626' : danger ? '#d97706' : '#3b82f6';
+                  return (
+                    <g key={p.id}>
+                      <rect x={p.x}   y={0}   width={PIPE_W} height={top}     fill={col} rx={6}/>
+                      <rect x={p.x+6} y={0}   width={8}      height={top}     fill="rgba(255,255,255,.15)" rx={4}/>
+                      <rect x={p.x}   y={bot} width={PIPE_W} height={H-bot}   fill={col} rx={6}/>
+                      <rect x={p.x+6} y={bot} width={8}      height={H-bot}   fill="rgba(255,255,255,.15)" rx={4}/>
+                      {critical && (
+                        <g opacity={0.5 + Math.sin(frameRef.current * 0.3) * 0.3}>
+                          <rect x={p.x-2} y={top-6} width={PIPE_W+4} height={6} fill="#fff" rx={3}/>
+                          <rect x={p.x-2} y={bot}   width={PIPE_W+4} height={6} fill="#fff" rx={3}/>
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
+
+                {/* ══ PEACOCK ══ */}
+                <g transform={`translate(${BIRD_X},${birdY}) rotate(${rotation})`}>
+
+                  {/* ── Animated back wings (behind body) ── */}
+                  {/* Back wing — flaps with opposite phase for depth */}
+                  <g transform={`rotate(${Math.sin(frameRef.current * 0.5 + 0.8) * 22}, -6, 0)`}>
+                    <ellipse cx={-10} cy={-2} rx={13} ry={5.5} fill="#1e3a8a" opacity={0.85}/>
+                    <ellipse cx={-10} cy={-3} rx={9}  ry={3.5} fill="#2563eb" opacity={0.5}/>
+                    {/* feather notches */}
+                    {[-16,-11,-6,-1].map((wx,i) => (
+                      <ellipse key={i} cx={wx} cy={3}
+                        rx={2.2} ry={3.5}
+                        fill="#1e40af" opacity={0.9}/>
+                    ))}
+                  </g>
+
+                  {/* Tail fan — 7 feathers fanning back-left */}
+                  {[-55,-35,-17,0,17,35,55].map((angle, i) => {
+                    const rad = (angle - 165) * Math.PI / 180;
+                    const ex = -5 + Math.cos(rad) * 21;
+                    const ey =  0 + Math.sin(rad) * 21;
+                    return (
+                      <g key={i}>
+                        <line x1={-5} y1={0} x2={ex} y2={ey}
+                          stroke="#1d4ed8" strokeWidth={1.6} strokeLinecap="round" opacity={0.75}/>
+                        <circle cx={ex} cy={ey} r={3.8} fill="#1e40af"/>
+                        <circle cx={ex} cy={ey} r={2.2} fill="#3b82f6"/>
+                        <circle cx={ex} cy={ey} r={1}   fill="#93c5fd"/>
+                        <circle cx={ex-0.4} cy={ey-0.4} r={0.4} fill="#fff" opacity={0.7}/>
+                      </g>
+                    );
+                  })}
+
+                  {/* Body shadow */}
+                  <ellipse cx={1} cy={BIRD_R+3} rx={BIRD_R+1} ry={4} fill="rgba(0,0,0,.25)"/>
+
+                  {/* Body — main */}
+                  <circle r={BIRD_R} fill="#1d4ed8"/>
+                  <circle r={BIRD_R-3} fill="#3b82f6" cx={-2} cy={-2}/>
+                  {/* sheen highlight */}
+                  <ellipse cx={-4} cy={-6} rx={5} ry={3.5} fill="rgba(255,255,255,.22)"/>
+                  {/* belly shade */}
+                  <ellipse cx={2} cy={4} rx={5} ry={4} fill="#1e40af" opacity={0.4}/>
+
+                  {/* Front wing (on body, flaps normally) */}
+                  <g transform={`rotate(${Math.sin(frameRef.current * 0.5) * 18}, -4, 0)`}>
+                    <ellipse cx={-8} cy={4} rx={11} ry={5} fill="#1e3a8a" opacity={0.9}/>
+                    <ellipse cx={-8} cy={3} rx={7.5} ry={3} fill="#2563eb" opacity={0.55}/>
+                    {[-13,-8,-3,2].map((wx,i) => (
+                      <ellipse key={i} cx={wx} cy={9}
+                        rx={2.2} ry={3.5}
+                        fill="#172554" opacity={0.9}/>
+                    ))}
+                  </g>
+
+                  {/* ── Eye on body (right side, front-facing) ── */}
+                  <circle cx={7}   cy={-3} r={5}   fill="#fff"/>
+                  <circle cx={7.5} cy={-3} r={3.3} fill="#1e3a8a"/>
+                  <circle cx={8}   cy={-3} r={1.8} fill="#020617"/>
+                  {/* catchlight */}
+                  <circle cx={6.5} cy={-4.5} r={0.8} fill="#fff"/>
+                  {/* lower glint */}
+                  <circle cx={9}   cy={-2}   r={0.4} fill="#fff" opacity={0.6}/>
+
+                  {/* ── Beak on body (pointing right) ── */}
+                  <polygon points="13,0 21,2 13,5" fill="#ca8a04"/>
+                  <polygon points="13,1 20.5,2.5 13,3.5" fill="#a16207"/>
+                  <line x1={13} y1={2.5} x2={21} y2={2} stroke="#854d0e" strokeWidth={0.6} opacity={0.7}/>
+
+                  {/* ── Dead X eyes ── */}
+                  {gameState === 'dead' && (
+                    <g stroke="#020617" strokeWidth={2.2} strokeLinecap="round">
+                      <line x1={3.5} y1={-7}  x2={10.5} y2={0}/>
+                      <line x1={10.5} y1={-7} x2={3.5}  y2={0}/>
+                    </g>
+                  )}
+                </g>
+
+                {gameState === 'paused' && <rect width={W} height={H} fill="rgba(2,6,23,.42)"/>}
+              </svg>
+
+              {/* Pause/Resume button */}
+              {(gameState === 'playing' || gameState === 'paused') && (
+                <button className="pause-btn"
+                  onClick={togglePause}
+                  onTouchStart={e => { e.preventDefault(); e.stopPropagation(); togglePause(e); }}>
+                  {gameState === 'paused' ? '▶' : '⏸'}
+                </button>
+              )}
+
+              {/* Paused overlay */}
+              {gameState === 'paused' && (
+                <div style={{
+                  position:'absolute',inset:0,
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                }}>
+                  <div style={{
+                    background:'rgba(10,16,30,.93)',backdropFilter:'blur(10px)',
+                    border:'1px solid rgba(255,255,255,.07)',borderRadius:14,
+                    padding:'28px 36px',textAlign:'center',
+                  }}>
+                    <div style={{fontSize:32,marginBottom:8}}>⏸</div>
+                    <div style={{fontSize:20,fontWeight:700,color:'#fff',marginBottom:4}}>Paused</div>
+                    <div style={{fontSize:12,color:'#475569',marginBottom:18}}>score: {score}</div>
+                    <button className="play-btn" style={{fontSize:13,padding:'10px 28px'}}
+                      onClick={e => { e.stopPropagation(); setGameState('playing'); }}>
+                      ▶ RESUME
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Death screen */}
+              {gameState === 'dead' && (
+                <div style={{
+                  position:'absolute',inset:0,
+                  display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                  background:'rgba(2,6,23,.88)',backdropFilter:'blur(4px)',
+                }}>
+                  <p style={{fontSize:64,fontWeight:700,color:'#fff',marginBottom:8}}>{score}</p>
+                  {score > 0 && score >= highScore && (
+                    <p style={{fontSize:16,color:'#f59e0b',marginBottom:16}}>✨ new best ✨</p>
+                  )}
+                  <p style={{fontSize:14,color:'#475569',marginTop:24}}>tap to retry</p>
+                </div>
+              )}
+
+              {/* Critical warning dot */}
+              {gameState === 'playing' && pipes.some(p => p.gap < 85 && p.x > BIRD_X - 20 && p.x < W - 50) && (
+                <div style={{
+                  position:'absolute',top:16,left:'50%',transform:'translateX(-50%)',
+                  width:10,height:10,background:'#ef4444',borderRadius:'50%',
+                  boxShadow:'0 0 12px #ef4444',animation:'pulse .4s ease-in-out infinite',
+                }}/>
+              )}
+            </div>
+
+            <p style={{marginTop:20,fontSize:12,color:'#475569',letterSpacing:'.1em'}}>
+              <span style={{color:'#3b82f6'}}>●</span>{' → '}
+              <span style={{color:'#d97706'}}>●</span>{' → '}
+              <span style={{color:'#dc2626'}}>●</span>
+            </p>
+          </>
+        )}
+      </div>
+    </>
+  );
+};
+
+
+const _boot = document.getElementById('boot');
+if (_boot) _boot.remove();
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(FlappyFird));
+</script>
+</body>
+</html>

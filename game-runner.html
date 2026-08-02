@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Trigger Runner</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#fff;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-tap-highlight-color:transparent;overscroll-behavior:none;touch-action:manipulation}
+  #root{width:100%;height:100%}
+  #boot{position:fixed;inset:0;display:grid;place-items:center;font:500 12px/1.6 ui-monospace,monospace;
+    letter-spacing:.18em;text-transform:uppercase;color:#837B6A;background:#F2EEE4;z-index:9}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.2/babel.min.js" crossorigin></script>
+</head>
+<body>
+<div id="root"></div>
+<div id="boot">Loading Trigger Runner</div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffect,
+        useReducer, useContext, createContext, memo, Fragment, forwardRef } = React;
+
+
+const THEMES = [
+  { name: 'CALM', bg: '#ffffff', sky: '#e8f4fc', ground: '#2c3e50', groundLight: '#34495e', accent: '#e74c3c', player: '#3498db', cloud: '#d4e6f1' },
+  { name: 'RAGE', bg: '#ffffff', sky: '#fce8e8', ground: '#c0392b', groundLight: '#e74c3c', accent: '#8e0000', player: '#ff6b6b', cloud: '#f5b7b1' },
+  { name: 'HOPE', bg: '#ffffff', sky: '#e8fcf0', ground: '#27ae60', groundLight: '#2ecc71', accent: '#1a5c35', player: '#55efc4', cloud: '#abebc6' },
+  { name: 'FEAR', bg: '#ffffff', sky: '#f0e8fc', ground: '#8e44ad', groundLight: '#9b59b6', accent: '#4a0080', player: '#a29bfe', cloud: '#d7bde2' },
+  { name: 'JOY', bg: '#ffffff', sky: '#fcfce8', ground: '#f39c12', groundLight: '#f1c40f', accent: '#d68910', player: '#fdcb6e', cloud: '#fdebd0' },
+  { name: 'VOID', bg: '#ffffff', sky: '#f5f5f5', ground: '#2c3e50', groundLight: '#34495e', accent: '#1a1a1a', player: '#95a5a6', cloud: '#ecf0f1' },
+];
+
+const TRIGGERS = [
+  { name: 'SPEED UP', effect: 'speedUp' },
+  { name: 'LOW GRAVITY', effect: 'lowGravity' },
+];
+function TriggerRunner() {
+  const [dimensions, setDimensions] = useState({ width: 400, height: 600, isMobile: true });
+  const [gameState, setGameState] = useState('menu'); // menu, playing, paused, gameOver
+  const [showRules, setShowRules] = useState(false);
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [player, setPlayer] = useState({ x: 60, y: 0, velY: 0, jumping: false, falling: false, squash: 1 });
+  const [theme, setTheme] = useState(THEMES[0]);
+  const [currentTrigger, setCurrentTrigger] = useState(null);
+  const [triggerTimer, setTriggerTimer] = useState(0);
+  const [obstacles, setObstacles] = useState([]);
+  const [runningSpike, setRunningSpike] = useState(null);
+  const [missile, setMissile] = useState(null);
+  const [particles, setParticles] = useState([]);
+  const [clouds, setClouds] = useState([]);
+  const [screenShake, setScreenShake] = useState(0);
+  const [flashColor, setFlashColor] = useState(null);
+  const [gameSpeed, setGameSpeed] = useState(4);
+  const [gravity, setGravity] = useState(0.7);
+  const [jumpPower, setJumpPower] = useState(-13);
+  const [invincible, setInvincible] = useState(0);
+  const [warningText, setWarningText] = useState('');
+  const [gameTime, setGameTime] = useState(0);
+  const [effectsEnabled, setEffectsEnabled] = useState(false);
+  const [missileWarning, setMissileWarning] = useState(false);
+  const [runningSpikeWarning, setRunningSpikeWarning] = useState(false);
+  const [obstacleGap, setObstacleGap] = useState(0);
+  
+  const containerRef = useRef(null);
+  const gameLoopRef = useRef(null);
+
+  const PLAYER_SIZE = 28;
+  const VIDEO_URL = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Placeholder video URL
+  
+  const getGroundY = useCallback(() => Math.floor(dimensions.height / 2), [dimensions.height]);
+  const getPlayerX = useCallback(() => Math.floor(dimensions.width / 2) - PLAYER_SIZE / 2, [dimensions.width]);
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const w = rect.width || 400;
+        const h = rect.height || 600;
+        const mobile = w < 500;
+        setDimensions({ width: Math.max(300, w), height: Math.max(400, h), isMobile: mobile });
+      }
+    };
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  useEffect(() => {
+    const newClouds = [];
+    for (let i = 0; i < 6; i++) {
+      newClouds.push({
+        id: i,
+        x: Math.random() * dimensions.width,
+        y: 20 + Math.random() * 60,
+        width: 40 + Math.random() * 60,
+        speed: 0.2 + Math.random() * 0.4,
+      });
+    }
+    setClouds(newClouds);
+  }, [dimensions.width]);
+
+  // Keep player centered when dimensions change
+  useEffect(() => {
+    if (gameState === 'playing' || gameState === 'paused') {
+      const playerX = Math.floor(dimensions.width / 2) - PLAYER_SIZE / 2;
+      setPlayer(p => ({ ...p, x: playerX }));
+    }
+  }, [dimensions.width, gameState]);
+
+  const resetGame = useCallback(() => {
+    const groundY = Math.floor(dimensions.height / 2);
+    const playerX = Math.floor(dimensions.width / 2) - PLAYER_SIZE / 2;
+    setScore(0);
+    setLives(3);
+    setPlayer({ x: playerX, y: groundY - PLAYER_SIZE, velY: 0, jumping: false, falling: false, squash: 1 });
+    setTheme(THEMES[0]);
+    setCurrentTrigger(null);
+    setTriggerTimer(0);
+    setObstacles([]);
+    setRunningSpike(null);
+    setMissile(null);
+    setParticles([]);
+    setScreenShake(0);
+    setGameSpeed(4);
+    setGravity(0.7);
+    setJumpPower(-13);
+    setInvincible(0);
+    setWarningText('');
+    setGameTime(0);
+    setEffectsEnabled(false);
+    setMissileWarning(false);
+    setRunningSpikeWarning(false);
+    setObstacleGap(0);
+    setGameState('playing');
+  }, [dimensions.height, dimensions.width]);
+
+  const togglePause = useCallback(() => {
+    if (gameState === 'playing') {
+      setGameState('paused');
+    } else if (gameState === 'paused') {
+      setGameState('playing');
+    }
+  }, [gameState]);
+
+  const createParticles = useCallback((x, y, color, count = 12) => {
+    const newParticles = [];
+    for (let i = 0; i < count; i++) {
+      newParticles.push({
+        id: Date.now() + i + Math.random(),
+        x, y,
+        vx: (Math.random() - 0.5) * 10,
+        vy: (Math.random() - 0.5) * 10 - 4,
+        life: 35,
+        color,
+        size: Math.random() * 6 + 2,
+      });
+    }
+    setParticles(prev => [...prev, ...newParticles]);
+  }, []);
+
+  const handleHit = useCallback(() => {
+    if (invincible > 0) return;
+    
+    setLives(prev => {
+      const newLives = prev - 1;
+      if (newLives <= 0) {
+        setGameState('gameOver');
+        setHighScore(h => Math.max(h, score));
+      }
+      return newLives;
+    });
+    
+    setScreenShake(12);
+    setFlashColor('#ff0000');
+    setTimeout(() => setFlashColor(null), 120);
+    setInvincible(100);
+    createParticles(player.x, player.y, theme.accent);
+  }, [invincible, score, player.x, player.y, theme.accent, createParticles]);
+
+  const jump = useCallback(() => {
+    if (gameState !== 'playing' || player.falling) return;
+    
+    const groundY = getGroundY();
+    const onGround = player.y >= groundY - PLAYER_SIZE - 5;
+    
+    if (onGround || (gravity < 0.5 && !player.jumping)) {
+      setPlayer(p => ({ ...p, velY: jumpPower, jumping: true, squash: 0.6 }));
+      createParticles(player.x, player.y + PLAYER_SIZE, theme.ground, 6);
+    }
+  }, [gameState, player, gravity, jumpPower, getGroundY, createParticles, theme.ground]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.code === 'Space' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        if (gameState === 'playing') {
+          jump();
+        } else if (gameState === 'gameOver') {
+          resetGame();
+        }
+      }
+      if (e.code === 'Escape' || e.code === 'KeyP') {
+        if (gameState === 'playing' || gameState === 'paused') {
+          togglePause();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, jump, resetGame, togglePause]);
+
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    const groundY = getGroundY();
+    const gameWidth = dimensions.width;
+    const gameHeight = dimensions.height;
+
+    const loop = () => {
+      setScore(s => s + 1);
+      setGameTime(t => t + 1);
+
+      // Enable effects at 15s (900 frames)
+      setEffectsEnabled(prev => {
+        if (!prev && gameTime >= 900) {
+          setWarningText('EFFECTS ON!');
+          setScreenShake(10);
+          setTimeout(() => setWarningText(''), 1200);
+          return true;
+        }
+        return prev;
+      });
+
+      // Random triggers (only after effects enabled)
+      if (effectsEnabled && Math.random() < 0.002 && !currentTrigger) {
+        const trigger = TRIGGERS[Math.floor(Math.random() * TRIGGERS.length)];
+        const newTheme = THEMES[Math.floor(Math.random() * THEMES.length)];
+        setCurrentTrigger(trigger);
+        setTheme(newTheme);
+        setTriggerTimer(180);
+        setWarningText(trigger.name);
+        setScreenShake(12);
+        setTimeout(() => setWarningText(''), 1200);
+        
+        if (trigger.effect === 'lowGravity') {
+          setGravity(0.35);
+          setJumpPower(-10);
+        } else if (trigger.effect === 'speedUp') {
+          setGameSpeed(s => Math.min(s + 1, 8));
+        }
+      }
+
+      setTriggerTimer(t => {
+        if (t <= 0 && currentTrigger) {
+          setCurrentTrigger(null);
+          setGravity(0.7);
+          setJumpPower(-13);
+        }
+        return Math.max(0, t - 1);
+      });
+
+      // Spawn ONE obstacle group at a time
+      if (obstacles.length === 0) {
+        setObstacleGap(g => g + 1);
+        
+        if (obstacleGap > 40) {
+          // Choose obstacle type: spikes or void
+          const types = ['single', 'single', 'double', 'void'];
+          const type = types[Math.floor(Math.random() * types.length)];
+          
+          if (type === 'void') {
+            // Create a void/gap in ground
+            setObstacles([{
+              id: Date.now(),
+              type: 'void',
+              x: gameWidth + 40,
+              width: 60 + Math.random() * 30,
+            }]);
+          } else {
+            // Create spike group (1 or 2 close together)
+            const spikeCount = type === 'single' ? 1 : 2;
+            const newSpikes = [];
+            const baseHeight = 25 + Math.random() * 10;
+            
+            for (let i = 0; i < spikeCount; i++) {
+              newSpikes.push({
+                id: Date.now() + i,
+                type: 'spike',
+                x: gameWidth + 40 + (i * 35), // Close together (35px apart)
+                y: groundY,
+                width: 22,
+                height: 0,
+                maxHeight: baseHeight + (Math.random() * 5 - 2.5),
+                popTriggered: false,
+              });
+            }
+            setObstacles(newSpikes);
+          }
+          setObstacleGap(0);
+        }
+      }
+
+      // Spawn running spike after 35 seconds (2100 frames) - ONE at a time
+      if (gameTime > 2100 && !runningSpike && !runningSpikeWarning && Math.random() < 0.006) {
+        setRunningSpikeWarning(true);
+        setWarningText('⚡ RUNNING SPIKE!');
+        setTimeout(() => setWarningText(''), 1000);
+        
+        setTimeout(() => {
+          setRunningSpike({
+            id: Date.now(),
+            x: gameWidth + 30,
+            y: groundY,
+            width: 26,
+            height: 35,
+            speed: gameSpeed * 2.2,
+          });
+          setRunningSpikeWarning(false);
+        }, 800);
+      }
+
+      // Spawn missile after 20 seconds - ONE at a time
+      if (gameTime > 1200 && !missile && !missileWarning && Math.random() < 0.007) {
+        setMissileWarning(true);
+        setTimeout(() => {
+          const missileY = groundY - 30 - Math.random() * 50;
+          setMissile({
+            id: Date.now(),
+            x: gameWidth + 30,
+            y: missileY,
+            speed: gameSpeed * 2,
+          });
+          setMissileWarning(false);
+        }, 1000);
+      }
+
+      // Update clouds
+      setClouds(prev => prev.map(c => ({
+        ...c,
+        x: c.x - c.speed - gameSpeed * 0.15,
+        ...(c.x < -c.width && { x: gameWidth + 30 })
+      })));
+
+      // Update player
+      setPlayer(p => {
+        const playerX = Math.floor(gameWidth / 2) - PLAYER_SIZE / 2;
+        
+        if (p.falling) {
+          // Pure vertical fall - no horizontal movement
+          let newVelY = Math.min(p.velY + 0.8, 10);
+          let newY = p.y + newVelY;
+          
+          if (newY > gameHeight + 50) {
+            handleHit();
+            return { ...p, x: playerX, y: groundY - PLAYER_SIZE, velY: 0, falling: false, squash: 1.2 };
+          }
+          // Keep same x position during fall
+          return { ...p, y: newY, velY: newVelY, squash: 0.8 };
+        }
+
+        let newVelY = p.velY + gravity;
+        let newY = p.y + newVelY;
+        let newSquash = p.squash + (1 - p.squash) * 0.12;
+        let newJumping = p.jumping;
+
+        // Check if over void - use player's current position
+        const overVoid = obstacles.some(o => {
+          if (o.type !== 'void') return false;
+          const playerCenterX = p.x + PLAYER_SIZE / 2;
+          return playerCenterX > o.x + 8 && playerCenterX < o.x + o.width - 8;
+        });
+
+        if (newY >= groundY - PLAYER_SIZE) {
+          if (overVoid) {
+            // Fall into void - keep current x position, fall straight down
+            return { ...p, y: groundY - PLAYER_SIZE + 5, velY: 2, falling: true, jumping: false, squash: 0.7 };
+          }
+          if (p.velY > 4) newSquash = 1.35;
+          newY = groundY - PLAYER_SIZE;
+          newVelY = 0;
+          newJumping = false;
+        }
+
+        return { ...p, y: newY, velY: newVelY, jumping: newJumping, squash: newSquash };
+      });
+
+      // Update obstacles (spikes and voids)
+      setObstacles(prev => {
+        const playerX = Math.floor(gameWidth / 2) - PLAYER_SIZE / 2;
+        
+        const updated = prev.map(o => {
+          let newX = o.x - gameSpeed;
+          
+          if (o.type === 'spike') {
+            let newHeight = o.height;
+            let popTriggered = o.popTriggered;
+
+            // Pop spike 2 seconds before reaching player
+            const distanceToPlayer = o.x - playerX;
+            const timeToReach = distanceToPlayer / gameSpeed;
+            
+            if (timeToReach <= 120 && timeToReach > 0 && !popTriggered) {
+              popTriggered = true;
+            }
+            
+            if (popTriggered && newHeight < o.maxHeight) {
+              newHeight += 2;
+            }
+
+            return { ...o, x: newX, height: newHeight, popTriggered };
+          }
+          
+          return { ...o, x: newX };
+        });
+        
+        // Remove when ALL obstacles in group are off screen
+        const anyOnScreen = updated.some(o => o.x > -100);
+        return anyOnScreen ? updated : [];
+      });
+
+      // Update running spike
+      if (runningSpike) {
+        setRunningSpike(rs => {
+          if (!rs) return null;
+          let newX = rs.x - rs.speed;
+          if (newX < -50) return null;
+          return { ...rs, x: newX };
+        });
+      }
+
+      // Update missile
+      if (missile) {
+        setMissile(m => {
+          if (!m) return null;
+          let newX = m.x - m.speed;
+          if (newX < -60) return null;
+          return { ...m, x: newX };
+        });
+      }
+
+      // Collision detection
+      if (invincible <= 0 && !player.falling) {
+        const pw = PLAYER_SIZE * player.squash;
+        const ph = PLAYER_SIZE / player.squash;
+        const playerBox = { 
+          x: player.x + (PLAYER_SIZE - pw) / 2 + 5, 
+          y: player.y + (PLAYER_SIZE - ph) + 5, 
+          w: pw - 10, 
+          h: ph - 10 
+        };
+
+        // Check spike collisions
+        for (const o of obstacles) {
+          if (o.type === 'spike' && o.height > 8) {
+            const spikeBox = { 
+              x: o.x + 5, 
+              y: groundY - o.height + 8, 
+              w: o.width - 10, 
+              h: o.height - 12 
+            };
+            if (playerBox.x < spikeBox.x + spikeBox.w && 
+                playerBox.x + playerBox.w > spikeBox.x && 
+                playerBox.y + playerBox.h > spikeBox.y) {
+              handleHit();
+              break;
+            }
+          }
+        }
+
+        // Check running spike collision
+        if (runningSpike) {
+          const rsBox = { 
+            x: runningSpike.x + 5, 
+            y: groundY - runningSpike.height + 8, 
+            w: runningSpike.width - 10, 
+            h: runningSpike.height - 12 
+          };
+          if (playerBox.x < rsBox.x + rsBox.w && 
+              playerBox.x + playerBox.w > rsBox.x && 
+              playerBox.y + playerBox.h > rsBox.y) {
+            handleHit();
+            createParticles(runningSpike.x, groundY - runningSpike.height / 2, '#ff0000', 10);
+            setRunningSpike(null);
+          }
+        }
+
+        // Check missile collision
+        if (missile) {
+          const missileBox = { x: missile.x, y: missile.y, w: 40, h: 16 };
+          if (playerBox.x < missileBox.x + missileBox.w && 
+              playerBox.x + playerBox.w > missileBox.x && 
+              playerBox.y < missileBox.y + missileBox.h && 
+              playerBox.y + playerBox.h > missileBox.y) {
+            handleHit();
+            createParticles(missile.x, missile.y, '#ff6600', 15);
+            setMissile(null);
+          }
+        }
+      }
+
+      // Particles
+      setParticles(prev => prev
+        .map(p => ({ ...p, x: p.x + p.vx, y: p.y + p.vy, vy: p.vy + 0.35, life: p.life - 1 }))
+        .filter(p => p.life > 0)
+      );
+
+      setScreenShake(s => Math.max(0, s - 1));
+      setInvincible(i => Math.max(0, i - 1));
+    };
+
+    gameLoopRef.current = setInterval(loop, 1000 / 60);
+    return () => clearInterval(gameLoopRef.current);
+  }, [gameState, dimensions, gameTime, effectsEnabled, currentTrigger, gameSpeed, gravity, player, obstacles, runningSpike, missile, missileWarning, runningSpikeWarning, obstacleGap, invincible, getGroundY, handleHit, createParticles]);
+
+  const handleTap = (e) => {
+    e.preventDefault();
+    if (gameState === 'playing') {
+      jump();
+    } else if (gameState === 'gameOver') {
+      resetGame();
+    }
+  };
+
+  const groundY = getGroundY();
+  const shakeX = screenShake > 0 ? (Math.random() - 0.5) * screenShake : 0;
+  const shakeY = screenShake > 0 ? (Math.random() - 0.5) * screenShake : 0;
+  const pw = PLAYER_SIZE * player.squash;
+  const ph = PLAYER_SIZE / player.squash;
+  const displayTime = Math.floor(gameTime / 60);
+
+  // Main Menu Screen
+  if (gameState === 'menu') {
+    return (
+      <div
+        ref={containerRef}
+        style={{
+          width: '100%',
+          height: '100vh',
+          backgroundColor: '#1a1a2e',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          fontFamily: 'monospace',
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: 20,
+          maxWidth: 400,
+          width: '90%',
+        }}>
+          {/* Title */}
+          <div style={{ fontSize: 36, fontWeight: 'bold', color: '#e74c3c', textShadow: '3px 3px 0 #2c3e50', marginBottom: 8 }}>
+            TRIGGER
+          </div>
+          <div style={{ fontSize: 24, fontWeight: 'bold', color: '#3498db', marginBottom: 24 }}>
+            RUNNER
+          </div>
+
+          {/* Video Placeholder */}
+          <div style={{
+            width: '100%',
+            aspectRatio: '16/9',
+            backgroundColor: '#0f0f1a',
+            borderRadius: 12,
+            overflow: 'hidden',
+            marginBottom: 24,
+            border: '3px solid #3498db',
+            boxShadow: '0 0 20px rgba(52, 152, 219, 0.3)',
+          }}>
+            <iframe
+              src={VIDEO_URL}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+              }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="Game Trailer"
+            />
+          </div>
+
+          {/* Buttons */}
+          <button
+            onClick={resetGame}
+            style={{
+              width: '100%',
+              padding: '16px 32px',
+              fontSize: 20,
+              fontWeight: 'bold',
+              fontFamily: 'monospace',
+              backgroundColor: '#e74c3c',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              marginBottom: 12,
+              boxShadow: '0 4px 0 #c0392b',
+              transition: 'transform 0.1s, box-shadow 0.1s',
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'translateY(2px)';
+              e.currentTarget.style.boxShadow = '0 2px 0 #c0392b';
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 0 #c0392b';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 0 #c0392b';
+            }}
+          >
+            ▶ PLAY GAME
+          </button>
+
+          <button
+            onClick={() => setShowRules(true)}
+            style={{
+              width: '100%',
+              padding: '14px 32px',
+              fontSize: 16,
+              fontWeight: 'bold',
+              fontFamily: 'monospace',
+              backgroundColor: '#3498db',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              boxShadow: '0 4px 0 #2980b9',
+              transition: 'transform 0.1s, box-shadow 0.1s',
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'translateY(2px)';
+              e.currentTarget.style.boxShadow = '0 2px 0 #2980b9';
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 0 #2980b9';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 0 #2980b9';
+            }}
+          >
+            📖 HOW TO PLAY
+          </button>
+
+          {/* High Score */}
+          {highScore > 0 && (
+            <div style={{ marginTop: 20, color: '#f1c40f', fontSize: 14 }}>
+              🏆 HIGH SCORE: {highScore}
+            </div>
+          )}
+        </div>
+
+        {/* Rules Popup */}
+        {showRules && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 100,
+            }}
+            onClick={() => setShowRules(false)}
+          >
+            <div
+              style={{
+                backgroundColor: '#1a1a2e',
+                borderRadius: 16,
+                padding: 24,
+                maxWidth: 350,
+                width: '85%',
+                border: '3px solid #3498db',
+                boxShadow: '0 0 30px rgba(52, 152, 219, 0.4)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ fontSize: 22, fontWeight: 'bold', color: '#e74c3c', marginBottom: 16, textAlign: 'center' }}>
+                📖 HOW TO PLAY
+              </div>
+              
+              <div style={{ color: '#fff', fontSize: 13, lineHeight: 1.8 }}>
+                <div style={{ marginBottom: 12, padding: '8px 12px', backgroundColor: 'rgba(52, 152, 219, 0.2)', borderRadius: 8 }}>
+                  🎮 <strong>TAP / SPACE / ↑</strong> to Jump
+                </div>
+                <div style={{ marginBottom: 12, padding: '8px 12px', backgroundColor: 'rgba(52, 152, 219, 0.2)', borderRadius: 8 }}>
+                  ⏸️ <strong>P / ESC</strong> to Pause
+                </div>
+                
+                <div style={{ fontSize: 14, fontWeight: 'bold', color: '#f1c40f', marginTop: 16, marginBottom: 8 }}>
+                  ⏱️ TIMELINE:
+                </div>
+                <div style={{ marginBottom: 6, color: '#bbb' }}>• 0-15s: Spikes & Voids</div>
+                <div style={{ marginBottom: 6, color: '#bbb' }}>• 15s: Effects activate ⚡</div>
+                <div style={{ marginBottom: 6, color: '#bbb' }}>• 20s: Missiles appear 🚀</div>
+                <div style={{ marginBottom: 12, color: '#bbb' }}>• 35s: Fast spikes 💨</div>
+                
+                <div style={{ fontSize: 14, fontWeight: 'bold', color: '#e74c3c', marginTop: 16, marginBottom: 8 }}>
+                  ⚠️ OBSTACLES:
+                </div>
+                <div style={{ marginBottom: 6, color: '#bbb' }}>• 🔺 Spikes - Jump over them!</div>
+                <div style={{ marginBottom: 6, color: '#bbb' }}>• ⬛ Voids - Don't fall in!</div>
+                <div style={{ marginBottom: 6, color: '#bbb' }}>• 🚀 Missiles - Duck or jump!</div>
+                <div style={{ marginBottom: 6, color: '#bbb' }}>• ⚡ Fast Spikes - Be quick!</div>
+              </div>
+
+              <button
+                onClick={() => setShowRules(false)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  fontFamily: 'monospace',
+                  backgroundColor: '#e74c3c',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  marginTop: 16,
+                }}
+              >
+                GOT IT!
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      onClick={handleTap}
+      onTouchStart={handleTap}
+      style={{
+        width: '100%',
+        height: '100vh',
+        backgroundColor: '#e8e8e8',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        touchAction: 'manipulation',
+        userSelect: 'none',
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          width: dimensions.width,
+          height: dimensions.height,
+          backgroundColor: theme.bg,
+          borderRadius: 8,
+          overflow: 'hidden',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+          transform: `translate(${shakeX}px, ${shakeY}px)`,
+        }}
+      >
+        {/* Sky */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${theme.sky} 0%, ${theme.bg} 100%)` }} />
+
+        {/* Sun */}
+        <div style={{ position: 'absolute', right: 40, top: 40, width: 40, height: 40, backgroundColor: theme.accent, borderRadius: '50%', opacity: 0.25, boxShadow: `0 0 30px ${theme.accent}` }} />
+
+        {/* Clouds */}
+        {clouds.map(c => (
+          <div key={c.id} style={{ position: 'absolute', left: c.x, top: c.y }}>
+            <div style={{ position: 'absolute', width: c.width * 0.5, height: c.width * 0.3, backgroundColor: theme.cloud, borderRadius: '50%', left: 0, top: c.width * 0.08 }} />
+            <div style={{ position: 'absolute', width: c.width * 0.35, height: c.width * 0.25, backgroundColor: theme.cloud, borderRadius: '50%', left: c.width * 0.2, top: 0 }} />
+            <div style={{ position: 'absolute', width: c.width * 0.4, height: c.width * 0.28, backgroundColor: theme.cloud, borderRadius: '50%', left: c.width * 0.35, top: c.width * 0.06 }} />
+          </div>
+        ))}
+
+        {/* Flash */}
+        {flashColor && <div style={{ position: 'absolute', inset: 0, backgroundColor: flashColor, opacity: 0.35, zIndex: 50 }} />}
+
+        {/* Ground */}
+        <div style={{ position: 'absolute', left: 0, right: 0, top: groundY, bottom: 0, backgroundColor: theme.ground }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, backgroundColor: theme.groundLight }} />
+        </div>
+
+        {/* Voids (holes in ground) */}
+        {obstacles.filter(o => o.type === 'void').map(o => (
+          <div key={o.id}>
+            {/* Black void pit */}
+            <div style={{ 
+              position: 'absolute', 
+              left: o.x, 
+              top: groundY, 
+              width: o.width, 
+              height: dimensions.height - groundY + 10, 
+              backgroundColor: '#0a0a0a' 
+            }} />
+            {/* Left wall */}
+            <div style={{ 
+              position: 'absolute', 
+              left: o.x, 
+              top: groundY, 
+              width: 4, 
+              height: dimensions.height - groundY + 10, 
+              backgroundColor: '#333',
+            }} />
+            {/* Right wall */}
+            <div style={{ 
+              position: 'absolute', 
+              left: o.x + o.width - 4, 
+              top: groundY, 
+              width: 4, 
+              height: dimensions.height - groundY + 10, 
+              backgroundColor: '#333',
+            }} />
+            {/* Warning markers */}
+            <div style={{ 
+              position: 'absolute', 
+              left: o.x - 6, 
+              top: groundY - 12, 
+              width: 12, 
+              height: 12, 
+              backgroundColor: '#ff4444', 
+              borderRadius: 2,
+              boxShadow: '0 0 8px #ff0000',
+            }} />
+            <div style={{ 
+              position: 'absolute', 
+              left: o.x + o.width - 6, 
+              top: groundY - 12, 
+              width: 12, 
+              height: 12, 
+              backgroundColor: '#ff4444', 
+              borderRadius: 2,
+              boxShadow: '0 0 8px #ff0000',
+            }} />
+          </div>
+        ))}
+
+        {/* Spikes */}
+        {obstacles.filter(o => o.type === 'spike').map(o => (
+          o.height > 0 && (
+            <div key={o.id} style={{ position: 'absolute', left: o.x, top: groundY - o.height }}>
+              <div style={{
+                width: 0,
+                height: 0,
+                borderLeft: `${o.width / 2}px solid transparent`,
+                borderRight: `${o.width / 2}px solid transparent`,
+                borderBottom: `${o.height}px solid ${theme.accent}`,
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+              }} />
+              <div style={{
+                position: 'absolute',
+                left: o.width / 2 - 2,
+                top: o.height * 0.25,
+                width: 3,
+                height: o.height * 0.4,
+                backgroundColor: 'rgba(255,255,255,0.3)',
+                borderRadius: 1,
+              }} />
+            </div>
+          )
+        ))}
+
+        {/* Running Spike */}
+        {runningSpike && (
+          <div style={{ position: 'absolute', left: runningSpike.x, top: groundY - runningSpike.height }}>
+            <div style={{
+              width: 0,
+              height: 0,
+              borderLeft: `${runningSpike.width / 2}px solid transparent`,
+              borderRight: `${runningSpike.width / 2}px solid transparent`,
+              borderBottom: `${runningSpike.height}px solid #ff2222`,
+              filter: 'drop-shadow(0 0 8px #ff0000)',
+            }} />
+            <div style={{ position: 'absolute', right: -20, top: runningSpike.height * 0.3, width: 15, height: 2, backgroundColor: '#ff6666', opacity: 0.7 }} />
+            <div style={{ position: 'absolute', right: -25, top: runningSpike.height * 0.5, width: 20, height: 2, backgroundColor: '#ff6666', opacity: 0.5 }} />
+            <div style={{ position: 'absolute', right: -18, top: runningSpike.height * 0.7, width: 12, height: 2, backgroundColor: '#ff6666', opacity: 0.6 }} />
+          </div>
+        )}
+
+        {/* Missile */}
+        {missile && (
+          <div style={{ position: 'absolute', left: missile.x, top: missile.y }}>
+            <div style={{
+              width: 40,
+              height: 16,
+              backgroundColor: '#ff4400',
+              borderRadius: '8px 4px 4px 8px',
+              boxShadow: '0 0 10px #ff6600',
+            }}>
+              <div style={{ position: 'absolute', left: -8, top: 3, width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderRight: '10px solid #ff6600' }} />
+              <div style={{ position: 'absolute', right: 2, top: -6, width: 8, height: 6, backgroundColor: '#cc3300', clipPath: 'polygon(100% 100%, 0% 100%, 100% 0%)' }} />
+              <div style={{ position: 'absolute', right: 2, bottom: -6, width: 8, height: 6, backgroundColor: '#cc3300', clipPath: 'polygon(100% 0%, 0% 0%, 100% 100%)' }} />
+              <div style={{ position: 'absolute', right: -15, top: 3, width: 18, height: 10, background: 'linear-gradient(90deg, #ffff00, #ff6600, transparent)', borderRadius: '0 5px 5px 0', opacity: 0.9 }} />
+            </div>
+          </div>
+        )}
+
+        {/* Missile Warning */}
+        {missileWarning && (
+          <div style={{
+            position: 'absolute',
+            right: 20,
+            top: groundY - 90,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            animation: 'blink 0.2s infinite',
+          }}>
+            <div style={{ fontSize: 24, color: '#ff4400' }}>⚠</div>
+            <div style={{ fontSize: 14, fontWeight: 'bold', color: '#ff4400', fontFamily: 'monospace' }}>MISSILE!</div>
+          </div>
+        )}
+
+        {/* Player */}
+        <div style={{
+          position: 'absolute',
+          left: player.x + (PLAYER_SIZE - pw) / 2,
+          top: player.y + (PLAYER_SIZE - ph),
+          width: pw,
+          height: ph,
+          opacity: invincible > 0 && Math.floor(invincible / 4) % 2 === 0 ? 0.3 : 1,
+          zIndex: 10,
+        }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: theme.player, border: `3px solid ${theme.accent}`, borderRadius: 4 }} />
+          <div style={{ position: 'absolute', left: '18%', top: '22%', width: '18%', height: '22%', backgroundColor: theme.bg, borderRadius: 2 }} />
+          <div style={{ position: 'absolute', right: '18%', top: '22%', width: '18%', height: '22%', backgroundColor: theme.bg, borderRadius: 2 }} />
+          <div style={{ position: 'absolute', left: player.falling ? '20%' : '24%', top: player.falling ? '32%' : '28%', width: player.falling ? '14%' : '10%', height: player.falling ? '14%' : '10%', backgroundColor: theme.accent, borderRadius: player.falling ? '50%' : 1 }} />
+          <div style={{ position: 'absolute', right: player.falling ? '20%' : '24%', top: player.falling ? '32%' : '28%', width: player.falling ? '14%' : '10%', height: player.falling ? '14%' : '10%', backgroundColor: theme.accent, borderRadius: player.falling ? '50%' : 1 }} />
+          <div style={{ position: 'absolute', bottom: player.falling ? '12%' : '18%', left: player.falling ? '32%' : '28%', right: player.falling ? '32%' : '28%', height: player.falling ? '18%' : '8%', backgroundColor: theme.accent, borderRadius: player.falling ? '50%' : 2 }} />
+        </div>
+
+        {/* Player Shadow */}
+        {!player.falling && (
+          <div style={{
+            position: 'absolute',
+            left: player.x + 4,
+            top: groundY - 3,
+            width: PLAYER_SIZE - 8,
+            height: 6,
+            backgroundColor: 'rgba(0,0,0,0.15)',
+            borderRadius: '50%',
+            transform: `scaleX(${player.squash})`,
+          }} />
+        )}
+
+        {/* Particles */}
+        {particles.map(p => (
+          <div key={p.id} style={{ position: 'absolute', left: p.x, top: p.y, width: p.size, height: p.size, backgroundColor: p.color, opacity: p.life / 35, borderRadius: 2 }} />
+        ))}
+
+        {/* Pause Button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); togglePause(); }}
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            width: 36,
+            height: 36,
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            border: 'none',
+            borderRadius: 8,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 25,
+          }}
+        >
+          <div style={{ color: '#fff', fontSize: 18 }}>⏸</div>
+        </button>
+
+        {/* UI */}
+        <div style={{ position: 'absolute', top: 12, left: 12, fontFamily: 'monospace', zIndex: 20 }}>
+          <div style={{ fontSize: dimensions.isMobile ? 18 : 24, fontWeight: 'bold', color: theme.ground, textShadow: `1px 1px 0 ${theme.groundLight}` }}>
+            {String(score).padStart(6, '0')}
+          </div>
+          <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ width: dimensions.isMobile ? 12 : 16, height: dimensions.isMobile ? 12 : 16, backgroundColor: i < lives ? theme.accent : 'transparent', border: `2px solid ${theme.accent}`, borderRadius: 3, opacity: i < lives ? 1 : 0.3 }} />
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: theme.ground, opacity: 0.5, marginTop: 4 }}>{displayTime}s</div>
+        </div>
+
+        {/* Status */}
+        <div style={{ position: 'absolute', top: 50, right: 12, fontFamily: 'monospace', textAlign: 'right', zIndex: 20 }}>
+          {currentTrigger && (
+            <div style={{ fontSize: 10, fontWeight: 'bold', padding: '4px 8px', backgroundColor: theme.accent, color: theme.bg, borderRadius: 4, marginBottom: 4 }}>
+              {currentTrigger.name}
+            </div>
+          )}
+          {effectsEnabled && <div style={{ fontSize: 9, padding: '2px 6px', backgroundColor: theme.groundLight, color: theme.bg, borderRadius: 3, marginBottom: 2 }}>EFFECTS</div>}
+          {gameTime > 1200 && <div style={{ fontSize: 9, padding: '2px 6px', backgroundColor: '#ff4400', color: '#fff', borderRadius: 3, marginBottom: 2 }}>🚀 MISSILES</div>}
+          {gameTime > 2100 && <div style={{ fontSize: 9, padding: '2px 6px', backgroundColor: '#ff2222', color: '#fff', borderRadius: 3, marginBottom: 2 }}>⚡ FAST SPIKES</div>}
+          <div style={{ fontSize: 9, padding: '2px 6px', backgroundColor: theme.cloud, color: theme.ground, borderRadius: 3 }}>{theme.name}</div>
+        </div>
+
+        {/* Warning */}
+        {warningText && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 30 }}>
+            <div style={{ fontFamily: 'monospace', fontSize: dimensions.isMobile ? 20 : 32, fontWeight: 'bold', color: theme.accent, textShadow: `3px 3px 0 ${theme.ground}`, textAlign: 'center' }}>
+              {warningText}
+            </div>
+          </div>
+        )}
+
+        {/* Paused Screen */}
+        {gameState === 'paused' && (
+          <div style={{ 
+            position: 'absolute', 
+            inset: 0, 
+            backgroundColor: 'rgba(0,0,0,0.7)', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 40, 
+            fontFamily: 'monospace' 
+          }}>
+            <div style={{ fontSize: 36, fontWeight: 'bold', color: '#fff', marginBottom: 20 }}>⏸ PAUSED</div>
+            <button
+              onClick={(e) => { e.stopPropagation(); togglePause(); }}
+              style={{
+                padding: '12px 32px',
+                fontSize: 18,
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                backgroundColor: '#27ae60',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                marginBottom: 12,
+              }}
+            >
+              ▶ RESUME
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); setGameState('menu'); }}
+              style={{
+                padding: '10px 24px',
+                fontSize: 14,
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                backgroundColor: '#e74c3c',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+              }}
+            >
+              🏠 MAIN MENU
+            </button>
+          </div>
+        )}
+
+        {/* Game Over */}
+        {gameState === 'gameOver' && (
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 40, fontFamily: 'monospace' }}>
+            <div style={{ fontSize: dimensions.isMobile ? 28 : 40, fontWeight: 'bold', color: '#e74c3c', textShadow: '3px 3px 0 #c0392b', marginBottom: 12 }}>GAME OVER</div>
+            <div style={{ fontSize: dimensions.isMobile ? 16 : 22, color: theme.ground }}>SCORE</div>
+            <div style={{ fontSize: dimensions.isMobile ? 28 : 36, fontWeight: 'bold', color: theme.accent, marginBottom: 4 }}>{score}</div>
+            <div style={{ fontSize: 12, color: theme.ground, opacity: 0.5, marginBottom: 4 }}>Survived: {displayTime}s</div>
+            <div style={{ fontSize: 14, color: theme.ground, opacity: 0.5, marginBottom: 16 }}>BEST: {highScore}</div>
+            <button
+              onClick={(e) => { e.stopPropagation(); resetGame(); }}
+              style={{
+                padding: '12px 32px',
+                fontSize: 16,
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                backgroundColor: '#e74c3c',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                marginBottom: 12,
+              }}
+            >
+              🔄 RETRY
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); setGameState('menu'); }}
+              style={{
+                padding: '10px 24px',
+                fontSize: 14,
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                backgroundColor: '#3498db',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+              }}
+            >
+              🏠 MAIN MENU
+            </button>
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.2; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+const _boot = document.getElementById('boot');
+if (_boot) _boot.remove();
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(TriggerRunner));
+</script>
+</body>
+</html>
