@@ -61,7 +61,8 @@
 
 /* ── 2. RESET ─────────────────────────────────────────────────── */
 *,*::before,*::after{ box-sizing:border-box }
-html{ -webkit-text-size-adjust:100% }
+html{ -webkit-text-size-adjust:100%; scrollbar-width:none; -ms-overflow-style:none }
+html::-webkit-scrollbar,body::-webkit-scrollbar{ width:0; height:0; display:none }
 body,h1,h2,h3,h4,p,ul,ol,figure{ margin:0 }
 ul[class]{ list-style:none; padding:0 }
 img,svg,canvas{ display:block; max-width:100% }
@@ -321,7 +322,8 @@ body.panel .sheet{
   width:min(380px, 33vw);
   max-height:min(74vh, 660px);
   overflow-y:auto; scrollbar-width:none; -ms-overflow-style:none;
-  padding:22px 24px 26px;
+  padding:24px 26px 28px;
+  border-radius:16px;
   background:linear-gradient(152deg, rgba(255,253,248,.60) 0%, rgba(243,238,226,.40) 100%);
   -webkit-backdrop-filter:blur(22px) saturate(1.25);
   backdrop-filter:blur(22px) saturate(1.25);
@@ -335,7 +337,9 @@ body.panel .sheet{
 body.panel .sheet::-webkit-scrollbar{ width:0; height:0 }
 body.panel .sheet::before{ opacity:.22 }
 body.panel .sheet::after{ background:linear-gradient(124deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 44%) }
-body.panel .tab{ opacity:.85 }
+body.panel .tab{ width:30px; opacity:.7 }
+body.flow .sheet{ border-radius:14px }
+.sheet .tab{ clip-path:polygon(0 0, 100% 0, 0 100%); border-top-left-radius:16px }
 body.panel .fold.active .sheet{
   opacity:1; visibility:visible;
   transform:perspective(1100px) translateY(0) rotateX(0deg) scale(1);
@@ -522,6 +526,12 @@ h2{ font-size:clamp(29px,5.2vw,60px); line-height:1.0; margin-bottom:clamp(13px,
   font-size:11.5px; color:var(--ink); line-height:1.2;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
+.cta.play{
+  background:var(--ink); color:var(--paper-hi); border-color:var(--ink); border-radius:9px; gap:9px;
+}
+.cta.play i{ position:relative; z-index:2; font-style:normal; color:var(--red); font-size:12px }
+.cta.play::before{ background:var(--red) }
+.cta.play:hover,.cta.play:focus-visible,.cta.play:hover i{ color:#fff }
 .cta-row{ display:flex; flex-wrap:wrap; gap:8px }
 .cta-row .cta{ margin-top:16px }
 
@@ -656,7 +666,10 @@ body.docked #arcadeFrame{ opacity:1 }
 body.fallback #arcadeFrame{
   left:0 !important; width:100% !important;
   top:52px !important; height:calc(100% - 52px) !important;
-  box-shadow:none;
+  box-shadow:none; border-radius:0;
+}
+@supports (height: 100dvh){
+  body.fallback #arcadeFrame{ height:calc(100dvh - 52px) !important }
 }
 .dock-note{
   position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
@@ -797,6 +810,8 @@ body.noweb{
   <nav class="hud-right" aria-label="Elsewhere">
     <a class="opt" href="https://arthis.space" target="_blank" rel="noopener">Arthis.Space</a>
     <span class="hud-sep opt" aria-hidden="true">·</span>
+    <a class="opt" href="https://arthis.land" target="_blank" rel="noopener">Arthis.Land</a>
+    <span class="hud-sep opt" aria-hidden="true">·</span>
     <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
     <span class="hud-sep" aria-hidden="true">·</span>
     <a href="mailto:akversebusiness@gmail.com">Email</a>
@@ -832,6 +847,7 @@ body.noweb{
           that drives them, and the platforms they ship on.</p>
         <div class="lobby-head">Pick a door</div>
         <div class="lobby" id="lobby"></div>
+        <button class="cta play" type="button" data-play="0"><i aria-hidden="true">&#9654;</i><span>Play Flappy Fird</span></button>
         <div class="links">
           <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener"><span class="dot"></span>GitHub</a>
           <a href="mailto:akversebusiness@gmail.com">Email</a>
@@ -853,6 +869,7 @@ body.noweb{
           start from a sentence.</p>
         <p class="copy">Unity and C# for engines, Python for Blender pipelines, JavaScript and Three.js for the
           web, FastAPI for the backend behind it all.</p>
+        <button class="cta play" type="button" data-play="1"><i aria-hidden="true">&#9654;</i><span>Play Trigger Runner</span></button>
         <div class="spec">
           <div><div class="k">Based</div><div class="v">Jaipur, India</div></div>
           <div><div class="k">Education</div><div class="v">NIT Jaipur · B.Tech ECE</div></div>
@@ -905,6 +922,7 @@ body.noweb{
         <div class="cta-row">
           <a class="cta" href="https://arthis.space" target="_blank" rel="noopener"><span>arthis.space</span><i aria-hidden="true">→</i></a>
           <a class="cta" href="https://arthis.land" target="_blank" rel="noopener"><span>arthis.land</span><i aria-hidden="true">→</i></a>
+          <button class="cta play" type="button" data-play="2"><i aria-hidden="true">&#9654;</i><span>Play 3072</span></button>
         </div>
       </div>
     </div>
@@ -1009,6 +1027,7 @@ body.noweb{
           <div class="bar"><div class="top"><span class="name">Peer-to-peer multiplayer</span><span class="val">15</span></div><div class="trk"><i class="fil" style="--w:9.7%"></i></div></div>
           <div class="bar muted"><div class="top"><span class="name">Other engines &amp; 2D</span><span class="val">96</span></div><div class="trk"><i class="fil" style="--w:62.3%"></i></div></div>
         </div>
+        <button class="cta play" type="button" data-play="6"><i aria-hidden="true">&#9654;</i><span>Play Sudoku</span></button>
       </div>
     </div>
   </section>
@@ -1036,10 +1055,6 @@ body.noweb{
   </section>
 
 </main>
-
-<button class="play-btn" id="playBtn" type="button" hidden>
-  <i aria-hidden="true">&#9654;</i> Play <span></span>
-</button>
 
 <div id="arcade" hidden role="dialog" aria-modal="true" aria-label="Playable game">
   <div class="arcade-bar">
@@ -1295,8 +1310,7 @@ const arcade   = $('#arcade');
 const arcFrame = $('#arcadeFrame');
 const arcTitle = $('#arcadeTitle');
 const arcHint  = $('#arcadeHint');
-const playBtn  = $('#playBtn');
-const playName = playBtn ? $('span', playBtn) : null;
+const playBtns = $$('[data-play]');
 let playing = false, loaded = false;
 let dockFn = null, undockFn = null;
 
@@ -1314,26 +1328,26 @@ function onDocked(rect){
   arcFrame.style.height = Math.max(60, rect.h).toFixed(1) + 'px';
 }
 
+function goFullScreen(){
+  if (!playing || loaded) return;
+  loaded = true;
+  arcFrame.src = GAMES[playing.room].file;
+  arcFrame.removeAttribute('style');
+  document.body.classList.add('docked', 'fallback');
+}
 function openGame(i){
   const gm = (typeof GAMES !== 'undefined') ? GAMES[i] : null;
   if (!gm || playing) return;
-  if (!dockFn || !dockFn(i)) return;
   playing = { room:i };
   loaded = false;
   arcTitle.textContent = gm.name;
   arcHint.textContent  = gm.hint;
   arcade.hidden = false;
   document.body.classList.add('playing');
-  /* if the flight never lands — a throttled tab, a stalled frame —
-     drop back to a full-screen game rather than stranding anyone */
-  setTimeout(function(){
-    if (playing && !loaded){
-      loaded = true;
-      arcFrame.src = GAMES[playing.room].file;
-      arcFrame.removeAttribute('style');
-      document.body.classList.add('docked', 'fallback');
-    }
-  }, 4200);
+
+  /* a phone gets the whole window; only a wide screen flies to the wall */
+  if (innerWidth < 900 || !dockFn || !dockFn(i)){ goFullScreen(); return; }
+  setTimeout(goFullScreen, 4200);
 }
 function closeGame(){
   if (!playing) return;
@@ -1346,15 +1360,12 @@ function closeGame(){
   document.body.classList.remove('docked');
   if (undockFn) undockFn();
 }
-if (playBtn){
-  $('#arcadeClose').addEventListener('click', closeGame);
-  addEventListener('keydown', e => { if (e.key === 'Escape') closeGame(); });
-  playBtn.addEventListener('click', () => {
-    /* activeIdx is -1 until the first frame ticks; derive it if needed */
-    const idx = (activeIdx >= 0) ? activeIdx : clamp(Math.round(scroll.p * (N - 1)), 0, N - 1);
-    openGame(idx);
-  });
-}
+if ($('#arcadeClose')) $('#arcadeClose').addEventListener('click', closeGame);
+addEventListener('keydown', e => { if (e.key === 'Escape') closeGame(); });
+playBtns.forEach(b => b.addEventListener('click', ev => {
+  ev.stopPropagation();
+  openGame(parseInt(b.dataset.play, 10));
+}));
 
 /* the lobby: one door per room */
 (function buildLobby(){
@@ -1462,11 +1473,7 @@ onTick(() => {
     }
     if (idx >= 5) maybeCount();
 
-    if (playBtn){
-      const gm = (typeof GAMES !== 'undefined') ? GAMES[idx] : null;
-      if (gm && !playing){ playBtn.hidden = false; if (playName) playName.textContent = gm.name; }
-      else playBtn.hidden = true;
-    }
+
   }
   if (MODE === 'flow' && !counted && scroll.p > .6) maybeCount();
 });
@@ -1547,10 +1554,10 @@ function build(){
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(PAPER);
   scene.fog = new THREE.Fog(PAPER, 30, 96);
-  const camera = new THREE.PerspectiveCamera(LOW ? 78 : 70, view.w/view.h, .1, 300);
+  const camera = new THREE.PerspectiveCamera(LOW ? 86 : 78, view.w/view.h, .1, 300);
 
   /* ── the plan ─────────────────────────────────────────────── */
-  const ROOM = 20, HALF = ROOM/2, H = 7.4, DW = 2.3, DH = 5.0, T = .34, EYE = 2.05;
+  const ROOM = 20, HALF = ROOM/2, H = 7.4, DW = 2.3, DH = 4.3, T = .34, EYE = 2.05;
   const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4]];
   const P = CELL.map(c => ({ x:c[0]*ROOM, z:c[1]*ROOM }));
 
@@ -2193,23 +2200,23 @@ function build(){
   /* ── a hanging paper lantern: the light that makes each room ── */
   const lanterns = [];
   function lantern(g, x, z, tintHex, roomIdx){
-    const y = 5.35;
+    const y = 6.15;
     const cord = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, y + .52, z), new THREE.Vector3(x, H, z)]),
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, y + .37, z), new THREE.Vector3(x, H, z)]),
       new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.4 }));
     g.add(cord);
-    CYL(g, .1, .1, .16, 8, M.dark, x, y + .52, z, false);
-    const shade = new THREE.Mesh(new THREE.CylinderGeometry(.34, .86, 1.0, 10, 1, true), paper2(0xFBF3DE));
+    CYL(g, .07, .07, .12, 8, M.dark, x, y + .37, z, false);
+    const shade = new THREE.Mesh(new THREE.CylinderGeometry(.22, .56, .68, 10, 1, true), paper2(0xFBF3DE));
     shade.position.set(x, y, z); g.add(shade);
-    CYL(g, .87, .87, .07, 10, paper(tintHex), x, y - .44, z, false);
-    CYL(g, .86, .86, .05, 10, paper(0xFFE9BE), x, y - .5, z, false);
+    CYL(g, .57, .57, .05, 10, paper(tintHex), x, y - .30, z, false);
+    CYL(g, .56, .56, .04, 10, paper(0xFFE9BE), x, y - .34, z, false);
     /* the bulb's bloom, drawn not lit */
     const gm = GLOW_MAT.clone();
     gm.opacity = 0;
-    const glow = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), gm);
-    glow.position.set(x, y - .35, z);
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 2.5), gm);
+    glow.position.set(x, y - .26, z);
     g.add(glow);
-    lanterns.push({ x:x, y:y - .35, z:z, glow:glow, mat:gm, room:roomIdx, lit:0 });
+    lanterns.push({ x:x, y:y - .26, z:z, glow:glow, mat:gm, room:roomIdx, lit:0 });
   }
 
   /* ── one hero per room, so every doorway frames something ──── */
@@ -2315,7 +2322,7 @@ function build(){
   }
 
   /* ── raise the house ──────────────────────────────────────── */
-  const roomGroups = [], screens = [], artTex = [], labTex = [];
+  const roomGroups = [], screens = [], artworks = [], artTex = [], labTex = [];
   const built = new Set();
 
   P.forEach((p, i) => {
@@ -2380,6 +2387,8 @@ function build(){
     art.position.set(0, 4.05, .15); frame.add(art);
     const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .82), new THREE.MeshBasicMaterial({ map:labTex[i] }));
     lab.position.set(0, 1.62, .15); frame.add(lab);
+    artworks.push({ group:frame, hit:art, w:6.5, h:5.0, room:i, cy:4.05,
+                    homePos:frame.position.clone(), homeQuat:frame.quaternion.clone() });
 
     /* a cabinet, where there is a game to play */
     const spare = ['px','nx','pz','nz'].filter(k => !doorSides[i][k] && k !== artKey[i]);
@@ -2498,6 +2507,25 @@ function build(){
   dockFn   = dockTo;
   undockFn = undock;
 
+  /* a piece lifts off its wall and holds square in front of you */
+  const show = { item:null, t:0, dir:1 };
+  const _fw = new THREE.Vector3(), _tp = new THREE.Vector3(), _off = new THREE.Vector3();
+  function presentArt(it){
+    if (show.item === it){ dismissArt(); return; }
+    if (show.item){                       /* snap the previous one home first */
+      show.item.group.position.copy(show.item.homePos);
+      show.item.group.quaternion.copy(show.item.homeQuat);
+    }
+    show.item = it; show.t = 0; show.dir = 1;
+    document.body.classList.add('viewing');
+  }
+  function dismissArt(){
+    if (!show.item) return;
+    show.dir = -1;
+    document.body.classList.remove('viewing');
+  }
+  addEventListener('keydown', e => { if (e.key === 'Escape') dismissArt(); });
+
   /* where on screen the wall panel lands, so the iframe can sit on it */
   function screenRect(){
     const sc = dock.screen;
@@ -2525,21 +2553,29 @@ function build(){
     if (!downAt) return;
     const moved = Math.abs(e.clientX - downAt.x) + Math.abs(e.clientY - downAt.y);
     downAt = null;
-    if (moved > 12 || !screens.length) return;
+    if (moved > 12) return;
     ndc.x = (e.clientX / view.w) * 2 - 1;
     ndc.y = -(e.clientY / view.h) * 2 + 1;
     ray.setFromCamera(ndc, camera);
-    const hit = ray.intersectObjects(screens.map(s => s.mesh), false)[0];
-    if (!hit) return;
-    for (let i = 0; i < screens.length; i++)
-      if (screens[i].mesh === hit.object){ openGame(screens[i].room); break; }
+
+    const sHit = ray.intersectObjects(screens.map(s => s.mesh), false)[0];
+    if (sHit){
+      for (let i = 0; i < screens.length; i++)
+        if (screens[i].mesh === sHit.object){ dismissArt(); openGame(screens[i].room); return; }
+    }
+    const aHit = ray.intersectObjects(artworks.map(a => a.hit), false)[0];
+    if (aHit){
+      for (let i = 0; i < artworks.length; i++)
+        if (artworks[i].hit === aHit.object){ presentArt(artworks[i]); return; }
+    }
+    dismissArt();
   });
 
   function resize(){
     renderer.setSize(view.w, view.h, false);
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, innerWidth < 900 ? 1.5 : 2));
     camera.aspect = view.w / view.h;
-    camera.fov = innerWidth < 900 ? 78 : 70;
+    camera.fov = innerWidth < 900 ? 86 : 78;
     camera.updateProjectionMatrix();
   }
   addEventListener('resize', () => { measure(); resize(); }, { passive:true });
@@ -2578,18 +2614,13 @@ function build(){
     const swing   = smooth(clamp((m - .20) / .66, 0, 1));
     const yawFwd  = yawCur + shortAngle(yawCur, yawNext) * swing;
 
-    const cw   = .5 + .5*Math.cos(Math.PI*2*m);
-    const rIdx = m < .5 ? i0 : i1;
-    const ease = 1 - clamp(TURN[rIdx] / (Math.PI/2), 0, 1) * .58;
-    const av   = SIDEVEC[artKey[rIdx]];
-    const gx = P[rIdx].x + av[0]*9.4, gz = P[rIdx].z + av[1]*9.4;
-    const w  = cw * .78 * ease;
-    const yawWant = yawFwd + shortAngle(yawFwd, Math.atan2(gx - pos.x, gz - pos.z)) * w;
+    /* straight down the corridor — the pieces come to you instead */
+    const yawWant = yawFwd;
 
     const K = 4.2, C = 2 * Math.sqrt(K) * 1.06;
     yawV   += (shortAngle(yaw, yawWant) * K - yawV * C) * dt;
     yaw    += yawV * dt;
-    const pitchWant = .075 * w;
+    const pitchWant = 0;
     pitchV += ((pitchWant - pitch) * K - pitchV * C) * dt;
     pitch  += pitchV * dt;
 
@@ -2602,6 +2633,22 @@ function build(){
     const ay = yaw + ptr.x*.16, D = 13;
     lookAt.set(pos.x + Math.sin(ay)*D, camY + Math.tan(pitch - ptr.y*.08)*D, pos.z + Math.cos(ay)*D);
     camera.lookAt(lookAt);
+
+    if (show.item){
+      const it = show.item;
+      show.t = clamp(show.t + (dt / .8) * show.dir, 0, 1);
+      const e = smooth(show.t);
+      _fw.set(0, 0, -1).applyQuaternion(camera.quaternion);
+      _off.set(0, it.cy, 0).applyQuaternion(camera.quaternion);
+      _tp.copy(camera.position).addScaledVector(_fw, frameDistance(it.w, it.h)).sub(_off);
+      it.group.position.lerpVectors(it.homePos, _tp, e);
+      it.group.quaternion.copy(it.homeQuat).slerp(camera.quaternion, e);
+      if (show.t <= 0 && show.dir < 0){
+        it.group.position.copy(it.homePos);
+        it.group.quaternion.copy(it.homeQuat);
+        show.item = null;
+      }
+    }
 
     /* each lamp eases up as you arrive and back down as you leave,
        so the house is dark until you are standing in it */
@@ -2629,6 +2676,7 @@ function build(){
       const dx = (P[i].x - pos.x)/ROOM, dz = (P[i].z - pos.z)/ROOM;
       roomGroups[i].visible = (dx*dx + dz*dz) < (LOW ? 3.0 : 5.2);
     }
+    if (show.item) roomGroups[show.item.room].visible = true;
     for (let i = 0; i < lanterns.length; i++)
       if (lanterns[i].glow.parent && lanterns[i].glow.parent.visible)
         lanterns[i].glow.quaternion.copy(camera.quaternion);
