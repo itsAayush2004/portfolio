@@ -1829,6 +1829,141 @@ function build(){
   function texFrom(c){ const t = new THREE.CanvasTexture(c); t.anisotropy = LOW?2:8; t.encoding = THREE.sRGBEncoding; return t; }
 
   /* ══════════════════════════════════════════════════════════
+     VOXELS
+     A model is a map of coloured cells. Building it emits one
+     merged geometry: faces between touching cubes are dropped,
+     colour rides on the vertices, and there is no UV attribute at
+     all — nothing to stretch, tile or chop. Corner occlusion is
+     baked into those same colours, so the depth survives the flat
+     toon ramp the rest of the house is shaded with.
+     ══════════════════════════════════════════════════════════ */
+  function Vox(){ this.c = new Map(); this.lit = new Set(); }
+  Vox.prototype.set  = function(x,y,z,col){ this.c.set(x+','+y+','+z, col); return this; };
+  Vox.prototype.has  = function(x,y,z){ return this.c.has(x+','+y+','+z); };
+  Vox.prototype.box  = function(x0,x1,y0,y1,z0,z1,col){
+    for (let x=x0;x<=x1;x++) for (let y=y0;y<=y1;y++) for (let z=z0;z<=z1;z++) this.set(x,y,z,col);
+    return this; };
+  Vox.prototype.shell = function(x0,x1,y0,y1,z0,z1,col){
+    for (let x=x0;x<=x1;x++) for (let y=y0;y<=y1;y++) for (let z=z0;z<=z1;z++)
+      if (x===x0||x===x1||y===y0||y===y1||z===z0||z===z1) this.set(x,y,z,col);
+    return this; };
+  Vox.prototype.rect = function(x0,x1,y0,y1,z0,z1,t,col){
+    for (let x=x0;x<=x1;x++) for (let y=y0;y<=y1;y++)
+      if (x < x0+t || x > x1-t || y < y0+t || y > y1-t)
+        for (let z=z0;z<=z1;z++) this.set(x,y,z,col);
+    return this; };
+  Vox.prototype.del = function(x0,x1,y0,y1,z0,z1){
+    for (let x=x0;x<=x1;x++) for (let y=y0;y<=y1;y++) for (let z=z0;z<=z1;z++) this.c.delete(x+','+y+','+z);
+    return this; };
+  /* a square ring at one height — the building block of every step */
+  Vox.prototype.ring = function(r,y,col,d){
+    d = (d === undefined) ? r : d;
+    for (let x=-r;x<=r;x++) for (let z=-d;z<=d;z++)
+      if (Math.abs(x)===r || Math.abs(z)===d) this.set(x,y,z,col);
+    return this; };
+  Vox.prototype.slab = function(r,y,col,d){
+    d = (d === undefined) ? r : d;
+    return this.box(-r,r,y,y,-d,d,col); };
+  /* the same, but the cells are marked as giving light rather than
+     taking it — no occlusion, no face shading */
+  Vox.prototype.litSlab = function(r,y,col,d){
+    d = (d === undefined) ? r : d;
+    for (let x=-r;x<=r;x++) for (let z=-d;z<=d;z++){
+      this.set(x,y,z,col); this.lit.add(x+','+y+','+z);
+    }
+    return this; };
+
+  const VFACE = [
+    { n:[ 1, 0, 0], u:[0,1,0], v:[0,0,1], s:.93 },
+    { n:[-1, 0, 0], u:[0,0,1], v:[0,1,0], s:.86 },
+    { n:[ 0, 1, 0], u:[0,0,1], v:[1,0,0], s:1.00 },
+    { n:[ 0,-1, 0], u:[1,0,0], v:[0,0,1], s:.66 },
+    { n:[ 0, 0, 1], u:[1,0,0], v:[0,1,0], s:.96 },
+    { n:[ 0, 0,-1], u:[0,1,0], v:[1,0,0], s:.81 }
+  ];
+  const VAO = [.55, .73, .88, 1.0];
+  const VCORN = [[-1,-1],[1,-1],[1,1],[-1,1]];
+
+  Vox.prototype.build = function(unit){
+    const P = [], N = [], K = [], self = this, tmp = new THREE.Color();
+    this.c.forEach(function(hex, key){
+      const q = key.split(','), X = +q[0], Y = +q[1], Z = +q[2];
+      tmp.setHex(hex);
+      for (let f = 0; f < 6; f++){
+        const F = VFACE[f], n = F.n, uu = F.u, vv = F.v;
+        if (self.has(X+n[0], Y+n[1], Z+n[2])) continue;
+        const cx = (X+.5)*unit, cy = (Y+.5)*unit, cz = (Z+.5)*unit, h = unit/2;
+        const ao = [], pts = [];
+        for (let c = 0; c < 4; c++){
+          const su = VCORN[c][0], sv = VCORN[c][1];
+          pts.push([ cx + (n[0] + su*uu[0] + sv*vv[0])*h,
+                     cy + (n[1] + su*uu[1] + sv*vv[1])*h,
+                     cz + (n[2] + su*uu[2] + sv*vv[2])*h ]);
+          const a1 = self.has(X+n[0]+su*uu[0], Y+n[1]+su*uu[1], Z+n[2]+su*uu[2]) ? 1 : 0;
+          const a2 = self.has(X+n[0]+sv*vv[0], Y+n[1]+sv*vv[1], Z+n[2]+sv*vv[2]) ? 1 : 0;
+          const ac = self.has(X+n[0]+su*uu[0]+sv*vv[0], Y+n[1]+su*uu[1]+sv*vv[1], Z+n[2]+su*uu[2]+sv*vv[2]) ? 1 : 0;
+          ao.push((a1 && a2) ? 0 : 3 - (a1 + a2 + ac));
+        }
+        /* split along the darker diagonal, or the shading creases
+           the wrong way across the corner */
+        const ord = (ao[0] + ao[2] > ao[1] + ao[3]) ? [0,1,2, 0,2,3] : [1,2,3, 1,3,0];
+        const glowing = self.lit.has(key);
+        for (let i = 0; i < 6; i++){
+          const idx = ord[i], pt = pts[idx], m = glowing ? 1 : VAO[ao[idx]] * F.s;
+          P.push(pt[0], pt[1], pt[2]);
+          N.push(n[0], n[1], n[2]);
+          K.push(tmp.r*m, tmp.g*m, tmp.b*m);
+        }
+      }
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(P,3));
+    g.setAttribute('normal',   new THREE.Float32BufferAttribute(N,3));
+    g.setAttribute('color',    new THREE.Float32BufferAttribute(K,3));
+    g.computeBoundingBox(); g.computeBoundingSphere();
+    return g;
+  };
+
+  /* the outline is a copy pushed a fixed distance along its own
+     normals, so the line weighs the same on a lantern and on a
+     doorway — which a scaled hull never does */
+  function voxOutline(geo, k){
+    const a = geo.attributes.position.array, b = geo.attributes.normal.array;
+    const out = new Float32Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = a[i] + b[i]*k;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(out,3));
+    return g;
+  }
+
+  const VOXMAT = new THREE.MeshToonMaterial({ vertexColors:true, gradientMap:RAMP });
+  const VOXCACHE = new Map();
+  function voxGeo(key, unit, make){
+    let g = VOXCACHE.get(key);
+    if (!g){ g = make().build(unit); VOXCACHE.set(key, g); }
+    return g;
+  }
+
+  /* place a built model by whichever edge or centre matters:
+     {cx,cy,cz} centre on an axis, {minY,maxY,minZ} pin an edge */
+  function voxAdd(par, geo, unit, a, outline){
+    const bb = geo.boundingBox;
+    const px = (a.cx !== undefined) ? a.cx - (bb.min.x+bb.max.x)/2
+             : (a.maxX !== undefined) ? a.maxX - bb.max.x : (a.minX||0) - bb.min.x;
+    const py = (a.cy !== undefined) ? a.cy - (bb.min.y+bb.max.y)/2
+             : (a.maxY !== undefined) ? a.maxY - bb.max.y : (a.minY||0) - bb.min.y;
+    const pz = (a.cz !== undefined) ? a.cz - (bb.min.z+bb.max.z)/2
+             : (a.maxZ !== undefined) ? a.maxZ - bb.max.z : (a.minZ||0) - bb.min.z;
+    const m = new THREE.Mesh(geo, VOXMAT);
+    m.position.set(px, py, pz); par.add(m);
+    if (outline !== false && !LOW){
+      const o = new THREE.Mesh(voxOutline(geo, unit*.11), HULL);
+      o.position.set(px, py, pz); par.add(o);
+    }
+    return m;
+  }
+
+  /* ══════════════════════════════════════════════════════════
      FOOTPRINTS — the reason nothing in this house overlaps
      ══════════════════════════════════════════════════════════ */
   const SIDEVEC = { px:[1,0], nx:[-1,0], pz:[0,1], nz:[0,-1] };
@@ -2250,10 +2385,27 @@ function build(){
     gate.position.set(mx, 0, mz);
     gate.rotation.y = alongZ ? Math.PI/2 : 0;
     g.add(gate);
-    const CZ = .62, JW = .44, JD = .62, GH = DH + .52;
-    [-1,1].forEach(s => BS(gate, JW, GH, JD, M.gate, s*(DW + JW/2 + .04), GH/2, CZ, .9));
-    BS(gate, DW*2 + JW*2 + .08, .46, JD, M.gate, 0, GH - .23, CZ, .9);
-    BS(gate, DW*2, .07, JD, M.brass, 0, .035, CZ, 0);
+    const CZ = .62, GH = DH + .52;
+    /* jamb with a foot and a capital, a lintel band and a cornice
+       that oversails it — masonry, counted in blocks */
+    const GU = GH / 17;
+    const surround = voxGeo('gate', GU, function(){
+      const v = new Vox();
+      /* cells -8..7 are the opening, so the two jambs sit at
+         8..9 and -10..-9 and the model is symmetric about zero */
+      [[8,9,10],[-10,-9,-11]].forEach(function(J){
+        const a = Math.min(J[0],J[1]), b = Math.max(J[0],J[1]);
+        const wa = Math.min(a, J[2]), wb = Math.max(b, J[2]);
+        v.box(a, b, 1, 13, 0, 1, 0xFCFCFC);          /* the shaft */
+        v.box(wa, wb, 0,  0, 0, 2, 0xE4E4E2);        /* its foot */
+        v.box(wa, wb, 14, 14, 0, 2, 0xE4E4E2);       /* its capital */
+      });
+      v.box(-10, 9, 15, 15, 0, 1, 0xFCFCFC);         /* the lintel */
+      v.box(-11, 10, 16, 16, 0, 2, 0xE4E4E2);        /* the cornice, oversailing */
+      return v;
+    });
+    voxAdd(gate, surround, GU, { cx:0, cz:CZ, minY:0 });
+    BS(gate, DW*2, .07, GU*2, M.brass, 0, .035, CZ, 0);
 
     const nxtI = Math.min(roomIdx + 1, N - 1);
     const mc = document.createElement('canvas'); mc.width = mc.height = 300;
@@ -2263,15 +2415,25 @@ function build(){
     mg.strokeStyle = HEXC[nxtI % HEXC.length]; mg.lineWidth = 4; mg.beginPath(); mg.arc(150,150,118,0,7); mg.stroke();
     drawIcon(mg, ICONS[nxtI], 150, 148, 138);
     const med = new THREE.Mesh(new THREE.CircleGeometry(.25, 30), new THREE.MeshBasicMaterial({ map:texFrom(mc), transparent:true }));
-    med.position.set(0, GH - .23, CZ + JD/2 + .015);
+    med.position.set(0, GU * 15.5, CZ + GU * 1.575 + .015);   /* on the face of the lintel course */
     gate.add(med);
 
     [-1,1].forEach(s => {
       const hg = new THREE.Group();
       hg.position.set(s*DW, 0, 0); gate.add(hg);
       const leaf2 = new THREE.Group(); hg.add(leaf2);
-      BS(leaf2, DW, DH - .1, .09, M.warmD, -s*DW/2, (DH-.1)/2, 0, .8);
-      CYL(leaf2, .045,.045,.22, 8, M.brass, -s*DW*.88, DH*.46, .09, false);
+      /* the leaf hangs off the hinge, eight cells of it, one thick */
+      const leafGeo = voxGeo('leaf'+s, GU, function(){
+        const v = new Vox();
+        const a = s > 0 ? -8 : 0, b = s > 0 ? -1 : 7;
+        v.box(a, b, 0, 13, 0, 0, 0xD2D2D0);
+        v.box(a, b, 14, 14, 0, 0, 0xE4E4E2);
+        const hx = s > 0 ? -7 : 6;
+        v.box(hx, hx, 7, 8, 1, 1, 0xD62222);
+        return v;
+      });
+      voxAdd(leaf2, leafGeo, GU,
+        s > 0 ? { maxX:0, minY:0, cz:0 } : { minX:0, minY:0, cz:0 }, false);
       doors.push({ hinge:hg, s:s, wx:mx, wz:mz });
     });
   }
@@ -2291,22 +2453,38 @@ function build(){
 
   /* ── a hanging paper lantern: the light that makes each room ── */
   const lanterns = [];
+  /* a stepped shade: five square courses, each one wider than the
+     last, with the tint band flush at the bottom and the lit face
+     recessed a course behind it. A lathe could not make this — the
+     staircase is the whole point. */
+  const LANT_U = .10;
+  function lanternGeo(tintHex){
+    return voxGeo('lant|'+tintHex, LANT_U, function(){
+      const v = new Vox();
+      v.ring(1, 11, 0xF4F1E6, 1);
+      v.ring(2, 10, 0xFBF6EA, 2);
+      v.ring(3,  9, 0xFCFAF2, 3);
+      v.ring(4,  8, 0xFDFCF6, 4);
+      v.ring(5,  7, 0xFEFDFA, 5);
+      v.ring(5,  6, tintHex,  5);          /* the tint band, flush */
+      v.litSlab(4, 5, 0xFFF8E4, 4);        /* the face that gives the light */
+      v.box(-1, 1, 12, 12, -1, 1, 0xD2D2D0);
+      v.box( 0, 0, 13, 15,  0, 0, 0x3A352C);
+      v.box( 0, 0, 16, 20,  0, 0, 0x241F1A);
+      return v;
+    });
+  }
   function lantern(g, x, z, tintHex, roomIdx){
     const y = 6.15;
-    const cord = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, y + .37, z), new THREE.Vector3(x, H, z)]),
-      new THREE.LineBasicMaterial({ color:0x17150F, transparent:true, opacity:.4 }));
-    g.add(cord);
-    CYL(g, .07, .07, .12, 8, M.dark, x, y + .37, z, false);
-    const shade = new THREE.Mesh(new THREE.CylinderGeometry(.22, .56, .68, 10, 1, true), paper2(0xFBF3DE));
-    shade.position.set(x, y, z); g.add(shade);
-    CYL(g, .57, .57, .05, 10, paper(tintHex), x, y - .30, z, false);
-    CYL(g, .56, .56, .04, 10, paper(0xFFFDF7), x, y - .34, z, false);
+    const geo = lanternGeo(tintHex);
+    /* the shade's underside lands where the old paper one did, and
+       the cord runs up into the ceiling slab */
+    voxAdd(g, geo, LANT_U, { cx:x, cz:z, minY:y - .34 });
     /* the bulb's bloom, drawn not lit */
     const gm = GLOW_MAT.clone();
     gm.opacity = 0;
     const glow = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 2.5), gm);
-    glow.position.set(x, y - .26, z);
+    glow.position.set(x, y - .40, z);        /* the bloom hangs below the lit face */
     g.add(glow);
     lanterns.push({ x:x, y:y - .26, z:z, glow:glow, mat:gm, room:roomIdx, lit:0 });
   }
@@ -2477,11 +2655,31 @@ function build(){
     frame.position.set(p.x + A[0]*(HALF - T*.5 - .06), 0, p.z + A[1]*(HALF - T*.5 - .06));
     frame.rotation.y = Math.atan2(-A[0], -A[1]);
     g.add(frame);
-    BS(frame, 6.5, 5.0, .18, paper(R.art), 0, 3.85, 0, .9);
+    /* a stepped frame with corner blocks that stand proud of the
+       rail, and a real rebate for the poster to sit back in. The
+       poster itself is untouched — it is content, not an asset. */
+    const AU = 6.5 / 23;
+    const frameGeo = voxGeo('art|'+R.art, AU, function(){
+      const v = new Vox(), W = 11, Hh = 8;
+      v.box(-W, W, -Hh, Hh, 0, 0, R.art);                  /* the backing board */
+      v.rect(-W, W, -Hh, Hh, 0, 0, 2, 0xE8E8E6);           /* the rail */
+      v.rect(-W, W, -Hh, Hh, 1, 1, 1, 0xFCFCFC);           /* the sight edge, proud */
+      [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(q){   /* a block on each corner */
+        const x0 = q[0] > 0 ? W-2 : -W, y0 = q[1] > 0 ? Hh-2 : -Hh;
+        v.box(x0, x0+2, y0, y0+2, 0, 2, 0xD8D8D6);
+      });
+      v.box(-W, -W+2, Hh-2, Hh, 0, 2, 0xD62222);           /* the one accent, on the corner */
+      return v;
+    });
+    voxAdd(frame, frameGeo, AU, { cx:0, cy:4.05, minZ:-.09 });
     const art = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 4.08), new THREE.MeshBasicMaterial({ map:artTex[i] }));
-    art.position.set(0, 4.05, .15); frame.add(art);
+    art.position.set(0, 4.05, .21); frame.add(art);
+    const labGeo = voxGeo('lab|'+R.art, AU, function(){
+      return new Vox().box(-6, 6, -2, 2, 0, 0, R.art).rect(-6, 6, -2, 2, 0, 0, 1, 0xD2D2D0);
+    });
+    voxAdd(frame, labGeo, AU, { cx:0, cy:1.62, minZ:-.09 });
     const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .82), new THREE.MeshBasicMaterial({ map:labTex[i] }));
-    lab.position.set(0, 1.62, .15); frame.add(lab);
+    lab.position.set(0, 1.62, .21); frame.add(lab);
     artworks.push({ group:frame, hit:art, w:6.5, h:5.0, room:i, cy:4.05,
                     homePos:frame.position.clone(), homeQuat:frame.quaternion.clone() });
 
@@ -2493,13 +2691,29 @@ function build(){
       cab.position.set(p.x + sv[0]*(HALF - T*.5 - .06), 0, p.z + sv[1]*(HALF - T*.5 - .06));
       cab.rotation.y = Math.atan2(-sv[0], -sv[1]);
       g.add(cab);
-      BS(cab, 6.2, 4.3, .34, M.dark, 0, 3.75, .14, .9);
-      BS(cab, 6.6, .34, .58, paper(R.tint), 0, 6.05, .2, .9);
+      /* the carcass, a bezel one course proud of it, a header that
+         oversails, and a shelf. The screen is content and stays a
+         plane — it just sits in a recess now. */
+      const CU = 6.2 / 21;
+      const cabGeo = voxGeo('cab|'+R.tint, CU, function(){
+        const v = new Vox(), W = 10, Hh = 14;
+        v.box(-W, W, 0, Hh, 0, 0, 0x141414);              /* carcass */
+        v.box(-W+1, W-1, 1, Hh-1, 0, 0, 0x14121A);        /* the screen wall */
+        v.box(-W, W, 0, Hh, 1, 1, 0x2E2A22);              /* bezel... */
+        v.del(-W+1, W-1, 1, Hh-1, 1, 1);                  /* ...cut to a ring */
+        [-1,1].forEach(function(sn){                       /* cheeks, stepping out */
+          v.box(sn*(W+1), sn*(W+1), 1, Hh-1, 0, 1, 0x413B30);
+        });
+        v.box(-W-1, W+1, Hh+1, Hh+2, 0, 1, R.tint);       /* the header */
+        v.box(-W, W, Hh+3, Hh+3, 0, 2, mix(R.tint, 0x141414, .28));
+        v.box(-W, W, -2, -1, 0, 2, 0xD2D2D0);             /* the shelf */
+        return v;
+      });
+      voxAdd(cab, cabGeo, CU, { cx:0, minY:1.6, minZ:-.03 });
       const scr = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 3.58),
         new THREE.MeshBasicMaterial({ map:texFrom(screenCanvas(i, GAMES[i])) }));
-      scr.position.set(0, 3.78, .33); cab.add(scr);
+      scr.position.set(0, 1.6 + 7.5*CU, .28); cab.add(scr);
       screens.push({ mesh:scr, room:i, w:5.4, h:3.58 });
-      BS(cab, 6.2, .42, .82, M.warmD, 0, 1.3, .32, .8);
     }
 
     /* the room is left empty on purpose — the lamp above the floor
