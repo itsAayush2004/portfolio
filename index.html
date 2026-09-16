@@ -1520,7 +1520,7 @@ function build(){
   });
 
   /* ── paper stock ──────────────────────────────────────────── */
-  const steps = new Uint8Array([132, 202, 245]);
+  const steps = new Uint8Array([96, 176, 240]);
   const RAMP = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
   RAMP.minFilter = RAMP.magFilter = THREE.NearestFilter;
   RAMP.generateMipmaps = false; RAMP.needsUpdate = true;
@@ -2362,6 +2362,235 @@ function build(){
       side:THREE.DoubleSide, flatShading:flat !== false });
   }
 
+  /* ══════════════════════════════════════════════════════════
+     FURNITURE — one set of folded pieces, dealt out by theme
+
+     Every piece is a Vox model, cached by its colours, so the
+     eight rooms share the same handful of geometries. Placement
+     goes through Plot: it refuses anything inside the walking
+     disc the camera travels, anything in a doorway, and anything
+     that would touch a piece already standing — so the rooms fill
+     up without a single thing ever crossing the camera's path.
+     ══════════════════════════════════════════════════════════ */
+  const FU = .21;                                   /* the furniture cell */
+
+  function propOf(key, unit, make){ return voxGeo(key, unit, make); }
+
+  /* drop a built model into the room, turned to face the middle */
+  function stand(g, geo, unit, x, z, ry, lift){
+    const h = new THREE.Group();
+    h.position.set(x, 0, z);
+    h.rotation.y = ry;
+    g.add(h);
+    voxAdd(h, geo, unit, { cx:0, cz:0, minY:lift || 0 });
+    return h;
+  }
+
+  /* furniture sits a shade under the walls, so a white piece against a
+     white wall still has a silhouette */
+  const PALE = 0xFBFBFA, MID = 0xDCDCD9, DEEP = 0xBEBEBB, DARK = 0x3A352C;
+
+  /* ── the pieces ───────────────────────────────────────────── */
+  function geoBed(tint){
+    return propOf('fbed|'+tint, FU, function(){
+      const v = new Vox();
+      v.box(-4, 4, 0, 1, -7, 6, DEEP);            /* the base                */
+      v.box(-4, 4, 2, 3, -7, 6, PALE);            /* the mattress            */
+      v.box(-4, 4, 2, 4, -1, 6, tint);            /* the blanket, turned back*/
+      v.box(-3, 3, 4, 5, -6, -4, PALE);           /* a pillow                */
+      v.box(-4, 4, 2, 7, -8, -7, MID);            /* the headboard           */
+      return v;
+    });
+  }
+  function geoCouch(tint){
+    return propOf('fcouch|'+tint, FU, function(){
+      const v = new Vox();
+      v.box(-6, 6, 0, 1, -3, 3, DEEP);
+      v.box(-6, 6, 2, 3, -3, 3, PALE);            /* the seat                */
+      v.box(-6, 6, 2, 7, -4, -3, MID);            /* the back                */
+      v.box(-7, -6, 2, 5, -3, 3, MID);            /* arms                    */
+      v.box( 6,  7, 2, 5, -3, 3, MID);
+      v.box(-4, -1, 4, 4, -2, 1, tint);           /* a cushion               */
+      return v;
+    });
+  }
+  function geoShelf(tint){
+    return propOf('fshelf|'+tint, FU, function(){
+      const v = new Vox(), H = 15;
+      v.box(-5, -4, 0, H, -2, 1, MID);            /* uprights                */
+      v.box( 4,  5, 0, H, -2, 1, MID);
+      v.box(-5, 5, H, H, -2, 1, MID);             /* the top                 */
+      [1, 5, 9, 13].forEach(function(y){
+        v.box(-4, 4, y, y, -2, 1, DEEP);          /* a shelf                 */
+        for (let x = -4; x <= 4; x++){            /* and what stands on it   */
+          const t = (x * 7 + y * 5) % 4;
+          if (t === 3) continue;
+          const top = y + 1 + ((x + y) % 3);
+          v.box(x, x, y + 1, top, -1, 0, t === 0 ? tint : (t === 1 ? PALE : DEEP));
+        }
+      });
+      return v;
+    });
+  }
+  function geoRack(tint){
+    return propOf('frack|'+tint, FU, function(){
+      const v = new Vox(), H = 17;
+      v.shell(-3, 3, 0, H, -2, 2, DEEP);          /* the carcass             */
+      v.box(-3, 3, 0, 0, -2, 2, DARK);            /* it stands on a plinth   */
+      for (let y = 2; y < H - 1; y += 3){
+        v.box(-2, 2, y, y + 1, 2, 2, DARK);       /* a blade in the bay      */
+        /* two lamps on the face of each blade — marked as giving light,
+           so the shading leaves them at full strength */
+        v.set(-2, y, 3, tint);      v.lit.add('-2,' + y + ',3');
+        v.set( 2, y + 1, 3, PALE);  v.lit.add('2,' + (y + 1) + ',3');
+      }
+      return v;
+    });
+  }
+  function geoDesk(tint){
+    return propOf('fdesk|'+tint, FU, function(){
+      const v = new Vox();
+      v.box(-6, 6, 4, 5, -3, 2, PALE);            /* the top                 */
+      v.box(-6, -5, 0, 3, -3, 2, MID);            /* the ends                */
+      v.box( 5,  6, 0, 3, -3, 2, MID);
+      v.box(-6, 6, 1, 2, -3, -2, DEEP);           /* a stretcher             */
+      v.box(-4, -2, 6, 8, -2, 0, DEEP);           /* work left on it         */
+      v.box( 1,  3, 6, 7, -2, 1, tint);
+      return v;
+    });
+  }
+  function geoSide(tint){
+    return propOf('fside|'+tint, FU, function(){
+      const v = new Vox();
+      v.box(-7, 7, 0, 7, -2, 2, MID);
+      v.box(-7, 7, 8, 8, -3, 3, PALE);            /* the top oversails       */
+      v.box(-6, -1, 2, 6, 3, 3, DEEP);            /* two drawer faces        */
+      v.box( 1,  6, 2, 6, 3, 3, DEEP);
+      v.box(-4, -3, 4, 4, 4, 4, tint);            /* the handles             */
+      v.box( 3,  4, 4, 4, 4, 4, tint);
+      return v;
+    });
+  }
+  function geoEasel(tint){
+    return propOf('feasel|'+tint, FU, function(){
+      const v = new Vox();
+      v.box(-4, -3, 0, 11, 1, 2, MID);            /* the legs                */
+      v.box( 3,  4, 0, 11, 1, 2, MID);
+      v.box(-1,  1, 0, 3, -3, -2, MID);           /* the back leg            */
+      v.box(-5, 5, 5, 6, 0, 1, DEEP);             /* the ledge               */
+      v.box(-5, 5, 7, 14, 1, 1, PALE);            /* the board               */
+      v.box(-3, 1, 9, 12, 2, 2, tint);            /* something started on it */
+      return v;
+    });
+  }
+  function geoCrates(tint){
+    return propOf('fcrate|'+tint, FU, function(){
+      const v = new Vox();
+      v.shell(-4, 4, 0, 5, -4, 4, MID);
+      v.box(-4, 4, 5, 5, -4, 4, PALE);
+      v.shell(-3, 1, 6, 10, -3, 1, DEEP);         /* one stacked, off square */
+      v.box(-3, 1, 10, 10, -3, 1, PALE);
+      v.box(-1, 0, 6, 10, 2, 2, tint);
+      return v;
+    });
+  }
+  function geoPlant(tint){
+    return propOf('fplant|'+tint, FU, function(){
+      const v = new Vox(), LEAF = 0x86A879, STEM = 0x6F8F63;
+      v.box(-2, 2, 0, 3, -2, 2, DEEP);            /* the pot                 */
+      v.box(-3, 3, 3, 4, -3, 3, MID);             /* its lip                 */
+      v.box(-1, 1, 5, 9, -1, 1, STEM);            /* the stem                */
+      v.box(-4, -1, 7,  8, -2, 2, LEAF);          /* three fronds            */
+      v.box( 1,  4, 8,  9, -2, 2, LEAF);
+      v.box(-2,  2, 10, 11, -2, 2, LEAF);
+      return v;
+    });
+  }
+  function geoStool(tint){
+    return propOf('fstool|'+tint, FU, function(){
+      const v = new Vox();
+      v.box(-3, 3, 4, 4, -3, 3, PALE);            /* the seat                */
+      v.box(-3, 3, 5, 5, -3, 3, tint);            /* a cushion on it         */
+      [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(function(o){
+        v.box(o[0], o[0], 0, 3, o[1], o[1], MID); /* four legs               */
+      });
+      return v;
+    });
+  }
+
+  const MAKERS = {
+    bed:   { geo:geoBed,    r:2.2 },
+    couch: { geo:geoCouch,  r:1.9 },
+    shelf: { geo:geoShelf,  r:1.4 },
+    rack:  { geo:geoRack,   r:1.1 },
+    desk:  { geo:geoDesk,   r:1.8 },
+    side:  { geo:geoSide,   r:1.9 },
+    easel: { geo:geoEasel,  r:1.3 },
+    crate: { geo:geoCrates, r:1.2 },
+    plant: { geo:geoPlant,  r:.9  },
+    stool: { geo:geoStool,  r:.8  }
+  };
+
+  /* what belongs in each room, in the order it should be tried.
+     a = along the wall the picture hangs on, l = across it. */
+  /* The picture hangs on the +a wall and the doorways are on the two
+     across walls, so furniture lives in the corners: two flanking the
+     picture where the camera can actually see them, two behind. */
+  const FURNISH = [
+    /* 00 lobby       */ [['side',6.2,-7.0],['plant',7.4,7.6],['stool',-6.4,7.0],['plant',-6.8,-7.2]],
+    /* 01 bedroom     */ [['bed',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['plant',7.4,7.6]],
+    /* 02 game room   */ [['couch',6.2,-7.0],['stool',7.8,-4.2],['crate',-6.8,-7.0],['plant',7.4,7.6]],
+    /* 03 workshop    */ [['desk',6.2,-7.0],['crate',7.8,-4.2],['shelf',-6.8,-7.0],['stool',-6.4,7.0]],
+    /* 04 studio      */ [['easel',6.4,-7.2],['stool',7.8,-4.2],['side',-6.8,-7.0],['plant',7.4,7.6]],
+    /* 05 server room */ [['rack',6.6,-7.4],['rack',6.6,-5.0],['rack',-6.8,-7.0],['crate',7.6,7.4]],
+    /* 06 library     */ [['shelf',6.4,-7.4],['shelf',6.4,-4.6],['shelf',-6.8,-7.0],['stool',7.6,7.8]],
+    /* 07 dining room */ [['side',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['plant',7.4,7.6]]
+  ];
+
+  /* the room's own no-go map. Plot's footprints were cut for small
+     ornaments; furniture is bigger and stands against the walls, so it
+     gets its own test: out of the disc the camera walks, out of every
+     doorway it walks through, off the wall the picture hangs on, inside
+     the room, and clear of whatever is already standing. */
+  function furnish(i, g, p, A, L, R){
+    const W = (a, l) => ({ x: p.x + A[0]*a + L[0]*l, z: p.z + A[1]*a + L[1]*l });
+    const chans = [];
+    ['px','nx','pz','nz'].forEach(k => { if (doorSides[i][k]) chans.push(SIDEVEC[k]); });
+    /* the hanging lamp is already claiming its own patch of floor */
+    const up = [{ a:[5.2, 2.4], r:1.6 }];
+
+    function fits(a, l, r){
+      if (Math.sqrt(a*a + l*l) < 3.4 + r) return false;            /* the walk   */
+      if (Math.max(Math.abs(a), Math.abs(l)) + r > 9.3) return false; /* the wall */
+      if (a > 3.6 && Math.abs(l) < 3.4 + r*.5) return false;       /* the picture*/
+      const dx = A[0]*a + L[0]*l, dz = A[1]*a + L[1]*l;
+      for (let c = 0; c < chans.length; c++){
+        const v = chans[c];
+        const along = dx*v[0] + dz*v[1];
+        const perp  = Math.abs(dx*(-v[1]) + dz*v[0]);
+        if (along > -.5 && perp < 2.4 + r) return false;            /* a doorway  */
+      }
+      for (let k = 0; k < up.length; k++){
+        const u = up[k], ex = a - u.a[0], ez = l - u.a[1];
+        if (Math.sqrt(ex*ex + ez*ez) < u.r + r) return false;       /* neighbours */
+      }
+      return true;
+    }
+
+    const list = FURNISH[i % FURNISH.length];
+    for (let k = 0; k < list.length; k++){
+      if (LOW && k > 2) break;
+      const name = list[k][0], a = list[k][1], l = list[k][2];
+      const M2 = MAKERS[name];
+      if (!M2 || !fits(a, l, M2.r)) continue;
+      up.push({ a:[a, l], r:M2.r });
+      const spot = W(a, l);
+      /* every piece turns its face toward the middle of the room */
+      const ry = Math.atan2(p.x - spot.x, p.z - spot.z);
+      stand(g, M2.geo(R.tint), FU, spot.x, spot.z, ry, 0);
+    }
+  }
+
   function hero(i, g, p, A, L, R){
     const W = (a, l) => ({ x: p.x + A[0]*a + L[0]*l, z: p.z + A[1]*a + L[1]*l });
     const s = W(5.6, 3.4);
@@ -2583,9 +2812,10 @@ function build(){
       screens.push({ mesh:scr, room:i, w:5.4, h:3.58 });
     }
 
-    /* the room is left empty on purpose — the lamp above the floor
-       where the piece faces is the only thing standing in it */
+    /* the lamp over the floor where the piece faces, and then whatever
+       furniture the room's theme calls for, dealt into the corners */
     lantern(g, p.x + A[0]*5.2 + L[0]*2.4, p.z + A[1]*5.2 + L[1]*2.4, R.tint, i);
+    furnish(i, g, p, A, L, R);
   });
 
   if (refused > 0 && window.console) console.warn('[house] placements refused:', refused);
@@ -2606,9 +2836,9 @@ function build(){
      ──────────────────────────────────────────────────────────── */
   /* the house is lit to the top of its range: heavy fill, a key just
      strong enough to keep the corners readable */
-  scene.add(new THREE.AmbientLight(0xFFFFFF, .44));
-  const key  = new THREE.DirectionalLight(0xFFFFFF, .40); key.position.set(9,16,10);   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xEAF1FA, .20); fill.position.set(-10,7,-12); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xFFFFFF, .26));
+  const key  = new THREE.DirectionalLight(0xFFFFFF, .36); key.position.set(9,16,10);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xEAF1FA, .15); fill.position.set(-10,7,-12); scene.add(fill);
   const bulbA = new THREE.PointLight(0xFFF8EE, 0, 20, 1.6); scene.add(bulbA);
   const bulbB = new THREE.PointLight(0xFFF8EE, 0, 18, 1.8); scene.add(bulbB);
 
