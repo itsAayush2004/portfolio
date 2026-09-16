@@ -159,103 +159,6 @@ body{
 .hud-sep{ color:var(--ink-4); opacity:.5 }
 @media (max-width:600px){ .hud-right .opt{ display:none } }
 
-/* ── 5. THE SLIDER ────────────────────────────────────────────────
-   A binder's tape down the right edge. Drag the folded tab, click a
-   rule, or use the arrow keys.
-   ─────────────────────────────────────────────────────────────── */
-.scrub{
-  position:fixed; z-index:70;
-  right:clamp(12px,2.4vw,34px);
-  top:50%; transform:translateY(-50%);
-  height:min(58vh,470px); width:36px;
-  touch-action:none;
-  -webkit-user-select:none; user-select:none;
-  cursor:grab;
-}
-.scrub.dragging{ cursor:grabbing }
-.scrub:focus-visible{ outline:none }
-.scrub:focus-visible .tape{ box-shadow:0 0 0 2.5px var(--red) }
-
-/* the tape */
-.tape{
-  position:absolute; left:50%; top:0; bottom:0; width:5px; margin-left:-2.5px;
-  background:linear-gradient(90deg, rgba(23,21,15,.10), rgba(23,21,15,.05));
-  border-radius:1px;
-}
-.tape::after{
-  content:""; position:absolute; inset:0;
-  background:repeating-linear-gradient(0deg, rgba(255,255,255,.5) 0 3px, transparent 3px 6px);
-}
-.tape-fill{
-  position:absolute; left:50%; top:0; width:5px; margin-left:-2.5px; height:100%;
-  background:var(--red); border-radius:1px;
-  transform-origin:50% 0; transform:scaleY(0); will-change:transform;
-}
-
-/* rules */
-.rules{ position:absolute; inset:0 }
-.rules button{
-  position:absolute; right:0; width:36px; height:24px; margin-top:-12px;
-  display:flex; align-items:center; justify-content:flex-end;
-  cursor:pointer;
-}
-.rules button i{
-  display:block; width:12px; height:1.5px; background:var(--ink-3);
-  transition:width .38s var(--ease-out), background .3s;
-}
-.rules button:hover i{ width:22px; background:var(--ink) }
-.rules button[aria-current="true"] i{ width:24px; height:2px; background:var(--red) }
-.rules button span{
-  position:absolute; right:44px; white-space:nowrap;
-  font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--ink-3); opacity:0; transform:translateX(6px);
-  transition:opacity .3s, transform .42s var(--ease-out);
-  pointer-events:none;
-}
-.rules button:hover span,.rules button:focus-visible span{ opacity:1; transform:none }
-
-/* the folded tab */
-.knob{
-  position:absolute; right:-3px; top:0; width:42px; height:42px; margin-top:-21px;
-  display:flex; align-items:center; justify-content:center;
-  will-change:transform;
-}
-.knob i{
-  width:0; height:0; display:block;
-  border-top:9px solid transparent; border-bottom:9px solid transparent;
-  border-right:15px solid var(--red);
-  filter:drop-shadow(0 2px 3px rgba(58,48,28,.35));
-  transition:transform .3s var(--ease-fold);
-}
-.scrub:hover .knob i,.scrub.dragging .knob i{ transform:scale(1.18) }
-.knob b{
-  position:absolute; right:46px; top:50%; transform:translateY(-50%);
-  display:flex; align-items:baseline; gap:9px; white-space:nowrap;
-  padding:5px 11px; background:var(--paper-hi);
-  box-shadow:0 1px 2px rgba(23,21,15,.13), 0 8px 18px rgba(58,48,28,.14);
-  font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--ink-3); font-weight:500;
-  opacity:0; transition:opacity .32s var(--ease-out);
-}
-.knob b em{ font-style:normal; color:var(--red) }
-.scrub:hover .knob b,.scrub.dragging .knob b,.scrub:focus-visible .knob b{ opacity:1 }
-
-.scrub-hint{
-  position:fixed; right:clamp(12px,2.4vw,34px); z-index:70;
-  top:calc(50% + min(29vh,235px) + 20px);
-  width:36px; text-align:center;
-  font-family:var(--mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
-  color:var(--ink-4); writing-mode:vertical-rl;
-  opacity:.85; pointer-events:none;
-}
-@media (max-width:900px){
-  .scrub{ height:38vh; width:30px; right:8px }
-  .rules button span{ display:none }
-  .knob b{ display:none }
-  .scrub-hint{ display:none }
-}
-@media (max-width:400px){ .scrub{ display:none } }
-
 /* ── 6. LAYOUT — panel mode vs flow mode ─────────────────────── */
 #track{ display:none }
 .stack{ position:relative; z-index:10 }
@@ -680,7 +583,7 @@ body.fallback #arcadeFrame{
 body.docked .dock-note{ opacity:1 }
 @media (max-width:600px){ .arcade-hint{ display:none } }
 
-body.playing .hud,body.playing .scrub,body.playing .scrub-hint,
+body.playing .hud,
 body.playing .play-btn,body.playing .grain,body.playing .vig,body.playing .fibre,
 body.playing .fold{ display:none }
 body.playing{ overflow:hidden }
@@ -861,18 +764,6 @@ body.noweb{
     <a href="mailto:akversebusiness@gmail.com">Email</a>
   </nav>
 </header>
-
-<div class="scrub" id="scrub" role="slider" tabindex="0"
-     aria-label="Walk through the rooms"
-     aria-valuemin="0" aria-valuemax="7" aria-valuenow="0" aria-valuetext="Room 00 — Lobby">
-  <span class="tape" aria-hidden="true"></span>
-  <span class="tape-fill" id="tapeFill" aria-hidden="true"></span>
-  <div class="rules" id="rules" aria-hidden="true"></div>
-  <div class="knob" id="knob" aria-hidden="true">
-    <i></i><b><em id="knobNum">00</em><span id="knobName">Lobby</span></b>
-  </div>
-</div>
-<div class="scrub-hint" aria-hidden="true">Drag</div>
 
 <main id="main" class="stack">
 
@@ -1339,26 +1230,6 @@ function maybeCount(){
   $$('[data-count]').forEach(countUp);
 }
 
-/* ════════════════════════════════════════════════════════════════
-   4 — THE SLIDER
-   ════════════════════════════════════════════════════════════════ */
-const scrub    = $('#scrub');
-const rules    = $('#rules');
-const tapeFill = $('#tapeFill');
-const knob     = $('#knob');
-const knobNum  = $('#knobNum');
-const knobName = $('#knobName');
-
-for (let i = 0; i < N; i++){
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.style.top = (i/(N-1)*100) + '%';
-  b.setAttribute('aria-label', 'Room ' + String(i).padStart(2,'0') + ' — ' + NAMES[i]);
-  b.innerHTML = '<span>' + String(i).padStart(2,'0') + ' · ' + NAMES[i] + '</span><i></i>';
-  b.addEventListener('click', ev => { ev.stopPropagation(); goTo(i); });
-  rules.appendChild(b);
-}
-const ruleBtns = $$('button', rules);
 
 /* ── the arcade: tap a screen, or the button, to play ─────────── */
 const arcade   = $('#arcade');
@@ -1484,33 +1355,11 @@ function goTo(i){
   try { window.scrollTo({ top:y, behavior: REDUCED ? 'auto' : 'smooth' }); }
   catch(e){ window.scrollTo(0, y); }
 }
-function setFromClientY(cy){
-  const r = scrub.getBoundingClientRect();
-  const p = clamp((cy - r.top) / Math.max(1, r.height), 0, 1);
-  window.scrollTo(0, p * scroll.max);
-}
-
-let dragging = false;
-scrub.addEventListener('pointerdown', e => {
-  if (e.target.closest('.rules button')) return;
-  dragging = true;
-  scrub.classList.add('dragging');
-  scrub.setPointerCapture(e.pointerId);
-  scrub.focus({ preventScroll:true });
-  setFromClientY(e.clientY);
-  e.preventDefault();
-});
-scrub.addEventListener('pointermove', e => { if (dragging) setFromClientY(e.clientY); });
-function endDrag(e){
-  if (!dragging) return;
-  dragging = false;
-  scrub.classList.remove('dragging');
-  try { scrub.releasePointerCapture(e.pointerId); } catch(err){}
-}
-scrub.addEventListener('pointerup', endDrag);
-scrub.addEventListener('pointercancel', endDrag);
-
-scrub.addEventListener('keydown', e => {
+/* the rail is gone — the keyboard is the only direct way to step from
+   room to room, so it answers everywhere on the page rather than only
+   while a slider has focus */
+addEventListener('keydown', e => {
+  if (e.target !== document.body) return;
   const cur = Math.round(scroll.p * (N-1));
   let to = null;
   switch (e.key){
@@ -1526,35 +1375,15 @@ scrub.addEventListener('keydown', e => {
   goTo(to);
 });
 
-/* arrow keys anywhere on the page walk room to room too */
-addEventListener('keydown', e => {
-  if (e.target !== document.body) return;
-  const cur = Math.round(scroll.p * (N-1));
-  if (e.key === 'ArrowDown' || e.key === 'ArrowRight'){ e.preventDefault(); goTo(cur+1); }
-  else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft'){ e.preventDefault(); goTo(cur-1); }
-});
-
 /* ════════════════════════════════════════════════════════════════
-   5 — SYNC : slider, panels, counters
+   5 — SYNC : panels, counters
    ════════════════════════════════════════════════════════════════ */
 let activeIdx = -1;
-let railH = scrub.clientHeight || 400;
-function measureRail(){ railH = scrub.clientHeight || 400; }
-addEventListener('resize', () => setTimeout(measureRail, 160), { passive:true });
-setTimeout(measureRail, 400);
 
 onTick(() => {
-  tapeFill.style.transform = 'scaleY(' + scroll.p.toFixed(4) + ')';
-  knob.style.transform = 'translateY(' + (scroll.p * railH).toFixed(1) + 'px)';
-
   const idx = clamp(Math.round(scroll.p * (N-1)), 0, N-1);
   if (idx !== activeIdx){
     activeIdx = idx;
-    knobNum.textContent = String(idx).padStart(2,'0');
-    knobName.textContent = NAMES[idx];
-    scrub.setAttribute('aria-valuenow', String(idx));
-    scrub.setAttribute('aria-valuetext', 'Room ' + String(idx).padStart(2,'0') + ' — ' + NAMES[idx]);
-    for (let i = 0; i < ruleBtns.length; i++) ruleBtns[i].setAttribute('aria-current', i === idx ? 'true' : 'false');
 
     if (MODE === 'panel'){
       for (let i = 0; i < sections.length; i++) sections[i].classList.toggle('active', i === idx);
@@ -2671,7 +2500,7 @@ function build(){
       v.box(-W, -W+2, Hh-2, Hh, 0, 2, 0xD62222);           /* the one accent, on the corner */
       return v;
     });
-    voxAdd(frame, frameGeo, AU, { cx:0, cy:4.05, minZ:-.09 });
+    voxAdd(frame, frameGeo, AU, { cx:0, cy:4.05, minZ:-.09 }, false);
     const art = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 4.08), new THREE.MeshBasicMaterial({ map:artTex[i] }));
     art.position.set(0, 4.05, .21); frame.add(art);
     const labGeo = voxGeo('lab|'+R.art, AU, function(){
