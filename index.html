@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
-<link rel="icon" href="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png">
+<link rel="icon" href="data:image/svg+xml,<svg%20xmlns="http://www.w3.org/2000/svg"%20viewBox="0%200%2064%2064"><g%20fill="none"%20stroke="#14161F"%20stroke-width="2.4"%20stroke-linejoin="round"><path%20d="M32%209%2054%2021.5%2032%2034%2010%2021.5Z"%20fill="#F2A83B"/><path%20d="M10%2021.5%2032%2034v20.5L10%2042Z"%20fill="#D62222"/><path%20d="M54%2021.5%2032%2034v20.5L54%2042Z"%20fill="#2B3550"/><path%20d="M17.6%2031.2%2025.4%2035.6v11.6l-7.8-4.4Z"%20fill="#FCFCFC"%20stroke-width="2"/><path%20d="M38.6%2042.4%2047.4%2037.4v7.4l-8.8%205Z"%20fill="#FCFCFC"%20stroke-width="2"/></g></svg>">
+<link rel="apple-touch-icon" href="./art/mark.png">
+<meta property="og:image" content="https://itsaayush2004.github.io/portfolio/art/mark.png">
 
 <style>
 /* ════════════════════════════════════════════════════════════════
@@ -41,6 +41,7 @@
   --ink-4:  #A5A5A5;
 
   --red:    #D62222;
+  --amber:  #F2A83B;
   --blue:   #141414;
   --gold:   #D62222;
   --green:  #141414;
@@ -680,19 +681,8 @@ body.entered .gate{ opacity:0; visibility:hidden; pointer-events:none }
   box-shadow:0 0 0 2px var(--ink);
   overflow:hidden;
 }
-.gate-bar i{
-  position:absolute; inset:0; display:block; background:var(--red);
-  transform-origin:0 50%; transform:scaleX(0); will-change:transform;
-  transition:transform .12s steps(1, end);
-}
-.gate-bar::after{
-  content:""; position:absolute; inset:0; pointer-events:none;
-  background:repeating-linear-gradient(90deg,
-    transparent 0 14px, var(--paper) 14px 18px);
-}
 @media (prefers-reduced-motion:reduce){
   .gate-logo{ animation:none }
-  .gate-bar i{ transition:none }
 }
 
 /* ── 12. RESPONSIVE ───────────────────────────────────────────── */
@@ -800,12 +790,33 @@ body.noweb{
   box-shadow:0 0 0 1.5px var(--ink), 0 6px 16px -10px rgba(58,48,28,.6);
   animation:bar-in .85s var(--ease-fold) .12s both;
 }
-.gate-bar i{ background:var(--red) }
-.gate-bar::after{
-  background:repeating-linear-gradient(90deg,
-    transparent 0 12px, var(--paper-hi) 12px 15px);
-}
 @keyframes bar-in{ from{ opacity:0; transform:translateY(8px) } to{ opacity:1; transform:none } }
+
+/* the bar: eighteen blocks in a tray, laid one at a time. The one that
+   has just landed sits proud and amber for a beat before it settles. */
+.gate-bar{
+  display:flex; align-items:stretch; gap:3px; padding:3px;
+  width:min(74vw,304px); height:24px;
+  background:var(--paper-hi); border-radius:5px;
+  box-shadow:0 0 0 1.5px var(--ink), 0 10px 20px -14px rgba(58,48,28,.85);
+  overflow:visible;
+}
+.gate-bar .blk{
+  flex:1 1 0; min-width:0; border-radius:1.5px;
+  background:rgba(23,21,15,.07);
+  transition:background .16s steps(1,end), transform .22s var(--ease-fold);
+}
+.gate-bar .blk.on{ background:var(--red) }
+.gate-bar .blk.tip{ background:var(--amber); transform:scaleY(1.22) }
+.gate-bar.full .blk{ background:var(--red); transform:none }
+
+/* the mark: no plate behind it in the bar, it carries its own colour */
+.mark .face{
+  width:30px; height:30px; display:block;
+  background:none; border-radius:0; box-shadow:none; overflow:visible;
+}
+.mark:hover .face{ transform:translateY(-1px) scale(1.07) rotate(0deg); box-shadow:none }
+.gate-logo{ width:clamp(74px,15vw,92px); height:auto; aspect-ratio:1; border-radius:0 }
 
 /* stepping through, rather than a plain fade out */
 body.entered .gate{ transform:scale(1.035); transition:opacity .7s var(--ease-out), transform .9s var(--ease-fold), visibility .9s }
@@ -989,16 +1000,26 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
 <div class="gate" id="gate">
   <div class="gate-in">
     <div class="gate-plate">
-      <img class="gate-logo" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png"
-           alt="Aayush Kumar" loading="eager" onerror="this.style.visibility='hidden'">
+      <svg class="gate-logo" viewBox="0 0 64 64" role="img" aria-label="Aayush Kumar"><use href="#mark"/></svg>
     </div>
     <div class="gate-bar" role="progressbar" aria-label="Loading the house"
-         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gateBar">
-      <i id="gateFill"></i>
-    </div>
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gateBar"></div>
     <span class="sr" id="gatePct">00%</span>
   </div>
 </div>
+
+<!-- the mark, defined once and used wherever it is needed -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="mark" viewBox="0 0 64 64">
+    <g fill="none" stroke="#14161F" stroke-width="2.4" stroke-linejoin="round">
+      <path d="M32 9 54 21.5 32 34 10 21.5Z" fill="#F2A83B"/>
+      <path d="M10 21.5 32 34v20.5L10 42Z" fill="#D62222"/>
+      <path d="M54 21.5 32 34v20.5L54 42Z" fill="#2B3550"/>
+      <path d="M17.6 31.2 25.4 35.6v11.6l-7.8-4.4Z" fill="#FCFCFC" stroke-width="2"/>
+      <path d="M38.6 42.4 47.4 37.4v7.4l-8.8 5Z" fill="#FCFCFC" stroke-width="2"/>
+    </g>
+  </symbol>
+</svg>
 
 <canvas id="scene" aria-hidden="true"></canvas>
 <div class="fibre" aria-hidden="true"></div>
@@ -1007,7 +1028,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
 
 <header class="hud">
   <a class="mark" href="#s0" aria-label="Aayush Kumar — back to the lobby">
-    <img class="face" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png" alt="" loading="eager" onerror="this.style.display='none'">
+    <svg class="face" viewBox="0 0 64 64" aria-hidden="true"><use href="#mark"/></svg>
     <span class="mark-txt"><b>Aayush Kumar</b><span class="role">Games · AI · Backend</span></span>
   </a>
   <nav class="hud-right" aria-label="Elsewhere">
@@ -1432,19 +1453,41 @@ function armGate(){
      after just long enough for the last block to land */
   setTimeout(enter, 520);
 }
-const BLOCKS = 16;
+/* the bar is eighteen real blocks, laid one at a time. The block that
+   has just landed is amber for a moment before it settles to red, so
+   you can see the house being built rather than a bar sliding along. */
+const BLOCKS = 18;
+const blocks = [];
 let blockShown = -1;
-onTick(dt => {
-  if (!gateFill) return;
-  pShown += (pTarget - pShown) * clamp(dt * 2.2, 0, 1);
-  const b = Math.round(pShown * BLOCKS);                 /* whole blocks only */
-  if (b !== blockShown){
-    blockShown = b;
-    gateFill.style.transform = 'scaleX(' + (b / BLOCKS).toFixed(4) + ')';
-    const pc = Math.round(b / BLOCKS * 100);
-    if (gatePct) gatePct.textContent = String(pc).padStart(2,'0') + '%';
-    if (gateBar) gateBar.setAttribute('aria-valuenow', String(pc));
+if (gateBar){
+  for (let i = 0; i < BLOCKS; i++){
+    const b = document.createElement('i');
+    b.className = 'blk';
+    gateBar.appendChild(b);
+    blocks.push(b);
   }
+}
+/* the bar never stalls at nothing: while the house is still loading it
+   creeps toward seven-eighths on its own, and the real stages pull it
+   ahead of that. It only reaches the last block when the house is
+   actually ready. */
+const gateT0 = performance.now();
+onTick(dt => {
+  if (!blocks.length) return;
+  const creep  = Math.min(.86, (performance.now() - gateT0) / 8200 * .86);
+  const target = gateReady ? 1 : Math.max(pTarget, creep);
+  pShown += (target - pShown) * clamp(dt * 2.2, 0, 1);
+  const n = Math.min(BLOCKS, Math.round(pShown * BLOCKS));
+  if (n === blockShown) return;
+  blockShown = n;
+  for (let i = 0; i < BLOCKS; i++){
+    blocks[i].classList.toggle('on', i < n);
+    blocks[i].classList.toggle('tip', i === n - 1 && n < BLOCKS);
+  }
+  const pc = Math.round(n / BLOCKS * 100);
+  if (gatePct) gatePct.textContent = String(pc).padStart(2,'0') + '%';
+  gateBar.setAttribute('aria-valuenow', String(pc));
+  gateBar.classList.toggle('full', n >= BLOCKS);
 });
 
 function enter(){
