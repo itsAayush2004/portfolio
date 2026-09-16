@@ -117,47 +117,69 @@ body{
   background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
 }
 
-/* ── 4. TOP BAR ───────────────────────────────────────────────── */
+/* ── 4. TOP BAR ─────────────────────────────────────────────────
+   A solid bar, not a fade: one surface, one hairline under it, the
+   name on the left and four real buttons on the right.
+   ─────────────────────────────────────────────────────────────── */
 .hud{
   position:fixed; top:0; left:0; right:0; z-index:50;
-  display:flex; align-items:center; justify-content:space-between; gap:16px;
-  padding:clamp(13px,2vw,24px) var(--gut);
-  pointer-events:none;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:9px clamp(12px,2.2vw,26px);
+  padding-top:calc(9px + env(safe-area-inset-top));
+  background:var(--paper-hi);
+  border-bottom:1px solid rgba(23,21,15,.11);
+  box-shadow:0 1px 0 rgba(23,21,15,.03), 0 8px 22px rgba(58,48,28,.055);
 }
-.hud::before{
-  content:""; position:absolute; inset:-2px 0 auto 0; height:calc(100% + 30px); z-index:-1;
-  background:linear-gradient(180deg, var(--paper) 0%, rgba(242,238,228,.90) 44%, rgba(242,238,228,0) 100%);
-}
-.hud > *{ pointer-events:auto }
-.mark{
-  display:flex; align-items:center; gap:10px;
-  font-family:var(--mono); font-size:11.5px; letter-spacing:.13em;
-  text-transform:uppercase; color:var(--ink);
-}
-.mark .face{
-  width:27px; height:27px; flex:none; border-radius:50%; object-fit:cover;
-  background:var(--paper-lo); box-shadow:0 0 0 1.5px var(--ink);
-  transition:transform .6s var(--ease-fold);
-}
-.mark:hover .face{ transform:scale(1.09) rotate(-6deg) }
-.mark b{ font-weight:500 }
-.mark .sep{ color:var(--ink-4) }
-.mark .role{ color:var(--ink-3); display:none }
-@media (min-width:640px){ .mark .role{ display:inline } }
 
-.hud-right{
-  display:flex; align-items:center; gap:clamp(10px,1.5vw,20px);
-  font-family:var(--mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+/* the name, with the face as its mark */
+.mark{
+  display:inline-flex; align-items:center; gap:10px; min-height:40px;
+  padding:4px 10px 4px 4px; border-radius:10px;
+  transition:background .26s var(--ease-out);
 }
-.hud-right a{ position:relative; color:var(--ink-3); transition:color .3s; padding:6px 0 }
-.hud-right a::after{
-  content:""; position:absolute; left:0; right:0; bottom:2px; height:1.5px; background:var(--red);
-  transform:scaleX(0); transform-origin:0 50%; transition:transform .42s var(--ease-out);
+.mark:hover{ background:rgba(23,21,15,.045) }
+.mark .face{
+  width:32px; height:32px; flex:none; border-radius:9px; object-fit:cover;
+  background:var(--paper-lo); box-shadow:0 0 0 1.5px rgba(23,21,15,.18);
+  transition:transform .5s var(--ease-fold), box-shadow .3s;
 }
-.hud-right a:hover{ color:var(--ink) }
-.hud-right a:hover::after{ transform:none }
-.hud-sep{ color:var(--ink-4); opacity:.5 }
-@media (max-width:600px){ .hud-right .opt{ display:none } }
+.mark:hover .face{ transform:rotate(-4deg) scale(1.05); box-shadow:0 0 0 1.5px var(--red) }
+.mark-txt{ display:flex; flex-direction:column; gap:1px; line-height:1.15 }
+.mark b{
+  font-family:var(--mono); font-size:11px; font-weight:500;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--ink);
+}
+.mark .role{
+  font-family:var(--mono); font-size:8.5px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--ink-4); display:none;
+}
+@media (min-width:640px){ .mark .role{ display:block } }
+
+/* the buttons */
+.hud-right{ display:flex; align-items:center; gap:7px }
+.nav-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:36px; padding:0 14px; border-radius:9px;
+  border:1.5px solid rgba(23,21,15,.15); background:var(--paper);
+  font-family:var(--mono); font-size:10px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--ink-2); white-space:nowrap;
+  transition:color .24s, background .24s, border-color .24s,
+             transform .3s var(--ease-fold), box-shadow .3s var(--ease-fold);
+}
+.nav-btn:hover,.nav-btn:focus-visible{
+  color:var(--ink); border-color:rgba(23,21,15,.42); background:var(--paper-hi);
+  transform:translateY(-1px); box-shadow:0 3px 10px rgba(58,48,28,.10);
+}
+.nav-btn:active{ transform:none; box-shadow:none }
+.nav-btn.primary{
+  background:var(--red); border-color:var(--red); color:var(--paper-hi); font-weight:500;
+}
+.nav-btn.primary:hover,.nav-btn.primary:focus-visible{
+  background:#B01C1C; border-color:#B01C1C; color:#fff;
+  box-shadow:0 3px 12px rgba(214,34,34,.30);
+}
+@media (max-width:760px){ .nav-btn.opt{ display:none } }
+@media (max-width:380px){ .mark b{ font-size:10px } .nav-btn{ padding:0 11px } }
 
 /* ── 6. LAYOUT — panel mode vs flow mode ─────────────────────── */
 #track{ display:none }
@@ -632,62 +654,46 @@ body.viewing .stick,body.playing .stick,body.flow .stick{ display:none !importan
 @media (max-width:900px){ .stick{ display:none !important } }
 @media (pointer:coarse){ .stick{ display:none !important } }
 
-/* ── 11. THE ENTRANCE ─────────────────────────────────────────── */
+/* ── 11. THE ENTRANCE ───────────────────────────────────────────
+   The logo, and a loading bar counted out in whole blocks. No
+   heading, no copy, no button — it lets itself in when it is ready.
+   ─────────────────────────────────────────────────────────────── */
 .gate{
   position:fixed; inset:0; z-index:200; background:var(--paper);
   display:grid; place-items:center; padding:26px;
-  transition:opacity .9s var(--ease-out), visibility .9s;
+  transition:opacity .8s var(--ease-out), visibility .8s;
 }
 body.entered .gate{ opacity:0; visibility:hidden; pointer-events:none }
-.gate-in{ width:min(100%,470px); text-align:center }
-.gate-face{
-  width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto 22px;
-  background:var(--paper-lo); box-shadow:0 0 0 1.5px var(--ink);
+.gate-in{ display:flex; flex-direction:column; align-items:center; gap:clamp(26px,5vh,44px) }
+.gate-logo{
+  width:clamp(84px,17vw,116px); height:auto; display:block;
+  image-rendering:auto;
+  animation:logo-in .9s var(--ease-fold) both;
 }
-.gate-mark{
-  font-family:var(--mono); font-size:10px; letter-spacing:.26em; text-transform:uppercase;
-  color:var(--ink-4); margin-bottom:14px;
+@keyframes logo-in{ from{ opacity:0; transform:translateY(10px) scale(.94) } to{ opacity:1; transform:none } }
+
+/* the bar: a hard-edged trough, a fill that advances one block at a
+   time, and a mask that cuts the whole thing into pixels */
+.gate-bar{
+  position:relative; width:min(72vw,296px); height:18px;
+  background:rgba(23,21,15,.075);
+  box-shadow:0 0 0 2px var(--ink);
+  overflow:hidden;
 }
-.gate-name{
-  font-family:var(--display); font-weight:700; color:var(--ink);
-  font-size:clamp(34px,7vw,54px); line-height:1.0; letter-spacing:-.03em;
-  font-variation-settings:"opsz" 96; margin-bottom:18px;
+.gate-bar i{
+  position:absolute; inset:0; display:block; background:var(--red);
+  transform-origin:0 50%; transform:scaleX(0); will-change:transform;
+  transition:transform .12s steps(1, end);
 }
-.gate-name em{ font-style:normal; color:var(--red) }
-.gate-say{
-  font-size:14.5px; line-height:1.62; color:var(--ink-2);
-  max-width:34ch; margin:0 auto 30px; text-wrap:pretty;
+.gate-bar::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(90deg,
+    transparent 0 14px, var(--paper) 14px 18px);
 }
-.gate-rule{ position:relative; height:2px; background:rgba(23,21,15,.12); overflow:hidden }
-.gate-rule i{
-  position:absolute; inset:0 auto 0 0; width:100%; background:var(--red);
-  transform:scaleX(0); transform-origin:0 50%; will-change:transform;
+@media (prefers-reduced-motion:reduce){
+  .gate-logo{ animation:none }
+  .gate-bar i{ transition:none }
 }
-.gate-pct{
-  display:flex; justify-content:space-between; align-items:baseline;
-  font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--ink-4); margin-top:10px;
-}
-.gate-enter{
-  margin-top:30px; width:100%; min-height:54px;
-  display:inline-flex; align-items:center; justify-content:center; gap:11px;
-  font-family:var(--mono); font-size:11.5px; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--ink); border:1.5px solid var(--ink); position:relative; overflow:hidden;
-  transition:color .34s var(--ease-out), opacity .4s;
-}
-.gate-enter i{ font-style:normal; position:relative; z-index:2; transition:transform .4s var(--ease-out) }
-.gate-enter span{ position:relative; z-index:2 }
-.gate-enter::before{
-  content:""; position:absolute; inset:0; background:var(--ink); z-index:1;
-  transform:scaleY(0); transform-origin:50% 100%; transition:transform .44s var(--ease-fold);
-}
-.gate-enter:hover:not(:disabled){ color:var(--paper-hi) }
-.gate-enter:hover:not(:disabled)::before{ transform:scaleY(1) }
-.gate-enter:hover:not(:disabled) i{ transform:translateX(5px) }
-.gate-enter:disabled{ opacity:.32; cursor:default; border-color:var(--ink-4); color:var(--ink-4) }
-.gate-enter.ready{ animation:breathe 2.6s var(--ease-io) infinite }
-@keyframes breathe{ 0%,100%{ box-shadow:0 0 0 0 rgba(224,71,44,0) } 50%{ box-shadow:0 0 0 5px rgba(224,71,44,.10) } }
-body:not(.entered){ overflow:hidden }
 
 /* ── 12. RESPONSIVE ───────────────────────────────────────────── */
 @media (max-width:820px){
@@ -731,16 +737,13 @@ body.noweb{
 
 <div class="gate" id="gate">
   <div class="gate-in">
-    <img class="gate-face" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png" alt="" loading="eager" onerror="this.style.visibility='hidden'">
-    <div class="gate-mark">Aayush Kumar · Portfolio 2026</div>
-    <h1 class="gate-name">The Paper<em>House</em></h1>
-    <p class="gate-say">Eight rooms, folded not downloaded. Every wall, every piece
-      and every fold is drawn in your browser while you read this.</p>
-    <div class="gate-rule"><i id="gateFill"></i></div>
-    <div class="gate-pct"><span>Folding</span><span id="gatePct">00%</span></div>
-    <button class="gate-enter" id="gateEnter" type="button" disabled>
-      <span>Enter the house</span><i aria-hidden="true">&#8594;</i>
-    </button>
+    <img class="gate-logo" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png"
+         alt="Aayush Kumar" loading="eager" onerror="this.style.visibility='hidden'">
+    <div class="gate-bar" role="progressbar" aria-label="Loading the house"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gateBar">
+      <i id="gateFill"></i>
+    </div>
+    <span class="sr" id="gatePct">00%</span>
   </div>
 </div>
 
@@ -752,16 +755,13 @@ body.noweb{
 <header class="hud">
   <a class="mark" href="#s0" aria-label="Aayush Kumar — back to the lobby">
     <img class="face" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png" alt="" loading="eager" onerror="this.style.display='none'">
-    <b>Aayush Kumar</b><span class="sep">/</span><span class="role">Games · AI · Backend</span>
+    <span class="mark-txt"><b>Aayush Kumar</b><span class="role">Games · AI · Backend</span></span>
   </a>
   <nav class="hud-right" aria-label="Elsewhere">
-    <a class="opt" href="https://arthis.space" target="_blank" rel="noopener">Arthis.Space</a>
-    <span class="hud-sep opt" aria-hidden="true">·</span>
-    <a class="opt" href="https://arthis.land" target="_blank" rel="noopener">Arthis.Land</a>
-    <span class="hud-sep opt" aria-hidden="true">·</span>
-    <a href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
-    <span class="hud-sep" aria-hidden="true">·</span>
-    <a href="mailto:akversebusiness@gmail.com">Email</a>
+    <a class="nav-btn opt" href="https://arthis.space" target="_blank" rel="noopener">Arthis.Space</a>
+    <a class="nav-btn opt" href="https://arthis.land" target="_blank" rel="noopener">Arthis.Land</a>
+    <a class="nav-btn" href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
+    <a class="nav-btn primary" href="mailto:akversebusiness@gmail.com">Email</a>
   </nav>
 </header>
 
@@ -1158,6 +1158,7 @@ const gate     = $('#gate');
 const gateFill = $('#gateFill');
 const gatePct  = $('#gatePct');
 const gateGo   = $('#gateEnter');
+const gateBar  = $('#gateBar');
 
 /* honest progress: real milestones, eased so the number never jumps */
 const STAGES = { three:.24, fonts:.18, scene:.42, frame:.16 };
@@ -1174,12 +1175,23 @@ function armGate(){
   if (gateReady) return;
   gateReady = true;
   if (gateGo){ gateGo.disabled = false; gateGo.classList.add('ready'); }
+  /* no button to press — once the bar is full the house opens itself,
+     after just long enough for the last block to land */
+  setTimeout(enter, 520);
 }
+const BLOCKS = 16;
+let blockShown = -1;
 onTick(dt => {
   if (!gateFill) return;
   pShown += (pTarget - pShown) * clamp(dt * 2.2, 0, 1);
-  gateFill.style.transform = 'scaleX(' + pShown.toFixed(4) + ')';
-  gatePct.textContent = String(Math.round(pShown * 100)).padStart(2,'0') + '%';
+  const b = Math.round(pShown * BLOCKS);                 /* whole blocks only */
+  if (b !== blockShown){
+    blockShown = b;
+    gateFill.style.transform = 'scaleX(' + (b / BLOCKS).toFixed(4) + ')';
+    const pc = Math.round(b / BLOCKS * 100);
+    if (gatePct) gatePct.textContent = String(pc).padStart(2,'0') + '%';
+    if (gateBar) gateBar.setAttribute('aria-valuenow', String(pc));
+  }
 });
 
 function enter(){
@@ -1520,7 +1532,7 @@ function build(){
   });
 
   /* ── paper stock ──────────────────────────────────────────── */
-  const steps = new Uint8Array([96, 176, 240]);
+  const steps = new Uint8Array([84, 162, 238]);
   const RAMP = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
   RAMP.minFilter = RAMP.magFilter = THREE.NearestFilter;
   RAMP.generateMipmaps = false; RAMP.needsUpdate = true;
@@ -2836,9 +2848,9 @@ function build(){
      ──────────────────────────────────────────────────────────── */
   /* the house is lit to the top of its range: heavy fill, a key just
      strong enough to keep the corners readable */
-  scene.add(new THREE.AmbientLight(0xFFFFFF, .26));
-  const key  = new THREE.DirectionalLight(0xFFFFFF, .36); key.position.set(9,16,10);   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xEAF1FA, .15); fill.position.set(-10,7,-12); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xFFFFFF, .18));
+  const key  = new THREE.DirectionalLight(0xFFFFFF, .34); key.position.set(9,16,10);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xE4ECF6, .14); fill.position.set(-10,7,-12); scene.add(fill);
   const bulbA = new THREE.PointLight(0xFFF8EE, 0, 20, 1.6); scene.add(bulbA);
   const bulbB = new THREE.PointLight(0xFFF8EE, 0, 18, 1.8); scene.add(bulbB);
 
