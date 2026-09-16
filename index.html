@@ -729,6 +729,257 @@ body.noweb{
   .ink-u path{ stroke-dashoffset:0 !important }
   .veil{ display:none }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   15. THE FINISH
+   The house already had its palette — paper, ink, one red. This is
+   the pass that makes the two surfaces you actually read carry it
+   properly: the doorstep, and the eight cards.
+
+   Type scale (panel mode): 46 / 28 / 14.5 / 13.5 / 13 / 9.5
+   Rhythm: one gap down the card, set once, never per element.
+   Buttons: one language, shared with the header.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── the doorstep ─────────────────────────────────────────────── */
+.gate{
+  background:
+    radial-gradient(120% 78% at 50% 0%, #FFFFFF 0%, rgba(255,255,255,0) 58%),
+    var(--paper);
+}
+.gate::before{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.55;
+  background-image:
+    linear-gradient(90deg, rgba(23,21,15,.045) 1px, transparent 1px),
+    linear-gradient(0deg,  rgba(23,21,15,.045) 1px, transparent 1px);
+  background-size:28px 28px;
+  -webkit-mask-image:radial-gradient(70% 60% at 50% 50%, #000 0%, transparent 78%);
+          mask-image:radial-gradient(70% 60% at 50% 50%, #000 0%, transparent 78%);
+}
+.gate::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(120% 92% at 50% 44%, transparent 44%, rgba(23,21,15,.06) 100%);
+}
+.gate-in{ position:relative; z-index:2 }
+
+/* the logo sits on a plate, with the same folded corner every card has */
+.gate-plate{
+  position:relative; padding:18px;
+  background:var(--paper-hi);
+  border:1px solid rgba(23,21,15,.10);
+  border-radius:16px;
+  box-shadow:
+    0 1px 2px rgba(23,21,15,.10),
+    0 14px 30px -12px rgba(58,48,28,.30),
+    0 40px 70px -40px rgba(58,48,28,.45);
+  animation:plate-in .85s var(--ease-fold) both;
+}
+.gate-plate::before{
+  content:""; position:absolute; top:0; left:0; z-index:3; width:30px; aspect-ratio:1;
+  background:var(--red); border-top-left-radius:16px;
+  clip-path:polygon(0 0, 100% 0, 0 100%);
+}
+.gate-plate::after{
+  content:""; position:absolute; inset:0; z-index:1; border-radius:16px; pointer-events:none;
+  background:linear-gradient(140deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 46%);
+}
+.gate-logo{
+  position:relative; z-index:2;
+  width:clamp(76px,15vw,96px); height:auto; display:block; border-radius:8px;
+  animation:none;
+}
+@keyframes plate-in{
+  from{ opacity:0; transform:translateY(14px) rotate(-1.5deg) scale(.95) }
+  to  { opacity:1; transform:none }
+}
+
+/* the bar: a trough in ink, a fill that lands one block at a time */
+.gate-bar{
+  width:min(70vw,268px); height:16px;
+  background:var(--paper-hi);
+  box-shadow:0 0 0 1.5px var(--ink), 0 6px 16px -10px rgba(58,48,28,.6);
+  animation:bar-in .85s var(--ease-fold) .12s both;
+}
+.gate-bar i{ background:var(--red) }
+.gate-bar::after{
+  background:repeating-linear-gradient(90deg,
+    transparent 0 12px, var(--paper-hi) 12px 15px);
+}
+@keyframes bar-in{ from{ opacity:0; transform:translateY(8px) } to{ opacity:1; transform:none } }
+
+/* stepping through, rather than a plain fade out */
+body.entered .gate{ transform:scale(1.035); transition:opacity .7s var(--ease-out), transform .9s var(--ease-fold), visibility .9s }
+
+@media (prefers-reduced-motion:reduce){
+  .gate-plate,.gate-bar{ animation:none }
+  body.entered .gate{ transform:none }
+}
+
+/* ── the cards ────────────────────────────────────────────────── */
+/* one material: paper held just off the wall, not a slab of glass */
+body.panel .sheet{
+  width:min(384px, 33vw);
+  padding:22px 24px 24px;
+  border-radius:14px;
+  background:rgba(252,252,252,.86);
+  -webkit-backdrop-filter:blur(16px) saturate(1.12);
+          backdrop-filter:blur(16px) saturate(1.12);
+  border:1px solid rgba(20,20,20,.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 1px 2px rgba(20,20,20,.10),
+    0 12px 26px -10px rgba(20,20,20,.22),
+    0 34px 64px -28px rgba(20,20,20,.34);
+}
+body.panel .sheet::after{ background:linear-gradient(136deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,0) 40%) }
+body.panel .cover .sheet{ width:min(408px, 36vw) }
+
+/* the folded corner, sharpened */
+.tab{ width:clamp(30px,3.2vw,40px) }
+body.panel .tab{ width:26px; opacity:1 }
+.sheet .tab{ border-top-left-radius:14px }
+
+/* one gap down the card — nothing sets its own top margin any more */
+.stg{ display:flex; flex-direction:column; gap:clamp(13px,1.5vw,17px) }
+.stg > .kicker,.stg > .wordmark,.stg > h2{ margin-bottom:0 }
+.stg > .pts,.stg > .stamps,.stg > .spec,.stg > .prints,.stg > .cta,.stg > .cta-row,
+.stg > .links,.stg > .tally,.stg > .bars,.stg > .lobby-head,.stg > .prompt,
+.stg > .copy,.stg > .lede{ margin-top:0 }
+.stg > .copy{ margin-bottom:0 }
+
+/* ── the eyebrow: which room you are standing in ──────────────── */
+.kicker{
+  gap:9px; font-size:9.5px; letter-spacing:.17em; color:var(--ink-4);
+  align-items:center;
+}
+.kicker .dash{ width:14px; height:1.5px; background:var(--red); opacity:.9 }
+.kicker b{ color:var(--red); font-weight:500; letter-spacing:.14em }
+
+/* ── type ─────────────────────────────────────────────────────── */
+body.panel h1{ font-size:clamp(40px,3.5vw,46px); line-height:.94 }
+body.panel h2{ font-size:clamp(25px,2.2vw,29px); line-height:1.06; margin-bottom:0; letter-spacing:-.022em }
+body.panel .lede{ font-size:14.5px; line-height:1.5 }
+body.panel .sheet{ font-size:13.5px; line-height:1.62 }
+body.panel .pts li{ font-size:13px; line-height:1.55; padding-left:22px }
+body.panel .pts{ gap:9px }
+.pts li::before{ width:10px; height:7px; top:.55em; opacity:1 }
+.wordmark{ margin:0 }
+
+/* ── one button language, shared with the header ──────────────── */
+.cta{
+  align-self:flex-start; gap:9px; min-height:40px; padding:0 16px;
+  border:1.5px solid rgba(23,21,15,.16); border-radius:9px;
+  background:var(--paper); color:var(--ink-2);
+  font-size:10px; letter-spacing:.11em;
+  transition:color .24s, background .24s, border-color .24s,
+             transform .3s var(--ease-fold), box-shadow .3s var(--ease-fold);
+}
+.cta::before{ display:none }
+.cta:hover,.cta:focus-visible{
+  color:var(--ink); border-color:rgba(23,21,15,.42); background:var(--paper-hi);
+  transform:translateY(-1px); box-shadow:0 3px 10px rgba(58,48,28,.10);
+}
+.cta:active{ transform:none; box-shadow:none }
+.cta:hover i{ transform:none }
+.cta.play{
+  background:var(--red); border-color:var(--red); color:var(--paper-hi); font-weight:500;
+}
+.cta.play i{ color:var(--paper-hi) }
+.cta.play:hover,.cta.play:focus-visible{
+  background:#B01C1C; border-color:#B01C1C; color:#fff;
+  box-shadow:0 3px 12px rgba(214,34,34,.30);
+}
+.cta.play:hover i{ color:#fff }
+body.panel .cta{ min-height:38px; font-size:9.5px; padding:0 14px }
+.cta-row{ gap:8px }
+.cta-row .cta{ margin-top:0 }
+
+/* ── the doors in the lobby ───────────────────────────────────── */
+.lobby-head{
+  margin:0; padding-top:13px; border-top:1px solid var(--rule);
+  font-size:9px; letter-spacing:.17em; color:var(--ink-4);
+}
+.lobby{ gap:8px }
+.door{
+  border:1px solid rgba(23,21,15,.13); border-radius:10px;
+  background:var(--paper-hi); padding:9px 11px; min-height:48px;
+  transition:border-color .24s, background .24s,
+             transform .3s var(--ease-fold), box-shadow .3s var(--ease-fold);
+}
+.door:hover,.door:focus-visible{
+  transform:translateY(-2px) rotate(0deg); border-color:rgba(23,21,15,.34);
+  box-shadow:0 4px 12px rgba(58,48,28,.10);
+}
+.door em{ font-size:8px; letter-spacing:.15em; color:var(--red) }
+.door span{ font-size:12px; color:var(--ink) }
+.door canvas{ opacity:.7 }
+
+/* ── stamps ───────────────────────────────────────────────────── */
+.chip{
+  border:1px solid rgba(23,21,15,.13); border-radius:7px;
+  background:rgba(23,21,15,.028); color:var(--ink-3);
+  font-size:9.5px; letter-spacing:.1em; padding:5px 9px;
+  transition:color .24s, background .24s, border-color .24s, transform .3s var(--ease-fold);
+}
+.chip:hover{ transform:translateY(-1px) rotate(0deg); color:var(--ink); border-color:rgba(23,21,15,.3) }
+.chip.hot{
+  color:#A3211D; background:rgba(214,34,34,.07);
+  border-color:rgba(214,34,34,.26); font-weight:500;
+}
+.stamps{ gap:6px }
+
+/* ── figures ──────────────────────────────────────────────────── */
+.spec{ gap:clamp(16px,2.4vw,32px); padding-top:15px; border-top:1px solid var(--rule) }
+.spec .k{ font-size:8.5px; letter-spacing:.16em; color:var(--ink-4); margin-bottom:5px }
+.spec .v{ font-variant-numeric:tabular-nums }
+.tally{
+  gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:10px; overflow:hidden;
+}
+.tally .cell{ background:rgba(252,252,252,.72) }
+.tally .n{ font-variant-numeric:tabular-nums }
+.tally .l{ font-size:8.5px; letter-spacing:.13em; margin-top:7px }
+.bars .cap{ font-size:8.5px; letter-spacing:.16em; padding-bottom:10px; margin-bottom:13px }
+.bar .trk{ height:6px; border-radius:3px; background:rgba(23,21,15,.07) }
+.bar .fil{ background:var(--red); border-radius:3px }
+.bar.muted .fil{ background:var(--ink-4) }
+.bar .val{ font-variant-numeric:tabular-nums; font-size:10px }
+
+/* ── prints ───────────────────────────────────────────────────── */
+.print{
+  border-radius:10px; padding:7px 7px 30px; background:var(--paper-hi);
+  border:1px solid rgba(23,21,15,.09);
+  box-shadow:0 1px 2px rgba(23,21,15,.08), 0 8px 18px -10px rgba(58,48,28,.30);
+}
+.print img{ border-radius:5px }
+.print:nth-child(odd),.print:nth-child(even){ transform:none }
+.print:hover,.print:focus-visible{
+  transform:translateY(-3px); box-shadow:0 2px 4px rgba(23,21,15,.10), 0 16px 30px -12px rgba(58,48,28,.34);
+}
+.print .cap{ bottom:9px; font-size:8.5px; letter-spacing:.13em }
+.print .pin{ background:rgba(214,34,34,.18); box-shadow:none; border-radius:2px }
+
+/* ── links ────────────────────────────────────────────────────── */
+.links{ gap:2px 20px }
+.links a{ font-size:10.5px; letter-spacing:.09em }
+.links a .dot{ width:5px; height:5px }
+
+/* ── the card scrolls, so let it show a proper rail ───────────── */
+body.panel .fold:nth-child(odd) .sheet,
+body.panel .fold:nth-child(even) .sheet{ rotate:0deg }
+body.panel .sheet{ scrollbar-width:thin; scrollbar-color:rgba(23,21,15,.22) transparent }
+body.panel .sheet::-webkit-scrollbar{ width:4px; height:4px }
+body.panel .sheet::-webkit-scrollbar-thumb{ background:rgba(23,21,15,.2); border-radius:4px }
+body.panel .sheet::-webkit-scrollbar-track{ background:transparent }
+
+/* ── flow mode keeps the same card, at reading size ───────────── */
+body.flow .sheet{
+  border-radius:14px;
+  border:1px solid rgba(23,21,15,.09);
+  box-shadow:0 1px 2px rgba(23,21,15,.08), 0 14px 30px -14px rgba(58,48,28,.30);
+}
+body.flow .fold:nth-child(odd),body.flow .fold:nth-child(even){ transform:none }
+body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
+
 </style>
 </head>
 <body>
@@ -737,8 +988,10 @@ body.noweb{
 
 <div class="gate" id="gate">
   <div class="gate-in">
-    <img class="gate-logo" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png"
-         alt="Aayush Kumar" loading="eager" onerror="this.style.visibility='hidden'">
+    <div class="gate-plate">
+      <img class="gate-logo" src="https://raw.githubusercontent.com/itsAayush2004/TravelDiary/main/content/branding/face.png"
+           alt="Aayush Kumar" loading="eager" onerror="this.style.visibility='hidden'">
+    </div>
     <div class="gate-bar" role="progressbar" aria-label="Loading the house"
          aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gateBar">
       <i id="gateFill"></i>
