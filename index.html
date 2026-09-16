@@ -1447,6 +1447,13 @@ function drawIcon(g, key, cx, cy, s){
   g.restore();
 }
 
+/* the piece that hangs in each room — a real picture, in art/.
+   PIECE_AR is the image's own aspect, so the frame is cut to fit the
+   picture rather than the picture squeezed into a fixed frame. */
+const PIECE    = ['art/00.jpg','art/01.jpg','art/02.jpg','art/03.jpg',
+                  'art/04.jpg','art/05.jpg','art/06.jpg','art/07.jpg'];
+const PIECE_AR = [16/9, 16/9, 16/9, 3/2, 16/9, 3/2, 3/2, 16/9];
+
 /* which room has which cabinet on its wall */
 const GAMES = {
   0: { file:'game-flappy.html', name:'Flappy Fird',    hint:'Tap, or press Space, to flap' },
@@ -1513,7 +1520,7 @@ function build(){
   });
 
   /* ── paper stock ──────────────────────────────────────────── */
-  const steps = new Uint8Array([72, 150, 236]);
+  const steps = new Uint8Array([132, 202, 245]);
   const RAMP = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
   RAMP.minFilter = RAMP.magFilter = THREE.NearestFilter;
   RAMP.generateMipmaps = false; RAMP.needsUpdate = true;
@@ -2177,6 +2184,21 @@ function build(){
     return tex;
   }
 
+  /* pictures load unlit and at full strength — a poster on a wall in this
+     house is meant to read as bright as the screen can make it */
+  const TEXLOADER = new THREE.TextureLoader();
+  function loadPiece(url, mat){
+    TEXLOADER.load(url, function(t){
+      t.encoding = THREE.sRGBEncoding;
+      t.minFilter = THREE.LinearFilter;
+      t.generateMipmaps = false;
+      t.anisotropy = LOW ? 2 : 8;
+      mat.map = t;
+      mat.color.setHex(0xFFFFFF);
+      mat.needsUpdate = true;
+    }, undefined, function(){});
+  }
+
   const SKY_MAT = new THREE.MeshBasicMaterial({ map:texFrom(skyCanvas()) });
 
   /* ── which walls carry doorways ───────────────────────────── */
@@ -2488,28 +2510,44 @@ function build(){
        rail, and a real rebate for the poster to sit back in. The
        poster itself is untouched — it is content, not an asset. */
     const AU = 6.5 / 23;
-    const frameGeo = voxGeo('art|'+R.art, AU, function(){
-      const v = new Vox(), W = 11, Hh = 8;
+    /* the picture is 5.5 wide; its height follows its own aspect, and the
+       frame is cut to whatever that comes to — half-height in cells, one
+       course of margin all round */
+    const AR   = PIECE_AR[i % PIECE_AR.length];
+    const artW = 5.5, artH = artW / AR;
+    const HC   = Math.max(4, Math.round(artH / 2 / AU) + 1);
+    const frameGeo = voxGeo('art|'+R.art+'|'+HC, AU, function(){
+      const v = new Vox(), W = 11, Hh = HC;
       v.box(-W, W, -Hh, Hh, 0, 0, R.art);                  /* the backing board */
-      v.rect(-W, W, -Hh, Hh, 0, 0, 2, 0xE8E8E6);           /* the rail */
+      v.rect(-W, W, -Hh, Hh, 0, 0, 2, 0xD9D9D7);           /* the rail, dark enough to
+                                                              read against a bright wall */
       v.rect(-W, W, -Hh, Hh, 1, 1, 1, 0xFCFCFC);           /* the sight edge, proud */
       [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(q){   /* a block on each corner */
         const x0 = q[0] > 0 ? W-2 : -W, y0 = q[1] > 0 ? Hh-2 : -Hh;
-        v.box(x0, x0+2, y0, y0+2, 0, 2, 0xD8D8D6);
+        v.box(x0, x0+2, y0, y0+2, 0, 2, 0xC4C4C2);
       });
       v.box(-W, -W+2, Hh-2, Hh, 0, 2, 0xD62222);           /* the one accent, on the corner */
       return v;
     });
     voxAdd(frame, frameGeo, AU, { cx:0, cy:4.05, minZ:-.09 }, false);
-    const art = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 4.08), new THREE.MeshBasicMaterial({ map:artTex[i] }));
+    const artMat = new THREE.MeshBasicMaterial({ map:artTex[i] });
+    const art = new THREE.Mesh(new THREE.PlaneGeometry(artW, artH), artMat);
     art.position.set(0, 4.05, .21); frame.add(art);
+    /* the drawn poster shows immediately; the photograph replaces it the
+       moment it arrives, so a slow or failed load never leaves a hole */
+    loadPiece(PIECE[i % PIECE.length], artMat);
+
+    /* the name plate hangs clear below the frame, not tucked under it */
+    const frameHalf = (2*HC + 1) * AU / 2;
+    const labHalf   = 2.5 * AU;
+    const labY      = 4.05 - frameHalf - .34 - labHalf;
     const labGeo = voxGeo('lab|'+R.art, AU, function(){
       return new Vox().box(-6, 6, -2, 2, 0, 0, R.art).rect(-6, 6, -2, 2, 0, 0, 1, 0xD2D2D0);
     });
-    voxAdd(frame, labGeo, AU, { cx:0, cy:1.62, minZ:-.09 });
+    voxAdd(frame, labGeo, AU, { cx:0, cy:labY, minZ:-.09 });
     const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .82), new THREE.MeshBasicMaterial({ map:labTex[i] }));
-    lab.position.set(0, 1.62, .21); frame.add(lab);
-    artworks.push({ group:frame, hit:art, w:6.5, h:5.0, room:i, cy:4.05,
+    lab.position.set(0, labY, .21); frame.add(lab);
+    artworks.push({ group:frame, hit:art, w:6.5, h:frameHalf*2 + .2, room:i, cy:4.05,
                     homePos:frame.position.clone(), homeQuat:frame.quaternion.clone() });
 
     /* a cabinet, where there is a game to play */
@@ -2566,9 +2604,11 @@ function build(){
      Low ambient, one cool key, and two warm bulbs that travel with
      you — so the room you are standing in is the lit one.
      ──────────────────────────────────────────────────────────── */
-  scene.add(new THREE.AmbientLight(0xFFFFFF, .13));
-  const key  = new THREE.DirectionalLight(0xFFFFFF, .32); key.position.set(9,16,10);   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xDCE4F0, .14); fill.position.set(-10,7,-12); scene.add(fill);
+  /* the house is lit to the top of its range: heavy fill, a key just
+     strong enough to keep the corners readable */
+  scene.add(new THREE.AmbientLight(0xFFFFFF, .44));
+  const key  = new THREE.DirectionalLight(0xFFFFFF, .40); key.position.set(9,16,10);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xEAF1FA, .20); fill.position.set(-10,7,-12); scene.add(fill);
   const bulbA = new THREE.PointLight(0xFFF8EE, 0, 20, 1.6); scene.add(bulbA);
   const bulbB = new THREE.PointLight(0xFFF8EE, 0, 18, 1.8); scene.add(bulbB);
 
