@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="icon" href="data:image/svg+xml,<svg%20xmlns="http://www.w3.org/2000/svg"%20viewBox="0%200%2064%2064"><g%20fill="none"%20stroke="#14161F"%20stroke-width="2.4"%20stroke-linejoin="round"><path%20d="M32%209%2054%2021.5%2032%2034%2010%2021.5Z"%20fill="#F2A83B"/><path%20d="M10%2021.5%2032%2034v20.5L10%2042Z"%20fill="#D62222"/><path%20d="M54%2021.5%2032%2034v20.5L54%2042Z"%20fill="#2B3550"/><path%20d="M17.6%2031.2%2025.4%2035.6v11.6l-7.8-4.4Z"%20fill="#FCFCFC"%20stroke-width="2"/><path%20d="M38.6%2042.4%2047.4%2037.4v7.4l-8.8%205Z"%20fill="#FCFCFC"%20stroke-width="2"/></g></svg>">
 <link rel="apple-touch-icon" href="./art/mark.png">
 <meta property="og:image" content="https://itsaayush2004.github.io/portfolio/art/mark.png">
@@ -49,7 +49,7 @@
   --rule:   rgba(20,20,20,.14);
 
   --display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --body:    "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   --ease-out:  cubic-bezier(.16,1,.3,1);
@@ -999,6 +999,240 @@ body.flow .sheet{
 body.flow .fold:nth-child(odd),body.flow .fold:nth-child(even){ transform:none }
 body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
 
+
+/* ════════════════════════════════════════════════════════════════
+   PLACARD — the house's UI kit. Every surface is a placard: paper,
+   a 2px ink edge and a hard offset shadow, so the interface reads as
+   built from the same blocks as the rooms. One red, one amber, and
+   each room's own colour on its card's header band.
+   ════════════════════════════════════════════════════════════════ */
+:root{
+  --pc-ink:#17161C; --pc-paper:#FBF8F2; --pc-ground:#F3EEE6; --pc-red:#D62222; --pc-red-t:#B81C1C;
+  --pc-amber:#F2A83B; --pc-mute:#5E5A66; --pc-body:#3C3944;
+  --pc-edge:2px solid var(--pc-ink);
+  --pc-sh:5px 5px 0 var(--pc-ink);
+}
+#s0{ --tint:#F3EADB } #s1{ --tint:#DCE7D3 } #s2{ --tint:#E1DDF3 } #s3{ --tint:#D5E7F1 }
+#s4{ --tint:#F6DCC7 } #s5{ --tint:#434B7E; --tint-ink:#FFFFFF } #s6{ --tint:#F3E6BE } #s7{ --tint:#F4D9D2 }
+
+/* the pressable thing: a key that drops into its own shadow */
+.pc-press{ transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out), background .2s, color .2s }
+
+/* ── header ── */
+.hud{
+  top:14px; left:16px; right:16px; width:auto;
+  padding:7px 8px 7px 10px; padding-top:7px; margin-top:env(safe-area-inset-top);
+  background:var(--pc-paper); border:var(--pc-edge); border-radius:16px; box-shadow:var(--pc-sh);
+}
+.mark b{ font-weight:600; font-size:12px; letter-spacing:.14em }
+.mark .role{ color:var(--pc-mute); font-size:9.5px }
+.mark .face{ width:34px; height:34px }
+.nav-btn{
+  min-height:44px; padding:0 15px; border:var(--pc-edge); border-radius:10px; background:var(--pc-paper);
+  color:var(--pc-ink); font-weight:600; font-size:11px; letter-spacing:.1em;
+}
+.nav-btn:hover,.nav-btn:focus-visible{ background:#FFFFFF; color:var(--pc-ink); border-color:var(--pc-ink); transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--pc-ink) }
+.nav-btn.primary{ background:var(--pc-red); border-color:var(--pc-ink); color:#FFFFFF; box-shadow:3px 3px 0 var(--pc-ink) }
+.nav-btn.primary:hover,.nav-btn.primary:focus-visible{ background:var(--pc-red); border-color:var(--pc-ink); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--pc-ink) }
+.nav-btn:active,.nav-btn.primary:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--pc-ink) }
+
+.where{ display:none; align-items:center; gap:12px; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--pc-mute) }
+.where-blocks{ display:flex; gap:5px }
+.where-blocks i{ width:13px; height:13px; border-radius:3px; border:2px solid var(--pc-ink); box-sizing:border-box; transition:background .3s, box-shadow .3s }
+.where-blocks i.past{ background:var(--pc-ink) }
+.where-blocks i.now{ background:var(--pc-red); border-color:var(--pc-red); box-shadow:0 0 0 2px var(--pc-paper), 0 0 0 4px var(--pc-red) }
+.where-name{ font-family:var(--display); font-weight:600; font-size:16px; letter-spacing:0; text-transform:none; color:var(--pc-ink); min-width:13ch }
+@media (min-width:1180px){ body.panel .where{ display:flex } }
+
+/* ── cards ── */
+body.panel .sheet, body.flow .sheet, body.noweb .sheet{
+  padding:0; background:var(--pc-paper); color:var(--pc-body);
+  border:var(--pc-edge); border-radius:18px; box-shadow:7px 7px 0 var(--pc-ink);
+  -webkit-backdrop-filter:none; backdrop-filter:none; rotate:none;
+}
+body.panel .fold:nth-child(odd) .sheet, body.panel .fold:nth-child(even) .sheet{ rotate:none }
+body.flow .fold:nth-child(odd), body.flow .fold:nth-child(even){ transform:none }
+.sheet::before,.sheet::after{ display:none }
+.sheet .tab{ display:none }
+.sheet > .stg{ padding:20px 24px 24px }
+body.flow .sheet > .stg{ padding:20px clamp(18px,4vw,30px) 26px }
+body.panel .sheet{ width:min(400px, 33vw) }
+body.panel .cover .sheet{ width:min(470px, 38vw) }
+body.flow .sheet > .poster{ margin:0; border-radius:16px 16px 0 0; box-shadow:none; border-bottom:var(--pc-edge) }
+
+.kicker{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin:-20px -24px 18px; padding:12px 24px;
+  background:var(--tint, #EFE9DE); border-bottom:var(--pc-edge);
+  font-size:10.5px; letter-spacing:.14em; color:var(--tint-ink, #3A3640); border-radius:16px 16px 0 0;
+}
+body.flow .kicker{ margin:-20px calc(-1 * clamp(18px,4vw,30px)) 18px; padding-inline:clamp(18px,4vw,30px) }
+body.flow .sheet > .poster + .stg .kicker{ border-radius:0 }
+.kicker .dash{ display:none }
+.kicker b{ background:var(--pc-ink); color:#FFFFFF; padding:4px 8px; border-radius:6px; font-weight:600 }
+#s5 .kicker b{ background:#FFFFFF; color:var(--pc-ink) }
+body.panel .kicker{ font-size:10px; margin-bottom:16px }
+.closer .kicker{ justify-content:center }
+
+h1,h2{ color:var(--pc-ink); letter-spacing:-.03em }
+.wordmark em{ color:var(--pc-red) }
+.copy b,.pts b{ color:var(--pc-ink) }
+
+.pts li::before{ clip-path:none; width:9px; height:9px; top:.5em; background:var(--pc-red); opacity:1; outline:1.5px solid var(--pc-ink); outline-offset:0 }
+body.panel .pts li::before{ width:8px; height:8px; top:.52em }
+
+.chip{ font-weight:600; color:var(--pc-ink); border:var(--pc-edge); border-radius:7px; background:transparent; padding:4px 8px }
+.chip.hot{ background:var(--pc-ink); color:var(--pc-paper); border:var(--pc-edge); font-weight:600 }
+.chip:hover{ transform:translate(-1px,-1px); box-shadow:2px 2px 0 var(--pc-ink) }
+
+.spec{ display:grid; grid-template-columns:repeat(auto-fit,minmax(0,1fr)); gap:0; padding:0; border:var(--pc-edge); border-radius:12px; overflow:hidden }
+.spec > div{ min-width:0; padding:11px 13px; border-right:var(--pc-edge) }
+.spec > div:last-child{ border-right:0 }
+.spec .k{ color:var(--pc-mute) }
+.spec .v{ color:var(--pc-ink) }
+body.panel .spec{ padding-top:0; gap:0 }
+body.panel .spec > div{ min-width:0 }
+
+.tally{ background:var(--pc-ink); border:var(--pc-edge); gap:2px; border-radius:12px; overflow:hidden }
+.tally .cell{ background:var(--pc-paper) }
+.tally .n i{ color:var(--pc-red) }
+.bars .cap{ border-bottom:var(--pc-edge); color:var(--pc-mute) }
+.bar .trk{ height:10px; background:#FFFFFF; border:var(--pc-edge); border-radius:4px }
+.bar .fil{ background:var(--pc-red) }
+.bar.muted .fil{ background:var(--pc-ink) }
+
+.cta{
+  min-height:46px; padding:0 18px; border:var(--pc-edge); border-radius:10px; background:var(--pc-paper);
+  font-weight:600; letter-spacing:.1em; color:var(--pc-ink); box-shadow:3px 3px 0 var(--pc-ink); overflow:visible;
+  transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out);
+}
+.cta::before{ display:none }
+.cta:hover,.cta:focus-visible{ color:var(--pc-ink); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--pc-ink) }
+.cta:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--pc-ink) }
+.cta.play{ background:var(--pc-red); color:#FFFFFF; border-color:var(--pc-ink); border-radius:10px }
+.cta.play i{ color:#FFFFFF }
+.cta.play:hover,.cta.play:focus-visible,.cta.play:hover i{ color:#FFFFFF }
+
+.links a{ color:var(--pc-ink); font-weight:600 }
+.links a .dot{ background:var(--pc-red) }
+
+.print, .print:nth-child(odd), .print:nth-child(even){ transform:none; border:var(--pc-edge); border-radius:12px; box-shadow:4px 4px 0 var(--pc-ink); padding:6px 6px 28px }
+.print:hover,.print:focus-visible{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--pc-ink) }
+.print img{ border-radius:7px }
+.print .pin{ display:none }
+
+/* the lobby's doors */
+.lobby-head{ display:flex; align-items:center; gap:12px; border-top:0; padding-top:0; color:var(--pc-mute) }
+.lobby-head::after{ content:""; flex:1; height:2px; background:var(--pc-ink) }
+.lobby{ gap:9px }
+.door{
+  min-height:52px; padding:7px 10px; gap:10px; background:#FFFFFF; border:var(--pc-edge); border-radius:12px;
+  box-shadow:3px 3px 0 var(--pc-ink); transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out), background .2s;
+}
+.door:hover,.door:focus-visible{ transform:translate(-2px,-2px); rotate:none; background:var(--door, #FFFFFF); border-color:var(--pc-ink); box-shadow:5px 5px 0 var(--pc-ink) }
+.door:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--pc-ink) }
+.door canvas{ display:none }
+.door .txt{ flex-direction:row; align-items:center; gap:10px }
+.door em{
+  flex:none; width:30px; height:30px; display:grid; place-items:center; border-radius:7px;
+  background:var(--door, #EFE9DE); border:var(--pc-edge); color:var(--pc-ink); font-size:10.5px; font-weight:600; letter-spacing:.04em;
+}
+.door span{ font-size:13.5px; font-weight:600 }
+.lobby .door:nth-child(1){ --door:#DCE7D3 } .lobby .door:nth-child(2){ --door:#E1DDF3 } .lobby .door:nth-child(3){ --door:#D5E7F1 }
+.lobby .door:nth-child(4){ --door:#F6DCC7 } .lobby .door:nth-child(5){ --door:#C9CDEA } .lobby .door:nth-child(6){ --door:#F3E6BE }
+.lobby .door:nth-child(7){ --door:#F4D9D2 }
+
+/* every card ends with the way on, and the way back */
+.card-nav{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border-top:var(--pc-edge); margin-top:2px }
+.card-nav button{
+  display:flex; flex-direction:column; gap:2px; align-items:flex-start; text-align:left; min-height:56px;
+  padding:11px 20px; background:transparent; color:var(--pc-ink); transition:background .2s;
+}
+.card-nav button + button, .card-nav .nx{ align-items:flex-end; text-align:right }
+.card-nav button:first-child:not(:only-child){ border-right:var(--pc-edge) }
+.card-nav .nx{ background:var(--pc-amber); grid-column:2 }
+.card-nav button:hover{ background:#FFFFFF }
+.card-nav .nx:hover{ background:#F6BC5E }
+.card-nav small{ font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--pc-mute) }
+.card-nav .nx small{ color:#3A2A0E }
+.card-nav b{ font-family:var(--display); font-weight:600; font-size:15px }
+.sheet .card-nav{ border-radius:0 0 16px 16px; overflow:hidden }
+
+/* the walk bar */
+.walk{
+  position:fixed; z-index:60; left:50%; bottom:clamp(18px,3.4vh,30px); transform:translateX(-50%);
+  display:none; align-items:center; gap:12px; padding:7px;
+  background:var(--pc-paper); border:var(--pc-edge); border-radius:999px; box-shadow:4px 4px 0 var(--pc-ink);
+}
+@media (min-width:1180px){ body.panel.entered .walk{ display:flex } }
+body.flow.entered .walk{ display:flex; left:12px; right:12px; transform:none; justify-content:space-between; bottom:calc(12px + env(safe-area-inset-bottom)) }
+body.flow{ padding-bottom:84px }
+body.viewing .walk, body.playing .walk{ display:none !important }
+.walk-btn{ width:44px; height:44px; border-radius:50%; border:var(--pc-edge); background:var(--pc-paper); display:grid; place-items:center;
+  transition:transform .14s var(--ease-out), opacity .2s }
+.walk-btn svg{ width:18px; height:18px; fill:none; stroke:var(--pc-ink); stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round }
+.walk-btn.next{ background:var(--pc-red) }
+.walk-btn.next svg{ stroke:#FFFFFF }
+.walk-btn:active{ transform:scale(.92) }
+.walk-btn[disabled]{ opacity:.35; cursor:default }
+.walk-mid{ display:flex; align-items:center; gap:12px; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--pc-body) }
+.walk-dots{ display:flex; gap:4px }
+.walk-dots i{ width:10px; height:10px; border-radius:2px; border:2px solid var(--pc-ink); box-sizing:border-box; transition:width .3s var(--ease-out), background .3s }
+.walk-dots i.past{ background:var(--pc-ink) }
+.walk-dots i.now{ width:22px; background:var(--pc-red); border-color:var(--pc-red) }
+body.panel .walk-dots{ display:none }
+body.flow .walk-hint{ display:none }
+
+/* look around: a placard ring */
+.stick-ring{ border:var(--pc-edge); background:var(--pc-paper); -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:4px 4px 0 var(--pc-ink) }
+.stick-ring::after{ border:2px dashed rgba(23,22,28,.28) }
+.stick-knob{ background:var(--pc-ink); box-shadow:none }
+.stick-label{ color:var(--pc-ink); font-weight:600; bottom:-24px }
+body.panel .stick{ width:88px; height:88px }
+
+/* ── the gate ── */
+.gate{ background:var(--pc-ground) }
+.gate::after{ inset:auto; top:0; left:0; width:0; height:0; background:none; border-top:88px solid var(--pc-red); border-right:88px solid transparent }
+.gate-in{ gap:26px }
+.gate-plate{ background:var(--pc-paper); border:var(--pc-edge); border-radius:28px; box-shadow:6px 6px 0 var(--pc-ink) }
+.gate-plate::before,.gate-plate::after{ display:none }
+.gate-bar{ width:min(78vw,420px); height:auto; padding:7px; gap:5px; background:var(--pc-paper); border:var(--pc-edge); border-radius:12px; box-shadow:4px 4px 0 var(--pc-ink) }
+.gate-bar .blk{ height:20px; border-radius:3px; background:#E7E1D6 }
+.gate-bar .blk.on, .gate-bar.full .blk{ background:var(--pc-red) }
+.gate-bar .blk.tip{ background:var(--pc-amber); transform:translateY(-4px); box-shadow:0 4px 0 var(--pc-ink) }
+.gate-words{ display:flex; flex-direction:column; align-items:center; gap:6px; order:-1; margin-top:-4px }
+.gate-plate{ order:-2 }
+.gate-name{ font-family:var(--display); font-weight:800; font-size:clamp(30px,4vw,42px); letter-spacing:-.02em; color:var(--pc-ink); line-height:1 }
+.gate-tag{ font-family:var(--mono); font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--pc-mute) }
+.gate-status{ display:flex; gap:14px; font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--pc-body) }
+.gate-status b{ color:var(--pc-ink); font-weight:600; min-width:4ch; text-align:right }
+
+/* ── the arcade ── */
+.arcade-bar{
+  top:14px; left:16px; right:16px; width:auto; margin-top:env(safe-area-inset-top); padding:8px 8px 8px 12px;
+  background:var(--pc-paper); color:var(--pc-ink); border:var(--pc-edge); border-radius:14px; box-shadow:5px 5px 0 var(--pc-red);
+  transform:translateY(-140%); font-size:11px;
+}
+.arcade-bar::before{ content:"Now playing"; flex:none; background:var(--pc-red); color:#FFFFFF; padding:6px 10px; border-radius:6px; font-weight:600; letter-spacing:.14em }
+.arcade-title{ color:var(--pc-ink); font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:0; text-transform:none }
+.arcade-hint{ color:var(--pc-mute) }
+.arcade-close{ min-height:44px; border:var(--pc-edge); border-radius:10px; background:var(--pc-ink); color:var(--pc-paper); font-weight:600 }
+.arcade-close:hover{ background:#000; border-color:var(--pc-ink) }
+.arcade-close kbd{ font-family:inherit; font-size:9.5px; padding:2px 6px; border:1.5px solid var(--pc-paper); border-radius:5px }
+#arcadeFrame{ border-radius:10px; box-shadow:0 0 0 3px var(--pc-ink), 0 0 0 8px var(--pc-red), 12px 12px 0 8px var(--pc-ink) }
+body.fallback #arcadeFrame{ top:84px !important; height:calc(100% - 84px) !important }
+@supports (height: 100dvh){ body.fallback #arcadeFrame{ height:calc(100dvh - 84px) !important } }
+.dock-note{ color:var(--pc-ink); font-weight:600; background:var(--pc-paper); border:var(--pc-edge); border-radius:999px; padding:8px 14px; box-shadow:3px 3px 0 var(--pc-ink) }
+
+/* the paper grain and the vignette belong to the room, not the cards */
+.vig,.grain{ z-index:5 }
+
+/* ── phone ── */
+body.flow .hud{ top:10px; left:10px; right:10px; border-radius:14px; box-shadow:4px 4px 0 var(--pc-ink) }
+body.flow .stack{ padding-top:76px }
+body.flow .fold{ padding-block:clamp(22px,4vh,40px) }
+body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
+@media (max-width:420px){ .nav-btn{ padding:0 12px } .mark b{ font-size:11px } }
 </style>
 </head>
 <body>
@@ -1013,6 +1247,11 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
     <div class="gate-bar" role="progressbar" aria-label="Loading the house"
          aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gateBar"></div>
     <span class="sr" id="gatePct">00%</span>
+    <div class="gate-words">
+      <div class="gate-name">Aayush Kumar</div>
+      <div class="gate-tag">A portfolio you walk through</div>
+    </div>
+    <div class="gate-status" aria-hidden="true"><span id="gateStage">Raising the walls</span><b id="gateNum">00%</b></div>
   </div>
 </div>
 
@@ -1039,11 +1278,16 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
     <svg class="face" viewBox="0 0 64 64" aria-hidden="true"><use href="#mark"/></svg>
     <span class="mark-txt"><b>Aayush Kumar</b><span class="role">Games · AI · Backend</span></span>
   </a>
+  <div class="where" id="where" aria-live="polite">
+    <span class="where-k">Room</span>
+    <span class="where-blocks" id="whereBlocks" aria-hidden="true"></span>
+    <span class="where-name" id="whereName">00 · Lobby</span>
+  </div>
   <nav class="hud-right" aria-label="Elsewhere">
     <a class="nav-btn opt" href="https://arthis.space" target="_blank" rel="noopener">Arthis.Space</a>
     <a class="nav-btn opt" href="https://arthis.land" target="_blank" rel="noopener">Arthis.Land</a>
     <a class="nav-btn" href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
-    <a class="nav-btn primary" href="mailto:akversebusiness@gmail.com">Email</a>
+    <a class="nav-btn primary" href="mailto:akversebusiness@gmail.com">Email me</a>
   </nav>
 </header>
 
@@ -1285,11 +1529,17 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <div class="arcade-bar">
     <span class="arcade-title" id="arcadeTitle"></span>
     <span class="arcade-hint" id="arcadeHint"></span>
-    <button class="arcade-close" id="arcadeClose" type="button">Close <i aria-hidden="true">&#10005;</i></button>
+    <button class="arcade-close" id="arcadeClose" type="button">Step back <kbd>Esc</kbd></button>
   </div>
   <iframe id="arcadeFrame" title="Playable game" allow="autoplay; fullscreen; gamepad"></iframe>
   <div class="dock-note">Press Esc to step back</div>
 </div>
+
+<nav class="walk" id="walk" aria-label="Walk between rooms">
+  <button class="walk-btn" type="button" id="walkPrev" aria-label="Previous room"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <span class="walk-mid"><span class="walk-dots" id="walkDots" aria-hidden="true"></span><span class="walk-hint">Scroll or use ← →</span></span>
+  <button class="walk-btn next" type="button" id="walkNext" aria-label="Next room"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+</nav>
 
 <div class="stick" id="stick" aria-hidden="true">
   <span class="stick-ring"></span>
@@ -1502,6 +1752,10 @@ onTick(dt => {
   }
   const pc = Math.round(n / BLOCKS * 100);
   if (gatePct) gatePct.textContent = String(pc).padStart(2,'0') + '%';
+  const gn = $('#gateNum'), gs = $('#gateStage');
+  if (gn) gn.textContent = String(pc).padStart(2,'0') + '%';
+  if (gs) gs.textContent = pc < 25 ? 'Raising the walls' : pc < 50 ? 'Hanging the posters'
+                         : pc < 80 ? 'Furnishing the rooms' : pc < 100 ? 'Turning the lights on' : 'Come on in';
   gateBar.setAttribute('aria-valuenow', String(pc));
   gateBar.classList.toggle('full', n >= BLOCKS);
 });
@@ -1675,6 +1929,12 @@ playBtns.forEach(b => b.addEventListener('click', ev => {
 
 function goTo(i){
   i = clamp(Math.round(i), 0, N-1);
+  if (MODE === 'flow'){
+    const top = sections[i].getBoundingClientRect().top + (window.pageYOffset || 0) - 76;
+    try { window.scrollTo({ top:Math.max(0, top), behavior: REDUCED ? 'auto' : 'smooth' }); }
+    catch(e){ window.scrollTo(0, top); }
+    return;
+  }
   const y = (i/(N-1)) * scroll.max;
   try { window.scrollTo({ top:y, behavior: REDUCED ? 'auto' : 'smooth' }); }
   catch(e){ window.scrollTo(0, y); }
@@ -1700,6 +1960,56 @@ addEventListener('keydown', e => {
 });
 
 /* ════════════════════════════════════════════════════════════════
+   4b — WAYFINDING : where you are, and the way on
+   ════════════════════════════════════════════════════════════════ */
+const pad2 = n => String(n).padStart(2, '0');
+const whereBlocks = $('#whereBlocks'), whereName = $('#whereName'), walkDots = $('#walkDots');
+const walkPrev = $('#walkPrev'), walkNext = $('#walkNext');
+[whereBlocks, walkDots].forEach(el => { if (el) for (let i = 0; i < N; i++) el.appendChild(document.createElement('i')); });
+let shownIdx = -1;
+function showWhere(idx){
+  if (idx === shownIdx) return;
+  shownIdx = idx;
+  [whereBlocks, walkDots].forEach(el => {
+    if (!el) return;
+    Array.prototype.forEach.call(el.children, (b, i) => {
+      b.classList.toggle('past', i < idx);
+      b.classList.toggle('now', i === idx);
+    });
+  });
+  if (whereName) whereName.textContent = pad2(idx) + ' · ' + NAMES[idx];
+  if (walkPrev) walkPrev.disabled = idx <= 0;
+  if (walkNext) walkNext.disabled = idx >= N - 1;
+}
+function currentIdx(){
+  if (MODE !== 'flow') return clamp(Math.round(scroll.p * (N-1)), 0, N-1);
+  let idx = 0;
+  for (let i = 0; i < N; i++) if (sections[i].getBoundingClientRect().top < innerHeight * .42) idx = i;
+  return idx;
+}
+if (walkPrev) walkPrev.addEventListener('click', () => goTo(currentIdx() - 1));
+if (walkNext) walkNext.addEventListener('click', () => goTo(currentIdx() + 1));
+sections.forEach((sec, i) => {
+  const sheet = $('.sheet', sec);
+  if (!sheet) return;
+  const nav = document.createElement('nav');
+  nav.className = 'card-nav';
+  nav.setAttribute('aria-label', 'Rooms either side');
+  const mk = (j, cls, label) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = cls;
+    b.innerHTML = '<small>' + label + '</small><b>' + pad2(j) + ' ' + NAMES[j] + '</b>';
+    b.addEventListener('click', () => goTo(j));
+    nav.appendChild(b);
+  };
+  if (i > 0) mk(i - 1, 'pv', '← Back');
+  if (i < N - 1) mk(i + 1, 'nx', 'Next room →');
+  sheet.appendChild(nav);
+});
+addEventListener('scroll', () => { if (MODE === 'flow') showWhere(currentIdx()); }, { passive:true });
+showWhere(0);
+
+/* ════════════════════════════════════════════════════════════════
    5 — SYNC : panels, counters
    ════════════════════════════════════════════════════════════════ */
 let activeIdx = -1;
@@ -1708,6 +2018,7 @@ onTick(() => {
   const idx = clamp(Math.round(scroll.p * (N-1)), 0, N-1);
   if (idx !== activeIdx){
     activeIdx = idx;
+    if (MODE !== 'flow') showWhere(idx);
 
     if (MODE === 'panel'){
       for (let i = 0; i < sections.length; i++) sections[i].classList.toggle('active', i === idx);

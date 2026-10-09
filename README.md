@@ -74,6 +74,11 @@ is simply not placed, so nothing ever crosses the camera's path.
 ambient plus one key so the bands read. Black `EdgesGeometry` outlines on every solid give the
 drawn, cel-shaded edge.
 
+**The interface is built from placards.** Every surface — header, room cards, doors, the walk bar,
+the arcade bar, the loading gate — is paper with a 2px ink edge and a hard offset shadow, so the UI
+reads as made from the same blocks as the rooms. Each card carries its room's colour on a header band
+and ends with the rooms either side; the header shows which of the eight rooms you are standing in.
+
 **Text lives in the DOM, not the canvas.** WebGL renders the room; every readable word is real HTML
 on a card over the top. That keeps the site selectable, searchable, screen-reader friendly, and
 legible even if WebGL fails entirely.
@@ -98,7 +103,7 @@ inlined as a data URI.
 | | |
 |---|---|
 | 3D | Three.js r128 |
-| Type | Fraunces · Inter · JetBrains Mono |
+| Type | Fraunces · Instrument Sans · JetBrains Mono |
 | Everything else | Vanilla HTML / CSS / JS |
 | Hosting | GitHub Pages |
 
