@@ -2754,160 +2754,231 @@ function build(){
      white wall still has a silhouette */
   const PALE = 0xF7F2E8, MID = 0xCB9A69, DEEP = 0x8E5D3A, DARK = 0x3A352C;
 
-  /* ── the pieces ───────────────────────────────────────────── */
-  function geoBed(tint){
-    return propOf('fbed|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-4, 4, 0, 1, -7, 6, DEEP);            /* the base                */
-      v.box(-4, 4, 2, 3, -7, 6, PALE);            /* the mattress            */
-      v.box(-4, 4, 2, 4, -1, 6, tint);            /* the blanket, turned back*/
-      v.box(-3, 3, 4, 5, -6, -4, PALE);           /* a pillow                */
-      v.box(-4, 4, 2, 7, -8, -7, MID);            /* the headboard           */
-      return v;
-    });
-  }
-  function geoCouch(tint){
-    return propOf('fcouch|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-6, 6, 0, 1, -3, 3, DEEP);
-      v.box(-6, 6, 2, 3, -3, 3, PALE);            /* the seat                */
-      v.box(-6, 6, 2, 7, -4, -3, MID);            /* the back                */
-      v.box(-7, -6, 2, 5, -3, 3, MID);            /* arms                    */
-      v.box( 6,  7, 2, 5, -3, 3, MID);
-      v.box(-4, -1, 4, 4, -2, 1, tint);           /* a cushion               */
-      return v;
-    });
-  }
-  function geoShelf(tint){
-    return propOf('fshelf|'+tint, FU, function(){
-      const v = new Vox(), H = 15;
-      v.box(-5, -4, 0, H, -2, 1, MID);            /* uprights                */
-      v.box( 4,  5, 0, H, -2, 1, MID);
-      v.box(-5, 5, H, H, -2, 1, MID);             /* the top                 */
-      [1, 5, 9, 13].forEach(function(y){
-        v.box(-4, 4, y, y, -2, 1, DEEP);          /* a shelf                 */
-        for (let x = -4; x <= 4; x++){            /* and what stands on it   */
-          const t = (x * 7 + y * 5) % 4;
-          if (t === 3) continue;
-          const top = y + 1 + ((x + y) % 3);
-          v.box(x, x, y + 1, top, -1, 0, t === 0 ? tint : (t === 1 ? PALE : DEEP));
+  /* ══════════════════════════════════════════════════════════
+     PROPS — the furniture set, one material library.
+     y is up, +z is the face that turns to the middle of the room.
+     Every piece is built the same way: a walnut or ink structure,
+     oak and fabric on top of it, one tonal trim (a lighter course
+     on top edges, a darker one at the base) so the silhouette reads
+     under flat toon light, and the room's accent used once or twice.
+     ══════════════════════════════════════════════════════════ */
+  const MAT = {
+    oak:0xC9925E, oakHi:0xE0AE78, oakLo:0x9F6A3F,
+    wal:0x7A4B2C, walHi:0x925E39, walLo:0x5A361F,
+    fab:0xF3ECDF, fabLo:0xDCD0BC, fabHi:0xFFFBF3,
+    ink:0x2A2930, inkHi:0x413F4A, inkLo:0x1B1A20,
+    clay:0xC8643C, clayHi:0xDE7E54, soil:0x4A3424,
+    leaf:0x5FAE6E, leafHi:0x84C98F, leafLo:0x3E8A52,
+    brass:0xE2B24E, glass:0xBFE3F5, glow:0xFFF1C9,
+    books:[0xD62222, 0xF2A83B, 0x2B3550, 0xF3ECDF, 0x5FAE6E, 0x8E7AD6, 0x3B86B8]
+  };
+  const shadeHex = (h, k) => {
+    const r = (h >> 16) & 255, g = (h >> 8) & 255, b = h & 255;
+    const f = v => Math.max(0, Math.min(255, Math.round(k >= 1 ? v + (255 - v) * (k - 1) : v * k)));
+    return (f(r) << 16) | (f(g) << 8) | f(b);
+  };
+  const tones = c => ({ c:c, hi:shadeHex(c, 1.22), lo:shadeHex(c, .72) });
+
+  const PROP = {
+    bed: function(v, A){
+      const t = tones(A);
+      [[-4,-7],[4,-7],[-4,6],[4,6]].forEach(q => v.box(q[0],q[0],0,0,q[1],q[1],MAT.walLo));   /* feet       */
+      v.box(-4, 4, 1, 1, -7, 6, MAT.wal);                                  /* the frame              */
+      v.box(-4, 4, 1, 1, 6, 6, MAT.walHi);
+      v.box(-4, 4, 2, 2, -7, 6, MAT.fabLo);                                /* mattress, its band     */
+      v.box(-4, 4, 3, 3, -7, 6, MAT.fab);
+      v.box(-4, 4, 4, 4, -1, 6, t.c);                                      /* the blanket...         */
+      v.box(-4, 4, 2, 3, 7, 7, t.c);                                       /* ...draped over the end */
+      v.box(-4, 4, 4, 4, -1, -1, t.hi);                                    /* turned back            */
+      v.box(-4, 4, 3, 3, 0, 6, t.c);  v.box(-4,-4,2,3,0,6,t.lo); v.box(4,4,2,3,0,6,t.lo);
+      v.box(-3, -1, 4, 5, -6, -4, MAT.fabHi);                              /* two pillows            */
+      v.box( 1,  3, 4, 5, -6, -4, MAT.fabHi);
+      v.box(-4, 4, 1, 8, -8, -8, MAT.wal);                                 /* headboard              */
+      v.box(-3, 3, 3, 7, -8, -8, MAT.walHi);                               /* its inset panel        */
+      v.box(-4, 4, 9, 9, -8, -8, MAT.oakHi);                               /* the cap                */
+    },
+    couch: function(v, A){
+      const t = tones(A);
+      [[-6,-3],[6,-3],[-6,3],[6,3]].forEach(q => v.box(q[0],q[0],0,0,q[1],q[1],MAT.wal));    /* legs       */
+      v.box(-7, 7, 1, 2, -4, 3, t.lo);                                     /* the base               */
+      v.box(-5, -1, 3, 3, -2, 3, t.c);                                     /* two seat cushions      */
+      v.box( 1,  5, 3, 3, -2, 3, t.c);
+      v.box( 0,  0, 3, 3, -2, 3, t.lo);                                    /* the seam between them  */
+      v.box(-5, 5, 3, 3, 3, 3, t.hi);
+      v.box(-7, 7, 3, 6, -4, -3, t.lo);                                    /* the back               */
+      v.box(-5, -1, 4, 7, -3, -3, t.c);  v.box(1, 5, 4, 7, -3, -3, t.c);   /* back cushions          */
+      v.box(-7, -6, 3, 5, -4, 3, t.c);   v.box(6, 7, 3, 5, -4, 3, t.c);    /* arms                   */
+      v.box(-7, -6, 5, 5, -4, 3, t.hi);  v.box(6, 7, 5, 5, -4, 3, t.hi);
+      v.box(-4, -2, 4, 5, -2, -1, MAT.fabHi);                              /* a throw pillow         */
+      v.box( 2,  3, 4, 5, -2, -1, MAT.brass);
+    },
+    shelf: function(v, A){
+      const H = 16;
+      v.box(-5, 5, 0, 0, -2, 1, MAT.walLo);                                /* plinth                 */
+      v.box(-5, -5, 1, H, -2, 1, MAT.oak);  v.box(5, 5, 1, H, -2, 1, MAT.oak);   /* sides            */
+      v.box(-5, -5, 1, H, 1, 1, MAT.oakHi); v.box(5, 5, 1, H, 1, 1, MAT.oakHi);
+      v.box(-4, 4, 1, H, -2, -2, MAT.oakLo);                               /* back                   */
+      v.box(-6, 6, H+1, H+1, -3, 2, MAT.wal);                              /* the cap oversails      */
+      v.box(-6, 6, H+1, H+1, 2, 2, MAT.walHi);
+      [1, 5, 9, 13].forEach(function(y, row){
+        v.box(-4, 4, y, y, -1, 1, MAT.oak);                                /* a shelf, its lip       */
+        v.box(-4, 4, y, y, 1, 1, MAT.oakHi);
+        for (let x = -4; x <= 4; x++){
+          const k = ((x * 5 + row * 3 + 9) % 11 + 11) % 11;
+          if (row === 3 && x >= 1){                                        /* a plant on the top one */
+            if (x === 2){ v.box(1, 3, y+1, y+1, -1, 0, MAT.clay); v.box(1, 3, y+2, y+3, -1, 0, MAT.leaf); v.set(2, y+3, 0, MAT.leafHi); }
+            continue;
+          }
+          if (k > 8) continue;                                             /* a gap                  */
+          const top = y + 2 + (((x + row * 2) % 2) + 2) % 2;
+          v.box(x, x, y+1, top, -1, 0, MAT.books[(k + row) % MAT.books.length]);
         }
       });
-      return v;
-    });
-  }
-  function geoRack(tint){
-    return propOf('frack|'+tint, FU, function(){
-      const v = new Vox(), H = 17;
-      v.shell(-3, 3, 0, H, -2, 2, DEEP);          /* the carcass             */
-      v.box(-3, 3, 0, 0, -2, 2, DARK);            /* it stands on a plinth   */
-      for (let y = 2; y < H - 1; y += 3){
-        v.box(-2, 2, y, y + 1, 2, 2, DARK);       /* a blade in the bay      */
-        /* two lamps on the face of each blade — marked as giving light,
-           so the shading leaves them at full strength */
-        v.set(-2, y, 3, tint);      v.lit.add('-2,' + y + ',3');
-        v.set( 2, y + 1, 3, PALE);  v.lit.add('2,' + (y + 1) + ',3');
+      v.box(-4, -2, 10, 11, -1, 0, A);                                     /* a box with the accent  */
+    },
+    rack: function(v, A){
+      const H = 17;
+      [[-3,-2],[3,-2],[-3,2],[3,2]].forEach(q => v.set(q[0],0,q[1],MAT.inkLo));
+      v.box(-3, 3, 1, H, -2, 2, MAT.ink);                                  /* the carcass            */
+      v.box(-3, 3, H+1, H+1, -2, 2, MAT.inkHi);                            /* top                    */
+      v.box(-3, -3, 1, H, 3, 3, MAT.inkHi); v.box(3, 3, 1, H, 3, 3, MAT.inkHi);   /* door frame      */
+      for (let y = 2; y <= H - 1; y += 2){
+        v.box(-2, 2, y, y, 3, 3, MAT.inkLo);                               /* a blade                */
+        v.set(-2, y, 3, (y % 6 === 2) ? A : 0x4BD18B); v.lit.add('-2,' + y + ',3');
+        v.set(-1, y, 3, (y % 4 === 0) ? MAT.brass : 0x4BD18B); v.lit.add('-1,' + y + ',3');
+        v.set( 2, y, 3, MAT.glass);
       }
-      return v;
-    });
-  }
-  function geoDesk(tint){
-    return propOf('fdesk|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-6, 6, 4, 5, -3, 2, PALE);            /* the top                 */
-      v.box(-6, -5, 0, 3, -3, 2, MID);            /* the ends                */
-      v.box( 5,  6, 0, 3, -3, 2, MID);
-      v.box(-6, 6, 1, 2, -3, -2, DEEP);           /* a stretcher             */
-      v.box(-4, -2, 6, 8, -2, 0, DEEP);           /* work left on it         */
-      v.box( 1,  3, 6, 7, -2, 1, tint);
-      return v;
-    });
-  }
-  function geoSide(tint){
-    return propOf('fside|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-7, 7, 0, 7, -2, 2, MID);
-      v.box(-7, 7, 8, 8, -3, 3, PALE);            /* the top oversails       */
-      v.box(-6, -1, 2, 6, 3, 3, DEEP);            /* two drawer faces        */
-      v.box( 1,  6, 2, 6, 3, 3, DEEP);
-      v.box(-4, -3, 4, 4, 4, 4, tint);            /* the handles             */
-      v.box( 3,  4, 4, 4, 4, 4, tint);
-      return v;
-    });
-  }
-  function geoEasel(tint){
-    return propOf('feasel|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-4, -3, 0, 11, 1, 2, MID);            /* the legs                */
-      v.box( 3,  4, 0, 11, 1, 2, MID);
-      v.box(-1,  1, 0, 3, -3, -2, MID);           /* the back leg            */
-      v.box(-5, 5, 5, 6, 0, 1, DEEP);             /* the ledge               */
-      v.box(-5, 5, 7, 14, 1, 1, PALE);            /* the board               */
-      v.box(-3, 1, 9, 12, 2, 2, tint);            /* something started on it */
-      return v;
-    });
-  }
-  function geoCrates(tint){
-    return propOf('fcrate|'+tint, FU, function(){
-      const v = new Vox();
-      v.shell(-4, 4, 0, 5, -4, 4, MID);
-      v.box(-4, 4, 5, 5, -4, 4, PALE);
-      v.shell(-3, 1, 6, 10, -3, 1, DEEP);         /* one stacked, off square */
-      v.box(-3, 1, 10, 10, -3, 1, PALE);
-      v.box(-1, 0, 6, 10, 2, 2, tint);
-      return v;
-    });
-  }
-  function geoPlant(tint){
-    return propOf('fplant|'+tint, FU, function(){
-      const v = new Vox(), LEAF = 0x5FAE6E, STEM = 0x3E8A52;
-      v.box(-2, 2, 0, 3, -2, 2, DEEP);            /* the pot                 */
-      v.box(-3, 3, 3, 4, -3, 3, MID);             /* its lip                 */
-      v.box(-1, 1, 5, 9, -1, 1, STEM);            /* the stem                */
-      v.box(-4, -1, 7,  8, -2, 2, LEAF);          /* three fronds            */
-      v.box( 1,  4, 8,  9, -2, 2, LEAF);
-      v.box(-2,  2, 10, 11, -2, 2, LEAF);
-      return v;
-    });
-  }
-  function geoStool(tint){
-    return propOf('fstool|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-3, 3, 4, 4, -3, 3, PALE);            /* the seat                */
-      v.box(-3, 3, 5, 5, -3, 3, tint);            /* a cushion on it         */
-      [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(function(o){
-        v.box(o[0], o[0], 0, 3, o[1], o[1], MID); /* four legs               */
+      v.box(-2, 2, H, H, 3, 3, A);                                         /* the badge              */
+    },
+    desk: function(v, A){
+      const t = tones(A);
+      v.box(-7, 7, 5, 5, -3, 2, MAT.oak);                                  /* the top                */
+      v.box(-7, 7, 5, 5, 2, 2, MAT.oakHi);
+      v.box(-6, -6, 0, 4, -2, 1, MAT.wal); v.box(-6,-6,0,0,-3,2,MAT.walLo); /* a trestle leg         */
+      v.box(-6, -6, 2, 2, -2, 1, MAT.walHi);
+      v.box( 2, 6, 0, 4, -3, 2, MAT.fab);                                  /* a drawer pedestal      */
+      v.box( 2, 6, 0, 0, -3, 2, MAT.fabLo);
+      v.box( 3, 5, 3, 3, 2, 2, MAT.fabLo); v.box(3, 5, 1, 1, 2, 2, MAT.fabLo);
+      v.set(4, 3, 3, MAT.brass); v.set(4, 1, 3, MAT.brass);
+      v.box(-4, 0, 7, 10, -2, -2, MAT.ink);                                /* the monitor            */
+      v.box(-3, -1, 8, 9, -1, -1, 0x3B86E8); v.lit.add('-3,8,-1'); v.lit.add('-2,8,-1'); v.lit.add('-1,8,-1'); v.lit.add('-3,9,-1'); v.lit.add('-2,9,-1'); v.lit.add('-1,9,-1');
+      v.set(-2, 9, -1, t.c); v.lit.add('-2,9,-1');
+      v.box(-2, -2, 6, 6, -2, -2, MAT.ink);                                /* its stand              */
+      v.box(-4, 0, 6, 6, 0, 1, MAT.fabHi);                                 /* keyboard               */
+      v.box(3, 3, 6, 7, 0, 0, t.c);                                        /* a mug                  */
+      v.box(5, 6, 6, 6, -2, -1, MAT.books[2]); v.box(5, 6, 7, 7, -2, -1, MAT.books[1]);   /* books   */
+    },
+    side: function(v, A){
+      const t = tones(A);
+      [[-6,-2],[6,-2],[-6,2],[6,2]].forEach(q => v.box(q[0],q[0],0,1,q[1],q[1],MAT.walLo)); /* legs     */
+      v.box(-7, 7, 2, 7, -2, 2, MAT.wal);                                  /* the body               */
+      v.box(-7, 7, 8, 8, -3, 3, MAT.oak);                                  /* the top                */
+      v.box(-7, 7, 8, 8, 3, 3, MAT.oakHi);
+      v.box(-6, -3, 3, 6, 3, 3, MAT.walHi);                                /* three fronts           */
+      v.box(-1,  1, 3, 6, 3, 3, t.c);
+      v.box( 3,  6, 3, 6, 3, 3, MAT.walHi);
+      v.set(-3, 5, 4, MAT.brass); v.set(3, 5, 4, MAT.brass);
+      v.box(-5, -4, 9, 12, -1, 0, t.c); v.box(-5, -4, 13, 13, -1, 0, t.hi); /* a vase               */
+      v.box(-5, -4, 14, 15, -1, 0, MAT.leaf); v.set(-4, 16, 0, MAT.leafHi);
+      v.box(2, 6, 9, 9, -2, 1, MAT.books[2]); v.box(2, 5, 10, 10, -2, 1, MAT.books[3]);
+      v.box(3, 4, 11, 11, -1, 0, MAT.brass);
+    },
+    easel: function(v, A){
+      v.box(-4, -4, 0, 13, 1, 1, MAT.oak); v.box(4, 4, 0, 13, 1, 1, MAT.oak);   /* front legs        */
+      v.box(-3, -3, 13, 14, 1, 1, MAT.oak); v.box(3, 3, 13, 14, 1, 1, MAT.oak);
+      v.box(-2, 2, 15, 15, 1, 1, MAT.oakHi);
+      v.box(0, 0, 0, 12, -3, -3, MAT.oakLo);                               /* the back leg           */
+      v.box(-5, 5, 4, 4, 1, 3, MAT.wal);                                   /* the ledge              */
+      v.box(-5, 5, 4, 4, 3, 3, MAT.walHi);
+      v.box(-4, 4, 5, 13, 2, 2, MAT.fabHi);                                /* the canvas             */
+      v.box(-3, 3, 6, 7, 3, 3, 0x9FC8E4);                                  /* a painting: the sky... */
+      v.box(-3, 3, 8, 12, 3, 3, 0xCFE6F2);
+      v.box(1, 2, 10, 11, 3, 3, MAT.brass);                                /* ...the sun...          */
+      v.box(-3, 0, 6, 8, 3, 3, MAT.leaf); v.box(-2, -1, 9, 9, 3, 3, MAT.leaf);   /* ...a hill         */
+      v.box(1, 3, 6, 7, 3, 3, MAT.leafLo);
+      v.box(-4, -3, 5, 5, 4, 4, A); v.set(3, 5, 4, MAT.brass);             /* brushes on the ledge   */
+    },
+    crate: function(v, A){
+      const t = tones(A);
+      const crate = function(x0, x1, y0, y1, z0, z1){
+        v.box(x0, x1, y0, y1, z0, z1, MAT.oak);
+        for (let y = y0; y <= y1; y++) if ((y - y0) % 2 === 1){            /* slats, gaps between   */
+          v.box(x0, x1, y, y, z1, z1, MAT.oakLo); v.box(x1, x1, y, y, z0, z1, MAT.oakLo);
+          v.box(x0, x0, y, y, z0, z1, MAT.oakLo);
+        }
+        v.box(x0, x0, y0, y1, z1, z1, MAT.wal); v.box(x1, x1, y0, y1, z1, z1, MAT.wal);   /* corners */
+        v.box(x0, x1, y1, y1, z0, z1, MAT.oakHi);
+      };
+      crate(-4, 4, 0, 5, -4, 4);
+      crate(-3, 2, 6, 10, -3, 2);
+      v.box(-1, 1, 2, 3, 5, 5, t.c);                                       /* a stencil mark         */
+      v.box(5, 6, 0, 1, 2, 4, MAT.fab); v.box(5, 6, 2, 2, 2, 4, t.c);      /* a parcel beside it     */
+    },
+    plant: function(v, A){
+      v.box(-2, 2, 0, 3, -2, 2, MAT.clay);                                 /* the pot                */
+      v.box(-3, 3, 4, 4, -3, 3, MAT.clayHi);                               /* its rim                */
+      v.box(-2, 2, 4, 4, -2, 2, MAT.soil);
+      /* a snake plant: upright blades of different heights, each
+         banded dark and light, the tip lighter still */
+      [[-1,-1,11],[1,-1,8],[0,0,13],[-1,1,9],[1,1,10],[2,0,7],[-2,0,8],[0,-2,9],[0,2,7]].forEach(function(b, k){
+        for (let y = 5; y <= 5 + b[2]; y++){
+          const col = y === 5 + b[2] ? MAT.leafHi : ((y + k) % 3 === 0 ? MAT.leafLo : MAT.leaf);
+          v.set(b[0], y, b[1], col);
+        }
       });
-      return v;
-    });
-  }
+      v.box(-2, 2, 1, 1, -2, 2, A);                                        /* a painted band         */
+    },
+    stool: function(v, A){
+      const t = tones(A);
+      [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(q => v.box(q[0],q[0],0,4,q[1],q[1],MAT.wal));    /* legs       */
+      v.box(-3, 3, 1, 1, -3, -3, MAT.walHi); v.box(-3, 3, 1, 1, 3, 3, MAT.walHi);            /* footring   */
+      v.box(-3, -3, 1, 1, -3, 3, MAT.walHi); v.box(3, 3, 1, 1, -3, 3, MAT.walHi);
+      v.box(-3, 3, 5, 5, -3, 3, MAT.oak);                                  /* the seat               */
+      v.box(-3, 3, 5, 5, 3, 3, MAT.oakHi);
+      v.box(-2, 2, 6, 6, -2, 2, t.c);                                      /* a cushion              */
+      v.box(-2, 2, 6, 6, 2, 2, t.hi);
+    },
+    lamp: function(v, A){
+      const t = tones(A);
+      v.box(-2, 2, 0, 0, -2, 2, MAT.ink);                                  /* the foot               */
+      v.box(-1, 1, 1, 1, -1, 1, MAT.inkHi);
+      v.box( 0, 0, 2, 12, 0, 0, MAT.ink);                                  /* the pole               */
+      v.set(0, 7, 0, MAT.brass);                                           /* a switch               */
+      v.box(-3, 3, 13, 13, -3, 3, t.c);                                    /* the shade, banded      */
+      v.box(-3, 3, 14, 16, -3, 3, MAT.fab);
+      v.box(-2, 2, 17, 17, -2, 2, MAT.fabLo);
+      v.del(-2, 2, 13, 16, -2, 2);                                         /* hollow, lit inside     */
+      for (let x = -2; x <= 2; x++) for (let z = -2; z <= 2; z++){ v.set(x, 13, z, MAT.glow); v.lit.add(x + ',13,' + z); }
+    },
+    chair: function(v, A){
+      const t = tones(A);
+      [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(q => v.box(q[0],q[0],0,1,q[1],q[1],MAT.wal));    /* legs       */
+      v.box(-4, 4, 2, 3, -3, 3, t.lo);                                     /* the seat               */
+      v.box(-3, 3, 4, 4, -2, 3, t.c);  v.box(-3, 3, 4, 4, 3, 3, t.hi);
+      v.box(-4, 4, 4, 9, -4, -3, t.c); v.box(-4, 4, 9, 9, -4, -3, t.hi);   /* the back               */
+      v.box(-5, -4, 3, 6, -4, 3, t.lo); v.box(4, 5, 3, 6, -4, 3, t.lo);    /* arms                   */
+      v.box(-5, -4, 6, 6, -4, 3, MAT.oak); v.box(4, 5, 6, 6, -4, 3, MAT.oak);
+      v.box(-1, 1, 5, 6, -2, -2, MAT.fabHi);                               /* a cushion              */
+    }
+  };
 
-  function geoLamp(tint){
-    return propOf('flamp|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-2, 2, 0, 0, -2, 2, DARK);            /* the foot                */
-      v.box( 0, 0, 1, 12, 0, 0, DARK);            /* the pole                */
-      v.box(-3, 3, 13, 13, -3, 3, tint);          /* the shade, banded       */
-      v.box(-3, 3, 14, 16, -3, 3, PALE);
-      v.box(-2, 2, 17, 17, -2, 2, PALE);
-      v.del(-2, 2, 13, 16, -2, 2);                /* hollow, lit inside      */
-      v.litSlab(2, 13, 0xFFF4D6, 2);
-      return v;
-    });
-  }
-
+  /* each piece is built once per accent and shared across the rooms */
+  const piece = name => tint => propOf('p' + name + '|' + tint, FU, function(){
+    const v = new Vox(); PROP[name](v, tint); return v;
+  });
   const MAKERS = {
-    lamp:  { geo:geoLamp,   r:.8  },
-    bed:   { geo:geoBed,    r:2.2 },
-    couch: { geo:geoCouch,  r:1.9 },
-    shelf: { geo:geoShelf,  r:1.4 },
-    rack:  { geo:geoRack,   r:1.1 },
-    desk:  { geo:geoDesk,   r:1.8 },
-    side:  { geo:geoSide,   r:1.9 },
-    easel: { geo:geoEasel,  r:1.3 },
-    crate: { geo:geoCrates, r:1.2 },
-    plant: { geo:geoPlant,  r:.9  },
-    stool: { geo:geoStool,  r:.8  }
+    bed:   { geo:piece('bed'),   r:2.2 },
+    couch: { geo:piece('couch'), r:1.9 },
+    chair: { geo:piece('chair'), r:1.3 },
+    shelf: { geo:piece('shelf'), r:1.4 },
+    rack:  { geo:piece('rack'),  r:1.1 },
+    desk:  { geo:piece('desk'),  r:1.8 },
+    side:  { geo:piece('side'),  r:1.9 },
+    easel: { geo:piece('easel'), r:1.3 },
+    crate: { geo:piece('crate'), r:1.4 },
+    plant: { geo:piece('plant'), r:.9  },
+    stool: { geo:piece('stool'), r:.8  },
+    lamp:  { geo:piece('lamp'),  r:.8  }
   };
 
   /* what belongs in each room, in the order it should be tried.
@@ -2916,14 +2987,14 @@ function build(){
      across walls, so furniture lives in the corners: two flanking the
      picture where the camera can actually see them, two behind. */
   const FURNISH = [
-    /* 00 lobby       */ [['side',6.2,-7.0],['plant',7.4,7.6],['lamp',7.8,-4.4],['stool',-6.4,7.0],['plant',-6.8,-7.2],['lamp',-7.6,7.8],['couch',-7.4,-1.2]],
+    /* 00 lobby       */ [['side',6.2,-7.0],['plant',7.4,7.6],['lamp',7.8,-4.4],['stool',-6.4,7.0],['plant',-6.8,-7.2],['lamp',-7.6,7.8],['couch',-7.4,-1.2],['chair',-4.6,7.6]],
     /* 01 bedroom     */ [['bed',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['desk',-7.6,1.0]],
     /* 02 game room   */ [['couch',6.2,-7.0],['stool',7.8,-4.2],['crate',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['plant',-7.8,-4.4]],
     /* 03 workshop    */ [['desk',6.2,-7.0],['crate',7.8,-4.2],['shelf',-6.8,-7.0],['stool',-6.4,7.0],['plant',7.6,7.6],['lamp',-7.8,4.4]],
     /* 04 studio      */ [['easel',6.4,-7.2],['stool',7.8,-4.2],['side',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['easel',-7.4,2.0]],
     /* 05 server room */ [['rack',6.6,-7.4],['rack',6.6,-5.0],['rack',-6.8,-7.0],['crate',7.6,7.4],['rack',-6.8,-4.6],['lamp',-7.6,7.6]],
     /* 06 library     */ [['shelf',6.4,-7.4],['shelf',6.4,-4.6],['shelf',-6.8,-7.0],['stool',7.6,7.8],['plant',-7.6,7.6],['lamp',7.8,4.6]],
-    /* 07 dining room */ [['side',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['plant',-7.8,-4.4]]
+    /* 07 dining room */ [['side',6.2,-7.0],['chair',7.6,-3.8],['shelf',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['plant',-7.8,-4.4]]
   ];
 
   /* the room's own no-go map. Plot's footprints were cut for small
