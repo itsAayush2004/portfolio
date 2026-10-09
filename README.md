@@ -58,6 +58,12 @@ on a turntable, server racks, a bar-chart city, an envelope — in the house pal
 `art/src/`: a tiny isometric renderer that emits SVG, one scene per room, and a script that renders
 them to JPEG. The frame is ink with a white mat, built to the picture's own aspect.
 
+**The posters move.** Every scene is drawn as a function of time, and each motion — the cube that
+bounces, the feed that swipes, the playhead, the server lights, the plane — is periodic, so the
+rendered four-second loops in `media/loops/` close on themselves. The still hangs first; the loop
+(WebM, or MP4 where WebM won't play) takes over the moment it is playing, and only the rooms near
+you are decoding at any time. Reduced motion keeps the stills.
+
 **Every room has a colour.** A pale wall, a deeper wainscot under a rail, skirting, a crown, a rug
 and an accent the furniture picks up — cream, sage, lilac, sky, peach, indigo, butter, blush, each
 taken from the room's poster. Each room lines the inside of its own walls, so a wall two rooms share

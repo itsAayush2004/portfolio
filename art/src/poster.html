@@ -1,8 +1,9 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
-<!-- The eight room posters in art/, drawn as isometric voxel scenes.
-     Open poster.html?i=0 … ?i=7 in a browser to see one, or run
-     `node render.js` (needs Playwright) to write art/00.jpg … 07.jpg. -->
+<!-- The eight room posters, drawn as isometric voxel scenes that loop.
+     poster.html?i=0 … ?i=7 shows one (add &t=0.5 for a moment in its
+     loop); window.frame(t) redraws it at t in 0…1. render.js writes the
+     stills to art/, loops.js the four-second loops to media/loops/. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Inter:wght@500;600&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 html,body{margin:0;background:#fff}
@@ -63,14 +64,27 @@ function chrome(o){
     <text x="50" y="27" font-family="JetBrains Mono" font-size="17" letter-spacing="3" fill="${ink}">AAYUSH KUMAR</text></g>`;
   return s;
 }
+/* ── time: T runs 0→1 over one loop; everything below is periodic in it ── */
+let T = 0;
+const TAU = Math.PI*2;
+const S = (k, ph) => Math.sin(TAU*(k*T + (ph||0)));
+const step = n => Math.floor(T*n + 1e-6) % n;
+const hash = (a,b,c) => { const x = Math.sin(a*127.1 + b*311.7 + c*74.7)*43758.5453; return x - Math.floor(x); };
+const bob = (svg, amp, ph, k) => `<g transform="translate(0,${(amp*S(k||1, ph||0)).toFixed(2)})">${svg}</g>`;
+
 /* action marks — the little burst lines from the sticker art */
 function burst(x, y, r, a0, a1, n, col, len){
   let s=''; for(let k=0;k<n;k++){ const a=(a0+(a1-a0)*k/(n-1))*Math.PI/180;
     const x0=x+Math.cos(a)*r, y0=y+Math.sin(a)*r, x1=x+Math.cos(a)*(r+(len||34)), y1=y+Math.sin(a)*(r+(len||34));
     s+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${col}" stroke-width="10" stroke-linecap="round"/>`; }
-  return s;
+  const o = (.55 + .45*(.5 + .5*S(2, x*.0007))).toFixed(3);
+  return `<g opacity="${o}">${s}</g>`;
 }
-function spark(x,y,r,col){ return `<path d="M${x} ${y-r}Q${x} ${y} ${x+r} ${y}Q${x} ${y} ${x} ${y+r}Q${x} ${y} ${x-r} ${y}Q${x} ${y} ${x} ${y-r}Z" fill="${col}" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round"/>`; }
+function spark(x,y,r,col){
+  const k = (.7 + .45*(.5 + .5*S(2, (x+y)*.0013))).toFixed(3), a = (S(1, x*.001)*18).toFixed(1);
+  return `<g transform="translate(${x},${y}) rotate(${a}) scale(${k}) translate(${-x},${-y})">${sparkRaw(x,y,r,col)}</g>`;
+}
+function sparkRaw(x,y,r,col){ return `<path d="M${x} ${y-r}Q${x} ${y} ${x+r} ${y}Q${x} ${y} ${x} ${y+r}Q${x} ${y} ${x-r} ${y}Q${x} ${y} ${x} ${y-r}Z" fill="${col}" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round"/>`; }
 function cube(x,y,s,col){ const sc=new IsoScene(s,x,y); sc.set(0,0,0,col); return sc.render(); }
 function shadow(x,y,rx,ry,o){ return `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#17161C" opacity="${o||.12}"/>`; }
 
@@ -108,7 +122,7 @@ SC[0] = function(){
   // desk + monitor
   sc.box(8,12,0,2,1,4,'#F5F0E6'); sc.del(9,11,0,2,1,3); sc.box(8,8,0,2,1,3,'#E0D6C4'); sc.box(12,12,0,2,1,3,'#E0D6C4');
   sc.box(9,11,0,0,5,7,INK); sc.box(9,11,1,1,5,7,'#2C2B33'); sc.box(10,10,0,0,4,4,INK);
-  sc.box(9,11,1,1,6,6,'#4BD18B',{glow:true}); sc.set(9,1,7,AMB,{glow:true});
+  sc.box(9,11,1,1,6,6,step(4)%2 ? '#7CC3E8' : '#4BD18B',{glow:true}); sc.set(9,1,7,step(8)%2 ? AMB : RED,{glow:true});
   // chair
   sc.box(9,11,4,6,1,3,IND); sc.box(9,11,6,6,4,6,IND);
   // plant
@@ -118,8 +132,9 @@ SC[0] = function(){
   // a big red cube in the middle, floating
   let s2 = sc.render();
   s += s2;
-  s += cube(1320, 600, 46, RED);
-  s += shadow(1360, 770, 50, 12, .14);
+  const hop = Math.abs(Math.sin(TAU*T));
+  s += shadow(1360, 770, 50 - hop*16, 12 - hop*4, .14 - hop*.06);
+  s += `<g transform="translate(0,${(-hop*70).toFixed(1)})">${cube(1320, 600, 46, RED)}</g>`;
   s += burst(1360, 640, 90, -70, -20, 3, AMB, 30);
   s += spark(900, 300, 22, AMB) + spark(1460, 260, 14, '#fff') + spark(1500, 470, 18, RED);
   return [base, s];
@@ -140,7 +155,7 @@ SC[1] = function(){
   sc.box(12,15,9,9,2,5,'#F3EEE4'); sc.set(13,9,4,INK); sc.set(14,9,4,INK); sc.set(13,9,2,INK);
   // monitors
   sc.box(3,10,1,1,10,15,INK); sc.box(4,9,2,2,11,14,'#24232B'); sc.box(6,7,1,1,8,9,'#3A3942'); sc.box(5,8,1,2,8,8,'#3A3942');
-  [[11,AMB],[12,'#4BD18B'],[13,'#7CC3E8'],[14,'#F07070']].forEach((r,k)=>{ sc.box(4,4+2+(k*2)%4,2,2,r[0],r[0],r[1],{glow:true}); });
+  [[11,AMB],[12,'#4BD18B'],[13,'#7CC3E8'],[14,'#F07070']].forEach((r,k)=>{ sc.box(4,4+1+((k*2 + step(6))%5),2,2,r[0],r[0],r[1],{glow:true}); });
   sc.box(11,15,2,2,9,13,INK); sc.box(12,14,3,3,10,12,IND); sc.box(12,13,3,3,11,11,'#9CA6FF',{glow:true});
   sc.box(13,13,2,2,8,8,'#3A3942');
   // keyboard + mouse
@@ -152,10 +167,10 @@ SC[1] = function(){
   let r = sc.render();
   s += r;
   // floating icons: brackets, gear
-  s += `<g transform="translate(1340,170)"><rect x="-58" y="-40" width="116" height="80" rx="16" fill="${INK}" stroke="${INK}" stroke-width="3"/>
-    <text x="0" y="16" text-anchor="middle" font-family="JetBrains Mono" font-size="44" fill="${AMB}">&lt;/&gt;</text></g>`;
-  s += `<g transform="translate(840,250)"><circle r="44" fill="#fff" stroke="${INK}" stroke-width="3"/><text y="16" text-anchor="middle" font-family="JetBrains Mono" font-size="40" fill="${RED}">C#</text></g>`;
-  s += `<g transform="translate(1480,380)"><circle r="38" fill="${AMB}" stroke="${INK}" stroke-width="3"/><text y="13" text-anchor="middle" font-family="JetBrains Mono" font-size="34" fill="${INK}">py</text></g>`;
+  s += bob(`<g transform="translate(1340,170)"><rect x="-58" y="-40" width="116" height="80" rx="16" fill="${INK}" stroke="${INK}" stroke-width="3"/>
+    <text x="0" y="16" text-anchor="middle" font-family="JetBrains Mono" font-size="44" fill="${AMB}">&lt;/&gt;</text></g>`, 12, 0);
+  s += bob(`<g transform="translate(840,250)"><circle r="44" fill="#fff" stroke="${INK}" stroke-width="3"/><text y="16" text-anchor="middle" font-family="JetBrains Mono" font-size="40" fill="${RED}">C#</text></g>`, 14, .33);
+  s += bob(`<g transform="translate(1480,380)"><circle r="38" fill="${AMB}" stroke="${INK}" stroke-width="3"/><text y="13" text-anchor="middle" font-family="JetBrains Mono" font-size="34" fill="${INK}">py</text></g>`, 12, .66);
   s += burst(1340, 170, 80, 200, 250, 3, RED, 26);
   s += spark(980, 140, 18, AMB) + spark(1520, 610, 16, '#fff');
   s += shadow(1110, 790, 330, 34, .1);
@@ -179,7 +194,7 @@ SC[2] = function(){
     const z0 = 1+lv*3, c = cols[lv%cols.length];
     sc.box(14,20,3,8,z0,z0+2,'#F6F3EA');
     sc.box(14,20,8,8,z0,z0, shade(c,1)); // floor band
-    for(let x=15;x<=19;x+=2) sc.box(x,x,8,8,z0+1,z0+1,lv%2? '#FFE08A':'#BDE6FF',{glow:true});
+    for(let x=15;x<=19;x+=2) sc.box(x,x,8,8,z0+1,z0+1, hash(x,lv,step(6)) > .3 ? (lv%2? '#FFE08A':'#BDE6FF') : '#5E5A7A',{glow:true});
     sc.box(20,20,4,7,z0+1,z0+1,'#BDE6FF',{glow:true});
     if (lv%2===0) sc.box(13,13,4,6,z0,z0,c);
   }
@@ -188,16 +203,21 @@ SC[2] = function(){
   sc.box(2,9,4,4,1,19,INK); sc.box(2,9,5,5,1,19,'#24232B');
   sc.box(3,8,5,5,2,18,'#fff');
   // feed cards on the screen
-  sc.box(3,8,5,5,13,17,'#FFD7A1'); sc.box(4,5,5,5,14,15,RED); sc.box(6,7,5,5,15,16,AMB); sc.set(5,5,16,GREEN);
-  sc.box(3,8,5,5,7,11,'#BFE3F5'); sc.box(4,7,5,5,8,8,IND); sc.box(5,6,5,5,9,10,RED);
-  sc.box(3,8,5,5,3,5,'#E3E0F3'); sc.box(4,4,5,5,4,4,LIL); sc.box(6,7,5,5,4,4,INK);
+  /* three games in the feed; every third of the loop it swipes up one */
+  const cards = [
+    z=>{ sc.box(3,8,5,5,z,z+4,'#FFD7A1'); sc.box(4,5,5,5,z+1,z+2,RED); sc.box(6,7,5,5,z+2,z+3,AMB); sc.set(5,5,z+3,GREEN); },
+    z=>{ sc.box(3,8,5,5,z,z+4,'#BFE3F5'); sc.box(4,7,5,5,z+1,z+1,IND); sc.box(5,6,5,5,z+2,z+3,RED); },
+    z=>{ sc.box(3,8,5,5,z,z+4,'#D8F0D2'); sc.box(4,4,5,5,z+1,z+3,GREEN); sc.box(6,7,5,5,z+1,z+1,AMB); sc.set(7,5,z+3,LIL); }
+  ];
+  const sw = step(3);
+  cards[sw](13); cards[(sw+1)%3](7); sc.box(3,8,5,5,3,5,'#E3E0F3'); sc.box(4,4,5,5,4,4,LIL); sc.box(6,7,5,5,4,4,INK);
   sc.box(5,6,5,5,19,19,'#3A3942');
   // little avatars walking
-  [[11,10,RED],[12,12,AMB],[10,12,IND]].forEach(a=>{ sc.box(a[0],a[0],a[1],a[1],1,2,a[2]); sc.set(a[0],a[1],3,'#F2C29B'); });
+  [[11,10,RED],[12,12,AMB],[10,12,IND]].forEach((a,k)=>{ const up = (step(6) + k*2) % 6 === 0 ? 1 : 0; sc.box(a[0],a[0],a[1],a[1],1+up,2+up,a[2]); sc.set(a[0],a[1],3+up,'#F2C29B'); });
   s += sc.render();
   // swipe arrow
-  s += `<g transform="translate(905,470)"><circle r="40" fill="${RED}" stroke="${INK}" stroke-width="3"/>
-    <path d="M0 18V-16M-14 -2L0 -16L14 -2" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+  s += bob(`<g transform="translate(905,470)"><circle r="40" fill="${RED}" stroke="${INK}" stroke-width="3"/>
+    <path d="M0 18V-16M-14 -2L0 -16L14 -2" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`, 14, 0, 3);
   s += `<g font-family="JetBrains Mono" font-size="18" letter-spacing="2"><rect x="1395" y="150" width="150" height="44" rx="10" fill="#fff" stroke="${INK}" stroke-width="2.5"/><text x="1416" y="179" fill="${INK}">ROOM 4721</text></g>`;
   s += spark(1520, 300, 18, AMB) + spark(860, 230, 16, '#fff') + spark(1500, 640, 14, RED);
   s += burst(1470, 160, 100, 110, 160, 3, AMB, 26);
@@ -221,7 +241,7 @@ SC[3] = function(){
     const p = hx(q,r); const cx = p[0]+8, cy = p[1]+5;
     let h = Math.max(.5, H(q,r)), top, side='#8C6A47';
     const water = (q===1&&r===0)||(q===2&&r===-1)||(q===1&&r===1)||(q===-2&&r===2)||(q===-3&&r===3)||(q===2&&r===0);
-    if (water){ h=.55; top=WATER; side='#3B86B8'; }
+    if (water){ h=.55 + .12*(.5+.5*S(1, q*.17 + r*.11)); top = S(2, q*.2+r*.13) > .3 ? '#7CC3E8' : WATER; side='#3B86B8'; }
     else if (d===5){ h = Math.min(h,1.1); top='#EBD7A6'; side='#C6A874'; }
     else if (h>2.9){ top='#B9B7B2'; side='#8D8A85'; }
     else top = (q+r)%3===0 ? '#6DBB6E' : GREEN;
@@ -253,11 +273,11 @@ SC[3] = function(){
   s += shadow(1090, 720, 340, 60, .12);
   s += sc.render();
   // editor gizmo
-  s += `<g transform="translate(1450,190)" stroke-width="5" stroke-linecap="round">
+  s += `<g transform="translate(1450,190) rotate(${(T*360).toFixed(1)})" stroke-width="5" stroke-linecap="round">
     <line x1="0" y1="0" x2="0" y2="-60" stroke="#4BD18B"/><line x1="0" y1="0" x2="52" y2="30" stroke="${RED}"/><line x1="0" y1="0" x2="-52" y2="30" stroke="#3B86E8"/>
     <circle r="9" fill="#fff" stroke="${INK}" stroke-width="3"/></g>`;
-  s += `<g font-family="JetBrains Mono" font-size="17" letter-spacing="2"><rect x="760" y="640" width="190" height="44" rx="10" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
-    <circle cx="784" cy="662" r="7" fill="#4BD18B"/><text x="800" y="668" fill="${INK}">160+ TILES</text></g>`;
+  s += bob(`<g font-family="JetBrains Mono" font-size="17" letter-spacing="2"><rect x="760" y="640" width="190" height="44" rx="10" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+    <circle cx="784" cy="662" r="7" fill="${step(4)%2 ? '#4BD18B' : '#2E9E5E'}"/><text x="800" y="668" fill="${INK}">160+ TILES</text></g>`, 8, .25);
   s += spark(1480, 520, 16, AMB) + spark(820, 230, 18, '#fff');
   return [base, s];
 };
@@ -288,7 +308,7 @@ SC[4] = function(){
   // camera on tripod
   sc.box(19,22,13,14,9,11,INK); sc.box(18,18,13,14,9,11,'#3A3942'); sc.box(17,17,13,14,10,10,'#7CC3E8',{glow:true});
   sc.box(20,20,13,13,1,8,'#3A3942'); sc.box(18,18,11,11,1,1,'#3A3942'); sc.box(22,22,16,16,1,1,'#3A3942');
-  sc.box(21,21,13,13,12,12,RED,{glow:true});
+  sc.box(21,21,13,13,12,12,step(4)%2 ? RED : '#5A1414',{glow:true});
   // light softbox
   sc.box(0,0,17,20,10,14,'#FFF6D8',{glow:true}); sc.box(-1,-1,17,20,10,14,INK); sc.box(-1,-1,18,19,1,9,'#3A3942');
   s += shadow(1080, 690, 250, 50, .12);
@@ -296,7 +316,7 @@ SC[4] = function(){
   // bones
   const b = (x,y,z)=>sc.P(x,y,z);
   const j = [b(9,11,17),b(9,11,11),b(9,11,8),b(4,11,12),b(14,11,12),b(7,11,4),b(11,11,4)];
-  s += `<g stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".95">
+  s += `<g stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="${(.7+.3*S(2)).toFixed(2)}">
     <line x1="${j[0][0]}" y1="${j[0][1]}" x2="${j[2][0]}" y2="${j[2][1]}"/>
     <line x1="${j[1][0]}" y1="${j[1][1]}" x2="${j[3][0]}" y2="${j[3][1]}"/><line x1="${j[1][0]}" y1="${j[1][1]}" x2="${j[4][0]}" y2="${j[4][1]}"/>
     <line x1="${j[2][0]}" y1="${j[2][1]}" x2="${j[5][0]}" y2="${j[5][1]}"/><line x1="${j[2][0]}" y1="${j[2][1]}" x2="${j[6][0]}" y2="${j[6][1]}"/></g>`;
@@ -305,8 +325,10 @@ SC[4] = function(){
   const tx=760, ty=760;
   s += `<rect x="${tx}" y="${ty}" width="700" height="56" rx="12" fill="${INK}"/>`;
   for (let k=0;k<26;k++) s += `<line x1="${tx+30+k*25.5}" y1="${ty+12}" x2="${tx+30+k*25.5}" y2="${ty+(k%5===0?26:18)}" stroke="rgba(255,255,255,.35)" stroke-width="2"/>`;
-  [2,6,9,14,19,23].forEach((k,n)=>{ const x=tx+30+k*25.5; s += `<rect x="${x-9}" y="${ty+28}" width="18" height="18" transform="rotate(45 ${x} ${ty+37})" fill="${n%2?AMB:'#fff'}"/>`; });
-  s += `<line x1="${tx+30+11*25.5}" y1="${ty+4}" x2="${tx+30+11*25.5}" y2="${ty+52}" stroke="${RED}" stroke-width="4"/>`;
+  const ph = T*25;
+  [2,6,9,14,19,23].forEach((k,n)=>{ const x=tx+30+k*25.5, near = Math.abs(ph - k) < .9; s += `<rect x="${x-(near?12:9)}" y="${ty+37-(near?12:9)}" width="${near?24:18}" height="${near?24:18}" transform="rotate(45 ${x} ${ty+37})" fill="${near?RED:(n%2?AMB:'#fff')}"/>`; });
+  const px = tx+30+ph*25.5;
+  s += `<line x1="${px}" y1="${ty+4}" x2="${px}" y2="${ty+52}" stroke="${RED}" stroke-width="4"/><rect x="${px-14}" y="${ty-18}" width="28" height="18" rx="4" fill="${RED}"/>`;
   s += spark(1480, 220, 18, '#fff') + spark(830, 300, 16, AMB);
   s += burst(980, 270, 70, 200, 250, 3, RED, 26);
   return [base, s];
@@ -328,8 +350,8 @@ SC[5] = function(){
     sc.box(p[0],p[0]+3,p[1]+3,p[1]+3,1,16,'#2A3058');
     for(let z=2; z<=15; z+=2){
       sc.box(p[0],p[0]+3,p[1]+3,p[1]+3,z,z,'#1A1E38');
-      sc.set(p[0], p[1]+3, z, LEDS[(z+k)%4], {glow:true});
-      sc.set(p[0]+1, p[1]+3, z, LEDS[(z+k+1)%4], {glow:true});
+      sc.set(p[0], p[1]+3, z, hash(z,k,step(12)) > .25 ? LEDS[(z+k)%4] : '#1A1E38', {glow:true});
+      sc.set(p[0]+1, p[1]+3, z, hash(z+9,k,step(8)) > .35 ? LEDS[(z+k+1)%4] : '#1A1E38', {glow:true});
     }
     sc.box(p[0],p[0]+3,p[1],p[1]+3,17,17,k===1?RED:'#4A5290');
   });
@@ -341,7 +363,12 @@ SC[5] = function(){
   const nx=1330, ny=210, lay=[3,4,3,1];
   const nodes=[]; lay.forEach((n,li)=>{ for(let k=0;k<n;k++) nodes.push({li, x:nx+li*62, y:ny+(k-(n-1)/2)*56}); });
   nodes.forEach(a=>nodes.forEach(b=>{ if(b.li===a.li+1) s+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="rgba(160,170,255,.45)" stroke-width="2.5"/>`; }));
-  nodes.forEach((a,k)=>{ s+=`<circle cx="${a.x}" cy="${a.y}" r="12" fill="${a.li===3?RED:(k%3?'#9CA6FF':AMB)}" stroke="#0B0D18" stroke-width="3"/>`; });
+  /* a signal crosses each layer in turn */
+  nodes.forEach(a=>nodes.forEach(b=>{ if(b.li!==a.li+1) return;
+    const u = ((T*3 - a.li*.333) % 1 + 1) % 1; if (u > .999) return;
+    s+=`<circle cx="${(a.x+(b.x-a.x)*u).toFixed(1)}" cy="${(a.y+(b.y-a.y)*u).toFixed(1)}" r="4.5" fill="#FFF1C9"/>`; }));
+  nodes.forEach((a,k)=>{ const lit = Math.floor(((T*3)%1)*0 + T*3*1) % 3 === a.li || (a.li===3 && step(3)===2);
+    s+=`<circle cx="${a.x}" cy="${a.y}" r="${lit?14:12}" fill="${a.li===3?RED:(k%3?'#9CA6FF':AMB)}" stroke="#0B0D18" stroke-width="3"/>`; });
   // pipeline chips
   s += `<g font-family="JetBrains Mono" font-size="16" letter-spacing="2">
     <rect x="1250" y="520" width="140" height="42" rx="10" fill="#2E3661" stroke="#9CA6FF" stroke-width="2"/><text x="1272" y="547" fill="#F4F2EC">RETRIEVE</text>
@@ -370,9 +397,9 @@ SC[6] = function(){
   // coins/cubes
   sc.box(19,20,6,7,1,1,AMB); sc.box(19,19,6,6,2,2,AMB);
   s += sc.render();
-  pos.forEach(p=>{ const t = sc.P(p[0]+1.5,4,p[1]+1); const w = p[2].length*19+30; s += `<g font-family="Fraunces" font-weight="800" font-size="32" text-anchor="middle"><rect x="${t[0]-w/2}" y="${t[1]-70}" width="${w}" height="46" rx="12" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M${t[0]-8} ${t[1]-25}L${t[0]} ${t[1]-14}L${t[0]+8} ${t[1]-25}Z" fill="#fff" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><rect x="${t[0]-7}" y="${t[1]-28}" width="14" height="5" fill="#fff"/><text x="${t[0]}" y="${t[1]-36}" fill="${INK}">${p[2]}</text></g>`; });
+  pos.forEach((p,n)=>{ const t = sc.P(p[0]+1.5,4,p[1]+1); t[1] += 6*S(1, n*.2); const w = p[2].length*19+30; s += `<g font-family="Fraunces" font-weight="800" font-size="32" text-anchor="middle"><rect x="${t[0]-w/2}" y="${t[1]-70}" width="${w}" height="46" rx="12" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M${t[0]-8} ${t[1]-25}L${t[0]} ${t[1]-14}L${t[0]+8} ${t[1]-25}Z" fill="#fff" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><rect x="${t[0]-7}" y="${t[1]-28}" width="14" height="5" fill="#fff"/><text x="${t[0]}" y="${t[1]-36}" fill="${INK}">${p[2]}</text></g>`; });
   // trend line
-  s += `<path d="M880 640C980 600 1040 520 1120 480S1300 300 1420 230" stroke="${RED}" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="2 16"/>`;
+  s += `<path d="M880 640C980 600 1040 520 1120 480S1300 300 1420 230" stroke="${RED}" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="2 16" stroke-dashoffset="${(-T*18*6).toFixed(1)}"/>`;
   s += `<path d="M1420 230l-30 4 18 22z" fill="${RED}"/>`;
   s += spark(1500, 160, 18, AMB) + spark(860, 210, 16, '#fff');
   s += burst(1450, 210, 50, -60, 0, 3, AMB, 24);
@@ -405,27 +432,40 @@ SC[7] = function(){
     <rect x="12" y="-9.6" width="2.6" height="3.2" fill="${AMB}"/><rect x="12.5" y="-9.1" width="1.6" height="2.2" fill="none" stroke="#fff" stroke-dasharray=".25 .2"/>
     <path d="M1.2 -2.2H5.2M1.2 -1.4H3.8" stroke="${INK}" stroke-width=".22" stroke-linecap="round" opacity=".5"/></g>`;
   // paper plane
-  s += `<g transform="translate(1420,150) rotate(-14)">
+  const fx = 70*Math.sin(TAU*T), fy = 34*Math.sin(2*TAU*T);
+  const ang = -14 + 12*Math.cos(TAU*T);
+  s += `<g transform="translate(${(1420+fx).toFixed(1)},${(150+fy).toFixed(1)}) rotate(${ang.toFixed(1)})">
     <path d="M0 0L-150 40L-80 60Z" fill="#fff" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
     <path d="M0 0L-80 60L-70 100Z" fill="#E9E4DD" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
     <path d="M0 0L-150 40L-110 56Z" fill="${RED}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/></g>`;
-  s += `<path d="M1250 120C1200 60 1130 70 1110 120S1180 200 1290 175" stroke="${INK}" stroke-width="4" fill="none" stroke-dasharray="4 14" stroke-linecap="round" opacity=".5"/>`;
-  s += `<g transform="translate(1440,520)"><circle r="56" fill="${AMB}" stroke="${INK}" stroke-width="3"/><text y="22" text-anchor="middle" font-family="Fraunces" font-weight="800" font-size="66" fill="${INK}">@</text></g>`;
+  s += `<path d="M1250 120C1200 60 1130 70 1110 120S1180 200 1290 175" stroke="${INK}" stroke-width="4" fill="none" stroke-dasharray="4 14" stroke-dashoffset="${(-T*18*5).toFixed(1)}" stroke-linecap="round" opacity=".5"/>`;
+  s += bob(`<g transform="translate(1440,520)"><circle r="56" fill="${AMB}" stroke="${INK}" stroke-width="3"/><text y="22" text-anchor="middle" font-family="Fraunces" font-weight="800" font-size="66" fill="${INK}">@</text></g>`, 10, .4);
   s += burst(1440, 520, 74, -80, -20, 3, RED, 26);
   s += spark(900, 200, 18, AMB) + spark(1530, 340, 14, '#fff');
   return [base, s];
 };
 
+let FIT = '';
+window.frame = function(t){
+  T = ((t % 1) + 1) % 1;
+  const g = document.getElementById('ill');
+  g.innerHTML = SC[I]()[1];
+  g.setAttribute('transform', FIT);
+};
 document.fonts.load('800 40px Fraunces').then(()=>Promise.all([document.fonts.load('500 20px Inter'),document.fonts.load('500 20px "JetBrains Mono"')])).then(()=>{
+  T = +(q.get('t')||0);
   const parts = SC[I]();
   document.getElementById('out').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${parts[0]}<g id="ill">${parts[1]}</g></svg>`;
   /* headline never runs into the picture */
   document.querySelectorAll('.hl').forEach(t=>{ const w=t.getComputedTextLength(); if(w>700){ const f=parseFloat(t.getAttribute('font-size')); t.setAttribute('font-size', (f*700/w).toFixed(1)); } });
-  /* the picture is fitted into its own box, centred */
-  const g=document.getElementById('ill'), bb=g.getBBox(), BX={x:850,y:70,w:690,h:720};
+  /* the picture is fitted into its own box once, at the start of the loop, so nothing jitters */
+  const keepT = T; T = 0;
+  const g=document.getElementById('ill'); g.innerHTML = SC[I]()[1];
+  const bb=g.getBBox(), BX={x:850,y:70,w:690,h:720};
   const k=Math.min(BX.w/bb.width, BX.h/bb.height, 1.25);
   const tx=BX.x+(BX.w-bb.width*k)/2-bb.x*k, ty=BX.y+(BX.h-bb.height*k)/2-bb.y*k;
-  g.setAttribute('transform',`translate(${tx.toFixed(1)},${ty.toFixed(1)}) scale(${k.toFixed(4)})`);
+  FIT = `translate(${tx.toFixed(1)},${ty.toFixed(1)}) scale(${k.toFixed(4)})`;
+  window.frame(keepT);
   document.title = 'ready';
 });
 </script>
