@@ -70,7 +70,6 @@ function TriggerRunner() {
   const gameLoopRef = useRef(null);
 
   const PLAYER_SIZE = 28;
-  const VIDEO_URL = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Placeholder video URL
   
   const getGroundY = useCallback(() => Math.floor(dimensions.height / 2), [dimensions.height]);
   const getPlayerX = useCallback(() => Math.floor(dimensions.width / 2) - PLAYER_SIZE / 2, [dimensions.width]);
@@ -563,30 +562,6 @@ function TriggerRunner() {
           </div>
           <div style={{ fontSize: 24, fontWeight: 'bold', color: '#3498db', marginBottom: 24 }}>
             RUNNER
-          </div>
-
-          {/* Video Placeholder */}
-          <div style={{
-            width: '100%',
-            aspectRatio: '16/9',
-            backgroundColor: '#0f0f1a',
-            borderRadius: 12,
-            overflow: 'hidden',
-            marginBottom: 24,
-            border: '3px solid #3498db',
-            boxShadow: '0 0 20px rgba(52, 152, 219, 0.3)',
-          }}>
-            <iframe
-              src={VIDEO_URL}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title="Game Trailer"
-            />
           </div>
 
           {/* Buttons */}
