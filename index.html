@@ -320,7 +320,7 @@ body.panel .prompt{ display:none }
    can't be seen: on a phone, and when there is no WebGL at all */
 .poster{ display:none; margin:0 0 clamp(16px,2.4vw,24px); border-radius:10px; overflow:hidden;
   box-shadow:0 0 0 1px rgba(23,21,15,.12), 0 10px 24px rgba(58,48,28,.14); background:var(--paper-lo) }
-.poster img{ width:100%; height:auto; aspect-ratio:16/9; object-fit:cover }
+.poster img,.poster video{ display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover }
 body.flow .poster, body.noweb .poster{ display:block }
 body.flow .sheet > .poster{ margin-top:4px }
 
@@ -1297,7 +1297,7 @@ body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
   <section class="fold cover" id="s0" data-name="Lobby" aria-labelledby="t0">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
-      <figure class="poster"><img src="art/00.jpg" alt="Isometric cut-away of a small room — the lobby poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="poster"><video poster="art/00.jpg" aria-label="Isometric cut-away of a small room — the lobby poster" width="1600" height="900" muted loop playsinline autoplay preload="none"><source src="media/loops/00.webm" type="video/webm"><source src="media/loops/00.mp4" type="video/mp4"></video></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 00</b> — Lobby</div>
         <h1 class="wordmark" id="t0">
@@ -1322,7 +1322,7 @@ body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
   <section class="fold right" id="s1" data-name="Practice" aria-labelledby="t1">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
-      <figure class="poster"><img src="art/01.jpg" alt="A voxel workbench with two monitors — the practice poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="poster"><video poster="art/01.jpg" aria-label="A voxel workbench with two monitors — the practice poster" width="1600" height="900" muted loop playsinline autoplay preload="none"><source src="media/loops/01.webm" type="video/webm"><source src="media/loops/01.mp4" type="video/mp4"></video></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 01</b> — Where it starts</div>
         <h2 id="t1">154 shipped builds,<br>one throughline.</h2>
@@ -1346,7 +1346,7 @@ body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
   <section class="fold" id="s2" data-name="Arthis" aria-labelledby="t2">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
-      <figure class="poster"><img src="art/02.jpg" alt="A phone game feed beside a voxel tower — the Arthis poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="poster"><video poster="art/02.jpg" aria-label="A phone game feed beside a voxel tower — the Arthis poster" width="1600" height="900" muted loop playsinline autoplay preload="none"><source src="media/loops/02.webm" type="video/webm"><source src="media/loops/02.mp4" type="video/mp4"></video></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 02</b> — Two live platforms</div>
         <h2 id="t2">Arthis</h2>
@@ -1396,7 +1396,7 @@ body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
   <section class="fold right" id="s3" data-name="HexaBed" aria-labelledby="t3">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
-      <figure class="poster"><img src="art/03.jpg" alt="A hexagonal voxel island with trees and a road — the HexaBed poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="poster"><video poster="art/03.jpg" aria-label="A hexagonal voxel island with trees and a road — the HexaBed poster" width="1600" height="900" muted loop playsinline autoplay preload="none"><source src="media/loops/03.webm" type="video/webm"><source src="media/loops/03.mp4" type="video/mp4"></video></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 03</b> — Unity engine</div>
         <h2 id="t3">HexaBed</h2>
@@ -1422,7 +1422,7 @@ body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
   <section class="fold" id="s4" data-name="Blender Suite" aria-labelledby="t4">
     <div class="sheet">
       <span class="tab gold" aria-hidden="true"></span>
-      <figure class="poster"><img src="art/04.jpg" alt="A rigged voxel figure on a turntable with a camera — the Blender poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="poster"><video poster="art/04.jpg" aria-label="A rigged voxel figure on a turntable with a camera — the Blender poster" width="1600" height="900" muted loop playsinline autoplay preload="none"><source src="media/loops/04.webm" type="video/webm"><source src="media/loops/04.mp4" type="video/mp4"></video></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 04</b> — Pipeline tooling</div>
         <h2 id="t4">Blender Add-on Suite</h2>
@@ -1446,7 +1446,7 @@ body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
   <section class="fold right" id="s5" data-name="Systems &amp; Inference" aria-labelledby="t5">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
-      <figure class="poster"><img src="art/05.jpg" alt="Server racks and a small neural network — the systems poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="poster"><video poster="art/05.jpg" aria-label="Server racks and a small neural network — the systems poster" width="1600" height="900" muted loop playsinline autoplay preload="none"><source src="media/loops/05.webm" type="video/webm"><source src="media/loops/05.mp4" type="video/mp4"></video></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 05</b> — AI &amp; backend</div>
         <h2 id="t5">Systems &amp; Inference</h2>
@@ -1471,7 +1471,7 @@ body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
   <section class="fold" id="s6" data-name="By the numbers" aria-labelledby="t6">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
-      <figure class="poster"><img src="art/06.jpg" alt="An isometric bar chart of the build counts — the numbers poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="poster"><video poster="art/06.jpg" aria-label="An isometric bar chart of the build counts — the numbers poster" width="1600" height="900" muted loop playsinline autoplay preload="none"><source src="media/loops/06.webm" type="video/webm"><source src="media/loops/06.mp4" type="video/mp4"></video></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 06</b> — Evidence</div>
         <h2 id="t6">By the numbers</h2>
@@ -1504,7 +1504,7 @@ body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
   <section class="fold right closer" id="s7" data-name="Contact" aria-labelledby="t7">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
-      <figure class="poster"><img src="art/07.jpg" alt="An envelope and a paper plane — the contact poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
+      <figure class="poster"><video poster="art/07.jpg" aria-label="An envelope and a paper plane — the contact poster" width="1600" height="900" muted loop playsinline autoplay preload="none"><source src="media/loops/07.webm" type="video/webm"><source src="media/loops/07.mp4" type="video/mp4"></video></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 07</b> — Unfolded</div>
         <h2 id="t7">Let us build something.</h2>
@@ -1780,6 +1780,7 @@ addEventListener('keydown', e => {
 setTimeout(armGate, 7000);
 setTimeout(function(){ if (!document.body.classList.contains('entered')) enter(); }, 16000);
 if (REDUCED){ armGate(); enter(); }
+if (REDUCED) $$('.poster video').forEach(v => { v.removeAttribute('autoplay'); v.pause(); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => progressStep('fonts'));
 else progressStep('fonts');
 addEventListener('load', () => progressStep('three'));
@@ -2864,6 +2865,7 @@ function build(){
   const TEXLOADER = new THREE.TextureLoader();
   function loadPiece(url, mat){
     TEXLOADER.load(url, function(t){
+      if (mat.map && mat.map.isVideoTexture) return;     /* the loop got there first */
       t.encoding = THREE.sRGBEncoding;
       t.minFilter = THREE.LinearFilter;
       t.generateMipmaps = false;
@@ -2872,6 +2874,42 @@ function build(){
       mat.color.setHex(0xFFFFFF);
       mat.needsUpdate = true;
     }, undefined, function(){});
+  }
+
+  /* each poster also has a four-second loop in media/loops. The still
+     goes up first; the loop takes over the moment it is actually
+     playing, and only plays while you are near its room. */
+  const loops = [];
+  function loadLoop(i, mat){
+    if (REDUCED) return;
+    const v = document.createElement('video');
+    v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    const ext = v.canPlayType('video/webm; codecs="vp9"') ? '.webm' : '.mp4';
+    v.src = 'media/loops/' + String(i).padStart(2, '0') + ext;
+    const L = { v:v, mat:mat, tex:null, want:false, room:i };
+    v.addEventListener('playing', function(){
+      if (L.tex) return;
+      const t = new THREE.VideoTexture(v);
+      t.encoding = THREE.sRGBEncoding;
+      t.minFilter = THREE.LinearFilter; t.magFilter = THREE.LinearFilter;
+      t.generateMipmaps = false;
+      L.tex = t; mat.map = t; mat.color.setHex(0xFFFFFF); mat.needsUpdate = true;
+    });
+    v.addEventListener('error', function(){ L.dead = true; });
+    loops.push(L);
+  }
+  function driveLoops(px, pz){
+    for (let k = 0; k < loops.length; k++){
+      const L = loops[k];
+      if (L.dead) continue;
+      const dx = P[L.room].x - px, dz = P[L.room].z - pz;
+      const near = (dx*dx + dz*dz) < (ROOM * 1.1) * (ROOM * 1.1) && !document.hidden;
+      if (near === L.want) continue;
+      L.want = near;
+      if (near){ const pr = L.v.play(); if (pr && pr.catch) pr.catch(function(){ L.want = false; }); }
+      else L.v.pause();
+    }
   }
 
   const SKY_MAT = new THREE.MeshBasicMaterial({ map:texFrom(skyCanvas()) });
@@ -3914,6 +3952,7 @@ function build(){
     /* the drawn poster shows immediately; the photograph replaces it the
        moment it arrives, so a slow or failed load never leaves a hole */
     loadPiece(PIECE[i % PIECE.length], artMat);
+    loadLoop(i, artMat);
 
     /* the name plate hangs clear below the frame, not tucked under it */
     const frameHalf  = (2*HC + 1) * AU / 2;
@@ -4312,6 +4351,7 @@ function build(){
       bulbB.intensity = lanterns[n2].lit * .7;
     }
 
+    driveLoops(pos.x, pos.z);
     for (let i = 0; i < N; i++){
       const dx = (P[i].x - pos.x)/ROOM, dz = (P[i].z - pos.z)/ROOM;
       roomGroups[i].visible = (dx*dx + dz*dz) < (LOW ? 3.0 : 5.2);
