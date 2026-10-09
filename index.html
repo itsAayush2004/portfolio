@@ -2962,8 +2962,221 @@ function build(){
     }
   };
 
+  /* ── the second batch: one set-piece family per room ─────────
+     Same cell, same materials, same rules as the first twelve. The
+     wall pieces (clock, corkboard, whiteboard, sign) face +z and hang
+     from their centre. */
+  Object.assign(PROP, {
+    tree: function(v, A){                                  /* a fiddle-leaf fig, tall */
+      v.box(-3, 3, 0, 4, -3, 3, MAT.clay);
+      v.box(-4, 4, 5, 5, -4, 4, MAT.clayHi);
+      v.box(-3, 3, 5, 5, -3, 3, MAT.soil);
+      v.box(-3, 3, 2, 2, -3, 3, A);
+      v.box(0, 0, 6, 15, 0, 0, MAT.wal);                                   /* the trunk              */
+      v.box(1, 2, 11, 11, 0, 0, MAT.wal); v.box(-2, -1, 13, 13, 0, 0, MAT.wal);
+      [[0,18,0,4],[3,13,1,3],[-3,15,-1,3],[1,21,-1,3],[-2,20,2,2],[3,17,-2,2]].forEach(function(c, k){
+        const r = c[3];
+        for (let x = -r; x <= r; x++) for (let y = -r+1; y <= r-1; y++) for (let z = -r; z <= r; z++){
+          if (x*x + y*y*1.6 + z*z > r*r + .5) continue;
+          const top = (x*x + (y+1)*(y+1)*1.6 + z*z > r*r + .5);
+          const under = (x*x + (y-1)*(y-1)*1.6 + z*z > r*r + .5);
+          v.set(c[0]+x, c[1]+y, c[2]+z, top ? MAT.leafHi : (under ? MAT.leafLo : MAT.leaf));
+        }
+      });
+    },
+    coatrack: function(v, A){
+      v.box(-2, 2, 0, 0, -2, 2, MAT.ink); v.box(-1, 1, 1, 1, -1, 1, MAT.inkHi);
+      v.box(0, 0, 2, 17, 0, 0, MAT.wal);
+      v.box(-2, 2, 15, 15, 0, 0, MAT.walHi); v.box(0, 0, 15, 15, -2, 2, MAT.walHi);   /* hooks       */
+      v.box(1, 3, 8, 14, 0, 1, A); v.box(1, 3, 14, 14, 0, 1, tones(A).hi);  /* a coat                 */
+      v.box(-2, -1, 10, 14, -1, 0, MAT.brass);                             /* a scarf                */
+      v.box(-2, 2, 18, 18, -2, 2, MAT.ink); v.box(-1, 1, 19, 20, -1, 1, MAT.ink);   /* a hat on top */
+      v.box(-1, 1, 19, 19, -1, 1, A);
+    },
+    bench: function(v, A){
+      const t = tones(A);
+      [[-7,-2],[7,-2],[-7,2],[7,2]].forEach(q => v.box(q[0],q[0],0,2,q[1],q[1],MAT.ink));
+      v.box(-7, 7, 2, 2, -2, 2, MAT.inkHi);
+      for (let z = -2; z <= 2; z += 2) v.box(-8, 8, 3, 3, z, z, z === 2 ? MAT.oakHi : MAT.oak);   /* slats */
+      v.box(-6, -1, 4, 4, -2, 1, t.c); v.box(-6, -1, 4, 4, 1, 1, t.hi);    /* a cushion              */
+      v.box(3, 4, 4, 5, -1, 0, MAT.books[2]); v.box(3, 4, 6, 6, -1, 0, MAT.books[1]);   /* books     */
+    },
+    beanbag: function(v, A){
+      const t = tones(A);
+      for (let x = -3; x <= 3; x++) for (let y = 0; y <= 4; y++) for (let z = -3; z <= 3; z++){
+        const r = 3.4 - y * .35;
+        if (x*x + z*z > r*r) continue;
+        const dip = (y === 4 && Math.abs(x) < 2 && Math.abs(z) < 2);
+        if (dip) continue;
+        v.set(x, y, z, y === 4 || (y === 3 && x*x+z*z > (r-1)*(r-1)) ? t.hi : (y === 0 ? t.lo : t.c));
+      }
+      v.box(-3, 3, 1, 4, -4, -4, t.c); v.box(-3, 3, 5, 5, -4, -4, t.hi);   /* the raised back        */
+    },
+    arcade: function(v, A){
+      const t = tones(A);
+      v.box(-3, 3, 0, 18, -3, 1, MAT.ink);                                 /* the cabinet            */
+      v.box(-3, 3, 0, 0, -3, 2, MAT.inkLo);
+      v.box(-4, -4, 0, 18, -3, 2, t.c); v.box(4, 4, 0, 18, -3, 2, t.c);    /* side art               */
+      v.box(-4, -4, 5, 12, 2, 2, t.hi); v.box(4, 4, 5, 12, 2, 2, t.hi);
+      v.box(-3, 3, 7, 8, 2, 3, MAT.inkHi);                                 /* the control deck       */
+      v.set(-2, 9, 2, MAT.inkLo); v.set(-2, 10, 2, A);                     /* stick                  */
+      v.set(1, 9, 3, MAT.books[1]); v.set(2, 9, 3, MAT.books[0]); v.lit.add('1,9,3'); v.lit.add('2,9,3');
+      v.box(-2, 2, 10, 14, 2, 2, 0x1E2A44);                                /* the screen             */
+      [[-1,12],[0,13],[1,11],[0,11],[-2,10],[2,14]].forEach(q => { v.set(q[0], q[1], 2, q[1] % 2 ? 0x4BD18B : MAT.brass); v.lit.add(q[0]+','+q[1]+',2'); });
+      v.box(-3, 3, 16, 17, 2, 2, A);                                       /* the marquee, lit       */
+      for (let x = -3; x <= 3; x++) for (let y = 16; y <= 17; y++) v.lit.add(x+','+y+',2');
+      v.box(-3, 3, 15, 15, 2, 2, MAT.ink); v.box(-3, 3, 18, 18, -3, 2, MAT.inkHi);
+    },
+    tvstand: function(v, A){
+      [[-7,-2],[7,-2],[-7,2],[7,2]].forEach(q => v.set(q[0],0,q[1],MAT.walLo));
+      v.box(-7, 7, 1, 4, -2, 2, MAT.wal); v.box(-7, 7, 5, 5, -2, 2, MAT.walHi);
+      v.box(-6, -1, 2, 3, 2, 2, MAT.walHi); v.box(1, 6, 2, 3, 2, 2, MAT.walHi);
+      v.box(2, 5, 2, 2, 2, 2, MAT.ink); v.set(5, 3, 2, 0x4BD18B); v.lit.add('5,3,2');   /* a console */
+      v.box(-6, 6, 7, 13, -1, -1, MAT.ink);                                /* the screen             */
+      v.box(-5, 5, 8, 12, 0, 0, 0x22325A);
+      [[-4,9,0x4BD18B],[-3,10,0x4BD18B],[1,11,MAT.brass],[3,9,A],[0,8,0x3B86E8],[-1,9,0x3B86E8]].forEach(q => { v.set(q[0], q[1], 0, q[2]); v.lit.add(q[0]+','+q[1]+',0'); });
+      v.box(-1, 1, 6, 6, -1, -1, MAT.ink);
+      v.box(-4, -3, 6, 6, 0, 1, MAT.inkHi);                                /* a controller           */
+    },
+    hextable: function(v, A){
+      [[-6,-4],[6,-4],[-6,4],[6,4]].forEach(q => v.box(q[0],q[0],0,4,q[1],q[1],MAT.wal));
+      v.box(-7, 7, 5, 5, -5, 5, MAT.oak); v.box(-7, 7, 5, 5, 5, 5, MAT.oakHi);
+      /* a little hex world on the table, columns of grass, stone and water */
+      for (let x = -5; x <= 5; x++) for (let z = -3; z <= 3; z++){
+        if (Math.abs(x) + Math.abs(z) * .7 > 5.6) continue;
+        const h = ((x * 7 + z * 13 + 40) % 4), water = (x === 1 && z >= -1) || (x === 2 && z === 1);
+        const col = water ? 0x4BA3D9 : (h >= 3 ? 0xA9A6A0 : (((x + z) % 3) ? MAT.leaf : MAT.leafHi));
+        const top = water ? 6 : 6 + h;
+        v.box(x, x, 6, top, z, z, water ? 0x3B86B8 : 0x9A6B45);
+        v.set(x, top, z, col);
+      }
+      v.set(-3, 10, 0, A); v.set(-3, 11, 0, A);                            /* a red-roofed house     */
+      v.box(3, 3, 9, 10, -2, -2, MAT.leafLo);                              /* a tree                 */
+    },
+    toolbox: function(v, A){
+      const t = tones(A);
+      [[-3,-2],[3,-2],[-3,2],[3,2]].forEach(q => v.set(q[0],0,q[1],MAT.ink));
+      v.box(-3, 3, 1, 9, -2, 2, t.c);
+      for (let y = 3; y <= 9; y += 2){ v.box(-3, 3, y, y, 2, 2, t.lo); v.set(0, y - 1, 3, MAT.inkHi); }  /* drawers */
+      v.box(-3, 3, 10, 10, -2, 2, t.lo);
+      v.box(-2, 2, 11, 11, -1, 1, MAT.ink); v.set(1, 12, 0, MAT.brass);    /* a case on top          */
+      v.box(-3, -3, 9, 12, 2, 2, MAT.inkHi);                               /* a handle               */
+    },
+    tripodcam: function(v, A){
+      v.box(0, 0, 5, 9, 0, 0, MAT.ink);
+      v.box(-3, -3, 0, 4, 2, 2, MAT.inkHi); v.box(3, 3, 0, 4, 2, 2, MAT.inkHi);   /* three legs      */
+      v.box(0, 0, 0, 4, -3, -3, MAT.inkHi);
+      v.box(-3, 3, 4, 4, 2, 2, MAT.ink); v.box(0, 0, 4, 4, -3, 2, MAT.ink);       /* the spider      */
+      [[-3,2],[3,2],[0,-3]].forEach(q => v.set(q[0], 0, q[1], MAT.inkLo));
+      v.box(-2, 2, 10, 13, -2, 1, MAT.ink);                                /* the body               */
+      v.box(-1, 1, 11, 12, 2, 4, MAT.inkHi);                               /* the lens               */
+      v.set(0, 11, 5, MAT.glass); v.set(0, 12, 5, MAT.glass); v.lit.add('0,11,5');
+      v.set(2, 13, -2, A); v.lit.add('2,13,-2');                           /* recording              */
+      v.box(-1, 1, 14, 14, -1, 0, MAT.inkHi);
+    },
+    softbox: function(v, A){
+      v.box(0, 0, 0, 10, 0, 0, MAT.ink);
+      v.box(-2, 2, 0, 0, 0, 0, MAT.ink); v.box(0, 0, 0, 0, -2, 2, MAT.ink);
+      v.box(-4, 4, 11, 19, -1, -1, MAT.ink);                               /* the box                */
+      v.box(-3, 3, 12, 18, 0, 0, MAT.fabHi);
+      for (let x = -3; x <= 3; x++) for (let y = 12; y <= 18; y++) v.lit.add(x+','+y+',0');
+      v.box(-4, 4, 11, 11, 0, 0, A);
+    },
+    filing: function(v, A){
+      v.box(-3, 3, 0, 0, -3, 3, MAT.inkLo);
+      v.box(-3, 3, 1, 12, -3, 3, MAT.ink);
+      [2, 6, 10].forEach(function(y){
+        v.box(-2, 2, y, y + 2, 4, 4, MAT.inkHi);
+        v.box(-1, 1, y + 1, y + 1, 5, 5, MAT.brass);                       /* a handle               */
+        v.set(0, y + 2, 5, MAT.fab);                                       /* a label                */
+      });
+      v.box(-3, 3, 13, 13, -3, 3, MAT.oak);
+      v.box(-2, 1, 14, 14, -2, 1, MAT.fab); v.box(-2, 1, 15, 15, -2, 1, A);   /* papers           */
+    },
+    globe: function(v, A){
+      v.box(-2, 2, 0, 0, -2, 2, MAT.wal); v.box(0, 0, 1, 4, 0, 0, MAT.wal);
+      v.box(-4, 4, 5, 5, 0, 0, MAT.brass);
+      for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) for (let z = -3; z <= 3; z++){
+        if (x*x + y*y + z*z > 11) continue;
+        const land = ((x * 3 + y * 5 + z * 7 + 30) % 5) < 2;
+        v.set(x, y + 9, z, land ? MAT.leaf : 0x3B86B8);
+      }
+      v.box(0, 0, 13, 13, 0, 0, MAT.brass);
+    },
+    trophy: function(v, A){
+      v.box(-3, 3, 0, 5, -3, 3, MAT.fab); v.box(-3, 3, 5, 5, -3, 3, MAT.fabHi);   /* a plinth       */
+      v.box(-3, 3, 2, 2, 3, 3, A);
+      v.box(-1, 1, 6, 6, -1, 1, MAT.wal);
+      v.box(0, 0, 7, 8, 0, 0, MAT.brass);
+      v.box(-2, 2, 9, 12, -2, 2, MAT.brass); v.del(-1, 1, 12, 12, -1, 1);  /* the cup                */
+      v.box(-3, -3, 10, 11, 0, 0, MAT.brass); v.box(3, 3, 10, 11, 0, 0, MAT.brass);
+    },
+    mailbox: function(v, A){
+      const t = tones(A);
+      v.box(0, 0, 0, 8, 0, 0, MAT.wal); v.box(-1, 1, 0, 0, -1, 1, MAT.walLo);
+      v.box(-2, 2, 9, 12, -3, 3, t.c); v.box(-2, 2, 13, 13, -2, 2, t.hi);  /* the box, round-topped  */
+      v.box(-1, 1, 10, 11, 4, 4, MAT.ink);                                 /* the slot               */
+      v.box(3, 3, 10, 15, 0, 0, MAT.brass); v.box(3, 3, 14, 15, 1, 2, MAT.brass);   /* the flag, up */
+      v.box(-1, 1, 12, 12, 4, 4, MAT.fabHi);                               /* a letter, poking out   */
+    },
+    coffeetable: function(v, A){
+      [[-5,-3],[5,-3],[-5,3],[5,3]].forEach(q => v.box(q[0],q[0],0,2,q[1],q[1],MAT.walLo));
+      v.box(-6, 6, 3, 3, -4, 4, MAT.oak); v.box(-6, 6, 3, 3, 4, 4, MAT.oakHi);
+      v.box(-5, 5, 1, 1, -3, 3, MAT.wal);                                  /* a lower shelf          */
+      v.box(-4, -1, 2, 2, -2, 1, MAT.books[2]);
+      v.box(-4, -1, 4, 4, -2, 1, MAT.books[0]); v.box(-3, -1, 5, 5, -2, 0, MAT.fab);   /* books on top */
+      v.box(2, 3, 4, 5, 0, 1, A); v.box(4, 4, 4, 4, 0, 0, MAT.brass);      /* a cup, a spoon         */
+    },
+    barchart: function(v, A){
+      v.box(-6, 6, 0, 1, -3, 3, MAT.fab); v.box(-6, 6, 1, 1, 3, 3, MAT.fabHi);
+      [[ -5, 14, A ], [ -2, 8, MAT.books[1] ], [ 1, 6, MAT.books[2] ], [ 4, 4, MAT.leaf ]].forEach(function(b){
+        v.box(b[0], b[0]+1, 2, 1 + b[1], -1, 1, b[2]);
+        v.box(b[0], b[0]+1, 1 + b[1], 1 + b[1], -1, 1, shadeHex(b[2], 1.25));
+      });
+    },
+    /* ── on the wall ── */
+    clock: function(v, A){
+      for (let x = -5; x <= 5; x++) for (let y = -5; y <= 5; y++){
+        const d = x*x + y*y;
+        if (d > 27) continue;
+        v.set(x, y, 0, d > 17 ? MAT.ink : MAT.fabHi);
+      }
+      [[0,4],[0,-4],[4,0],[-4,0]].forEach(q => v.set(q[0], q[1], 1, MAT.ink));      /* the hours    */
+      v.box(0, 0, 0, 3, 1, 1, MAT.ink);                                    /* the hour hand          */
+      v.box(0, 3, 0, 0, 1, 1, MAT.inkHi);                                  /* the minute hand        */
+      v.set(-1, -1, 1, A); v.set(-2, -2, 1, A);                            /* the second hand        */
+      v.set(0, 0, 2, MAT.brass);
+    },
+    corkboard: function(v, A){
+      v.box(-9, 9, -6, 6, 0, 0, MAT.oak); v.box(-9, 9, 6, 6, 0, 0, MAT.oakHi);
+      v.box(-8, 8, -5, 5, 1, 1, 0xC9A16B);                                 /* the cork               */
+      [[-7,-4,3,3,MAT.fabHi],[-3,-1,2,3,MAT.brass],[1,1,4,3,A],[5,-3,3,4,MAT.fabHi],[-6,0,4,2,0x9FC8E4],[0,-4,4,2,MAT.leafHi],[4,2,3,3,MAT.books[1]]].forEach(function(n){
+        v.box(n[0], n[0]+n[2]-1, n[1], n[1]+n[3]-1, 2, 2, n[4]);           /* notes                  */
+        v.set(n[0] + (n[2] >> 1), n[1] + n[3] - 1, 3, A);                  /* and their pins         */
+      });
+    },
+    whiteboard: function(v, A){
+      v.box(-11, 11, -6, 6, 0, 0, MAT.inkHi);
+      v.box(-10, 10, -5, 5, 1, 1, 0xFBFAF6);
+      /* a diagram in marker: three boxes joined by lines */
+      [[-8,1],[-1,1],[6,1]].forEach(function(b, k){ v.box(b[0], b[0]+3, b[1], b[1]+2, 2, 2, k === 1 ? A : 0x2B3550); });
+      v.box(-4, -2, 2, 2, 2, 2, MAT.ink); v.box(3, 5, 2, 2, 2, 2, MAT.ink);
+      v.box(-7, 7, -3, -3, 2, 2, 0x3B86E8); v.box(-7, -7, -2, 0, 2, 2, 0x3B86E8);
+      v.box(-11, 11, -7, -7, 0, 2, MAT.inkHi);                             /* the marker tray        */
+      v.set(-6, -7, 3, A); v.set(-4, -7, 3, 0x3B86E8);
+    },
+    sign: function(v, A){                                  /* a lit play sign, arcade style */
+      v.box(-6, 6, -5, 5, 0, 0, MAT.ink);
+      for (let x = 0; x <= 6; x++){
+        const h = 3 - Math.floor(x / 2);
+        for (let y = -h; y <= h; y++){ v.set(x - 3, y + 1, 1, A); v.lit.add((x - 3) + ',' + (y + 1) + ',1'); }
+      }
+      v.box(-5, 5, -4, -4, 1, 1, MAT.brass); for (let x = -5; x <= 5; x++) v.lit.add(x + ',-4,1');
+    }
+  });
+
   /* each piece is built once per accent and shared across the rooms */
-  const piece = name => tint => propOf('p' + name + '|' + tint, FU, function(){
+  const piece = (name, u) => tint => propOf('p' + name + '|' + tint, u || FU, function(){
     const v = new Vox(); PROP[name](v, tint); return v;
   });
   const MAKERS = {
@@ -2978,8 +3191,30 @@ function build(){
     crate: { geo:piece('crate'), r:1.4 },
     plant: { geo:piece('plant'), r:.9  },
     stool: { geo:piece('stool'), r:.8  },
-    lamp:  { geo:piece('lamp'),  r:.8  }
+    lamp:  { geo:piece('lamp', .17),  r:.8, u:.17 },
+    tree:        { geo:piece('tree', .19),        r:1.3, u:.19 },
+    coatrack:    { geo:piece('coatrack', .15),    r:.8, u:.15 },
+    bench:       { geo:piece('bench'),       r:1.7 },
+    beanbag:     { geo:piece('beanbag'),     r:1.0 },
+    arcade:      { geo:piece('arcade', .15),      r:1.0, u:.15 },
+    tvstand:     { geo:piece('tvstand'),     r:1.6 },
+    hextable:    { geo:piece('hextable'),    r:1.6 },
+    toolbox:     { geo:piece('toolbox'),     r:.8  },
+    tripodcam:   { geo:piece('tripodcam', .17),   r:.9, u:.17 },
+    softbox:     { geo:piece('softbox', .16),     r:.9, u:.16 },
+    filing:      { geo:piece('filing'),      r:.8  },
+    globe:       { geo:piece('globe'),       r:.8  },
+    trophy:      { geo:piece('trophy'),      r:.8  },
+    mailbox:     { geo:piece('mailbox', .17),     r:.7, u:.17 },
+    coffeetable: { geo:piece('coffeetable'), r:1.4 },
+    barchart:    { geo:piece('barchart'),    r:1.4 }
   };
+  /* what hangs beside the doorways, room by room */
+  const WALLDECO = [
+    ['clock', 'corkboard'], ['corkboard', 'clock'], ['sign', 'sign'], ['whiteboard', 'clock'],
+    ['corkboard', 'clock'], ['whiteboard', 'clock'], ['clock', 'corkboard'], ['clock', 'sign']
+  ];
+  const WU = .12;                                   /* the wall-piece cell */
 
   /* what belongs in each room, in the order it should be tried.
      a = along the wall the picture hangs on, l = across it. */
@@ -2987,14 +3222,14 @@ function build(){
      across walls, so furniture lives in the corners: two flanking the
      picture where the camera can actually see them, two behind. */
   const FURNISH = [
-    /* 00 lobby       */ [['side',6.2,-7.0],['plant',7.4,7.6],['lamp',7.8,-4.4],['stool',-6.4,7.0],['plant',-6.8,-7.2],['lamp',-7.6,7.8],['couch',-7.4,-1.2],['chair',-4.6,7.6]],
-    /* 01 bedroom     */ [['bed',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['desk',-7.6,1.0]],
-    /* 02 game room   */ [['couch',6.2,-7.0],['stool',7.8,-4.2],['crate',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['plant',-7.8,-4.4]],
-    /* 03 workshop    */ [['desk',6.2,-7.0],['crate',7.8,-4.2],['shelf',-6.8,-7.0],['stool',-6.4,7.0],['plant',7.6,7.6],['lamp',-7.8,4.4]],
-    /* 04 studio      */ [['easel',6.4,-7.2],['stool',7.8,-4.2],['side',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['easel',-7.4,2.0]],
-    /* 05 server room */ [['rack',6.6,-7.4],['rack',6.6,-5.0],['rack',-6.8,-7.0],['crate',7.6,7.4],['rack',-6.8,-4.6],['lamp',-7.6,7.6]],
-    /* 06 library     */ [['shelf',6.4,-7.4],['shelf',6.4,-4.6],['shelf',-6.8,-7.0],['stool',7.6,7.8],['plant',-7.6,7.6],['lamp',7.8,4.6]],
-    /* 07 dining room */ [['side',6.2,-7.0],['chair',7.6,-3.8],['shelf',-6.8,-7.0],['plant',7.4,7.6],['lamp',-7.6,7.6],['plant',-7.8,-4.4]]
+    /* 00 lobby       */ [['plant',8.2,5.0],['coatrack',8.2,-5.0],['side',6.2,-7.0],['tree',7.4,7.4],['lamp',7.8,-4.4],['coatrack',-7.6,7.6],['bench',-7.4,-1.2],['chair',-4.6,7.6],['plant',-6.8,-7.2],['couch',-7.4,3.0],['tree',-7.6,-7.6]],
+    /* 01 bedroom     */ [['plant',8.2,5.0],['lamp',8.2,-5.0],['bed',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['tree',7.4,7.6],['lamp',-7.6,7.6],['desk',-7.6,1.0],['beanbag',-5.0,7.6],['chair',-7.6,-3.6]],
+    /* 02 game room   */ [['plant',8.2,5.0],['arcade',8.2,-5.0],['couch',6.2,-7.0],['arcade',7.8,-3.8],['arcade',7.8,3.8],['beanbag',-6.6,-7.0],['tvstand',-7.8,0.0],['beanbag',-5.0,6.8],['plant',7.4,7.6],['lamp',-7.6,7.6]],
+    /* 03 workshop    */ [['plant',8.2,5.0],['toolbox',8.2,-5.0],['desk',6.2,-7.0],['toolbox',7.8,-4.0],['shelf',-6.8,-7.0],['hextable',-7.2,2.0],['crate',7.6,7.2],['stool',-6.4,7.0],['lamp',-7.8,-3.8],['plant',7.8,4.4]],
+    /* 04 studio      */ [['plant',8.2,5.0],['softbox',8.2,-5.0],['easel',6.4,-7.2],['tripodcam',7.6,-3.6],['softbox',-7.6,-7.6],['softbox',7.6,7.6],['side',-6.8,-3.0],['plant',-7.6,7.6],['easel',-7.4,2.0],['stool',4.4,-7.8]],
+    /* 05 server room */ [['plant',8.2,5.0],['filing',8.2,-5.0],['rack',6.6,-7.4],['rack',6.6,-5.0],['rack',-6.8,-7.0],['rack',-6.8,-4.6],['filing',7.6,7.4],['desk',-7.4,3.0],['lamp',-7.6,7.6],['crate',7.6,4.4],['rack',6.6,4.8]],
+    /* 06 library     */ [['plant',8.2,5.0],['trophy',8.2,-5.0],['shelf',6.4,-7.4],['shelf',6.4,-4.6],['shelf',-6.8,-7.0],['globe',7.6,7.8],['barchart',-7.2,2.4],['trophy',-7.6,7.6],['filing',7.8,4.4],['trophy',-7.6,-4.0],['chair',4.4,7.6]],
+    /* 07 dining room */ [['plant',8.2,5.0],['mailbox',8.2,-5.0],['side',6.2,-7.0],['chair',7.6,-3.8],['shelf',-6.8,-7.0],['tree',7.4,7.6],['coffeetable',-7.0,2.6],['mailbox',-7.8,7.8],['lamp',-7.6,-3.8],['chair',-4.6,6.6]]
   ];
 
   /* the room's own no-go map. Plot's footprints were cut for small
@@ -3029,15 +3264,28 @@ function build(){
 
     const list = FURNISH[i % FURNISH.length];
     for (let k = 0; k < list.length; k++){
-      if (LOW && k > 3) break;
-      const name = list[k][0], a = list[k][1], l = list[k][2];
+      if (LOW && k > 5) break;
+      const name = list[k][0];
       const M2 = MAKERS[name];
-      if (!M2 || !fits(a, l, M2.r)) continue;
+      if (!M2) continue;
+      /* the spot asked for, or failing that the nearest free one along
+         the walls — every room's doors fall differently */
+      let a = list[k][1], l = list[k][2];
+      if (!fits(a, l, M2.r)){
+        let best = null, bd = 1e9;
+        for (let ca = -7.8; ca <= 7.81; ca += .6) for (let cl = -7.8; cl <= 7.81; cl += .6){
+          if (Math.max(Math.abs(ca), Math.abs(cl)) < 6.2) continue;
+          const d = (ca - a)*(ca - a) + (cl - l)*(cl - l);
+          if (d < bd && fits(ca, cl, M2.r)){ bd = d; best = [ca, cl]; }
+        }
+        if (!best) continue;
+        a = best[0]; l = best[1];
+      }
       up.push({ a:[a, l], r:M2.r });
       const spot = W(a, l);
       /* every piece turns its face toward the middle of the room */
       const ry = Math.atan2(p.x - spot.x, p.z - spot.z);
-      stand(g, M2.geo(R.tint), FU, spot.x, spot.z, ry, 0);
+      stand(g, M2.geo(R.tint), M2.u || FU, spot.x, spot.z, ry, 0);
     }
   }
 
@@ -3416,6 +3664,18 @@ function build(){
       scr.position.set(0, 1.6 + 7.5*CU, .28); cab.add(scr);
       screens.push({ mesh:scr, room:i, w:5.4, h:3.58 });
     }
+
+    /* beside every doorway, something on the wall: a clock, a board, a sign */
+    ['px','nx','pz','nz'].filter(k => doorSides[i][k]).forEach(function(k, n){
+      const sv = SIDEVEC[k];
+      const wg = new THREE.Group();
+      wg.position.set(p.x + sv[0]*(HALF - T*.5 - .1), 0, p.z + sv[1]*(HALF - T*.5 - .1));
+      wg.rotation.y = Math.atan2(-sv[0], -sv[1]);
+      g.add(wg);
+      const deco = WALLDECO[i % WALLDECO.length], name = deco[n % deco.length];
+      const geo = voxGeo('w' + name + '|' + R.tint, WU, function(){ const v = new Vox(); PROP[name](v, R.tint); return v; });
+      voxAdd(wg, geo, WU, { cx:(n % 2 ? -1 : 1) * 6.3, cy:4.7, minZ:0 });
+    });
 
     /* the walls with nothing on them get a shelf and a little gallery */
     spare.slice(GAMES[i] ? 1 : 0).forEach(function(k, n){
