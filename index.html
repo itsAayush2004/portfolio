@@ -2118,7 +2118,7 @@ function build(){
   const camera = new THREE.PerspectiveCamera(LOW ? 86 : 78, view.w/view.h, .1, 300);
 
   /* ── the plan ─────────────────────────────────────────────── */
-  const ART_Y = 4.3;
+  const ART_Y = 4.55;
   const ROOM = 20, HALF = ROOM/2, H = 7.4, DW = 2.3, DH = 4.3, T = .34, EYE = 2.05;
   const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4]];
   const P = CELL.map(c => ({ x:c[0]*ROOM, z:c[1]*ROOM }));
@@ -3533,14 +3533,14 @@ function build(){
      across walls, so furniture lives in the corners: two flanking the
      picture where the camera can actually see them, two behind. */
   const FURNISH = [
-    /* 00 lobby       */ [['plant',8.2,5.0],['coatrack',8.2,-5.0],['side',6.2,-7.0],['tree',7.4,7.4],['lamp',7.8,-4.4],['coatrack',-7.6,7.6],['bench',-7.4,-1.2],['chair',-4.6,7.6],['plant',-6.8,-7.2],['couch',-7.4,3.0],['tree',-7.6,-7.6]],
-    /* 01 bedroom     */ [['plant',8.2,5.0],['lamp',8.2,-5.0],['bed',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['tree',7.4,7.6],['lamp',-7.6,7.6],['desk',-7.6,1.0],['beanbag',-5.0,7.6],['chair',-7.6,-3.6]],
-    /* 02 game room   */ [['plant',8.2,5.0],['arcade',8.2,-5.0],['couch',6.2,-7.0],['arcade',7.8,-3.8],['arcade',7.8,3.8],['beanbag',-6.6,-7.0],['tvstand',-7.8,0.0],['beanbag',-5.0,6.8],['plant',7.4,7.6],['lamp',-7.6,7.6]],
-    /* 03 workshop    */ [['plant',8.2,5.0],['toolbox',8.2,-5.0],['desk',6.2,-7.0],['toolbox',7.8,-4.0],['shelf',-6.8,-7.0],['hextable',-7.2,2.0],['crate',7.6,7.2],['stool',-6.4,7.0],['lamp',-7.8,-3.8],['plant',7.8,4.4]],
-    /* 04 studio      */ [['plant',8.2,5.0],['softbox',8.2,-5.0],['easel',6.4,-7.2],['tripodcam',7.6,-3.6],['softbox',-7.6,-7.6],['softbox',7.6,7.6],['side',-6.8,-3.0],['plant',-7.6,7.6],['easel',-7.4,2.0],['stool',4.4,-7.8]],
-    /* 05 server room */ [['plant',8.2,5.0],['filing',8.2,-5.0],['rack',6.6,-7.4],['rack',6.6,-5.0],['rack',-6.8,-7.0],['rack',-6.8,-4.6],['filing',7.6,7.4],['desk',-7.4,3.0],['lamp',-7.6,7.6],['crate',7.6,4.4],['rack',6.6,4.8]],
-    /* 06 library     */ [['plant',8.2,5.0],['trophy',8.2,-5.0],['shelf',6.4,-7.4],['shelf',6.4,-4.6],['shelf',-6.8,-7.0],['globe',7.6,7.8],['barchart',-7.2,2.4],['trophy',-7.6,7.6],['filing',7.8,4.4],['trophy',-7.6,-4.0],['chair',4.4,7.6]],
-    /* 07 dining room */ [['plant',8.2,5.0],['mailbox',8.2,-5.0],['side',6.2,-7.0],['chair',7.6,-3.8],['shelf',-6.8,-7.0],['tree',7.4,7.6],['coffeetable',-7.0,2.6],['mailbox',-7.8,7.8],['lamp',-7.6,-3.8],['chair',-4.6,6.6]]
+    /* 00 lobby       */ [['plant',8.2,6.2],['coatrack',8.2,-6.2],['side',6.2,-7.0],['tree',7.4,7.4],['lamp',7.8,-4.4],['coatrack',-7.6,7.6],['bench',-7.4,-1.2],['chair',-4.6,7.6],['plant',-6.8,-7.2],['couch',-7.4,3.0],['tree',-7.6,-7.6]],
+    /* 01 bedroom     */ [['plant',8.2,6.2],['lamp',8.2,-6.2],['bed',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['tree',7.4,7.6],['lamp',-7.6,7.6],['desk',-7.6,1.0],['beanbag',-5.0,7.6],['chair',-7.6,-3.6]],
+    /* 02 game room   */ [['plant',8.2,6.2],['arcade',8.2,-6.2],['couch',6.2,-7.0],['arcade',7.8,-3.8],['arcade',7.8,3.8],['beanbag',-6.6,-7.0],['tvstand',-7.8,0.0],['beanbag',-5.0,6.8],['plant',7.4,7.6],['lamp',-7.6,7.6]],
+    /* 03 workshop    */ [['plant',8.2,6.2],['toolbox',8.2,-6.2],['desk',6.2,-7.0],['toolbox',7.8,-4.0],['shelf',-6.8,-7.0],['hextable',-7.2,2.0],['crate',7.6,7.2],['stool',-6.4,7.0],['lamp',-7.8,-3.8],['plant',7.8,4.4]],
+    /* 04 studio      */ [['plant',8.2,6.2],['softbox',8.2,-6.2],['easel',6.4,-7.2],['tripodcam',7.6,-3.6],['softbox',-7.6,-7.6],['softbox',7.6,7.6],['side',-6.8,-3.0],['plant',-7.6,7.6],['easel',-7.4,2.0],['stool',4.4,-7.8]],
+    /* 05 server room */ [['plant',8.2,6.2],['filing',8.2,-6.2],['rack',6.6,-7.4],['rack',6.6,-5.0],['rack',-6.8,-7.0],['rack',-6.8,-4.6],['filing',7.6,7.4],['desk',-7.4,3.0],['lamp',-7.6,7.6],['crate',7.6,4.4],['rack',6.6,4.8]],
+    /* 06 library     */ [['plant',8.2,6.2],['trophy',8.2,-6.2],['shelf',6.4,-7.4],['shelf',6.4,-4.6],['shelf',-6.8,-7.0],['globe',7.6,7.8],['barchart',-7.2,2.4],['trophy',-7.6,7.6],['filing',7.8,4.4],['trophy',-7.6,-4.0],['chair',4.4,7.6]],
+    /* 07 dining room */ [['plant',8.2,6.2],['mailbox',8.2,-6.2],['side',6.2,-7.0],['chair',7.6,-3.8],['shelf',-6.8,-7.0],['tree',7.4,7.6],['coffeetable',-7.0,2.6],['mailbox',-7.8,7.8],['lamp',-7.6,-3.8],['chair',-4.6,6.6]]
   ];
 
   /* the room's own no-go map. Plot's footprints were cut for small
@@ -3558,7 +3558,7 @@ function build(){
     function fits(a, l, r){
       if (Math.sqrt(a*a + l*l) < 3.4 + r) return false;            /* the walk   */
       if (Math.max(Math.abs(a), Math.abs(l)) + r > 9.3) return false; /* the wall */
-      if (a > 3.6 && Math.abs(l) < 3.4 + r*.5) return false;       /* the picture*/
+      if (a > 3.6 && Math.abs(l) < 4.4 + r*.5) return false;       /* the picture*/
       const dx = A[0]*a + L[0]*l, dz = A[1]*a + L[1]*l;
       for (let c = 0; c < chans.length; c++){
         const v = chans[c];
@@ -3888,50 +3888,49 @@ function build(){
     frame.position.set(p.x + A[0]*(HALF - T*.5 - .06), 0, p.z + A[1]*(HALF - T*.5 - .06));
     frame.rotation.y = Math.atan2(-A[0], -A[1]);
     g.add(frame);
-    /* a stepped frame with corner blocks that stand proud of the
-       rail, and a real rebate for the poster to sit back in. The
-       poster itself is untouched — it is content, not an asset. */
-    const AU = 6.5 / 23;
-    /* the picture is 5.5 wide; its height follows its own aspect, and the
-       frame is cut to whatever that comes to — half-height in cells, one
-       course of margin all round */
+    /* a slim frame: a thin ink rail two cells wide, a lip one cell in,
+       a narrow white mat, and the poster as large as the wall allows.
+       The poster itself is untouched — it is content, not an asset. */
+    const AU = .1;
+    /* the picture is 7.4 wide; its height follows its own aspect, and the
+       frame is cut to it — one cell of mat, then the rail */
     const AR   = PIECE_AR[i % PIECE_AR.length];
-    const artW = 5.5, artH = artW / AR;
-    const HC   = Math.max(4, Math.round(artH / 2 / AU) + 1);
-    const frameGeo = voxGeo('art|'+R.art+'|'+HC, AU, function(){
-      const v = new Vox(), W = 11, Hh = HC;
+    const artW = 7.4, artH = artW / AR;
+    const WC   = Math.round(artW / 2 / AU) + 3;
+    const HC   = Math.round(artH / 2 / AU) + 3;
+    const frameGeo = voxGeo('art|'+R.art+'|'+WC+'|'+HC, AU, function(){
+      const v = new Vox(), W = WC, Hh = HC;
       v.box(-W, W, -Hh, Hh, 0, 0, R.art);                  /* the mat */
-      v.rect(-W, W, -Hh, Hh, 0, 1, 1, 0x24232B);           /* the rail, in ink */
-      v.rect(-W, W, -Hh, Hh, 2, 2, 1, 0x34333D);           /* stepped proud */
-      [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(q){   /* a block on each corner */
-        const x0 = q[0] > 0 ? W-2 : -W, y0 = q[1] > 0 ? Hh-2 : -Hh;
-        v.box(x0, x0+2, y0, y0+2, 0, 2, 0x1A1920);
-      });
-      v.box(-W, -W+2, Hh-2, Hh, 0, 2, 0xD62222);           /* the one accent, on the corner */
+      v.rect(-W, W, -Hh, Hh, 0, 1, 2, 0x24232B);           /* the rail, in ink */
+      v.rect(-W+2, W-2, -Hh+2, Hh-2, 1, 1, 1, 0x3A3944);   /* the lip, a step in */
+      v.box(-W, -W+3, Hh-1, Hh, 0, 2, 0xD62222);           /* the one accent, on the corner */
+      v.box(-W, -W+1, Hh-3, Hh, 0, 2, 0xD62222);
       return v;
     });
     voxAdd(frame, frameGeo, AU, { cx:0, cy:ART_Y, minZ:-.09 }, false);
     const artMat = new THREE.MeshBasicMaterial({ map:artTex[i] });
     const art = new THREE.Mesh(new THREE.PlaneGeometry(artW, artH), artMat);
-    art.position.set(0, ART_Y, .21); frame.add(art);
+    art.position.set(0, ART_Y, .035); frame.add(art);
     /* the drawn poster shows immediately; the photograph replaces it the
        moment it arrives, so a slow or failed load never leaves a hole */
     loadPiece(PIECE[i % PIECE.length], artMat);
 
     /* the name plate hangs clear below the frame, not tucked under it */
-    const frameHalf = (2*HC + 1) * AU / 2;
-    const labHalf   = 2.5 * AU;
-    const labY      = ART_Y - frameHalf - .16 - labHalf;
-    const labGeo = voxGeo('lab|'+R.art, AU, function(){
+    const frameHalf  = (2*HC + 1) * AU / 2;
+    const frameHalfW = (2*WC + 1) * AU / 2;
+    const LU = .2;
+    const labHalf   = 2.5 * LU;
+    const labY      = ART_Y - frameHalf - .12 - labHalf;
+    const labGeo = voxGeo('lab|'+R.art, LU, function(){
       return new Vox().box(-6, 6, -2, 2, 0, 0, R.art).rect(-6, 6, -2, 2, 0, 0, 1, 0x24232B);
     });
-    voxAdd(frame, labGeo, AU, { cx:0, cy:labY, minZ:-.09 });
-    const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .82), new THREE.MeshBasicMaterial({ map:labTex[i] }));
-    lab.position.set(0, labY, .21); frame.add(lab);
+    voxAdd(frame, labGeo, LU, { cx:0, cy:labY, minZ:-.09 });
+    const lab = new THREE.Mesh(new THREE.PlaneGeometry(1.84, .58), new THREE.MeshBasicMaterial({ map:labTex[i] }));
+    lab.position.set(0, labY, .125); frame.add(lab);
     /* a pair of sconces either side of the picture */
     [-1, 1].forEach(function(sd){
       const sg = new THREE.Group();
-      sg.position.set(sd * 4.15, ART_Y + .55, 0);
+      sg.position.set(sd * (frameHalfW + .55), ART_Y + .55, 0);
       frame.add(sg);
       voxAdd(sg, sconceGeo(R.tint), .07, { cx:0, cy:0, minZ:-.09 });
       const glow = new THREE.Sprite(SCONCE_GLOW);
@@ -3940,7 +3939,7 @@ function build(){
       sg.add(glow);
     });
 
-    artworks.push({ group:frame, hit:art, w:6.5, h:frameHalf*2 + .2, room:i, cy:ART_Y,
+    artworks.push({ group:frame, hit:art, w:frameHalfW*2, h:frameHalf*2 + .2, room:i, cy:ART_Y,
                     homePos:frame.position.clone(), homeQuat:frame.quaternion.clone() });
 
     /* a cabinet, where there is a game to play */
