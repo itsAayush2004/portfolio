@@ -12,10 +12,10 @@
 </p>
 
 You come in through a door. Scrolling moves a camera forward through eight rooms laid out on a
-serpentine plan. Each room hangs one piece of work on its wall with a name plate under it, has
-furniture that belongs to what the room is about, and a built doorway ahead naming whatever is next.
-The camera turns to face whichever wall the piece is on. The copy rides over the top on a card that
-lands as you arrive.
+serpentine plan. Each room has its own colour, hangs one poster of the work on its wall between a
+pair of sconces, has furniture that belongs to what the room is about, a shelf and a little gallery
+on its spare wall, and a built doorway ahead naming whatever is next. The camera turns square to the
+poster and slides it into the half of the screen the copy card leaves free.
 
 Built as a single self-contained `index.html` — no build step, no bundler, nothing to install.
 Three.js loads from a CDN; every wall, frame, lamp and chair is drawn at runtime.
@@ -49,15 +49,23 @@ always comes to rest exactly at a room's centre — no drift. The value is dampe
 
 **The camera turns.** Each room hangs its piece on one half of a wall. As you enter, the look-at
 target eases toward that wall and returns to dead-ahead in the doorways between rooms, weighted by
-`smoothstep(1 - |p - i| / 0.5)`.
+`smoothstep(1 - |p - i| / 0.5)`. It always lands square on — and then `setViewOffset` slides the
+frame sideways so the poster sits beside the card rather than under it.
 
-**The frame fits the picture.** Each room's piece is a real image from `art/`. The plate is 5.5
-units wide and takes its height from the image's own aspect, and the voxel surround is built to
-whatever that comes to, one course of margin all round — so a 16:9 piece and a 3:2 piece both sit
-in a frame cut for them.
+**The posters are drawn, not photographed.** Each room's piece in `art/` is an isometric voxel
+diorama — a cut-away lobby, a workbench, a phone feed beside a tower, a hex island, a rigged figure
+on a turntable, server racks, a bar-chart city, an envelope — in the house palette. The source is in
+`art/src/`: a tiny isometric renderer that emits SVG, one scene per room, and a script that renders
+them to JPEG. The frame is ink with a white mat, built to the picture's own aspect.
 
-**Furnished by theme.** Ten voxel pieces — bed, couch, shelf, server rack, desk, sideboard, easel,
-crates, plant, stool — dealt out by what each room is. Every piece is tested before it is placed:
+**Every room has a colour.** A pale wall, a deeper wainscot under a rail, skirting, a crown, a rug
+and an accent the furniture picks up — cream, sage, lilac, sky, peach, indigo, butter, blush, each
+taken from the room's poster. Each room lines the inside of its own walls, so a wall two rooms share
+shows each of them its own colour. Colours are converted from sRGB to linear before they reach the
+renderer, so ink reads as ink and the red as red.
+
+**Furnished by theme.** Eleven voxel pieces — bed, couch, shelf, server rack, desk, sideboard, easel,
+crates, plant, stool, floor lamp — in oak, walnut and fabric, dealt out by what each room is. Every piece is tested before it is placed:
 outside the disc the camera walks through, clear of every doorway it travels down, off the wall the
 picture hangs on, inside the room, and not touching anything already standing. Anything that fails
 is simply not placed, so nothing ever crosses the camera's path.
@@ -65,6 +73,11 @@ is simply not placed, so nothing ever crosses the camera's path.
 **Toon shading.** `MeshToonMaterial` with a three-step `DataTexture` ramp on `NearestFilter`, lit by
 ambient plus one key so the bands read. Black `EdgesGeometry` outlines on every solid give the
 drawn, cel-shaded edge.
+
+**The interface is built from placards.** Every surface — header, room cards, doors, the walk bar,
+the arcade bar, the loading gate — is paper with a 2px ink edge and a hard offset shadow, so the UI
+reads as made from the same blocks as the rooms. Each card carries its room's colour on a header band
+and ends with the rooms either side; the header shows which of the eight rooms you are standing in.
 
 **Text lives in the DOM, not the canvas.** WebGL renders the room; every readable word is real HTML
 on a card over the top. That keeps the site selectable, searchable, screen-reader friendly, and
@@ -78,6 +91,7 @@ inlined as a data URI.
 
 - No WebGL → the canvas hides itself, the content stands alone on a blueprint grid
 - An image fails to load → the hand-drawn poster underneath is already there
+- Phone, or no WebGL → each room's poster rides at the top of its card instead
 - `prefers-reduced-motion` → camera drift, turning, dust and easing all switch off
 - Mobile → pixel ratio capped, particles off, cards flow vertically
 - Keyboard → arrows and PageUp/PageDown walk room to room
@@ -89,7 +103,7 @@ inlined as a data URI.
 | | |
 |---|---|
 | 3D | Three.js r128 |
-| Type | Fraunces · Inter · JetBrains Mono |
+| Type | Fraunces · Instrument Sans · JetBrains Mono |
 | Everything else | Vanilla HTML / CSS / JS |
 | Hosting | GitHub Pages |
 
@@ -123,5 +137,6 @@ B.Tech Electronics & Communication, MNIT Jaipur (2026)
 
 MIT — see [LICENSE](LICENSE).
 
-The code is free to reuse. The written content, the artwork in `art/`, the trailer and the personal
-details are mine; please swap them for your own.
+The code is free to reuse. The written content, the posters in `art/`, the trailer and the personal
+details are mine; please swap them for your own (the scenes in `art/src/poster.html` are a good
+place to start).

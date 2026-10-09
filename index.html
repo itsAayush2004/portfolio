@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="icon" href="data:image/svg+xml,<svg%20xmlns="http://www.w3.org/2000/svg"%20viewBox="0%200%2064%2064"><g%20fill="none"%20stroke="#14161F"%20stroke-width="2.4"%20stroke-linejoin="round"><path%20d="M32%209%2054%2021.5%2032%2034%2010%2021.5Z"%20fill="#F2A83B"/><path%20d="M10%2021.5%2032%2034v20.5L10%2042Z"%20fill="#D62222"/><path%20d="M54%2021.5%2032%2034v20.5L54%2042Z"%20fill="#2B3550"/><path%20d="M17.6%2031.2%2025.4%2035.6v11.6l-7.8-4.4Z"%20fill="#FCFCFC"%20stroke-width="2"/><path%20d="M38.6%2042.4%2047.4%2037.4v7.4l-8.8%205Z"%20fill="#FCFCFC"%20stroke-width="2"/></g></svg>">
 <link rel="apple-touch-icon" href="./art/mark.png">
 <meta property="og:image" content="https://itsaayush2004.github.io/portfolio/art/mark.png">
@@ -49,7 +49,7 @@
   --rule:   rgba(20,20,20,.14);
 
   --display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --body:    "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   --ease-out:  cubic-bezier(.16,1,.3,1);
@@ -315,6 +315,14 @@ body.panel .bar .trk{ height:6px }
 body.panel .tab{ width:34px }
 body.panel .wordmark{ margin:6px 0 12px }
 body.panel .prompt{ display:none }
+
+/* the room's poster rides at the top of its card wherever the wall
+   can't be seen: on a phone, and when there is no WebGL at all */
+.poster{ display:none; margin:0 0 clamp(16px,2.4vw,24px); border-radius:10px; overflow:hidden;
+  box-shadow:0 0 0 1px rgba(23,21,15,.12), 0 10px 24px rgba(58,48,28,.14); background:var(--paper-lo) }
+.poster img{ width:100%; height:auto; aspect-ratio:16/9; object-fit:cover }
+body.flow .poster, body.noweb .poster{ display:block }
+body.flow .sheet > .poster{ margin-top:4px }
 
 /* ── 7. TYPE ──────────────────────────────────────────────────── */
 .kicker{
@@ -991,6 +999,240 @@ body.flow .sheet{
 body.flow .fold:nth-child(odd),body.flow .fold:nth-child(even){ transform:none }
 body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
 
+
+/* ════════════════════════════════════════════════════════════════
+   PLACARD — the house's UI kit. Every surface is a placard: paper,
+   a 2px ink edge and a hard offset shadow, so the interface reads as
+   built from the same blocks as the rooms. One red, one amber, and
+   each room's own colour on its card's header band.
+   ════════════════════════════════════════════════════════════════ */
+:root{
+  --pc-ink:#17161C; --pc-paper:#FBF8F2; --pc-ground:#F3EEE6; --pc-red:#D62222; --pc-red-t:#B81C1C;
+  --pc-amber:#F2A83B; --pc-mute:#5E5A66; --pc-body:#3C3944;
+  --pc-edge:2px solid var(--pc-ink);
+  --pc-sh:5px 5px 0 var(--pc-ink);
+}
+#s0{ --tint:#F3EADB } #s1{ --tint:#DCE7D3 } #s2{ --tint:#E1DDF3 } #s3{ --tint:#D5E7F1 }
+#s4{ --tint:#F6DCC7 } #s5{ --tint:#434B7E; --tint-ink:#FFFFFF } #s6{ --tint:#F3E6BE } #s7{ --tint:#F4D9D2 }
+
+/* the pressable thing: a key that drops into its own shadow */
+.pc-press{ transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out), background .2s, color .2s }
+
+/* ── header ── */
+.hud{
+  top:14px; left:16px; right:16px; width:auto;
+  padding:7px 8px 7px 10px; padding-top:7px; margin-top:env(safe-area-inset-top);
+  background:var(--pc-paper); border:var(--pc-edge); border-radius:16px; box-shadow:var(--pc-sh);
+}
+.mark b{ font-weight:600; font-size:12px; letter-spacing:.14em }
+.mark .role{ color:var(--pc-mute); font-size:9.5px }
+.mark .face{ width:34px; height:34px }
+.nav-btn{
+  min-height:44px; padding:0 15px; border:var(--pc-edge); border-radius:10px; background:var(--pc-paper);
+  color:var(--pc-ink); font-weight:600; font-size:11px; letter-spacing:.1em;
+}
+.nav-btn:hover,.nav-btn:focus-visible{ background:#FFFFFF; color:var(--pc-ink); border-color:var(--pc-ink); transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--pc-ink) }
+.nav-btn.primary{ background:var(--pc-red); border-color:var(--pc-ink); color:#FFFFFF; box-shadow:3px 3px 0 var(--pc-ink) }
+.nav-btn.primary:hover,.nav-btn.primary:focus-visible{ background:var(--pc-red); border-color:var(--pc-ink); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--pc-ink) }
+.nav-btn:active,.nav-btn.primary:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--pc-ink) }
+
+.where{ display:none; align-items:center; gap:12px; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--pc-mute) }
+.where-blocks{ display:flex; gap:5px }
+.where-blocks i{ width:13px; height:13px; border-radius:3px; border:2px solid var(--pc-ink); box-sizing:border-box; transition:background .3s, box-shadow .3s }
+.where-blocks i.past{ background:var(--pc-ink) }
+.where-blocks i.now{ background:var(--pc-red); border-color:var(--pc-red); box-shadow:0 0 0 2px var(--pc-paper), 0 0 0 4px var(--pc-red) }
+.where-name{ font-family:var(--display); font-weight:600; font-size:16px; letter-spacing:0; text-transform:none; color:var(--pc-ink); min-width:13ch }
+@media (min-width:1180px){ body.panel .where{ display:flex } }
+
+/* ── cards ── */
+body.panel .sheet, body.flow .sheet, body.noweb .sheet{
+  padding:0; background:var(--pc-paper); color:var(--pc-body);
+  border:var(--pc-edge); border-radius:18px; box-shadow:7px 7px 0 var(--pc-ink);
+  -webkit-backdrop-filter:none; backdrop-filter:none; rotate:none;
+}
+body.panel .fold:nth-child(odd) .sheet, body.panel .fold:nth-child(even) .sheet{ rotate:none }
+body.flow .fold:nth-child(odd), body.flow .fold:nth-child(even){ transform:none }
+.sheet::before,.sheet::after{ display:none }
+.sheet .tab{ display:none }
+.sheet > .stg{ padding:20px 24px 24px }
+body.flow .sheet > .stg{ padding:20px clamp(18px,4vw,30px) 26px }
+body.panel .sheet{ width:min(400px, 33vw) }
+body.panel .cover .sheet{ width:min(470px, 38vw) }
+body.flow .sheet > .poster{ margin:0; border-radius:16px 16px 0 0; box-shadow:none; border-bottom:var(--pc-edge) }
+
+.kicker{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin:-20px -24px 18px; padding:12px 24px;
+  background:var(--tint, #EFE9DE); border-bottom:var(--pc-edge);
+  font-size:10.5px; letter-spacing:.14em; color:var(--tint-ink, #3A3640); border-radius:16px 16px 0 0;
+}
+body.flow .kicker{ margin:-20px calc(-1 * clamp(18px,4vw,30px)) 18px; padding-inline:clamp(18px,4vw,30px) }
+body.flow .sheet > .poster + .stg .kicker{ border-radius:0 }
+.kicker .dash{ display:none }
+.kicker b{ background:var(--pc-ink); color:#FFFFFF; padding:4px 8px; border-radius:6px; font-weight:600 }
+#s5 .kicker b{ background:#FFFFFF; color:var(--pc-ink) }
+body.panel .kicker{ font-size:10px; margin-bottom:16px }
+.closer .kicker{ justify-content:center }
+
+h1,h2{ color:var(--pc-ink); letter-spacing:-.03em }
+.wordmark em{ color:var(--pc-red) }
+.copy b,.pts b{ color:var(--pc-ink) }
+
+.pts li::before{ clip-path:none; width:9px; height:9px; top:.5em; background:var(--pc-red); opacity:1; outline:1.5px solid var(--pc-ink); outline-offset:0 }
+body.panel .pts li::before{ width:8px; height:8px; top:.52em }
+
+.chip{ font-weight:600; color:var(--pc-ink); border:var(--pc-edge); border-radius:7px; background:transparent; padding:4px 8px }
+.chip.hot{ background:var(--pc-ink); color:var(--pc-paper); border:var(--pc-edge); font-weight:600 }
+.chip:hover{ transform:translate(-1px,-1px); box-shadow:2px 2px 0 var(--pc-ink) }
+
+.spec{ display:grid; grid-template-columns:repeat(auto-fit,minmax(0,1fr)); gap:0; padding:0; border:var(--pc-edge); border-radius:12px; overflow:hidden }
+.spec > div{ min-width:0; padding:11px 13px; border-right:var(--pc-edge) }
+.spec > div:last-child{ border-right:0 }
+.spec .k{ color:var(--pc-mute) }
+.spec .v{ color:var(--pc-ink) }
+body.panel .spec{ padding-top:0; gap:0 }
+body.panel .spec > div{ min-width:0 }
+
+.tally{ background:var(--pc-ink); border:var(--pc-edge); gap:2px; border-radius:12px; overflow:hidden }
+.tally .cell{ background:var(--pc-paper) }
+.tally .n i{ color:var(--pc-red) }
+.bars .cap{ border-bottom:var(--pc-edge); color:var(--pc-mute) }
+.bar .trk{ height:10px; background:#FFFFFF; border:var(--pc-edge); border-radius:4px }
+.bar .fil{ background:var(--pc-red) }
+.bar.muted .fil{ background:var(--pc-ink) }
+
+.cta{
+  min-height:46px; padding:0 18px; border:var(--pc-edge); border-radius:10px; background:var(--pc-paper);
+  font-weight:600; letter-spacing:.1em; color:var(--pc-ink); box-shadow:3px 3px 0 var(--pc-ink); overflow:visible;
+  transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out);
+}
+.cta::before{ display:none }
+.cta:hover,.cta:focus-visible{ color:var(--pc-ink); transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--pc-ink) }
+.cta:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--pc-ink) }
+.cta.play{ background:var(--pc-red); color:#FFFFFF; border-color:var(--pc-ink); border-radius:10px }
+.cta.play i{ color:#FFFFFF }
+.cta.play:hover,.cta.play:focus-visible,.cta.play:hover i{ color:#FFFFFF }
+
+.links a{ color:var(--pc-ink); font-weight:600 }
+.links a .dot{ background:var(--pc-red) }
+
+.print, .print:nth-child(odd), .print:nth-child(even){ transform:none; border:var(--pc-edge); border-radius:12px; box-shadow:4px 4px 0 var(--pc-ink); padding:6px 6px 28px }
+.print:hover,.print:focus-visible{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--pc-ink) }
+.print img{ border-radius:7px }
+.print .pin{ display:none }
+
+/* the lobby's doors */
+.lobby-head{ display:flex; align-items:center; gap:12px; border-top:0; padding-top:0; color:var(--pc-mute) }
+.lobby-head::after{ content:""; flex:1; height:2px; background:var(--pc-ink) }
+.lobby{ gap:9px }
+.door{
+  min-height:52px; padding:7px 10px; gap:10px; background:#FFFFFF; border:var(--pc-edge); border-radius:12px;
+  box-shadow:3px 3px 0 var(--pc-ink); transition:transform .14s var(--ease-out), box-shadow .14s var(--ease-out), background .2s;
+}
+.door:hover,.door:focus-visible{ transform:translate(-2px,-2px); rotate:none; background:var(--door, #FFFFFF); border-color:var(--pc-ink); box-shadow:5px 5px 0 var(--pc-ink) }
+.door:active{ transform:translate(3px,3px); box-shadow:0 0 0 var(--pc-ink) }
+.door canvas{ display:none }
+.door .txt{ flex-direction:row; align-items:center; gap:10px }
+.door em{
+  flex:none; width:30px; height:30px; display:grid; place-items:center; border-radius:7px;
+  background:var(--door, #EFE9DE); border:var(--pc-edge); color:var(--pc-ink); font-size:10.5px; font-weight:600; letter-spacing:.04em;
+}
+.door span{ font-size:13.5px; font-weight:600 }
+.lobby .door:nth-child(1){ --door:#DCE7D3 } .lobby .door:nth-child(2){ --door:#E1DDF3 } .lobby .door:nth-child(3){ --door:#D5E7F1 }
+.lobby .door:nth-child(4){ --door:#F6DCC7 } .lobby .door:nth-child(5){ --door:#C9CDEA } .lobby .door:nth-child(6){ --door:#F3E6BE }
+.lobby .door:nth-child(7){ --door:#F4D9D2 }
+
+/* every card ends with the way on, and the way back */
+.card-nav{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border-top:var(--pc-edge); margin-top:2px }
+.card-nav button{
+  display:flex; flex-direction:column; gap:2px; align-items:flex-start; text-align:left; min-height:56px;
+  padding:11px 20px; background:transparent; color:var(--pc-ink); transition:background .2s;
+}
+.card-nav button + button, .card-nav .nx{ align-items:flex-end; text-align:right }
+.card-nav button:first-child:not(:only-child){ border-right:var(--pc-edge) }
+.card-nav .nx{ background:var(--pc-amber); grid-column:2 }
+.card-nav button:hover{ background:#FFFFFF }
+.card-nav .nx:hover{ background:#F6BC5E }
+.card-nav small{ font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--pc-mute) }
+.card-nav .nx small{ color:#3A2A0E }
+.card-nav b{ font-family:var(--display); font-weight:600; font-size:15px }
+.sheet .card-nav{ border-radius:0 0 16px 16px; overflow:hidden }
+
+/* the walk bar */
+.walk{
+  position:fixed; z-index:60; left:50%; bottom:clamp(18px,3.4vh,30px); transform:translateX(-50%);
+  display:none; align-items:center; gap:12px; padding:7px;
+  background:var(--pc-paper); border:var(--pc-edge); border-radius:999px; box-shadow:4px 4px 0 var(--pc-ink);
+}
+@media (min-width:1180px){ body.panel.entered .walk{ display:flex } }
+body.flow.entered .walk{ display:flex; left:12px; right:12px; transform:none; justify-content:space-between; bottom:calc(12px + env(safe-area-inset-bottom)) }
+body.flow{ padding-bottom:84px }
+body.viewing .walk, body.playing .walk{ display:none !important }
+.walk-btn{ width:44px; height:44px; border-radius:50%; border:var(--pc-edge); background:var(--pc-paper); display:grid; place-items:center;
+  transition:transform .14s var(--ease-out), opacity .2s }
+.walk-btn svg{ width:18px; height:18px; fill:none; stroke:var(--pc-ink); stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round }
+.walk-btn.next{ background:var(--pc-red) }
+.walk-btn.next svg{ stroke:#FFFFFF }
+.walk-btn:active{ transform:scale(.92) }
+.walk-btn[disabled]{ opacity:.35; cursor:default }
+.walk-mid{ display:flex; align-items:center; gap:12px; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--pc-body) }
+.walk-dots{ display:flex; gap:4px }
+.walk-dots i{ width:10px; height:10px; border-radius:2px; border:2px solid var(--pc-ink); box-sizing:border-box; transition:width .3s var(--ease-out), background .3s }
+.walk-dots i.past{ background:var(--pc-ink) }
+.walk-dots i.now{ width:22px; background:var(--pc-red); border-color:var(--pc-red) }
+body.panel .walk-dots{ display:none }
+body.flow .walk-hint{ display:none }
+
+/* look around: a placard ring */
+.stick-ring{ border:var(--pc-edge); background:var(--pc-paper); -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:4px 4px 0 var(--pc-ink) }
+.stick-ring::after{ border:2px dashed rgba(23,22,28,.28) }
+.stick-knob{ background:var(--pc-ink); box-shadow:none }
+.stick-label{ color:var(--pc-ink); font-weight:600; bottom:-24px }
+body.panel .stick{ width:88px; height:88px }
+
+/* ── the gate ── */
+.gate{ background:var(--pc-ground) }
+.gate::after{ inset:auto; top:0; left:0; width:0; height:0; background:none; border-top:88px solid var(--pc-red); border-right:88px solid transparent }
+.gate-in{ gap:26px }
+.gate-plate{ background:var(--pc-paper); border:var(--pc-edge); border-radius:28px; box-shadow:6px 6px 0 var(--pc-ink) }
+.gate-plate::before,.gate-plate::after{ display:none }
+.gate-bar{ width:min(78vw,420px); height:auto; padding:7px; gap:5px; background:var(--pc-paper); border:var(--pc-edge); border-radius:12px; box-shadow:4px 4px 0 var(--pc-ink) }
+.gate-bar .blk{ height:20px; border-radius:3px; background:#E7E1D6 }
+.gate-bar .blk.on, .gate-bar.full .blk{ background:var(--pc-red) }
+.gate-bar .blk.tip{ background:var(--pc-amber); transform:translateY(-4px); box-shadow:0 4px 0 var(--pc-ink) }
+.gate-words{ display:flex; flex-direction:column; align-items:center; gap:6px; order:-1; margin-top:-4px }
+.gate-plate{ order:-2 }
+.gate-name{ font-family:var(--display); font-weight:800; font-size:clamp(30px,4vw,42px); letter-spacing:-.02em; color:var(--pc-ink); line-height:1 }
+.gate-tag{ font-family:var(--mono); font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--pc-mute) }
+.gate-status{ display:flex; gap:14px; font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--pc-body) }
+.gate-status b{ color:var(--pc-ink); font-weight:600; min-width:4ch; text-align:right }
+
+/* ── the arcade ── */
+.arcade-bar{
+  top:14px; left:16px; right:16px; width:auto; margin-top:env(safe-area-inset-top); padding:8px 8px 8px 12px;
+  background:var(--pc-paper); color:var(--pc-ink); border:var(--pc-edge); border-radius:14px; box-shadow:5px 5px 0 var(--pc-red);
+  transform:translateY(-140%); font-size:11px;
+}
+.arcade-bar::before{ content:"Now playing"; flex:none; background:var(--pc-red); color:#FFFFFF; padding:6px 10px; border-radius:6px; font-weight:600; letter-spacing:.14em }
+.arcade-title{ color:var(--pc-ink); font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:0; text-transform:none }
+.arcade-hint{ color:var(--pc-mute) }
+.arcade-close{ min-height:44px; border:var(--pc-edge); border-radius:10px; background:var(--pc-ink); color:var(--pc-paper); font-weight:600 }
+.arcade-close:hover{ background:#000; border-color:var(--pc-ink) }
+.arcade-close kbd{ font-family:inherit; font-size:9.5px; padding:2px 6px; border:1.5px solid var(--pc-paper); border-radius:5px }
+#arcadeFrame{ border-radius:10px; box-shadow:0 0 0 3px var(--pc-ink), 0 0 0 8px var(--pc-red), 12px 12px 0 8px var(--pc-ink) }
+body.fallback #arcadeFrame{ top:84px !important; height:calc(100% - 84px) !important }
+@supports (height: 100dvh){ body.fallback #arcadeFrame{ height:calc(100dvh - 84px) !important } }
+.dock-note{ color:var(--pc-ink); font-weight:600; background:var(--pc-paper); border:var(--pc-edge); border-radius:999px; padding:8px 14px; box-shadow:3px 3px 0 var(--pc-ink) }
+
+/* the paper grain and the vignette belong to the room, not the cards */
+.vig,.grain{ z-index:5 }
+
+/* ── phone ── */
+body.flow .hud{ top:10px; left:10px; right:10px; border-radius:14px; box-shadow:4px 4px 0 var(--pc-ink) }
+body.flow .stack{ padding-top:76px }
+body.flow .fold{ padding-block:clamp(22px,4vh,40px) }
+body.flow .sheet{ box-shadow:5px 5px 0 var(--pc-ink) }
+@media (max-width:420px){ .nav-btn{ padding:0 12px } .mark b{ font-size:11px } }
 </style>
 </head>
 <body>
@@ -1005,6 +1247,11 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
     <div class="gate-bar" role="progressbar" aria-label="Loading the house"
          aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gateBar"></div>
     <span class="sr" id="gatePct">00%</span>
+    <div class="gate-words">
+      <div class="gate-name">Aayush Kumar</div>
+      <div class="gate-tag">A portfolio you walk through</div>
+    </div>
+    <div class="gate-status" aria-hidden="true"><span id="gateStage">Raising the walls</span><b id="gateNum">00%</b></div>
   </div>
 </div>
 
@@ -1031,11 +1278,16 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
     <svg class="face" viewBox="0 0 64 64" aria-hidden="true"><use href="#mark"/></svg>
     <span class="mark-txt"><b>Aayush Kumar</b><span class="role">Games · AI · Backend</span></span>
   </a>
+  <div class="where" id="where" aria-live="polite">
+    <span class="where-k">Room</span>
+    <span class="where-blocks" id="whereBlocks" aria-hidden="true"></span>
+    <span class="where-name" id="whereName">00 · Lobby</span>
+  </div>
   <nav class="hud-right" aria-label="Elsewhere">
     <a class="nav-btn opt" href="https://arthis.space" target="_blank" rel="noopener">Arthis.Space</a>
     <a class="nav-btn opt" href="https://arthis.land" target="_blank" rel="noopener">Arthis.Land</a>
     <a class="nav-btn" href="https://github.com/itsAayush2004" target="_blank" rel="noopener">GitHub</a>
-    <a class="nav-btn primary" href="mailto:akversebusiness@gmail.com">Email</a>
+    <a class="nav-btn primary" href="mailto:akversebusiness@gmail.com">Email me</a>
   </nav>
 </header>
 
@@ -1045,6 +1297,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <section class="fold cover" id="s0" data-name="Lobby" aria-labelledby="t0">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
+      <figure class="poster"><img src="art/00.jpg" alt="Isometric cut-away of a small room — the lobby poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 00</b> — Lobby</div>
         <h1 class="wordmark" id="t0">
@@ -1069,6 +1322,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <section class="fold right" id="s1" data-name="Practice" aria-labelledby="t1">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
+      <figure class="poster"><img src="art/01.jpg" alt="A voxel workbench with two monitors — the practice poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 01</b> — Where it starts</div>
         <h2 id="t1">154 shipped builds,<br>one throughline.</h2>
@@ -1092,6 +1346,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <section class="fold" id="s2" data-name="Arthis" aria-labelledby="t2">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
+      <figure class="poster"><img src="art/02.jpg" alt="A phone game feed beside a voxel tower — the Arthis poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 02</b> — Two live platforms</div>
         <h2 id="t2">Arthis</h2>
@@ -1141,6 +1396,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <section class="fold right" id="s3" data-name="HexaBed" aria-labelledby="t3">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
+      <figure class="poster"><img src="art/03.jpg" alt="A hexagonal voxel island with trees and a road — the HexaBed poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 03</b> — Unity engine</div>
         <h2 id="t3">HexaBed</h2>
@@ -1166,6 +1422,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <section class="fold" id="s4" data-name="Blender Suite" aria-labelledby="t4">
     <div class="sheet">
       <span class="tab gold" aria-hidden="true"></span>
+      <figure class="poster"><img src="art/04.jpg" alt="A rigged voxel figure on a turntable with a camera — the Blender poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 04</b> — Pipeline tooling</div>
         <h2 id="t4">Blender Add-on Suite</h2>
@@ -1189,6 +1446,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <section class="fold right" id="s5" data-name="Systems &amp; Inference" aria-labelledby="t5">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
+      <figure class="poster"><img src="art/05.jpg" alt="Server racks and a small neural network — the systems poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 05</b> — AI &amp; backend</div>
         <h2 id="t5">Systems &amp; Inference</h2>
@@ -1213,6 +1471,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <section class="fold" id="s6" data-name="By the numbers" aria-labelledby="t6">
     <div class="sheet">
       <span class="tab blue" aria-hidden="true"></span>
+      <figure class="poster"><img src="art/06.jpg" alt="An isometric bar chart of the build counts — the numbers poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 06</b> — Evidence</div>
         <h2 id="t6">By the numbers</h2>
@@ -1245,6 +1504,7 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <section class="fold right closer" id="s7" data-name="Contact" aria-labelledby="t7">
     <div class="sheet">
       <span class="tab" aria-hidden="true"></span>
+      <figure class="poster"><img src="art/07.jpg" alt="An envelope and a paper plane — the contact poster" width="1600" height="900" loading="lazy" decoding="async"></figure>
       <div class="stg">
         <div class="kicker"><span class="dash"></span><b>Room 07</b> — Unfolded</div>
         <h2 id="t7">Let us build something.</h2>
@@ -1269,11 +1529,17 @@ body.flow .sheet .stg{ gap:clamp(15px,2vw,20px) }
   <div class="arcade-bar">
     <span class="arcade-title" id="arcadeTitle"></span>
     <span class="arcade-hint" id="arcadeHint"></span>
-    <button class="arcade-close" id="arcadeClose" type="button">Close <i aria-hidden="true">&#10005;</i></button>
+    <button class="arcade-close" id="arcadeClose" type="button">Step back <kbd>Esc</kbd></button>
   </div>
   <iframe id="arcadeFrame" title="Playable game" allow="autoplay; fullscreen; gamepad"></iframe>
   <div class="dock-note">Press Esc to step back</div>
 </div>
+
+<nav class="walk" id="walk" aria-label="Walk between rooms">
+  <button class="walk-btn" type="button" id="walkPrev" aria-label="Previous room"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <span class="walk-mid"><span class="walk-dots" id="walkDots" aria-hidden="true"></span><span class="walk-hint">Scroll or use ← →</span></span>
+  <button class="walk-btn next" type="button" id="walkNext" aria-label="Next room"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+</nav>
 
 <div class="stick" id="stick" aria-hidden="true">
   <span class="stick-ring"></span>
@@ -1486,6 +1752,10 @@ onTick(dt => {
   }
   const pc = Math.round(n / BLOCKS * 100);
   if (gatePct) gatePct.textContent = String(pc).padStart(2,'0') + '%';
+  const gn = $('#gateNum'), gs = $('#gateStage');
+  if (gn) gn.textContent = String(pc).padStart(2,'0') + '%';
+  if (gs) gs.textContent = pc < 25 ? 'Raising the walls' : pc < 50 ? 'Hanging the posters'
+                         : pc < 80 ? 'Furnishing the rooms' : pc < 100 ? 'Turning the lights on' : 'Come on in';
   gateBar.setAttribute('aria-valuenow', String(pc));
   gateBar.classList.toggle('full', n >= BLOCKS);
 });
@@ -1659,6 +1929,12 @@ playBtns.forEach(b => b.addEventListener('click', ev => {
 
 function goTo(i){
   i = clamp(Math.round(i), 0, N-1);
+  if (MODE === 'flow'){
+    const top = sections[i].getBoundingClientRect().top + (window.pageYOffset || 0) - 76;
+    try { window.scrollTo({ top:Math.max(0, top), behavior: REDUCED ? 'auto' : 'smooth' }); }
+    catch(e){ window.scrollTo(0, top); }
+    return;
+  }
   const y = (i/(N-1)) * scroll.max;
   try { window.scrollTo({ top:y, behavior: REDUCED ? 'auto' : 'smooth' }); }
   catch(e){ window.scrollTo(0, y); }
@@ -1684,6 +1960,56 @@ addEventListener('keydown', e => {
 });
 
 /* ════════════════════════════════════════════════════════════════
+   4b — WAYFINDING : where you are, and the way on
+   ════════════════════════════════════════════════════════════════ */
+const pad2 = n => String(n).padStart(2, '0');
+const whereBlocks = $('#whereBlocks'), whereName = $('#whereName'), walkDots = $('#walkDots');
+const walkPrev = $('#walkPrev'), walkNext = $('#walkNext');
+[whereBlocks, walkDots].forEach(el => { if (el) for (let i = 0; i < N; i++) el.appendChild(document.createElement('i')); });
+let shownIdx = -1;
+function showWhere(idx){
+  if (idx === shownIdx) return;
+  shownIdx = idx;
+  [whereBlocks, walkDots].forEach(el => {
+    if (!el) return;
+    Array.prototype.forEach.call(el.children, (b, i) => {
+      b.classList.toggle('past', i < idx);
+      b.classList.toggle('now', i === idx);
+    });
+  });
+  if (whereName) whereName.textContent = pad2(idx) + ' · ' + NAMES[idx];
+  if (walkPrev) walkPrev.disabled = idx <= 0;
+  if (walkNext) walkNext.disabled = idx >= N - 1;
+}
+function currentIdx(){
+  if (MODE !== 'flow') return clamp(Math.round(scroll.p * (N-1)), 0, N-1);
+  let idx = 0;
+  for (let i = 0; i < N; i++) if (sections[i].getBoundingClientRect().top < innerHeight * .42) idx = i;
+  return idx;
+}
+if (walkPrev) walkPrev.addEventListener('click', () => goTo(currentIdx() - 1));
+if (walkNext) walkNext.addEventListener('click', () => goTo(currentIdx() + 1));
+sections.forEach((sec, i) => {
+  const sheet = $('.sheet', sec);
+  if (!sheet) return;
+  const nav = document.createElement('nav');
+  nav.className = 'card-nav';
+  nav.setAttribute('aria-label', 'Rooms either side');
+  const mk = (j, cls, label) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = cls;
+    b.innerHTML = '<small>' + label + '</small><b>' + pad2(j) + ' ' + NAMES[j] + '</b>';
+    b.addEventListener('click', () => goTo(j));
+    nav.appendChild(b);
+  };
+  if (i > 0) mk(i - 1, 'pv', '← Back');
+  if (i < N - 1) mk(i + 1, 'nx', 'Next room →');
+  sheet.appendChild(nav);
+});
+addEventListener('scroll', () => { if (MODE === 'flow') showWhere(currentIdx()); }, { passive:true });
+showWhere(0);
+
+/* ════════════════════════════════════════════════════════════════
    5 — SYNC : panels, counters
    ════════════════════════════════════════════════════════════════ */
 let activeIdx = -1;
@@ -1692,6 +2018,7 @@ onTick(() => {
   const idx = clamp(Math.round(scroll.p * (N-1)), 0, N-1);
   if (idx !== activeIdx){
     activeIdx = idx;
+    if (MODE !== 'flow') showWhere(idx);
 
     if (MODE === 'panel'){
       for (let i = 0; i < sections.length; i++) sections[i].classList.toggle('active', i === idx);
@@ -1755,12 +2082,12 @@ function drawIcon(g, key, cx, cy, s){
   g.restore();
 }
 
-/* the piece that hangs in each room — a real picture, in art/.
+/* the piece that hangs in each room — an isometric poster, in art/.
    PIECE_AR is the image's own aspect, so the frame is cut to fit the
    picture rather than the picture squeezed into a fixed frame. */
 const PIECE    = ['art/00.jpg','art/01.jpg','art/02.jpg','art/03.jpg',
                   'art/04.jpg','art/05.jpg','art/06.jpg','art/07.jpg'];
-const PIECE_AR = [16/9, 16/9, 16/9, 3/2, 16/9, 3/2, 3/2, 16/9];
+const PIECE_AR = [16/9, 16/9, 16/9, 16/9, 16/9, 16/9, 16/9, 16/9];
 
 /* which room has which cabinet on its wall */
 const GAMES = {
@@ -1784,13 +2111,14 @@ function build(){
   renderer.setSize(view.w, view.h, false);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
-  const PAPER = 0xF4F4F3;
+  const PAPER = 0xF3EEE6;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(PAPER);
   scene.fog = new THREE.Fog(PAPER, 30, 96);
   const camera = new THREE.PerspectiveCamera(LOW ? 86 : 78, view.w/view.h, .1, 300);
 
   /* ── the plan ─────────────────────────────────────────────── */
+  const ART_Y = 4.3;
   const ROOM = 20, HALF = ROOM/2, H = 7.4, DW = 2.3, DH = 4.3, T = .34, EYE = 2.05;
   const CELL = [[0,0],[0,-1],[-1,-1],[-1,-2],[0,-2],[0,-3],[-1,-3],[-1,-4]];
   const P = CELL.map(c => ({ x:c[0]*ROOM, z:c[1]*ROOM }));
@@ -1812,23 +2140,42 @@ function build(){
     [[DEV+'threejs/threejs-original.svg','Three.js'], [DEV+'github/github-original.svg','GitHub'],             [DEV+'javascript/javascript-original.svg','JavaScript']]
   ];
   const mix = (base, tint, amt) => new THREE.Color(base).lerp(new THREE.Color(tint), amt).getHex();
-  /* one accent only; rooms separate by value, not hue */
+  /* every room has its own colour, taken from the poster that hangs in
+     it: a pale wall, a deeper wainscot below the rail, a rug and an
+     accent the furniture picks up. The house's red stays the signature. */
   const INK = 0x141414;
+  const PALETTE = [
+    /* wall      low       rug       accent    floor   */
+    [0xF0E2CC, 0xD9BE98, 0xC8372E, 0xD62222, 0xC8956A],   /* 00 lobby — cream      */
+    [0xDCE7D3, 0xA3BC98, 0xE89A2E, 0xF2A83B, 0xC8956A],   /* 01 practice — sage    */
+    [0xE1DDF3, 0xADA5DC, 0x4C4FB4, 0x4C4FB4, 0xBE8C62],   /* 02 arthis — lilac     */
+    [0xD5E7F1, 0x96BED6, 0x4F9E62, 0x4F9E62, 0xC8956A],   /* 03 hexabed — sky      */
+    [0xF6DCC7, 0xE6AA7C, 0x3F4FA6, 0xF2A83B, 0xBE8C62],   /* 04 blender — peach    */
+    [0x434B7E, 0x2C335C, 0xC8372E, 0xD62222, 0x6A5240],   /* 05 systems — indigo   */
+    [0xF3E6BE, 0xDDC06C, 0xC8372E, 0xD62222, 0xC8956A],   /* 06 numbers — butter   */
+    [0xF4D9D2, 0xE0A398, 0xD9604F, 0xD62222, 0xBE8C62]    /* 07 contact — blush    */
+  ];
   const ROOMS = P.map((_, i) => {
-    const v = (i % 4) * .038;
+    const c = PALETTE[i % PALETTE.length];
     return {
-      icon:ICONS[i], theme:THEMES[i], tint:TINT[0], hex:HEXC[0],
-      wall: mix(0xF2F2F1, INK, v*.55),
-      floor:mix(0xC9C9C7, INK, v),
-      ceil: mix(0xF8F8F7, INK, v*.3),
-      rail: mix(0x9C9C9A, INK, v),
-      art:  mix(0xDEDEDC, INK, v*.7),
-      obj:  mix(0xEAEAE8, INK, v*.5)
+      icon:ICONS[i], theme:THEMES[i], tint:c[3], hex:HEXC[0],
+      wall: c[0], low: c[1], rug: c[2], floor: c[4],
+      ceil: mix(0xFBF8F2, c[0], .35),
+      rail: mix(c[1], INK, .25),
+      art:  0xFBFAF6,
+      obj:  mix(0xEAEAE8, c[0], .5),
+      dark: i === 5
     };
   });
 
+  /* every colour in this file is written as it should look on screen;
+     the renderer works in linear light and encodes on the way out, so
+     each one is converted first — otherwise ink comes out grey and the
+     red comes out pink */
+  const lin = hex => new THREE.Color(hex).convertSRGBToLinear();
+
   /* ── paper stock ──────────────────────────────────────────── */
-  const steps = new Uint8Array([84, 162, 238]);
+  const steps = new Uint8Array([120, 190, 250]);
   const RAMP = new THREE.DataTexture(steps, steps.length, 1, THREE.LuminanceFormat);
   RAMP.minFilter = RAMP.magFilter = THREE.NearestFilter;
   RAMP.generateMipmaps = false; RAMP.needsUpdate = true;
@@ -1845,30 +2192,50 @@ function build(){
     t.repeat.set(rep, rep);
     return t;
   }
+  /* floorboards: four staggered planks per tile, each its own shade,
+     a dark seam between them. White here — the room's floor colour
+     multiplies it. */
   function gridMap(rep){
-    const S = 64, c = document.createElement('canvas'); c.width = c.height = S;
+    const S = 128, c = document.createElement('canvas'); c.width = c.height = S;
     const g = c.getContext('2d'), r = rng(31);
-    const sh = ['#ffffff','#fbfaf6','#f4f2ea'];
-    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++){ g.fillStyle = sh[(r()*sh.length)|0]; g.fillRect(x,y,1,1); }
-    g.fillStyle = 'rgba(23,21,15,.16)'; g.fillRect(0,0,S,1); g.fillRect(0,0,1,S);
+    const PL = S/4;
+    for (let k = 0; k < 4; k++){
+      const off = (k % 2) ? S/4 : 0;
+      const sh = [226 + ((r()*26)|0), 226 + ((r()*26)|0)];
+      for (let j = -1; j <= 2; j++){
+        const x = off + j*S/2, v = sh[(j + 2) % 2];
+        g.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')';
+        g.fillRect(x, k*PL, S/2, PL);
+        g.fillStyle = 'rgba(40,24,10,.34)';
+        g.fillRect(x, k*PL, 2, PL);
+      }
+      for (let n = 0; n < 70; n++){            /* grain */
+        g.fillStyle = 'rgba(80,50,20,' + (.03 + r()*.05).toFixed(3) + ')';
+        g.fillRect((r()*S)|0, k*PL + 3 + ((r()*(PL-6))|0), 6 + ((r()*20)|0), 1);
+      }
+      g.fillStyle = 'rgba(40,24,10,.34)';
+      g.fillRect(0, k*PL, S, 2);
+    }
     const t = new THREE.CanvasTexture(c);
-    t.magFilter = t.minFilter = THREE.NearestFilter;
-    t.generateMipmaps = false;
+    t.magFilter = THREE.LinearFilter;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
+    t.anisotropy = LOW ? 2 : 8;
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.repeat.set(rep, rep);
     return t;
   }
   const STOCK = paperMap(13);
+  const FLOOR_MAP = gridMap(5);
   const MATS = new Map();
   function paper(hex){
     if (MATS.has(hex)) return MATS.get(hex);
-    const m = new THREE.MeshToonMaterial({ color:hex, gradientMap:RAMP, map:STOCK });
+    const m = new THREE.MeshToonMaterial({ color:lin(hex), gradientMap:RAMP, map:STOCK });
     MATS.set(hex, m); return m;
   }
   function paper2(hex){                       /* double sided, flat, for folded sheets */
     const k = 'D' + hex;
     if (MATS.has(k)) return MATS.get(k);
-    const m = new THREE.MeshToonMaterial({ color:hex, gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide });
+    const m = new THREE.MeshToonMaterial({ color:lin(hex), gradientMap:RAMP, map:STOCK, side:THREE.DoubleSide });
     MATS.set(k, m); return m;
   }
   const M = {
@@ -2032,7 +2399,7 @@ function build(){
     const P = [], N = [], K = [], self = this, tmp = new THREE.Color();
     this.c.forEach(function(hex, key){
       const q = key.split(','), X = +q[0], Y = +q[1], Z = +q[2];
-      tmp.setHex(hex);
+      tmp.setHex(hex).convertSRGBToLinear();
       for (let f = 0; f < 6; f++){
         const F = VFACE[f], n = F.n, uu = F.u, vv = F.v;
         if (self.has(X+n[0], Y+n[1], Z+n[2])) continue;
@@ -2666,7 +3033,7 @@ function build(){
     return m;
   }
   function toonMat(hex, flat){
-    return new THREE.MeshToonMaterial({ color:hex, gradientMap:RAMP, map:STOCK,
+    return new THREE.MeshToonMaterial({ color:lin(hex), gradientMap:RAMP, map:STOCK,
       side:THREE.DoubleSide, flatShading:flat !== false });
   }
 
@@ -2696,148 +3063,469 @@ function build(){
 
   /* furniture sits a shade under the walls, so a white piece against a
      white wall still has a silhouette */
-  const PALE = 0xFBFBFA, MID = 0xDCDCD9, DEEP = 0xBEBEBB, DARK = 0x3A352C;
+  const PALE = 0xF7F2E8, MID = 0xCB9A69, DEEP = 0x8E5D3A, DARK = 0x3A352C;
 
-  /* ── the pieces ───────────────────────────────────────────── */
-  function geoBed(tint){
-    return propOf('fbed|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-4, 4, 0, 1, -7, 6, DEEP);            /* the base                */
-      v.box(-4, 4, 2, 3, -7, 6, PALE);            /* the mattress            */
-      v.box(-4, 4, 2, 4, -1, 6, tint);            /* the blanket, turned back*/
-      v.box(-3, 3, 4, 5, -6, -4, PALE);           /* a pillow                */
-      v.box(-4, 4, 2, 7, -8, -7, MID);            /* the headboard           */
-      return v;
-    });
-  }
-  function geoCouch(tint){
-    return propOf('fcouch|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-6, 6, 0, 1, -3, 3, DEEP);
-      v.box(-6, 6, 2, 3, -3, 3, PALE);            /* the seat                */
-      v.box(-6, 6, 2, 7, -4, -3, MID);            /* the back                */
-      v.box(-7, -6, 2, 5, -3, 3, MID);            /* arms                    */
-      v.box( 6,  7, 2, 5, -3, 3, MID);
-      v.box(-4, -1, 4, 4, -2, 1, tint);           /* a cushion               */
-      return v;
-    });
-  }
-  function geoShelf(tint){
-    return propOf('fshelf|'+tint, FU, function(){
-      const v = new Vox(), H = 15;
-      v.box(-5, -4, 0, H, -2, 1, MID);            /* uprights                */
-      v.box( 4,  5, 0, H, -2, 1, MID);
-      v.box(-5, 5, H, H, -2, 1, MID);             /* the top                 */
-      [1, 5, 9, 13].forEach(function(y){
-        v.box(-4, 4, y, y, -2, 1, DEEP);          /* a shelf                 */
-        for (let x = -4; x <= 4; x++){            /* and what stands on it   */
-          const t = (x * 7 + y * 5) % 4;
-          if (t === 3) continue;
-          const top = y + 1 + ((x + y) % 3);
-          v.box(x, x, y + 1, top, -1, 0, t === 0 ? tint : (t === 1 ? PALE : DEEP));
+  /* ══════════════════════════════════════════════════════════
+     PROPS — the furniture set, one material library.
+     y is up, +z is the face that turns to the middle of the room.
+     Every piece is built the same way: a walnut or ink structure,
+     oak and fabric on top of it, one tonal trim (a lighter course
+     on top edges, a darker one at the base) so the silhouette reads
+     under flat toon light, and the room's accent used once or twice.
+     ══════════════════════════════════════════════════════════ */
+  const MAT = {
+    oak:0xC9925E, oakHi:0xE0AE78, oakLo:0x9F6A3F,
+    wal:0x7A4B2C, walHi:0x925E39, walLo:0x5A361F,
+    fab:0xF3ECDF, fabLo:0xDCD0BC, fabHi:0xFFFBF3,
+    ink:0x2A2930, inkHi:0x413F4A, inkLo:0x1B1A20,
+    clay:0xC8643C, clayHi:0xDE7E54, soil:0x4A3424,
+    leaf:0x5FAE6E, leafHi:0x84C98F, leafLo:0x3E8A52,
+    brass:0xE2B24E, glass:0xBFE3F5, glow:0xFFF1C9,
+    books:[0xD62222, 0xF2A83B, 0x2B3550, 0xF3ECDF, 0x5FAE6E, 0x8E7AD6, 0x3B86B8]
+  };
+  const shadeHex = (h, k) => {
+    const r = (h >> 16) & 255, g = (h >> 8) & 255, b = h & 255;
+    const f = v => Math.max(0, Math.min(255, Math.round(k >= 1 ? v + (255 - v) * (k - 1) : v * k)));
+    return (f(r) << 16) | (f(g) << 8) | f(b);
+  };
+  const tones = c => ({ c:c, hi:shadeHex(c, 1.22), lo:shadeHex(c, .72) });
+
+  const PROP = {
+    bed: function(v, A){
+      const t = tones(A);
+      [[-4,-7],[4,-7],[-4,6],[4,6]].forEach(q => v.box(q[0],q[0],0,0,q[1],q[1],MAT.walLo));   /* feet       */
+      v.box(-4, 4, 1, 1, -7, 6, MAT.wal);                                  /* the frame              */
+      v.box(-4, 4, 1, 1, 6, 6, MAT.walHi);
+      v.box(-4, 4, 2, 2, -7, 6, MAT.fabLo);                                /* mattress, its band     */
+      v.box(-4, 4, 3, 3, -7, 6, MAT.fab);
+      v.box(-4, 4, 4, 4, -1, 6, t.c);                                      /* the blanket...         */
+      v.box(-4, 4, 2, 3, 7, 7, t.c);                                       /* ...draped over the end */
+      v.box(-4, 4, 4, 4, -1, -1, t.hi);                                    /* turned back            */
+      v.box(-4, 4, 3, 3, 0, 6, t.c);  v.box(-4,-4,2,3,0,6,t.lo); v.box(4,4,2,3,0,6,t.lo);
+      v.box(-3, -1, 4, 5, -6, -4, MAT.fabHi);                              /* two pillows            */
+      v.box( 1,  3, 4, 5, -6, -4, MAT.fabHi);
+      v.box(-4, 4, 1, 8, -8, -8, MAT.wal);                                 /* headboard              */
+      v.box(-3, 3, 3, 7, -8, -8, MAT.walHi);                               /* its inset panel        */
+      v.box(-4, 4, 9, 9, -8, -8, MAT.oakHi);                               /* the cap                */
+    },
+    couch: function(v, A){
+      const t = tones(A);
+      [[-6,-3],[6,-3],[-6,3],[6,3]].forEach(q => v.box(q[0],q[0],0,0,q[1],q[1],MAT.wal));    /* legs       */
+      v.box(-7, 7, 1, 2, -4, 3, t.lo);                                     /* the base               */
+      v.box(-5, -1, 3, 3, -2, 3, t.c);                                     /* two seat cushions      */
+      v.box( 1,  5, 3, 3, -2, 3, t.c);
+      v.box( 0,  0, 3, 3, -2, 3, t.lo);                                    /* the seam between them  */
+      v.box(-5, 5, 3, 3, 3, 3, t.hi);
+      v.box(-7, 7, 3, 6, -4, -3, t.lo);                                    /* the back               */
+      v.box(-5, -1, 4, 7, -3, -3, t.c);  v.box(1, 5, 4, 7, -3, -3, t.c);   /* back cushions          */
+      v.box(-7, -6, 3, 5, -4, 3, t.c);   v.box(6, 7, 3, 5, -4, 3, t.c);    /* arms                   */
+      v.box(-7, -6, 5, 5, -4, 3, t.hi);  v.box(6, 7, 5, 5, -4, 3, t.hi);
+      v.box(-4, -2, 4, 5, -2, -1, MAT.fabHi);                              /* a throw pillow         */
+      v.box( 2,  3, 4, 5, -2, -1, MAT.brass);
+    },
+    shelf: function(v, A){
+      const H = 16;
+      v.box(-5, 5, 0, 0, -2, 1, MAT.walLo);                                /* plinth                 */
+      v.box(-5, -5, 1, H, -2, 1, MAT.oak);  v.box(5, 5, 1, H, -2, 1, MAT.oak);   /* sides            */
+      v.box(-5, -5, 1, H, 1, 1, MAT.oakHi); v.box(5, 5, 1, H, 1, 1, MAT.oakHi);
+      v.box(-4, 4, 1, H, -2, -2, MAT.oakLo);                               /* back                   */
+      v.box(-6, 6, H+1, H+1, -3, 2, MAT.wal);                              /* the cap oversails      */
+      v.box(-6, 6, H+1, H+1, 2, 2, MAT.walHi);
+      [1, 5, 9, 13].forEach(function(y, row){
+        v.box(-4, 4, y, y, -1, 1, MAT.oak);                                /* a shelf, its lip       */
+        v.box(-4, 4, y, y, 1, 1, MAT.oakHi);
+        for (let x = -4; x <= 4; x++){
+          const k = ((x * 5 + row * 3 + 9) % 11 + 11) % 11;
+          if (row === 3 && x >= 1){                                        /* a plant on the top one */
+            if (x === 2){ v.box(1, 3, y+1, y+1, -1, 0, MAT.clay); v.box(1, 3, y+2, y+3, -1, 0, MAT.leaf); v.set(2, y+3, 0, MAT.leafHi); }
+            continue;
+          }
+          if (k > 8) continue;                                             /* a gap                  */
+          const top = y + 2 + (((x + row * 2) % 2) + 2) % 2;
+          v.box(x, x, y+1, top, -1, 0, MAT.books[(k + row) % MAT.books.length]);
         }
       });
-      return v;
-    });
-  }
-  function geoRack(tint){
-    return propOf('frack|'+tint, FU, function(){
-      const v = new Vox(), H = 17;
-      v.shell(-3, 3, 0, H, -2, 2, DEEP);          /* the carcass             */
-      v.box(-3, 3, 0, 0, -2, 2, DARK);            /* it stands on a plinth   */
-      for (let y = 2; y < H - 1; y += 3){
-        v.box(-2, 2, y, y + 1, 2, 2, DARK);       /* a blade in the bay      */
-        /* two lamps on the face of each blade — marked as giving light,
-           so the shading leaves them at full strength */
-        v.set(-2, y, 3, tint);      v.lit.add('-2,' + y + ',3');
-        v.set( 2, y + 1, 3, PALE);  v.lit.add('2,' + (y + 1) + ',3');
+      v.box(-4, -2, 10, 11, -1, 0, A);                                     /* a box with the accent  */
+    },
+    rack: function(v, A){
+      const H = 17;
+      [[-3,-2],[3,-2],[-3,2],[3,2]].forEach(q => v.set(q[0],0,q[1],MAT.inkLo));
+      v.box(-3, 3, 1, H, -2, 2, MAT.ink);                                  /* the carcass            */
+      v.box(-3, 3, H+1, H+1, -2, 2, MAT.inkHi);                            /* top                    */
+      v.box(-3, -3, 1, H, 3, 3, MAT.inkHi); v.box(3, 3, 1, H, 3, 3, MAT.inkHi);   /* door frame      */
+      for (let y = 2; y <= H - 1; y += 2){
+        v.box(-2, 2, y, y, 3, 3, MAT.inkLo);                               /* a blade                */
+        v.set(-2, y, 3, (y % 6 === 2) ? A : 0x4BD18B); v.lit.add('-2,' + y + ',3');
+        v.set(-1, y, 3, (y % 4 === 0) ? MAT.brass : 0x4BD18B); v.lit.add('-1,' + y + ',3');
+        v.set( 2, y, 3, MAT.glass);
       }
-      return v;
-    });
-  }
-  function geoDesk(tint){
-    return propOf('fdesk|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-6, 6, 4, 5, -3, 2, PALE);            /* the top                 */
-      v.box(-6, -5, 0, 3, -3, 2, MID);            /* the ends                */
-      v.box( 5,  6, 0, 3, -3, 2, MID);
-      v.box(-6, 6, 1, 2, -3, -2, DEEP);           /* a stretcher             */
-      v.box(-4, -2, 6, 8, -2, 0, DEEP);           /* work left on it         */
-      v.box( 1,  3, 6, 7, -2, 1, tint);
-      return v;
-    });
-  }
-  function geoSide(tint){
-    return propOf('fside|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-7, 7, 0, 7, -2, 2, MID);
-      v.box(-7, 7, 8, 8, -3, 3, PALE);            /* the top oversails       */
-      v.box(-6, -1, 2, 6, 3, 3, DEEP);            /* two drawer faces        */
-      v.box( 1,  6, 2, 6, 3, 3, DEEP);
-      v.box(-4, -3, 4, 4, 4, 4, tint);            /* the handles             */
-      v.box( 3,  4, 4, 4, 4, 4, tint);
-      return v;
-    });
-  }
-  function geoEasel(tint){
-    return propOf('feasel|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-4, -3, 0, 11, 1, 2, MID);            /* the legs                */
-      v.box( 3,  4, 0, 11, 1, 2, MID);
-      v.box(-1,  1, 0, 3, -3, -2, MID);           /* the back leg            */
-      v.box(-5, 5, 5, 6, 0, 1, DEEP);             /* the ledge               */
-      v.box(-5, 5, 7, 14, 1, 1, PALE);            /* the board               */
-      v.box(-3, 1, 9, 12, 2, 2, tint);            /* something started on it */
-      return v;
-    });
-  }
-  function geoCrates(tint){
-    return propOf('fcrate|'+tint, FU, function(){
-      const v = new Vox();
-      v.shell(-4, 4, 0, 5, -4, 4, MID);
-      v.box(-4, 4, 5, 5, -4, 4, PALE);
-      v.shell(-3, 1, 6, 10, -3, 1, DEEP);         /* one stacked, off square */
-      v.box(-3, 1, 10, 10, -3, 1, PALE);
-      v.box(-1, 0, 6, 10, 2, 2, tint);
-      return v;
-    });
-  }
-  function geoPlant(tint){
-    return propOf('fplant|'+tint, FU, function(){
-      const v = new Vox(), LEAF = 0x86A879, STEM = 0x6F8F63;
-      v.box(-2, 2, 0, 3, -2, 2, DEEP);            /* the pot                 */
-      v.box(-3, 3, 3, 4, -3, 3, MID);             /* its lip                 */
-      v.box(-1, 1, 5, 9, -1, 1, STEM);            /* the stem                */
-      v.box(-4, -1, 7,  8, -2, 2, LEAF);          /* three fronds            */
-      v.box( 1,  4, 8,  9, -2, 2, LEAF);
-      v.box(-2,  2, 10, 11, -2, 2, LEAF);
-      return v;
-    });
-  }
-  function geoStool(tint){
-    return propOf('fstool|'+tint, FU, function(){
-      const v = new Vox();
-      v.box(-3, 3, 4, 4, -3, 3, PALE);            /* the seat                */
-      v.box(-3, 3, 5, 5, -3, 3, tint);            /* a cushion on it         */
-      [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(function(o){
-        v.box(o[0], o[0], 0, 3, o[1], o[1], MID); /* four legs               */
+      v.box(-2, 2, H, H, 3, 3, A);                                         /* the badge              */
+    },
+    desk: function(v, A){
+      const t = tones(A);
+      v.box(-7, 7, 5, 5, -3, 2, MAT.oak);                                  /* the top                */
+      v.box(-7, 7, 5, 5, 2, 2, MAT.oakHi);
+      v.box(-6, -6, 0, 4, -2, 1, MAT.wal); v.box(-6,-6,0,0,-3,2,MAT.walLo); /* a trestle leg         */
+      v.box(-6, -6, 2, 2, -2, 1, MAT.walHi);
+      v.box( 2, 6, 0, 4, -3, 2, MAT.fab);                                  /* a drawer pedestal      */
+      v.box( 2, 6, 0, 0, -3, 2, MAT.fabLo);
+      v.box( 3, 5, 3, 3, 2, 2, MAT.fabLo); v.box(3, 5, 1, 1, 2, 2, MAT.fabLo);
+      v.set(4, 3, 3, MAT.brass); v.set(4, 1, 3, MAT.brass);
+      v.box(-4, 0, 7, 10, -2, -2, MAT.ink);                                /* the monitor            */
+      v.box(-3, -1, 8, 9, -1, -1, 0x3B86E8); v.lit.add('-3,8,-1'); v.lit.add('-2,8,-1'); v.lit.add('-1,8,-1'); v.lit.add('-3,9,-1'); v.lit.add('-2,9,-1'); v.lit.add('-1,9,-1');
+      v.set(-2, 9, -1, t.c); v.lit.add('-2,9,-1');
+      v.box(-2, -2, 6, 6, -2, -2, MAT.ink);                                /* its stand              */
+      v.box(-4, 0, 6, 6, 0, 1, MAT.fabHi);                                 /* keyboard               */
+      v.box(3, 3, 6, 7, 0, 0, t.c);                                        /* a mug                  */
+      v.box(5, 6, 6, 6, -2, -1, MAT.books[2]); v.box(5, 6, 7, 7, -2, -1, MAT.books[1]);   /* books   */
+    },
+    side: function(v, A){
+      const t = tones(A);
+      [[-6,-2],[6,-2],[-6,2],[6,2]].forEach(q => v.box(q[0],q[0],0,1,q[1],q[1],MAT.walLo)); /* legs     */
+      v.box(-7, 7, 2, 7, -2, 2, MAT.wal);                                  /* the body               */
+      v.box(-7, 7, 8, 8, -3, 3, MAT.oak);                                  /* the top                */
+      v.box(-7, 7, 8, 8, 3, 3, MAT.oakHi);
+      v.box(-6, -3, 3, 6, 3, 3, MAT.walHi);                                /* three fronts           */
+      v.box(-1,  1, 3, 6, 3, 3, t.c);
+      v.box( 3,  6, 3, 6, 3, 3, MAT.walHi);
+      v.set(-3, 5, 4, MAT.brass); v.set(3, 5, 4, MAT.brass);
+      v.box(-5, -4, 9, 12, -1, 0, t.c); v.box(-5, -4, 13, 13, -1, 0, t.hi); /* a vase               */
+      v.box(-5, -4, 14, 15, -1, 0, MAT.leaf); v.set(-4, 16, 0, MAT.leafHi);
+      v.box(2, 6, 9, 9, -2, 1, MAT.books[2]); v.box(2, 5, 10, 10, -2, 1, MAT.books[3]);
+      v.box(3, 4, 11, 11, -1, 0, MAT.brass);
+    },
+    easel: function(v, A){
+      v.box(-4, -4, 0, 13, 1, 1, MAT.oak); v.box(4, 4, 0, 13, 1, 1, MAT.oak);   /* front legs        */
+      v.box(-3, -3, 13, 14, 1, 1, MAT.oak); v.box(3, 3, 13, 14, 1, 1, MAT.oak);
+      v.box(-2, 2, 15, 15, 1, 1, MAT.oakHi);
+      v.box(0, 0, 0, 12, -3, -3, MAT.oakLo);                               /* the back leg           */
+      v.box(-5, 5, 4, 4, 1, 3, MAT.wal);                                   /* the ledge              */
+      v.box(-5, 5, 4, 4, 3, 3, MAT.walHi);
+      v.box(-4, 4, 5, 13, 2, 2, MAT.fabHi);                                /* the canvas             */
+      v.box(-3, 3, 6, 7, 3, 3, 0x9FC8E4);                                  /* a painting: the sky... */
+      v.box(-3, 3, 8, 12, 3, 3, 0xCFE6F2);
+      v.box(1, 2, 10, 11, 3, 3, MAT.brass);                                /* ...the sun...          */
+      v.box(-3, 0, 6, 8, 3, 3, MAT.leaf); v.box(-2, -1, 9, 9, 3, 3, MAT.leaf);   /* ...a hill         */
+      v.box(1, 3, 6, 7, 3, 3, MAT.leafLo);
+      v.box(-4, -3, 5, 5, 4, 4, A); v.set(3, 5, 4, MAT.brass);             /* brushes on the ledge   */
+    },
+    crate: function(v, A){
+      const t = tones(A);
+      const crate = function(x0, x1, y0, y1, z0, z1){
+        v.box(x0, x1, y0, y1, z0, z1, MAT.oak);
+        for (let y = y0; y <= y1; y++) if ((y - y0) % 2 === 1){            /* slats, gaps between   */
+          v.box(x0, x1, y, y, z1, z1, MAT.oakLo); v.box(x1, x1, y, y, z0, z1, MAT.oakLo);
+          v.box(x0, x0, y, y, z0, z1, MAT.oakLo);
+        }
+        v.box(x0, x0, y0, y1, z1, z1, MAT.wal); v.box(x1, x1, y0, y1, z1, z1, MAT.wal);   /* corners */
+        v.box(x0, x1, y1, y1, z0, z1, MAT.oakHi);
+      };
+      crate(-4, 4, 0, 5, -4, 4);
+      crate(-3, 2, 6, 10, -3, 2);
+      v.box(-1, 1, 2, 3, 5, 5, t.c);                                       /* a stencil mark         */
+      v.box(5, 6, 0, 1, 2, 4, MAT.fab); v.box(5, 6, 2, 2, 2, 4, t.c);      /* a parcel beside it     */
+    },
+    plant: function(v, A){
+      v.box(-2, 2, 0, 3, -2, 2, MAT.clay);                                 /* the pot                */
+      v.box(-3, 3, 4, 4, -3, 3, MAT.clayHi);                               /* its rim                */
+      v.box(-2, 2, 4, 4, -2, 2, MAT.soil);
+      /* a snake plant: upright blades of different heights, each
+         banded dark and light, the tip lighter still */
+      [[-1,-1,11],[1,-1,8],[0,0,13],[-1,1,9],[1,1,10],[2,0,7],[-2,0,8],[0,-2,9],[0,2,7]].forEach(function(b, k){
+        for (let y = 5; y <= 5 + b[2]; y++){
+          const col = y === 5 + b[2] ? MAT.leafHi : ((y + k) % 3 === 0 ? MAT.leafLo : MAT.leaf);
+          v.set(b[0], y, b[1], col);
+        }
       });
-      return v;
-    });
-  }
-
-  const MAKERS = {
-    bed:   { geo:geoBed,    r:2.2 },
-    couch: { geo:geoCouch,  r:1.9 },
-    shelf: { geo:geoShelf,  r:1.4 },
-    rack:  { geo:geoRack,   r:1.1 },
-    desk:  { geo:geoDesk,   r:1.8 },
-    side:  { geo:geoSide,   r:1.9 },
-    easel: { geo:geoEasel,  r:1.3 },
-    crate: { geo:geoCrates, r:1.2 },
-    plant: { geo:geoPlant,  r:.9  },
-    stool: { geo:geoStool,  r:.8  }
+      v.box(-2, 2, 1, 1, -2, 2, A);                                        /* a painted band         */
+    },
+    stool: function(v, A){
+      const t = tones(A);
+      [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(q => v.box(q[0],q[0],0,4,q[1],q[1],MAT.wal));    /* legs       */
+      v.box(-3, 3, 1, 1, -3, -3, MAT.walHi); v.box(-3, 3, 1, 1, 3, 3, MAT.walHi);            /* footring   */
+      v.box(-3, -3, 1, 1, -3, 3, MAT.walHi); v.box(3, 3, 1, 1, -3, 3, MAT.walHi);
+      v.box(-3, 3, 5, 5, -3, 3, MAT.oak);                                  /* the seat               */
+      v.box(-3, 3, 5, 5, 3, 3, MAT.oakHi);
+      v.box(-2, 2, 6, 6, -2, 2, t.c);                                      /* a cushion              */
+      v.box(-2, 2, 6, 6, 2, 2, t.hi);
+    },
+    lamp: function(v, A){
+      const t = tones(A);
+      v.box(-2, 2, 0, 0, -2, 2, MAT.ink);                                  /* the foot               */
+      v.box(-1, 1, 1, 1, -1, 1, MAT.inkHi);
+      v.box( 0, 0, 2, 12, 0, 0, MAT.ink);                                  /* the pole               */
+      v.set(0, 7, 0, MAT.brass);                                           /* a switch               */
+      v.box(-3, 3, 13, 13, -3, 3, t.c);                                    /* the shade, banded      */
+      v.box(-3, 3, 14, 16, -3, 3, MAT.fab);
+      v.box(-2, 2, 17, 17, -2, 2, MAT.fabLo);
+      v.del(-2, 2, 13, 16, -2, 2);                                         /* hollow, lit inside     */
+      for (let x = -2; x <= 2; x++) for (let z = -2; z <= 2; z++){ v.set(x, 13, z, MAT.glow); v.lit.add(x + ',13,' + z); }
+    },
+    chair: function(v, A){
+      const t = tones(A);
+      [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(q => v.box(q[0],q[0],0,1,q[1],q[1],MAT.wal));    /* legs       */
+      v.box(-4, 4, 2, 3, -3, 3, t.lo);                                     /* the seat               */
+      v.box(-3, 3, 4, 4, -2, 3, t.c);  v.box(-3, 3, 4, 4, 3, 3, t.hi);
+      v.box(-4, 4, 4, 9, -4, -3, t.c); v.box(-4, 4, 9, 9, -4, -3, t.hi);   /* the back               */
+      v.box(-5, -4, 3, 6, -4, 3, t.lo); v.box(4, 5, 3, 6, -4, 3, t.lo);    /* arms                   */
+      v.box(-5, -4, 6, 6, -4, 3, MAT.oak); v.box(4, 5, 6, 6, -4, 3, MAT.oak);
+      v.box(-1, 1, 5, 6, -2, -2, MAT.fabHi);                               /* a cushion              */
+    }
   };
+
+  /* ── the second batch: one set-piece family per room ─────────
+     Same cell, same materials, same rules as the first twelve. The
+     wall pieces (clock, corkboard, whiteboard, sign) face +z and hang
+     from their centre. */
+  Object.assign(PROP, {
+    tree: function(v, A){                                  /* a fiddle-leaf fig, tall */
+      v.box(-3, 3, 0, 4, -3, 3, MAT.clay);
+      v.box(-4, 4, 5, 5, -4, 4, MAT.clayHi);
+      v.box(-3, 3, 5, 5, -3, 3, MAT.soil);
+      v.box(-3, 3, 2, 2, -3, 3, A);
+      v.box(0, 0, 6, 15, 0, 0, MAT.wal);                                   /* the trunk              */
+      v.box(1, 2, 11, 11, 0, 0, MAT.wal); v.box(-2, -1, 13, 13, 0, 0, MAT.wal);
+      [[0,18,0,4],[3,13,1,3],[-3,15,-1,3],[1,21,-1,3],[-2,20,2,2],[3,17,-2,2]].forEach(function(c, k){
+        const r = c[3];
+        for (let x = -r; x <= r; x++) for (let y = -r+1; y <= r-1; y++) for (let z = -r; z <= r; z++){
+          if (x*x + y*y*1.6 + z*z > r*r + .5) continue;
+          const top = (x*x + (y+1)*(y+1)*1.6 + z*z > r*r + .5);
+          const under = (x*x + (y-1)*(y-1)*1.6 + z*z > r*r + .5);
+          v.set(c[0]+x, c[1]+y, c[2]+z, top ? MAT.leafHi : (under ? MAT.leafLo : MAT.leaf));
+        }
+      });
+    },
+    coatrack: function(v, A){
+      v.box(-2, 2, 0, 0, -2, 2, MAT.ink); v.box(-1, 1, 1, 1, -1, 1, MAT.inkHi);
+      v.box(0, 0, 2, 17, 0, 0, MAT.wal);
+      v.box(-2, 2, 15, 15, 0, 0, MAT.walHi); v.box(0, 0, 15, 15, -2, 2, MAT.walHi);   /* hooks       */
+      v.box(1, 3, 8, 14, 0, 1, A); v.box(1, 3, 14, 14, 0, 1, tones(A).hi);  /* a coat                 */
+      v.box(-2, -1, 10, 14, -1, 0, MAT.brass);                             /* a scarf                */
+      v.box(-2, 2, 18, 18, -2, 2, MAT.ink); v.box(-1, 1, 19, 20, -1, 1, MAT.ink);   /* a hat on top */
+      v.box(-1, 1, 19, 19, -1, 1, A);
+    },
+    bench: function(v, A){
+      const t = tones(A);
+      [[-7,-2],[7,-2],[-7,2],[7,2]].forEach(q => v.box(q[0],q[0],0,2,q[1],q[1],MAT.ink));
+      v.box(-7, 7, 2, 2, -2, 2, MAT.inkHi);
+      for (let z = -2; z <= 2; z += 2) v.box(-8, 8, 3, 3, z, z, z === 2 ? MAT.oakHi : MAT.oak);   /* slats */
+      v.box(-6, -1, 4, 4, -2, 1, t.c); v.box(-6, -1, 4, 4, 1, 1, t.hi);    /* a cushion              */
+      v.box(3, 4, 4, 5, -1, 0, MAT.books[2]); v.box(3, 4, 6, 6, -1, 0, MAT.books[1]);   /* books     */
+    },
+    beanbag: function(v, A){
+      const t = tones(A);
+      for (let x = -3; x <= 3; x++) for (let y = 0; y <= 4; y++) for (let z = -3; z <= 3; z++){
+        const r = 3.4 - y * .35;
+        if (x*x + z*z > r*r) continue;
+        const dip = (y === 4 && Math.abs(x) < 2 && Math.abs(z) < 2);
+        if (dip) continue;
+        v.set(x, y, z, y === 4 || (y === 3 && x*x+z*z > (r-1)*(r-1)) ? t.hi : (y === 0 ? t.lo : t.c));
+      }
+      v.box(-3, 3, 1, 4, -4, -4, t.c); v.box(-3, 3, 5, 5, -4, -4, t.hi);   /* the raised back        */
+    },
+    arcade: function(v, A){
+      const t = tones(A);
+      v.box(-3, 3, 0, 18, -3, 1, MAT.ink);                                 /* the cabinet            */
+      v.box(-3, 3, 0, 0, -3, 2, MAT.inkLo);
+      v.box(-4, -4, 0, 18, -3, 2, t.c); v.box(4, 4, 0, 18, -3, 2, t.c);    /* side art               */
+      v.box(-4, -4, 5, 12, 2, 2, t.hi); v.box(4, 4, 5, 12, 2, 2, t.hi);
+      v.box(-3, 3, 7, 8, 2, 3, MAT.inkHi);                                 /* the control deck       */
+      v.set(-2, 9, 2, MAT.inkLo); v.set(-2, 10, 2, A);                     /* stick                  */
+      v.set(1, 9, 3, MAT.books[1]); v.set(2, 9, 3, MAT.books[0]); v.lit.add('1,9,3'); v.lit.add('2,9,3');
+      v.box(-2, 2, 10, 14, 2, 2, 0x1E2A44);                                /* the screen             */
+      [[-1,12],[0,13],[1,11],[0,11],[-2,10],[2,14]].forEach(q => { v.set(q[0], q[1], 2, q[1] % 2 ? 0x4BD18B : MAT.brass); v.lit.add(q[0]+','+q[1]+',2'); });
+      v.box(-3, 3, 16, 17, 2, 2, A);                                       /* the marquee, lit       */
+      for (let x = -3; x <= 3; x++) for (let y = 16; y <= 17; y++) v.lit.add(x+','+y+',2');
+      v.box(-3, 3, 15, 15, 2, 2, MAT.ink); v.box(-3, 3, 18, 18, -3, 2, MAT.inkHi);
+    },
+    tvstand: function(v, A){
+      [[-7,-2],[7,-2],[-7,2],[7,2]].forEach(q => v.set(q[0],0,q[1],MAT.walLo));
+      v.box(-7, 7, 1, 4, -2, 2, MAT.wal); v.box(-7, 7, 5, 5, -2, 2, MAT.walHi);
+      v.box(-6, -1, 2, 3, 2, 2, MAT.walHi); v.box(1, 6, 2, 3, 2, 2, MAT.walHi);
+      v.box(2, 5, 2, 2, 2, 2, MAT.ink); v.set(5, 3, 2, 0x4BD18B); v.lit.add('5,3,2');   /* a console */
+      v.box(-6, 6, 7, 13, -1, -1, MAT.ink);                                /* the screen             */
+      v.box(-5, 5, 8, 12, 0, 0, 0x22325A);
+      [[-4,9,0x4BD18B],[-3,10,0x4BD18B],[1,11,MAT.brass],[3,9,A],[0,8,0x3B86E8],[-1,9,0x3B86E8]].forEach(q => { v.set(q[0], q[1], 0, q[2]); v.lit.add(q[0]+','+q[1]+',0'); });
+      v.box(-1, 1, 6, 6, -1, -1, MAT.ink);
+      v.box(-4, -3, 6, 6, 0, 1, MAT.inkHi);                                /* a controller           */
+    },
+    hextable: function(v, A){
+      [[-6,-4],[6,-4],[-6,4],[6,4]].forEach(q => v.box(q[0],q[0],0,4,q[1],q[1],MAT.wal));
+      v.box(-7, 7, 5, 5, -5, 5, MAT.oak); v.box(-7, 7, 5, 5, 5, 5, MAT.oakHi);
+      /* a little hex world on the table, columns of grass, stone and water */
+      for (let x = -5; x <= 5; x++) for (let z = -3; z <= 3; z++){
+        if (Math.abs(x) + Math.abs(z) * .7 > 5.6) continue;
+        const h = ((x * 7 + z * 13 + 40) % 4), water = (x === 1 && z >= -1) || (x === 2 && z === 1);
+        const col = water ? 0x4BA3D9 : (h >= 3 ? 0xA9A6A0 : (((x + z) % 3) ? MAT.leaf : MAT.leafHi));
+        const top = water ? 6 : 6 + h;
+        v.box(x, x, 6, top, z, z, water ? 0x3B86B8 : 0x9A6B45);
+        v.set(x, top, z, col);
+      }
+      v.set(-3, 10, 0, A); v.set(-3, 11, 0, A);                            /* a red-roofed house     */
+      v.box(3, 3, 9, 10, -2, -2, MAT.leafLo);                              /* a tree                 */
+    },
+    toolbox: function(v, A){
+      const t = tones(A);
+      [[-3,-2],[3,-2],[-3,2],[3,2]].forEach(q => v.set(q[0],0,q[1],MAT.ink));
+      v.box(-3, 3, 1, 9, -2, 2, t.c);
+      for (let y = 3; y <= 9; y += 2){ v.box(-3, 3, y, y, 2, 2, t.lo); v.set(0, y - 1, 3, MAT.inkHi); }  /* drawers */
+      v.box(-3, 3, 10, 10, -2, 2, t.lo);
+      v.box(-2, 2, 11, 11, -1, 1, MAT.ink); v.set(1, 12, 0, MAT.brass);    /* a case on top          */
+      v.box(-3, -3, 9, 12, 2, 2, MAT.inkHi);                               /* a handle               */
+    },
+    tripodcam: function(v, A){
+      v.box(0, 0, 5, 9, 0, 0, MAT.ink);
+      v.box(-3, -3, 0, 4, 2, 2, MAT.inkHi); v.box(3, 3, 0, 4, 2, 2, MAT.inkHi);   /* three legs      */
+      v.box(0, 0, 0, 4, -3, -3, MAT.inkHi);
+      v.box(-3, 3, 4, 4, 2, 2, MAT.ink); v.box(0, 0, 4, 4, -3, 2, MAT.ink);       /* the spider      */
+      [[-3,2],[3,2],[0,-3]].forEach(q => v.set(q[0], 0, q[1], MAT.inkLo));
+      v.box(-2, 2, 10, 13, -2, 1, MAT.ink);                                /* the body               */
+      v.box(-1, 1, 11, 12, 2, 4, MAT.inkHi);                               /* the lens               */
+      v.set(0, 11, 5, MAT.glass); v.set(0, 12, 5, MAT.glass); v.lit.add('0,11,5');
+      v.set(2, 13, -2, A); v.lit.add('2,13,-2');                           /* recording              */
+      v.box(-1, 1, 14, 14, -1, 0, MAT.inkHi);
+    },
+    softbox: function(v, A){
+      v.box(0, 0, 0, 10, 0, 0, MAT.ink);
+      v.box(-2, 2, 0, 0, 0, 0, MAT.ink); v.box(0, 0, 0, 0, -2, 2, MAT.ink);
+      v.box(-4, 4, 11, 19, -1, -1, MAT.ink);                               /* the box                */
+      v.box(-3, 3, 12, 18, 0, 0, MAT.fabHi);
+      for (let x = -3; x <= 3; x++) for (let y = 12; y <= 18; y++) v.lit.add(x+','+y+',0');
+      v.box(-4, 4, 11, 11, 0, 0, A);
+    },
+    filing: function(v, A){
+      v.box(-3, 3, 0, 0, -3, 3, MAT.inkLo);
+      v.box(-3, 3, 1, 12, -3, 3, MAT.ink);
+      [2, 6, 10].forEach(function(y){
+        v.box(-2, 2, y, y + 2, 4, 4, MAT.inkHi);
+        v.box(-1, 1, y + 1, y + 1, 5, 5, MAT.brass);                       /* a handle               */
+        v.set(0, y + 2, 5, MAT.fab);                                       /* a label                */
+      });
+      v.box(-3, 3, 13, 13, -3, 3, MAT.oak);
+      v.box(-2, 1, 14, 14, -2, 1, MAT.fab); v.box(-2, 1, 15, 15, -2, 1, A);   /* papers           */
+    },
+    globe: function(v, A){
+      v.box(-2, 2, 0, 0, -2, 2, MAT.wal); v.box(0, 0, 1, 4, 0, 0, MAT.wal);
+      v.box(-4, 4, 5, 5, 0, 0, MAT.brass);
+      for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) for (let z = -3; z <= 3; z++){
+        if (x*x + y*y + z*z > 11) continue;
+        const land = ((x * 3 + y * 5 + z * 7 + 30) % 5) < 2;
+        v.set(x, y + 9, z, land ? MAT.leaf : 0x3B86B8);
+      }
+      v.box(0, 0, 13, 13, 0, 0, MAT.brass);
+    },
+    trophy: function(v, A){
+      v.box(-3, 3, 0, 5, -3, 3, MAT.fab); v.box(-3, 3, 5, 5, -3, 3, MAT.fabHi);   /* a plinth       */
+      v.box(-3, 3, 2, 2, 3, 3, A);
+      v.box(-1, 1, 6, 6, -1, 1, MAT.wal);
+      v.box(0, 0, 7, 8, 0, 0, MAT.brass);
+      v.box(-2, 2, 9, 12, -2, 2, MAT.brass); v.del(-1, 1, 12, 12, -1, 1);  /* the cup                */
+      v.box(-3, -3, 10, 11, 0, 0, MAT.brass); v.box(3, 3, 10, 11, 0, 0, MAT.brass);
+    },
+    mailbox: function(v, A){
+      const t = tones(A);
+      v.box(0, 0, 0, 8, 0, 0, MAT.wal); v.box(-1, 1, 0, 0, -1, 1, MAT.walLo);
+      v.box(-2, 2, 9, 12, -3, 3, t.c); v.box(-2, 2, 13, 13, -2, 2, t.hi);  /* the box, round-topped  */
+      v.box(-1, 1, 10, 11, 4, 4, MAT.ink);                                 /* the slot               */
+      v.box(3, 3, 10, 15, 0, 0, MAT.brass); v.box(3, 3, 14, 15, 1, 2, MAT.brass);   /* the flag, up */
+      v.box(-1, 1, 12, 12, 4, 4, MAT.fabHi);                               /* a letter, poking out   */
+    },
+    coffeetable: function(v, A){
+      [[-5,-3],[5,-3],[-5,3],[5,3]].forEach(q => v.box(q[0],q[0],0,2,q[1],q[1],MAT.walLo));
+      v.box(-6, 6, 3, 3, -4, 4, MAT.oak); v.box(-6, 6, 3, 3, 4, 4, MAT.oakHi);
+      v.box(-5, 5, 1, 1, -3, 3, MAT.wal);                                  /* a lower shelf          */
+      v.box(-4, -1, 2, 2, -2, 1, MAT.books[2]);
+      v.box(-4, -1, 4, 4, -2, 1, MAT.books[0]); v.box(-3, -1, 5, 5, -2, 0, MAT.fab);   /* books on top */
+      v.box(2, 3, 4, 5, 0, 1, A); v.box(4, 4, 4, 4, 0, 0, MAT.brass);      /* a cup, a spoon         */
+    },
+    barchart: function(v, A){
+      v.box(-6, 6, 0, 1, -3, 3, MAT.fab); v.box(-6, 6, 1, 1, 3, 3, MAT.fabHi);
+      [[ -5, 14, A ], [ -2, 8, MAT.books[1] ], [ 1, 6, MAT.books[2] ], [ 4, 4, MAT.leaf ]].forEach(function(b){
+        v.box(b[0], b[0]+1, 2, 1 + b[1], -1, 1, b[2]);
+        v.box(b[0], b[0]+1, 1 + b[1], 1 + b[1], -1, 1, shadeHex(b[2], 1.25));
+      });
+    },
+    /* ── on the wall ── */
+    clock: function(v, A){
+      for (let x = -5; x <= 5; x++) for (let y = -5; y <= 5; y++){
+        const d = x*x + y*y;
+        if (d > 27) continue;
+        v.set(x, y, 0, d > 17 ? MAT.ink : MAT.fabHi);
+      }
+      [[0,4],[0,-4],[4,0],[-4,0]].forEach(q => v.set(q[0], q[1], 1, MAT.ink));      /* the hours    */
+      v.box(0, 0, 0, 3, 1, 1, MAT.ink);                                    /* the hour hand          */
+      v.box(0, 3, 0, 0, 1, 1, MAT.inkHi);                                  /* the minute hand        */
+      v.set(-1, -1, 1, A); v.set(-2, -2, 1, A);                            /* the second hand        */
+      v.set(0, 0, 2, MAT.brass);
+    },
+    corkboard: function(v, A){
+      v.box(-9, 9, -6, 6, 0, 0, MAT.oak); v.box(-9, 9, 6, 6, 0, 0, MAT.oakHi);
+      v.box(-8, 8, -5, 5, 1, 1, 0xC9A16B);                                 /* the cork               */
+      [[-7,-4,3,3,MAT.fabHi],[-3,-1,2,3,MAT.brass],[1,1,4,3,A],[5,-3,3,4,MAT.fabHi],[-6,0,4,2,0x9FC8E4],[0,-4,4,2,MAT.leafHi],[4,2,3,3,MAT.books[1]]].forEach(function(n){
+        v.box(n[0], n[0]+n[2]-1, n[1], n[1]+n[3]-1, 2, 2, n[4]);           /* notes                  */
+        v.set(n[0] + (n[2] >> 1), n[1] + n[3] - 1, 3, A);                  /* and their pins         */
+      });
+    },
+    whiteboard: function(v, A){
+      v.box(-11, 11, -6, 6, 0, 0, MAT.inkHi);
+      v.box(-10, 10, -5, 5, 1, 1, 0xFBFAF6);
+      /* a diagram in marker: three boxes joined by lines */
+      [[-8,1],[-1,1],[6,1]].forEach(function(b, k){ v.box(b[0], b[0]+3, b[1], b[1]+2, 2, 2, k === 1 ? A : 0x2B3550); });
+      v.box(-4, -2, 2, 2, 2, 2, MAT.ink); v.box(3, 5, 2, 2, 2, 2, MAT.ink);
+      v.box(-7, 7, -3, -3, 2, 2, 0x3B86E8); v.box(-7, -7, -2, 0, 2, 2, 0x3B86E8);
+      v.box(-11, 11, -7, -7, 0, 2, MAT.inkHi);                             /* the marker tray        */
+      v.set(-6, -7, 3, A); v.set(-4, -7, 3, 0x3B86E8);
+    },
+    sign: function(v, A){                                  /* a lit play sign, arcade style */
+      v.box(-6, 6, -5, 5, 0, 0, MAT.ink);
+      for (let x = 0; x <= 6; x++){
+        const h = 3 - Math.floor(x / 2);
+        for (let y = -h; y <= h; y++){ v.set(x - 3, y + 1, 1, A); v.lit.add((x - 3) + ',' + (y + 1) + ',1'); }
+      }
+      v.box(-5, 5, -4, -4, 1, 1, MAT.brass); for (let x = -5; x <= 5; x++) v.lit.add(x + ',-4,1');
+    }
+  });
+
+  /* each piece is built once per accent and shared across the rooms */
+  const piece = (name, u) => tint => propOf('p' + name + '|' + tint, u || FU, function(){
+    const v = new Vox(); PROP[name](v, tint); return v;
+  });
+  const MAKERS = {
+    bed:   { geo:piece('bed'),   r:2.2 },
+    couch: { geo:piece('couch'), r:1.9 },
+    chair: { geo:piece('chair'), r:1.3 },
+    shelf: { geo:piece('shelf'), r:1.4 },
+    rack:  { geo:piece('rack'),  r:1.1 },
+    desk:  { geo:piece('desk'),  r:1.8 },
+    side:  { geo:piece('side'),  r:1.9 },
+    easel: { geo:piece('easel'), r:1.3 },
+    crate: { geo:piece('crate'), r:1.4 },
+    plant: { geo:piece('plant'), r:.9  },
+    stool: { geo:piece('stool'), r:.8  },
+    lamp:  { geo:piece('lamp', .17),  r:.8, u:.17 },
+    tree:        { geo:piece('tree', .19),        r:1.3, u:.19 },
+    coatrack:    { geo:piece('coatrack', .15),    r:.8, u:.15 },
+    bench:       { geo:piece('bench'),       r:1.7 },
+    beanbag:     { geo:piece('beanbag'),     r:1.0 },
+    arcade:      { geo:piece('arcade', .15),      r:1.0, u:.15 },
+    tvstand:     { geo:piece('tvstand'),     r:1.6 },
+    hextable:    { geo:piece('hextable'),    r:1.6 },
+    toolbox:     { geo:piece('toolbox'),     r:.8  },
+    tripodcam:   { geo:piece('tripodcam', .17),   r:.9, u:.17 },
+    softbox:     { geo:piece('softbox', .16),     r:.9, u:.16 },
+    filing:      { geo:piece('filing'),      r:.8  },
+    globe:       { geo:piece('globe'),       r:.8  },
+    trophy:      { geo:piece('trophy'),      r:.8  },
+    mailbox:     { geo:piece('mailbox', .17),     r:.7, u:.17 },
+    coffeetable: { geo:piece('coffeetable'), r:1.4 },
+    barchart:    { geo:piece('barchart'),    r:1.4 }
+  };
+  /* what hangs beside the doorways, room by room */
+  const WALLDECO = [
+    ['clock', 'corkboard'], ['corkboard', 'clock'], ['sign', 'sign'], ['whiteboard', 'clock'],
+    ['corkboard', 'clock'], ['whiteboard', 'clock'], ['clock', 'corkboard'], ['clock', 'sign']
+  ];
+  const WU = .12;                                   /* the wall-piece cell */
 
   /* what belongs in each room, in the order it should be tried.
      a = along the wall the picture hangs on, l = across it. */
@@ -2845,14 +3533,14 @@ function build(){
      across walls, so furniture lives in the corners: two flanking the
      picture where the camera can actually see them, two behind. */
   const FURNISH = [
-    /* 00 lobby       */ [['side',6.2,-7.0],['plant',7.4,7.6],['stool',-6.4,7.0],['plant',-6.8,-7.2]],
-    /* 01 bedroom     */ [['bed',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['plant',7.4,7.6]],
-    /* 02 game room   */ [['couch',6.2,-7.0],['stool',7.8,-4.2],['crate',-6.8,-7.0],['plant',7.4,7.6]],
-    /* 03 workshop    */ [['desk',6.2,-7.0],['crate',7.8,-4.2],['shelf',-6.8,-7.0],['stool',-6.4,7.0]],
-    /* 04 studio      */ [['easel',6.4,-7.2],['stool',7.8,-4.2],['side',-6.8,-7.0],['plant',7.4,7.6]],
-    /* 05 server room */ [['rack',6.6,-7.4],['rack',6.6,-5.0],['rack',-6.8,-7.0],['crate',7.6,7.4]],
-    /* 06 library     */ [['shelf',6.4,-7.4],['shelf',6.4,-4.6],['shelf',-6.8,-7.0],['stool',7.6,7.8]],
-    /* 07 dining room */ [['side',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['plant',7.4,7.6]]
+    /* 00 lobby       */ [['plant',8.2,5.0],['coatrack',8.2,-5.0],['side',6.2,-7.0],['tree',7.4,7.4],['lamp',7.8,-4.4],['coatrack',-7.6,7.6],['bench',-7.4,-1.2],['chair',-4.6,7.6],['plant',-6.8,-7.2],['couch',-7.4,3.0],['tree',-7.6,-7.6]],
+    /* 01 bedroom     */ [['plant',8.2,5.0],['lamp',8.2,-5.0],['bed',6.2,-7.0],['stool',7.8,-4.2],['shelf',-6.8,-7.0],['tree',7.4,7.6],['lamp',-7.6,7.6],['desk',-7.6,1.0],['beanbag',-5.0,7.6],['chair',-7.6,-3.6]],
+    /* 02 game room   */ [['plant',8.2,5.0],['arcade',8.2,-5.0],['couch',6.2,-7.0],['arcade',7.8,-3.8],['arcade',7.8,3.8],['beanbag',-6.6,-7.0],['tvstand',-7.8,0.0],['beanbag',-5.0,6.8],['plant',7.4,7.6],['lamp',-7.6,7.6]],
+    /* 03 workshop    */ [['plant',8.2,5.0],['toolbox',8.2,-5.0],['desk',6.2,-7.0],['toolbox',7.8,-4.0],['shelf',-6.8,-7.0],['hextable',-7.2,2.0],['crate',7.6,7.2],['stool',-6.4,7.0],['lamp',-7.8,-3.8],['plant',7.8,4.4]],
+    /* 04 studio      */ [['plant',8.2,5.0],['softbox',8.2,-5.0],['easel',6.4,-7.2],['tripodcam',7.6,-3.6],['softbox',-7.6,-7.6],['softbox',7.6,7.6],['side',-6.8,-3.0],['plant',-7.6,7.6],['easel',-7.4,2.0],['stool',4.4,-7.8]],
+    /* 05 server room */ [['plant',8.2,5.0],['filing',8.2,-5.0],['rack',6.6,-7.4],['rack',6.6,-5.0],['rack',-6.8,-7.0],['rack',-6.8,-4.6],['filing',7.6,7.4],['desk',-7.4,3.0],['lamp',-7.6,7.6],['crate',7.6,4.4],['rack',6.6,4.8]],
+    /* 06 library     */ [['plant',8.2,5.0],['trophy',8.2,-5.0],['shelf',6.4,-7.4],['shelf',6.4,-4.6],['shelf',-6.8,-7.0],['globe',7.6,7.8],['barchart',-7.2,2.4],['trophy',-7.6,7.6],['filing',7.8,4.4],['trophy',-7.6,-4.0],['chair',4.4,7.6]],
+    /* 07 dining room */ [['plant',8.2,5.0],['mailbox',8.2,-5.0],['side',6.2,-7.0],['chair',7.6,-3.8],['shelf',-6.8,-7.0],['tree',7.4,7.6],['coffeetable',-7.0,2.6],['mailbox',-7.8,7.8],['lamp',-7.6,-3.8],['chair',-4.6,6.6]]
   ];
 
   /* the room's own no-go map. Plot's footprints were cut for small
@@ -2887,15 +3575,28 @@ function build(){
 
     const list = FURNISH[i % FURNISH.length];
     for (let k = 0; k < list.length; k++){
-      if (LOW && k > 2) break;
-      const name = list[k][0], a = list[k][1], l = list[k][2];
+      if (LOW && k > 5) break;
+      const name = list[k][0];
       const M2 = MAKERS[name];
-      if (!M2 || !fits(a, l, M2.r)) continue;
+      if (!M2) continue;
+      /* the spot asked for, or failing that the nearest free one along
+         the walls — every room's doors fall differently */
+      let a = list[k][1], l = list[k][2];
+      if (!fits(a, l, M2.r)){
+        let best = null, bd = 1e9;
+        for (let ca = -7.8; ca <= 7.81; ca += .6) for (let cl = -7.8; cl <= 7.81; cl += .6){
+          if (Math.max(Math.abs(ca), Math.abs(cl)) < 6.2) continue;
+          const d = (ca - a)*(ca - a) + (cl - l)*(cl - l);
+          if (d < bd && fits(ca, cl, M2.r)){ bd = d; best = [ca, cl]; }
+        }
+        if (!best) continue;
+        a = best[0]; l = best[1];
+      }
       up.push({ a:[a, l], r:M2.r });
       const spot = W(a, l);
       /* every piece turns its face toward the middle of the room */
       const ry = Math.atan2(p.x - spot.x, p.z - spot.z);
-      stand(g, M2.geo(R.tint), FU, spot.x, spot.z, ry, 0);
+      stand(g, M2.geo(R.tint), M2.u || FU, spot.x, spot.z, ry, 0);
     }
   }
 
@@ -2979,6 +3680,100 @@ function build(){
     return s;
   }
 
+  /* ── wall dressing ────────────────────────────────────────── */
+  const SCONCE_GLOW = new THREE.SpriteMaterial({ map:GLOW_MAT.map, transparent:true,
+    blending:THREE.AdditiveBlending, depthWrite:false, opacity:.55 });
+  function sconceGeo(tint){
+    return voxGeo('sconce|'+tint, .07, function(){
+      const v = new Vox();
+      v.box(-1, 1, -3, 3, 0, 0, 0x24232B);          /* the back plate   */
+      v.box( 0, 0, -1, 0, 1, 2, 0x24232B);          /* the arm          */
+      v.box(-2, 2, 1, 1, 1, 5, tint);               /* the shade's band */
+      v.box(-2, 2, 2, 4, 1, 5, 0xFBF6EA);           /* the shade        */
+      v.litSlab(1, 1, 0xFFF4D6, 1);
+      v.c.forEach(function(_, key){                  /* the slab sits where the shade is open */
+        const q = key.split(',');
+        if (+q[1] === 1 && Math.abs(+q[0]) <= 1 && +q[2] >= 2 && +q[2] <= 4) v.lit.add(key);
+      });
+      return v;
+    });
+  }
+  /* small pictures for the side walls — shapes in the room's colours */
+  const hexOf = n => '#' + n.toString(16).padStart(6, '0');
+  function miniArt(i, k, R, w, h){
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d');
+    const bg = [R.wall, R.low, 0xFBF8F1, 0x24232B][k % 4];
+    const acc = hexOf(R.tint), ink = '#24232B';
+    g.fillStyle = hexOf(k % 4 === 3 ? 0x2B3550 : mix(bg, 0xFFFFFF, .35)); g.fillRect(0, 0, w, h);
+    const m = Math.min(w, h);
+    switch ((i + k) % 4){
+      case 0:                                         /* the sun over hills */
+        g.fillStyle = acc; g.beginPath(); g.arc(w*.62, h*.36, m*.2, 0, 7); g.fill();
+        g.fillStyle = hexOf(mix(R.low, INK, .2));
+        g.beginPath(); g.moveTo(0, h); g.lineTo(0, h*.7); g.quadraticCurveTo(w*.3, h*.5, w*.6, h*.72); g.quadraticCurveTo(w*.8, h*.62, w, h*.66); g.lineTo(w, h); g.fill();
+        g.fillStyle = ink; g.fillRect(0, h*.9, w, h*.1); break;
+      case 1:                                         /* the mark, in isometric */
+        { const cx = w/2, cy = h/2, r = m*.32;
+          g.lineWidth = m*.025; g.strokeStyle = ink; g.lineJoin = 'round';
+          const top = [[cx, cy-r],[cx+r*.87, cy-r*.5],[cx, cy],[cx-r*.87, cy-r*.5]];
+          const lf  = [[cx-r*.87, cy-r*.5],[cx, cy],[cx, cy+r],[cx-r*.87, cy+r*.5]];
+          const rt  = [[cx+r*.87, cy-r*.5],[cx, cy],[cx, cy+r],[cx+r*.87, cy+r*.5]];
+          [[top,'#F2A83B'],[lf,'#D62222'],[rt,'#2B3550']].forEach(function(f){
+            g.beginPath(); f[0].forEach((q, j) => j ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1])); g.closePath();
+            g.fillStyle = f[1]; g.fill(); g.stroke(); }); }
+        break;
+      case 2:                                         /* stripes and a dot */
+        for (let j = 0; j < 6; j++){ g.fillStyle = j % 2 ? acc : hexOf(mix(R.low, 0xFFFFFF, .2)); g.fillRect(0, h*(.15 + j*.1), w, h*.1); }
+        g.fillStyle = ink; g.beginPath(); g.arc(w*.5, h*.82, m*.07, 0, 7); g.fill(); break;
+      default:                                        /* a grid of hexes */
+        for (let y = 0; y < 5; y++) for (let x = 0; x < 4; x++){
+          const cx = w*(.2 + x*.2 + (y % 2)*.1), cy = h*(.18 + y*.16), r = m*.075;
+          g.beginPath(); for (let a = 0; a < 6; a++){ const t = Math.PI/6 + a*Math.PI/3; g.lineTo(cx + Math.cos(t)*r, cy + Math.sin(t)*r); }
+          g.closePath(); g.fillStyle = (x + y) % 3 ? '#5FAE6E' : acc; g.fill();
+        }
+    }
+    return texFrom(c);
+  }
+  function miniFrame(par, x, y, w, h, tex){
+    const U = .07, cw = Math.round(w/U/2), ch = Math.round(h/U/2);
+    const geo = voxGeo('mini|'+cw+'|'+ch, U, function(){
+      return new Vox().box(-cw, cw, -ch, ch, 0, 0, 0xFBFAF6).rect(-cw, cw, -ch, ch, 0, 1, 2, 0x24232B);
+    });
+    voxAdd(par, geo, U, { cx:x, cy:y, minZ:0 });
+    const pic = new THREE.Mesh(new THREE.PlaneGeometry(w - .5, h - .5), new THREE.MeshBasicMaterial({ map:tex }));
+    pic.position.set(x, y, U + .012); par.add(pic);
+  }
+  function shelfGeo(R){
+    return voxGeo('wshelf|'+R.tint+'|'+R.low, .12, function(){
+      const v = new Vox();
+      v.box(-12, 12, 0, 0, 0, 3, MID);                 /* the board        */
+      v.box(-10, -10, -2, -1, 0, 0, DARK);             /* brackets         */
+      v.box( 10,  10, -2, -1, 0, 0, DARK);
+      const cols = [R.tint, 0xF7F2E8, R.low, 0x2B3550, 0xF2A83B];
+      for (let x = -11; x <= -4; x++){                 /* a run of books   */
+        const t = (x * 7 + 3) % 5, ht = 4 + ((x * 5) % 3);
+        v.box(x, x, 1, ht, 0, 2, cols[(t + 5) % 5]);
+      }
+      v.box(-3, -3, 1, 4, 0, 2, MID);                  /* one leaning      */
+      v.box(1, 3, 1, 3, 0, 2, 0xD62222);               /* a red cube       */
+      v.box(1, 2, 4, 4, 0, 1, 0xF2A83B);
+      v.box(6, 9, 1, 3, 0, 3, 0xF7F2E8);               /* a pot...         */
+      v.box(6, 9, 4, 7, 0, 3, 0x5FAE6E);               /* ...and its plant */
+      v.box(7, 8, 8, 8, 1, 2, 0x3E8A52);
+      return v;
+    });
+  }
+  function dressWall(wg, i, n, R){
+    /* a shelf on one side, two pictures on the other; the mirror image on
+       the second spare wall so the room doesn't repeat itself */
+    const sd = n % 2 ? -1 : 1;
+    voxAdd(wg, shelfGeo(R), .12, { cx:sd * 2.6, minY:2.55, minZ:0 });
+    miniFrame(wg, -sd * 2.9, 3.9, 1.9, 2.5, miniArt(i, n*2,     R, 160, 210));
+    miniFrame(wg, -sd * 0.7, 4.3, 1.5, 1.5, miniArt(i, n*2 + 1, R, 160, 160));
+    miniFrame(wg, -sd * 0.7, 2.75, 1.5, 1.1, miniArt(i, n*2 + 2, R, 160, 116));
+  }
+
   /* ── raise the house ──────────────────────────────────────── */
   const roomGroups = [], screens = [], artworks = [], artTex = [], labTex = [];
   const built = new Set();
@@ -2986,7 +3781,7 @@ function build(){
   P.forEach((p, i) => {
     const R = ROOMS[i];
     const wallM = paper(R.wall);
-    const floorM = new THREE.MeshToonMaterial({ color:R.floor, gradientMap:RAMP, map:gridMap(10) });
+    const floorM = new THREE.MeshToonMaterial({ color:lin(R.floor), gradientMap:RAMP, map:FLOOR_MAP });
     const g = new THREE.Group(); scene.add(g); roomGroups.push(g);
 
     /* a slab exactly one room wide, top face at y=0. Neighbouring rooms
@@ -3035,6 +3830,56 @@ function build(){
 
     });
 
+    /* each room dresses the inside of its own four walls, so a wall two
+       rooms share shows each of them its own colour */
+    const lowM = paper(R.low), railM = paper(R.rail), trimM = paper(mix(0xFBF8F2, R.wall, .25));
+    const skirtM = paper(mix(R.low, INK, .45));
+    [['px',1,0],['nx',-1,0],['pz',0,1],['nz',0,-1]].forEach(function(w){
+      const k = w[0], sx = w[1], sz = w[2], alongZ = sx !== 0;
+      const face = HALF - T/2;
+      /* lay a strip of the given depth flush on the inside face, along
+         [from,to] across the wall and [y0,y1] up it */
+      const strip = function(mat, d, from, to, y0, y1, o){
+        const len = to - from, mid = (from + to)/2, dd = face - d/2;
+        const cx = p.x + (alongZ ? sx*dd : mid), cz = p.z + (alongZ ? mid : sz*dd);
+        B(g, alongZ ? d : len, y1 - y0, alongZ ? len : d, mat, cx, (y0 + y1)/2, cz, o);
+      };
+      const spans = doorSides[i][k] ? [[-HALF, -DW], [DW, HALF]] : [[-HALF, HALF]];
+      spans.forEach(function(sp){
+        strip(wallM,  .04, sp[0], sp[1], 0,    doorSides[i][k] ? DH : H, 0);
+        strip(lowM,   .08, sp[0], sp[1], 0,    .82, 0);
+        strip(railM,  .13, sp[0], sp[1], .80,  .90, .6);
+        strip(skirtM, .14, sp[0], sp[1], 0,    .17, .6);
+      });
+      if (doorSides[i][k]) strip(wallM, .04, -HALF, HALF, DH, H, 0);
+      strip(trimM, .12, -HALF, HALF, H - .22, H, .6);
+    });
+
+    /* a rug under the walk, turned to the picture */
+    {
+      const rc = document.createElement('canvas'); rc.width = 256; rc.height = 192;
+      const rg = rc.getContext('2d');
+      const hx = n => '#' + n.toString(16).padStart(6, '0');
+      rg.fillStyle = hx(mix(R.rug, R.floor, .3)); rg.fillRect(0, 0, 256, 192);
+      rg.strokeStyle = hx(mix(R.rug, 0xFFFFFF, .78)); rg.lineWidth = 6; rg.strokeRect(14, 14, 228, 164);
+      rg.lineWidth = 2; rg.strokeRect(26, 26, 204, 140);
+      rg.fillStyle = hx(mix(R.rug, 0xFFFFFF, .78));
+      for (let k = 0; k < 5; k++){                    /* a row of diamonds down the middle */
+        const cx = 56 + k*36, cy = 96;
+        rg.beginPath(); rg.moveTo(cx, cy-14); rg.lineTo(cx+12, cy); rg.lineTo(cx, cy+14); rg.lineTo(cx-12, cy); rg.closePath(); rg.fill();
+      }
+      rg.fillStyle = hx(mix(R.rug, INK, .25));
+      for (let k = 0; k < 256; k += 8){ rg.fillRect(k, 0, 4, 5); rg.fillRect(k, 187, 4, 5); }   /* fringe */
+      const rt = texFrom(rc);
+      const rug = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 4.2),
+        new THREE.MeshToonMaterial({ map:rt, gradientMap:RAMP, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 }));
+      rug.rotation.x = -Math.PI/2;
+      const A0 = SIDEVEC[artKey[i]];
+      rug.rotation.z = Math.atan2(A0[0], A0[1]);
+      rug.position.set(p.x + A0[0]*4.6, .015, p.z + A0[1]*4.6);
+      g.add(rug);
+    }
+
     /* the piece on the wall — frame, canvas, caption. Nothing else. */
     const A = SIDEVEC[artKey[i]], L = [A[1], -A[0]];
     artTex.push(texFrom(artCanvas(i)));
@@ -3055,21 +3900,20 @@ function build(){
     const HC   = Math.max(4, Math.round(artH / 2 / AU) + 1);
     const frameGeo = voxGeo('art|'+R.art+'|'+HC, AU, function(){
       const v = new Vox(), W = 11, Hh = HC;
-      v.box(-W, W, -Hh, Hh, 0, 0, R.art);                  /* the backing board */
-      v.rect(-W, W, -Hh, Hh, 0, 0, 2, 0xD9D9D7);           /* the rail, dark enough to
-                                                              read against a bright wall */
-      v.rect(-W, W, -Hh, Hh, 1, 1, 1, 0xFCFCFC);           /* the sight edge, proud */
+      v.box(-W, W, -Hh, Hh, 0, 0, R.art);                  /* the mat */
+      v.rect(-W, W, -Hh, Hh, 0, 1, 1, 0x24232B);           /* the rail, in ink */
+      v.rect(-W, W, -Hh, Hh, 2, 2, 1, 0x34333D);           /* stepped proud */
       [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(q){   /* a block on each corner */
         const x0 = q[0] > 0 ? W-2 : -W, y0 = q[1] > 0 ? Hh-2 : -Hh;
-        v.box(x0, x0+2, y0, y0+2, 0, 2, 0xC4C4C2);
+        v.box(x0, x0+2, y0, y0+2, 0, 2, 0x1A1920);
       });
       v.box(-W, -W+2, Hh-2, Hh, 0, 2, 0xD62222);           /* the one accent, on the corner */
       return v;
     });
-    voxAdd(frame, frameGeo, AU, { cx:0, cy:4.05, minZ:-.09 }, false);
+    voxAdd(frame, frameGeo, AU, { cx:0, cy:ART_Y, minZ:-.09 }, false);
     const artMat = new THREE.MeshBasicMaterial({ map:artTex[i] });
     const art = new THREE.Mesh(new THREE.PlaneGeometry(artW, artH), artMat);
-    art.position.set(0, 4.05, .21); frame.add(art);
+    art.position.set(0, ART_Y, .21); frame.add(art);
     /* the drawn poster shows immediately; the photograph replaces it the
        moment it arrives, so a slow or failed load never leaves a hole */
     loadPiece(PIECE[i % PIECE.length], artMat);
@@ -3077,14 +3921,26 @@ function build(){
     /* the name plate hangs clear below the frame, not tucked under it */
     const frameHalf = (2*HC + 1) * AU / 2;
     const labHalf   = 2.5 * AU;
-    const labY      = 4.05 - frameHalf - .34 - labHalf;
+    const labY      = ART_Y - frameHalf - .16 - labHalf;
     const labGeo = voxGeo('lab|'+R.art, AU, function(){
-      return new Vox().box(-6, 6, -2, 2, 0, 0, R.art).rect(-6, 6, -2, 2, 0, 0, 1, 0xD2D2D0);
+      return new Vox().box(-6, 6, -2, 2, 0, 0, R.art).rect(-6, 6, -2, 2, 0, 0, 1, 0x24232B);
     });
     voxAdd(frame, labGeo, AU, { cx:0, cy:labY, minZ:-.09 });
     const lab = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .82), new THREE.MeshBasicMaterial({ map:labTex[i] }));
     lab.position.set(0, labY, .21); frame.add(lab);
-    artworks.push({ group:frame, hit:art, w:6.5, h:frameHalf*2 + .2, room:i, cy:4.05,
+    /* a pair of sconces either side of the picture */
+    [-1, 1].forEach(function(sd){
+      const sg = new THREE.Group();
+      sg.position.set(sd * 4.15, ART_Y + .55, 0);
+      frame.add(sg);
+      voxAdd(sg, sconceGeo(R.tint), .07, { cx:0, cy:0, minZ:-.09 });
+      const glow = new THREE.Sprite(SCONCE_GLOW);
+      glow.scale.set(2.4, 2.4, 1);
+      glow.position.set(0, .28, .45);
+      sg.add(glow);
+    });
+
+    artworks.push({ group:frame, hit:art, w:6.5, h:frameHalf*2 + .2, room:i, cy:ART_Y,
                     homePos:frame.position.clone(), homeQuat:frame.quaternion.clone() });
 
     /* a cabinet, where there is a game to play */
@@ -3120,6 +3976,28 @@ function build(){
       screens.push({ mesh:scr, room:i, w:5.4, h:3.58 });
     }
 
+    /* beside every doorway, something on the wall: a clock, a board, a sign */
+    ['px','nx','pz','nz'].filter(k => doorSides[i][k]).forEach(function(k, n){
+      const sv = SIDEVEC[k];
+      const wg = new THREE.Group();
+      wg.position.set(p.x + sv[0]*(HALF - T*.5 - .1), 0, p.z + sv[1]*(HALF - T*.5 - .1));
+      wg.rotation.y = Math.atan2(-sv[0], -sv[1]);
+      g.add(wg);
+      const deco = WALLDECO[i % WALLDECO.length], name = deco[n % deco.length];
+      const geo = voxGeo('w' + name + '|' + R.tint, WU, function(){ const v = new Vox(); PROP[name](v, R.tint); return v; });
+      voxAdd(wg, geo, WU, { cx:(n % 2 ? -1 : 1) * 6.3, cy:4.7, minZ:0 });
+    });
+
+    /* the walls with nothing on them get a shelf and a little gallery */
+    spare.slice(GAMES[i] ? 1 : 0).forEach(function(k, n){
+      const sv = SIDEVEC[k];
+      const wg = new THREE.Group();
+      wg.position.set(p.x + sv[0]*(HALF - T*.5 - .1), 0, p.z + sv[1]*(HALF - T*.5 - .1));
+      wg.rotation.y = Math.atan2(-sv[0], -sv[1]);
+      g.add(wg);
+      dressWall(wg, i, n, R);
+    });
+
     /* the lamp over the floor where the piece faces, and then whatever
        furniture the room's theme calls for, dealt into the corners */
     lantern(g, p.x + A[0]*5.2 + L[0]*2.4, p.z + A[1]*5.2 + L[1]*2.4, R.tint, i);
@@ -3144,8 +4022,9 @@ function build(){
      ──────────────────────────────────────────────────────────── */
   /* the house is lit to the top of its range: heavy fill, a key just
      strong enough to keep the corners readable */
-  scene.add(new THREE.AmbientLight(0xFFFFFF, .18));
-  const key  = new THREE.DirectionalLight(0xFFFFFF, .34); key.position.set(9,16,10);   scene.add(key);
+  scene.add(new THREE.AmbientLight(0xFFF8EE, .5));
+  scene.add(new THREE.HemisphereLight(0xFFFFFF, 0xC9A27A, .22));
+  const key  = new THREE.DirectionalLight(0xFFF6EA, .5); key.position.set(9,16,10);   scene.add(key);
   const fill = new THREE.DirectionalLight(0xE4ECF6, .14); fill.position.set(-10,7,-12); scene.add(fill);
   const bulbA = new THREE.PointLight(0xFFF8EE, 0, 20, 1.6); scene.add(bulbA);
   const bulbB = new THREE.PointLight(0xFFF8EE, 0, 18, 1.8); scene.add(bulbB);
@@ -3156,12 +4035,6 @@ function build(){
     if (d < 0) d += Math.PI*2;
     return d - Math.PI;
   };
-  const TURN = [];
-  for (let i = 0; i < N; i++){
-    const a = dirAt(Math.max(0, i-1)), b = dirAt(Math.min(i, N-2));
-    TURN.push(Math.abs(shortAngle(Math.atan2(a.x,a.z), Math.atan2(b.x,b.z))));
-  }
-
   const ptr = { x:0, y:0, tx:0, ty:0 };
   if (!COARSE){
     addEventListener('pointermove', e => {
@@ -3180,6 +4053,7 @@ function build(){
     return yf + shortAngle(yf, ya);
   })();
   const HOME_PITCH = .085;
+  let viewShift = 0;
   let yaw = HOME_YAW, yawV = 0, pitch = HOME_PITCH, pitchV = 0;
 
   /* called when the reader enters, so a restored scroll position or a
@@ -3317,6 +4191,7 @@ function build(){
 
   function step(dt, t){
     if (dock.on){
+      if (viewShift !== 0){ viewShift = 0; camera.clearViewOffset(); }
       dock.t = clamp((performance.now() - dock.t0) / 1150, 0, 1);
       const e = smooth(dock.t);
       camera.position.lerpVectors(dock.camFrom, dock.camTo, e);
@@ -3354,10 +4229,11 @@ function build(){
     const raw  = .5 + .5*Math.cos(Math.PI*2*m);
     const cw   = smooth(clamp((raw - .18) / .62, 0, 1));
     const rIdx = m < .5 ? i0 : i1;
-    const ease = 1 - clamp(TURN[rIdx] / (Math.PI/2), 0, 1) * .18;
     const av   = SIDEVEC[artKey[rIdx]];
     const gx = P[rIdx].x + av[0]*9.4, gz = P[rIdx].z + av[1]*9.4;
-    const w  = cw * ease;
+    /* square on, always — a softened turn left the piece half off the
+       screen in every room where the path bends */
+    const w  = cw;
     const yawWant = yawFwd + shortAngle(yawFwd, Math.atan2(gx - pos.x, gz - pos.z)) * w;
 
     const K = 4.2, C = 2 * Math.sqrt(K) * 1.06;
@@ -3374,6 +4250,21 @@ function build(){
       const kr = clamp(dt*5.5, 0, 1);
       sk.x += (sk.tx - sk.x) * kr;
       sk.y += (sk.ty - sk.y) * kr;
+    }
+
+    /* slide the frame so the room's picture lands in the half of the
+       screen the card leaves free */
+    {
+      let want = 0;
+      if (MODE === 'panel' && !show.item){
+        const sec = sections[clamp(Math.round(scroll.p * (N-1)), 0, N-1)];
+        if (!sec.classList.contains('closer')){
+          const card = sec.classList.contains('cover') ? Math.min(430, view.w*.38) : Math.min(380, view.w*.33);
+          want = (sec.classList.contains('right') ? 1 : -1) * (card * .5 + 20);
+        }
+      }
+      viewShift += (want - viewShift) * clamp(dt * 2.4, 0, 1);
+      camera.setViewOffset(view.w, view.h, viewShift, 0, view.w, view.h);
     }
 
     const bob  = REDUCED ? 0 : Math.sin(t*.7)*.028;
@@ -3415,11 +4306,11 @@ function build(){
     }
     if (lanterns[n1]){
       bulbA.position.set(lanterns[n1].x, lanterns[n1].y, lanterns[n1].z);
-      bulbA.intensity = lanterns[n1].lit * 3.4;
+      bulbA.intensity = lanterns[n1].lit * 1.3;
     }
     if (lanterns[n2]){
       bulbB.position.set(lanterns[n2].x, lanterns[n2].y, lanterns[n2].z);
-      bulbB.intensity = lanterns[n2].lit * 2.0;
+      bulbB.intensity = lanterns[n2].lit * .7;
     }
 
     for (let i = 0; i < N; i++){

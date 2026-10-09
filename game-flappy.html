@@ -25,12 +25,6 @@ const { useState, useEffect, useCallback, useRef, useMemo, useLayoutEffect,
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 🎬 BACKEND CONFIG — change this YouTube ID to update the video panel.
-//    Users never see or touch this value; it lives only in the source code.
-// ─────────────────────────────────────────────────────────────────────────────
-const VIDEO_YOUTUBE_ID = 'jNQXAC9IVRw';
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Pixelated sky hook — drives an offscreen canvas used as page background
 // ─────────────────────────────────────────────────────────────────────────────
 const useSkyCanvas = (ref) => {
@@ -273,21 +267,6 @@ const FlappyFird = () => {
                 </div>
                 <div style={{fontSize:11,color:'#94a3b8',letterSpacing:'.1em'}}>tunnels collapse over time</div>
               </div>
-            </div>
-
-            {/* ── Video panel — URL set via VIDEO_YOUTUBE_ID constant above ── */}
-            <div style={{
-              width:260,height:146,borderRadius:10,overflow:'hidden',marginBottom:16,
-              border:'1.5px solid rgba(59,130,246,.4)',
-              boxShadow:'0 0 28px rgba(59,130,246,.18)',
-            }}>
-              <iframe
-                src={`https://www.youtube.com/embed/${VIDEO_YOUTUBE_ID}?rel=0&modestbranding=1`}
-                style={{width:'100%',height:'100%',border:'none',display:'block'}}
-                allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
-                allowFullScreen
-                title="Game preview"
-              />
             </div>
 
             {/* Rules toggle */}
