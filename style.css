@@ -514,3 +514,19 @@ html{scroll-behavior:auto}
 .lc-art{clip-path:none}
 .po{scale:var(--hs, 1)}
 .po-big,.po-stack{translate:none;will-change:transform}
+
+/* ══ FLAT OPENING ═══════════════════════════════════════════
+   The lanes sit over the canvas as plain HTML until the merge.
+   Focus comes from two fixed soft zones the cards glide through,
+   so nothing switches on and off while you scroll. */
+#flat{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#flat .lane{pointer-events:auto}
+body.three .lc,body.three .lc.far{filter:none;opacity:1;transition:none}
+body.flat .lane::before,body.flat .lane::after{content:"";position:absolute;left:0;right:0;z-index:1;pointer-events:none;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+body.flat .lane::before{top:var(--hh,0px);height:16%;-webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent)}
+body.flat .lane::after{bottom:0;height:30%;-webkit-mask-image:linear-gradient(transparent,#000 70%);mask-image:linear-gradient(transparent,#000 70%)}
+body.flat .lane.eng::after{background:linear-gradient(transparent,rgba(12,12,13,.55))}
+body.flat .lane.cre::after{background:linear-gradient(transparent,rgba(242,58,29,.5))}
+@media (prefers-reduced-motion:reduce){ body.flat .lane::before,body.flat .lane::after{display:none} }
+body.low.flat .lane::before,body.low.flat .lane::after{-webkit-backdrop-filter:none;backdrop-filter:none}

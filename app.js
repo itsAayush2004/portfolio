@@ -211,6 +211,7 @@ if (store.get('aak-view') === 'simple' || !window.THREE || !THREE.CSS3DRenderer 
 body.classList.add('three', 'act1');
 const MOBILE = innerWidth < 760 || (matchMedia('(pointer: coarse)').matches && innerWidth < 1000);
 const LOW = MOBILE || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+body.classList.toggle('low', LOW);
 
 /* ── the loader lifts away by itself once everything is built ── */
 const gateFill = $('#gateFill'), gateMsg = $('#gateMsg');
@@ -882,12 +883,30 @@ function buildLights(){
 
 /* ══ the lanes in 3D ════════════════════════════════════════ */
 const laneEls = [$('#laneL'), $('#laneR')];
+const flatBox = $('#flat');
 const lanes = laneEls.map((el, k) => {
-  const o = new THREE.CSS3DObject(el);
   const hole = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0, blending: THREE.NoBlending, side: THREE.DoubleSide }));
-  o.add(hole); scene.add(o);
-  return { el, o, hole, strip: $('.strip', el), head: $('.lane-h', el), side: k === 0 ? -1 : 1, travel: 0, headH: 0, cards: [] };
+  return { el, o: null, hole, strip: $('.strip', el), head: $('.lane-h', el), side: k === 0 ? -1 : 1, travel: 0, headH: 0, cards: [] };
 });
+/* In the opening the lanes are flat, ordinary HTML over the canvas: text is drawn once and only
+   slides. When the merge starts they hand over to CSS3D at exactly the same place, so the switch
+   can't be seen. A fresh CSS3DObject each time keeps the renderer's style cache honest. */
+let isFlat = null;
+function setFlat(on){
+  if (on === isFlat) return; isFlat = on;
+  lanes.forEach(L => {
+    if (on){
+      if (L.o){ L.o.remove(L.hole); scene.remove(L.o); L.o = null; }
+      L.el.style.transform = ''; L.el.style.display = '';
+      flatBox.appendChild(L.el); placeFlat(L);
+    } else {
+      L.el.style.left = L.el.style.top = '';
+      L.o = new THREE.CSS3DObject(L.el); L.o.add(L.hole); scene.add(L.o);
+    }
+  });
+  body.classList.toggle('flat', on);
+}
+function placeFlat(L){ L.el.style.position = 'absolute'; L.el.style.top = '0px'; L.el.style.left = (L.side < 0 ? 0 : VW - laneW) + 'px'; }
 const Y0 = 3.3, ZL = .6, DIST = 7;
 let VW = innerWidth, VH = innerHeight, seamPx = 0, laneW = 0, sScreen = 1, sWall = 1;
 let pTarget = 0, pNow = 0, lastHere = -2, lastPhase = '';
@@ -907,7 +926,9 @@ function layout(){
     L.strip.style.paddingTop = (L.head.offsetHeight + 4) + 'px';
     L.travel = Math.max(0, L.strip.offsetHeight - VH);
     L.headH = L.head.offsetHeight;
-    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack', el) || el.querySelector('.lc-art') || el, top: el.offsetTop, h: el.offsetHeight, py: null, bl: null }));
+    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack', el) || el.querySelector('.lc-art') || el, top: el.offsetTop, h: el.offsetHeight, py: null }));
+    L.el.style.setProperty('--hh', L.headH + 'px');
+    if (isFlat) placeFlat(L);
   });
   camera.aspect = VW / VH; camera.updateProjectionMatrix();
   renderer.setSize(VW, VH, false); css.setSize(VW, VH);
@@ -921,6 +942,7 @@ function placeLanes(t){
   /* t: 0 = flat across the screen, 1 = open against the hall's side walls */
   const a = ease(clamp(t, 0, 1));
   lanes.forEach(L => {
+    if (!L.o) return;
     const s = lerp(sScreen, sWall, a);
     const hx = lerp(L.side * (VW / 2) * sScreen, L.side * HINGE_X, a);
     const hy = lerp(Y0, .4 + VH * sWall / 2, a), hz = lerp(ZL, -.3, a);
@@ -1014,7 +1036,7 @@ function direct(p, t){
   /* scroll speed drives the lean of the lanes */
   const dt = Math.max(.001, t - lastT), vel = (p - lastP) / dt; lastP = p; lastT = t;
   const k = 1 - Math.exp(-dt * 9);
-  skew += ((REDUCED ? 0 : clamp(vel * .008, -4, 4)) - skew) * k;
+  skew += ((REDUCED ? 0 : clamp(vel * .006, -2.5, 2.5)) - skew) * k;
 
   /* Act I: the strips run in opposite directions and lean with the scroll */
   const t1 = clamp(p / ACT1, 0, 1);
@@ -1022,16 +1044,12 @@ function direct(p, t){
     const y = n === 0 ? -t1 * L.travel : -(1 - t1) * L.travel;
     L.strip.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0) skewY(' + ((n ? -1 : 1) * skew).toFixed(2) + 'deg)';
     if (REDUCED) return;
-    /* the focus band sits on the golden line of the lane: cards sharpen there, blur away from it */
-    const focusY = VH * (PHI - 1), live = p < ACT1;
+    /* posters drift at their own depth */
     L.cards.forEach(c => {
       const top = c.top + y;
       if (top > VH + 40 || top + c.h < -40) return;
       const py = clamp((top + c.h / 2 - VH / 2) / VH, -1, 1) * -12;
-      const dist = Math.abs(top + c.h / 2 - focusY) / VH;
-      const far = live && dist > .34;
       if (c.py === null || Math.abs(py - c.py) > .05){ c.py = py; c.big.style.transform = 'translate3d(0,' + py.toFixed(2) + '%,0)'; }
-      if (c.bl !== far){ c.bl = far; c.el.classList.toggle('far', far); }
     });
   });
   const so = VW < 760 ? 1 - smooth(10, 45, p) : 1 - smooth(ACT1 * .82, ACT1 + 10, p);
@@ -1050,13 +1068,13 @@ function direct(p, t){
 
   /* Act II: doors open, the camera lifts out to the whole building, then drops into the hall */
   const tm = clamp((p - ACT1) / MERGE, 0, 1);
+  setFlat(p <= ACT1);
   placeLanes(smooth(0, .36, tm));
-  lanes.forEach(L => { L.o.visible = p < HALL_AT + STEP * .6; });
+  lanes.forEach(L => { if (L.o) L.o.visible = p < HALL_AT + STEP * .6; });
   if (p < HALL_AT){
     const up = ease(smooth(.3, .58, tm)), down = ease(smooth(.7, 1, tm));
     tmpPos.lerpVectors(DOOR.pos, REVEAL.pos, up).lerp(HALLP.pos, down);
     tmpLook.lerpVectors(DOOR.look, REVEAL.look, up).lerp(HALLP.look, down);
-    if (!REDUCED && p < ACT1) tmpLook.x += Math.sin(t * .25) * .3;
     applyPose(tmpPos, tmpLook, 0, 0);
   } else {
     /* Act III: walk room to room, through each door, resting at every piece */
