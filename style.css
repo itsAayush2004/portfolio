@@ -822,3 +822,30 @@ body.simple #laneL .bin-field{display:none}
   #gate .gate-num{font-size:min(70vw,36vh)}
   body:not(.booting) #gate{clip-path:inset(50% 0 50% 0)}
 }
+
+body.shot #hud,body.shot #gate,body.shot #grain,body.shot #cursor,body.shot #lanes,body.shot #flat,body.shot #wipe,body.shot .codex{display:none!important}
+body.shot #css3d{display:none}
+
+/* ══ the pieces, photographed: dossier heroes, index thumbnails ══ */
+.st-hero{margin:4px 0 18px;border-radius:var(--r3);overflow:hidden;aspect-ratio:4/3;max-width:560px}
+.st-hero img{width:100%;height:100%;object-fit:cover}
+.dos-body .st-hero{max-width:none;margin:8px 0 20px;animation:heroIn var(--d4) var(--ease-out) both}
+@keyframes heroIn{from{transform:scale(1.04);opacity:0}to{transform:none;opacity:1}}
+.menu-l button{grid-template-columns:48px 30px 1fr auto}
+.menu-l .th{width:48px;height:36px;border-radius:var(--r1);object-fit:cover;display:block;background:var(--paper-2)}
+@media (prefers-reduced-motion:reduce){ .dos-body .st-hero{animation:none} }
+
+/* ══ tiles: the loader leaves, and the merge sweeps, in squares ══ */
+.g-tiles{position:absolute;inset:0;z-index:3;pointer-events:none}
+.g-tiles i,#wipe i{position:absolute;display:grid;place-items:center;font:800 18px/1 var(--f-code);font-style:normal}
+.g-tiles i.e,#wipe i.e{background:var(--term);color:var(--green)}
+.g-tiles i.c,#wipe i.c{background:var(--red)}
+#wipe i.p{background:var(--paper)}
+#gate.dissolve{clip-path:none!important;visibility:visible!important;pointer-events:none;background:none;transition:none}
+#gate.dissolve::after{opacity:0;transition:opacity .3s}
+#gate.dissolve > section{opacity:0;transition:opacity .22s var(--ease-out)}
+#gate.dissolve .g-tiles i{animation:tileOut .62s var(--ease-io) both;animation-delay:var(--dl)}
+@keyframes tileOut{0%{transform:none;opacity:1}100%{transform:scale(0) rotate(90deg);opacity:0}}
+#wipe{visibility:hidden}
+#wipe i{transform:scale(0);will-change:transform;bottom:auto}
+@media (prefers-reduced-motion:reduce){ #wipe{display:none!important} }
