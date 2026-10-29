@@ -787,7 +787,7 @@ function buildBlender(i){
     m.quaternion.setFromUnitVectors(V3(0, 1, 0), Bv.clone().sub(A).normalize()); m.castShadow = true; fig.add(m);
     const j = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.3, r * 1.3, r * 1.2, 8), T); j.position.copy(Bv); j.quaternion.copy(m.quaternion); fig.add(j); };
   K(fig, .5, .62, .3, W, 0, 1.0, 0); K(fig, .54, .08, .34, T, 0, 1.6, 0); K(fig, .44, .16, .28, T, 0, .92, 0);
-  O8(fig, .2, .22, .4, W, 0, 1.72, 0); O8(fig, .22, .22, .05, T, 0, 2.1, 0); O8(fig, .07, .08, .1, T, 0, 1.64, 0);
+  K(fig, .4, .44, .38, W, 0, 1.7, 0, { r: .12 }); K(fig, .32, .11, .06, fm('ink'), 0, 1.88, .17, { r: .03 }); O8(fig, .04, .04, .05, fm('red'), .2, 2.04, 0); O8(fig, .07, .08, .1, T, 0, 1.64, 0);
   limb(-.3, 1.52, -.55, 1.2, .07); limb(-.55, 1.2, -.45, .92, .06); limb(.3, 1.52, .58, 1.34, .07); limb(.58, 1.34, .74, 1.6, .06);
   limb(-.13, .92, -.18, .48, .09); limb(-.18, .48, -.2, .04, .08); limb(.13, .92, .2, .5, .09); limb(.2, .5, .22, .04, .08);
   /* a softbox and a camera on a tripod, both on the same base */
@@ -1105,63 +1105,194 @@ function buildContact(i){
   return g;
 }
 
-/* ══ gates: a built doorway into every room, named for the room it opens on,
-   with two leaves that swing open as you walk up to them ══ */
-const GATES = [];
-function gateSign(i){
-  const st = STATIONS[i], side = ROOMS[i].side, W = 1100, H = 280, [c, g] = makeCanvas(W, H);
-  const num = String(i + 1).padStart(2, '0'), word = WALLWORD[i];
-  if (side === 'eng'){
-    g.fillStyle = '#070B08'; g.fillRect(0, 0, W, H);
-    g.strokeStyle = 'rgba(59,240,122,.45)'; g.lineWidth = 6; g.strokeRect(10, 10, W - 20, H - 20);
-    g.fillStyle = '#3BF07A'; g.font = '800 104px "JetBrains Mono", ui-monospace, monospace'; g.textBaseline = 'middle';
-    g.shadowColor = 'rgba(59,240,122,.6)'; g.shadowBlur = 18;
-    g.fillText('> cd ./' + word.toLowerCase().replace(/\s+/g, '_').slice(0, 9) + '_', 44, H / 2 + 4);
-    g.shadowBlur = 0; g.font = '700 30px "JetBrains Mono", ui-monospace, monospace'; g.fillStyle = 'rgba(59,240,122,.7)'; g.textAlign = 'right'; g.fillText('[' + num + '/09]', W - 40, 46);
-  } else {
-    const bg = side === 'cre' ? HEX.red : HEX.paper, ink = side === 'cre' ? HEX.black : HEX.red;
-    g.fillStyle = bg; g.fillRect(0, 0, W, H);
-    g.fillStyle = ink; g.textBaseline = 'alphabetic';
-    const t = num + ' ' + word.toUpperCase() + ' →'; fitText(g, t, W - 80, 220); g.fillText(t, 40, H / 2 + 72);
-  }
+/* ══ gates: one rounded portal per doorway, in the colour of the room it opens on,
+   with a thin accent line inside and the room's number on a round badge ══ */
+/* an arch as one outline: up the outside, over, down, then back up the inside */
+function portalGeo(ow, oh, or, iw, ih, ir, depth){
+  const s = new THREE.Shape();
+  s.moveTo(-ow / 2, 0); s.lineTo(-ow / 2, oh - or); s.quadraticCurveTo(-ow / 2, oh, -ow / 2 + or, oh);
+  s.lineTo(ow / 2 - or, oh); s.quadraticCurveTo(ow / 2, oh, ow / 2, oh - or); s.lineTo(ow / 2, 0);
+  s.lineTo(iw / 2, 0); s.lineTo(iw / 2, ih - ir); s.quadraticCurveTo(iw / 2, ih, iw / 2 - ir, ih);
+  s.lineTo(-iw / 2 + ir, ih); s.quadraticCurveTo(-iw / 2, ih, -iw / 2, ih - ir); s.lineTo(-iw / 2, 0); s.lineTo(-ow / 2, 0);
+  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: .04, bevelSize: .03, bevelSegments: LOW ? 1 : 3, curveSegments: LOW ? 6 : 14 });
+  g.translate(0, 0, -depth / 2); g.computeVertexNormals(); return g;
+}
+function badgeTex(num, bg, fg){
+  const [c, g] = makeCanvas(256, 256);
+  g.fillStyle = bg; g.beginPath(); g.arc(128, 128, 126, 0, Math.PI * 2); g.fill();
+  g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; posterFont(g, 150); g.fillText(num, 128, 182);
   return texFrom(c);
 }
 function buildGates(){
+  const T = .34, D = WT + .36;
+  const frameG = portalGeo(DW + 2 * T, DH + T, 1.1, DW, DH, .78, D);
+  const lineG = portalGeo(DW + .04, DH + .02, .8, DW - .12, DH - .06, .72, D + .12);
+  const STY = { eng: ['ink', FAM.green, '#3BF07A', '#0B110D'], cre: ['cream', C.black, HEX.black, HEX.paper], both: ['red', C.black, HEX.black, HEX.paper] };
   DOORS.forEach((d, i) => {
-    const rm = ROOMS[i], side = rm.side, a = rm.nin.clone().negate();
-    const fam = side === 'eng' ? 'ink' : side === 'cre' ? 'red' : 'cream', trim = side === 'eng' ? 'green' : side === 'cre' ? 'ink' : 'red';
+    const rm = ROOMS[i], st = STY[rm.side], a = rm.nin.clone().negate();
     const g = new THREE.Group(); g.position.set(d.x, 0, d.z); g.rotation.y = Math.atan2(a.x, a.z); world.add(g);
-    [-1, 1].forEach(sx => {
-      const x = sx * (DW / 2 + .23);
-      K(g, .46, DH + .06, .72, fm(fam), x, 0, 0);
-      K(g, .6, .18, .86, fm(fam, 't'), x, 0, 0);
-      K(g, .6, .16, .86, fm(fam, 't'), x, DH - .1, 0);
-      K(g, .48, .07, .74, fm(trim), x, 1.15, 0);
-      K(g, .48, .07, .74, fm(trim), x, 2.9, 0);
-    });
-    K(g, DW + .92, .36, .74, fm(fam), 0, DH + .02, 0);
-    K(g, DW + 1.2, .14, .9, fm(fam, 't'), 0, DH + .38, 0);
-    K(g, DW - .1, .03, .74, fm(trim, 't'), 0, 0, 0, { r: .01 });
-    plane(g, 2.6, .66, decal(gateSign(i)), 0, DH + .95, .4);
-    K(g, 2.72, .78, .06, fm(fam, 't'), 0, DH + .56, .36);
-    [-1, 1].forEach(s => {
-      const hinge = new THREE.Group(); hinge.position.set(s * DW / 2, 0, -.05); g.add(hinge);
-      K(hinge, DW / 2 - .05, DH - .12, .08, fm(fam, 'f'), -s * DW / 4, .04, 0);
-      K(hinge, DW / 2 - .35, .05, .1, fm(fam, 't'), -s * DW / 4, 1.4, 0);
-      K(hinge, DW / 2 - .35, .05, .1, fm(fam, 't'), -s * DW / 4, 3.1, 0);
-      O8(hinge, .05, .05, .12, fm(trim), -s * (DW / 2 - .25), 2.0, .07).rotation.x = Math.PI / 2;
-      GATES.push({ hinge, s, x: d.x, z: d.z, open: 0 });
+    mesh(g, frameG, fm(st[0]), 0, 0, 0);
+    mesh(g, lineG, flat(st[1]), 0, 0, 0, { noShadow: true });
+    const tex = badgeTex(String(i + 1).padStart(2, '0'), st[2], st[3]);
+    [1, -1].forEach(s => {
+      const disc = O8(g, .36, .36, .06, fm(st[0], 't'), 0, 0, 0, { seg: 24 });
+      disc.rotation.x = Math.PI / 2; disc.position.set(0, DH + T + .62, s * (D / 2 + .05));
+      const face = new THREE.Mesh(new THREE.CircleGeometry(.33, 32), decal(tex, { transparent: true }));
+      face.position.set(0, DH + T + .62, s * (D / 2 + .085)); if (s < 0) face.rotation.y = Math.PI; g.add(face);
     });
   });
-  anim.push((t, dt) => {
-    const k = 1 - Math.exp(-dt * 6);
-    GATES.forEach(gt => {
-      const dist = Math.hypot(camera.position.x - gt.x, camera.position.z - gt.z);
-      const want = REDUCED ? 1 : 1 - smooth(4.5, 10, dist);
-      gt.open += (want - gt.open) * k;
-      gt.hinge.rotation.y = -gt.s * gt.open * 1.5;
+}
+
+/* ══ dressing: each room furnished along its side walls, never in front of its piece ══ */
+function seeded(n){ let x = n * 9301 + 49297; return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; }; }
+function codeTex(seed){
+  const [c, g] = makeCanvas(512, 320), r = seeded(seed);
+  g.fillStyle = '#070B08'; g.fillRect(0, 0, 512, 320);
+  for (let k = 0; k < 15; k++){
+    const y = 18 + k * 19.5; g.fillStyle = 'rgba(59,240,122,.28)'; g.fillRect(14, y, 14, 9);
+    let x = 40 + Math.floor(r() * 4) * 16;
+    for (let w = 0; w < 1 + r() * 4 && x < 480; w++){
+      const len = 20 + r() * 90; const v = r();
+      g.fillStyle = v > .8 ? '#F23A1D' : v > .45 ? '#3BF07A' : v > .2 ? '#C9F5D6' : 'rgba(59,240,122,.45)';
+      g.fillRect(x, y, Math.min(len, 490 - x), 9); x += len + 10;
+    }
+  }
+  g.fillStyle = '#3BF07A'; g.fillRect(40, 18 + 15 * 19.5, 10, 12);
+  return texFrom(c);
+}
+function plant(par, x, z, kind, pot, s){
+  const p = new THREE.Group(); p.position.set(x, 0, z); p.scale.setScalar(s || 1); par.add(p);
+  O8(p, .3, .22, .5, fm(pot), 0, 0, 0); O8(p, .33, .33, .07, fm(pot, 't'), 0, .48, 0); O8(p, .27, .27, .02, fm('wood', 't'), 0, .5, 0);
+  if (kind === 0){
+    [[0, .9, 0, 0], [.1, 1.2, .25, 1], [-.1, 1.05, -.22, 2], [.05, .8, -.4, 3], [-.06, 1.3, .1, 4], [.13, .95, .5, 5]].forEach(b => {
+      K(p, .12, b[1], .05, fm(b[3] % 3 === 1 ? 'grass' : 'leaf', b[3] % 2 ? 'f' : 'm'), b[0], .5, b[0] * .5, { rz: b[2] * .5, ry: b[3] * .9, r: .02 });
     });
+  } else if (kind === 1){
+    [[0, 1.02, 0, .42, 'm'], [.22, .86, .12, .3, 'f'], [-.2, .9, -.1, .32, 't'], [0, 1.36, 0, .26, 'f']].forEach(q => {
+      const m = mesh(p, new THREE.IcosahedronGeometry(q[3], 0), fm('leaf', q[4]), q[0], q[1], q[2]); m.rotation.set(q[0] * 3, q[1], q[2]);
+    });
+  } else {
+    O8(p, .05, .07, 1.0, fm('wood', 't'), 0, .5, 0);
+    [[1.55, .5, .7, 'm'], [1.95, .4, .56, 'f'], [2.3, .28, .4, 'm']].forEach(c => { const m = new THREE.Mesh(new THREE.ConeGeometry(c[1], c[2], 8), fm('leaf', c[3])); m.position.y = c[0]; m.castShadow = true; p.add(m); });
+  }
+  return p;
+}
+function shelf(par, x, z, ry, side, seed){
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; par.add(g);
+  const fr = side === 'eng' ? 'ink' : side === 'cre' ? 'cream' : 'ink', r = seeded(seed);
+  const PAL = side === 'eng' ? [['ink', 'f'], ['green', 't'], ['steel', 'm'], ['ink', 't'], ['green', 'm']]
+    : side === 'cre' ? [['ink', 'm'], ['wood', 'm'], ['sand', 'm'], ['steel', 'm'], ['cream', 't']] : [['red', 'm'], ['ink', 'm'], ['cream', 't'], ['steel', 'm'], ['sand', 'm']];
+  K(g, 1.9, 2.5, .05, fm(fr, 't'), 0, 0, .02);
+  [-.93, .93].forEach(sx => K(g, .08, 2.6, .46, fm(fr), sx, 0, .23));
+  [0, .62, 1.24, 1.86, 2.5].forEach(y => K(g, 1.94, .07, .48, fm(fr), 0, y, .24));
+  [.07, .69, 1.31, 1.93].forEach((y, row) => {
+    let bx = -.84;
+    while (bx < .8){
+      if (r() < .12 && bx < .5){ O8(g, .1, .08, .26, fm(side === 'eng' ? 'green' : 'red', 't'), bx + .12, y, .24); bx += .3; continue; }
+      const w = .06 + r() * .07, h = .3 + r() * .2, c = PAL[Math.floor(r() * PAL.length)];
+      K(g, w, h, .3 + r() * .06, fm(c[0], c[1]), bx + w / 2, y, .24, { r: .01, rz: r() < .08 ? .2 : 0 }); bx += w + .012;
+      if (r() < .06) bx += .2;
+    }
   });
+  return g;
+}
+function framed(par, x, y, z, ry, tex, w, h, fam){
+  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; par.add(g);
+  K(g, w + .14, h + .14, .07, fm(fam), 0, -(h + .14) / 2, .035, { r: .025 });
+  plane(g, w, h, decal(tex), 0, 0, .075);
+  return g;
+}
+function floorLamp(par, x, z, shade){
+  const l = new THREE.Group(); l.position.set(x, 0, z); par.add(l);
+  O8(l, .26, .3, .06, fm('ink', 't'), 0, 0, 0); O8(l, .03, .03, 1.75, fm('ink'), 0, .06, 0);
+  O8(l, .2, .34, .4, fm(shade), 0, 1.72, 0);
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(.3, 16), flat(FAM.lamp)); glow.rotation.x = Math.PI / 2; glow.position.y = 1.73; l.add(glow);
+}
+function deskConsole(par, x, z, ry, seed){
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; par.add(g);
+  K(g, 2.2, .76, .7, fm('ink'), 0, 0, .35); K(g, 2.26, .06, .76, fm('ink', 't'), 0, .76, .35);
+  K(g, 2.2, .03, .02, flat(FAM.green), 0, .5, .71, { noShadow: true });
+  [-.52, .52].forEach((mx, k) => {
+    O8(g, .14, .16, .03, fm('ink', 't'), mx, .82, .25); K(g, .06, .3, .06, fm('ink'), mx, .82, .2);
+    K(g, .98, .62, .08, fm('ink', 't'), mx, 1.02, .2, { ry: k ? -.12 : .12 });
+    plane(g, .9, .54, decal(codeTex(seed + k)), mx, 1.33, .245, k ? -.12 : .12);
+  });
+  K(g, .7, .03, .22, fm('steel'), 0, .82, .52);
+  K(g, .34, .6, .6, fm('ink', 'f'), 1.4, 0, .35); [0, 1, 2].forEach(k => K(g, .2, .03, .02, flat(k ? 0xC9F5D6 : FAM.green), 1.4, .38 + k * .07, .66, { noShadow: true }));
+  return g;
+}
+function neonSign(par, x, y, z, ry, text, col, w){
+  const [c, g] = makeCanvas(512, 256);
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '800 150px "JetBrains Mono", ui-monospace, monospace';
+  g.shadowColor = col; g.shadowBlur = 26; g.fillStyle = col; g.fillText(text, 256, 132); g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.globalAlpha = .55; g.fillText(text, 256, 132);
+  const m = plane(par, w, w / 2, decal(texFrom(c), { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), x, y, z, ry);
+  return m;
+}
+/* static dressing is merged per material, so a furnished room costs a handful of draw calls */
+const _inv = new THREE.Matrix4(), _rel = new THREE.Matrix4();
+function mergeStatic(D){
+  D.updateMatrixWorld(true); _inv.copy(D.matrixWorld).invert();
+  const groups = new Map(), drop = [];
+  D.traverse(o => {
+    if (!o.isMesh || o.material.map || o.material.transparent) return;
+    _rel.multiplyMatrices(_inv, o.matrixWorld);
+    let g = o.geometry.clone().applyMatrix4(_rel); if (g.index) g = g.toNonIndexed();
+    const k = o.material.uuid; if (!groups.has(k)) groups.set(k, { m: o.material, pos: [], nor: [] });
+    const e = groups.get(k); e.pos.push(g.attributes.position.array); e.nor.push(g.attributes.normal.array); drop.push(o);
+  });
+  drop.forEach(o => o.parent.remove(o));
+  const cat = list => { const n = list.reduce((a, b) => a + b.length, 0), out = new Float32Array(n); let off = 0; list.forEach(a => { out.set(a, off); off += a.length; }); return out; };
+  groups.forEach(e => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(cat(e.pos), 3)); g.setAttribute('normal', new THREE.BufferAttribute(cat(e.nor), 3));
+    const m = new THREE.Mesh(g, e.m); m.castShadow = m.receiveShadow = true; D.add(m);
+  });
+}
+const SKIRT = { eng: ['ink', 't'], cre: ['ink', 'm'], both: ['red', 'm'] };
+function dressRoom(i){
+  const rm = ROOMS[i], side = rm.side, hw = rm.w / 2 - WT / 2, dep = CELL - WT;
+  const D = new THREE.Group(); D.position.copy(rm.f).addScaledVector(rm.n, WT / 2); D.rotation.y = rm.ry; world.add(D);
+  D.updateMatrixWorld(true);
+  const dx = D.worldToLocal(V3(rm.door.x, 0, rm.door.z)).x;
+  /* a skirting band all round, and a lit strip above it on the engineer side */
+  const sk = fm(SKIRT[side][0], SKIRT[side][1]);
+  K(D, 2 * hw, .2, .06, sk, 0, 0, .03, { r: .01 });
+  [-1, 1].forEach(s => K(D, .06, .2, dep, sk, s * (hw - .03), 0, dep / 2, { r: .01 }));
+  [[-hw, dx - DW / 2 - .4], [dx + DW / 2 + .4, hw]].forEach(sp => { if (sp[1] - sp[0] > .1) K(D, sp[1] - sp[0], .2, .06, sk, (sp[0] + sp[1]) / 2, 0, dep - .03, { r: .01 }); });
+  if (side === 'eng'){
+    const led = flat(FAM.green, { transparent: true, opacity: .85 });
+    plane(D, 2 * hw, .03, led, 0, .24, .062);
+    [-1, 1].forEach(s => plane(D, dep, .03, led, s * (hw - .062), .24, dep / 2, -s * Math.PI / 2));
+  }
+  const L = -hw, Rt = hw, pl = side === 'eng' ? 'ink' : side === 'cre' ? 'cream' : 'ink';
+  /* the two far corners always hold something green */
+  plant(D, L + .6, .6, i % 3, pl, 1.05);
+  plant(D, Rt - .6, .6, (i + 1) % 3, pl, .92);
+  if (side === 'eng'){
+    deskConsole(D, L + .02, 3.6, Math.PI / 2, i * 7);
+    framed(D, Rt - .02, 3.9, 3.6, -Math.PI / 2, codeTex(i * 7 + 3), 2.4, 1.5, 'ink');
+    neonSign(D, Rt - .04, 2.25, 3.6, -Math.PI / 2, ['</>', '{ }', '01'][i % 3] || '</>', '#3BF07A', 1.5);
+    plant(D, Rt - .6, 5.6, 1, 'ink', .8);
+    /* cable tray under the ceiling */
+    K(D, .34, .1, dep - 1, fm('ink', 't'), L + .5, RH - .9, dep / 2);
+  } else if (side === 'cre'){
+    shelf(D, L + .02, 3.4, Math.PI / 2, side, i * 11);
+    const keys = { 1: ['rig', 'reel'], 2: ['house', 'build'], 5: ['tools', 'cv'] }[i] || ['wall', 'hex'];
+    keys.forEach((k, n) => framed(D, Rt - .02, 3.55 + n * .1, 2.6 + n * 1.9, -Math.PI / 2, texFrom(posterCanvas(k, 260)), 1.15, 1.15 * PHI, 'ink'));
+    floorLamp(D, Rt - .6, 5.0, 'cream');
+  } else {
+    if (i === 8){
+      framed(D, L + .02, 4.2, 3.4, Math.PI / 2, texFrom(posterCanvas('build', 260)), 1.3, 1.3 * PHI, 'ink');
+      framed(D, Rt - .02, 4.2, 3.4, -Math.PI / 2, texFrom(posterCanvas('channel', 260)), 1.3, 1.3 * PHI, 'ink');
+      plant(D, L + 5.6, .6, 2, 'ink', 1.0); plant(D, Rt - 5.6, .6, 0, 'ink', 1.0);
+    } else {
+      shelf(D, L + .02, 3.4, Math.PI / 2, side, i * 13);
+      framed(D, Rt - .02, 3.8, 3.4, -Math.PI / 2, texFrom(posterCanvas(i === 7 ? 'arcade' : 'numbers', 260)), 1.3, 1.3 * PHI, 'ink');
+      floorLamp(D, Rt - .6, 5.2, 'red');
+    }
+  }
+  mergeStatic(D);
+  return D;
 }
 
 /* ══ atmosphere: a gallery beam over every piece, and the air of each half ══ */
@@ -1181,6 +1312,7 @@ const AIR = [], BEAMS = [];
 function buildAtmosphere(){
   const beamTex = gradTex([[0, 'rgba(255,255,255,0)'], [.55, 'rgba(255,255,255,.35)'], [1, 'rgba(255,255,255,.9)']], 4, 256);
   const poolTex = gradTex([[0, 'rgba(255,255,255,.9)'], [.45, 'rgba(255,255,255,.35)'], [1, 'rgba(255,255,255,0)']], 256, 256, true);
+  const aoTex = gradTex([[0, 'rgba(0,0,0,.55)'], [.55, 'rgba(0,0,0,.22)'], [1, 'rgba(0,0,0,0)']], 256, 256, true);
   const TINT = { eng: 0x9DFFC0, cre: 0xFFE2C2, both: 0xFFFFFF };
   PIECE.forEach((g, i) => {
     const p = new THREE.Vector3(); g.getWorldPosition(p); const tint = lin(TINT[ROOMS[i].side]);
@@ -1189,6 +1321,10 @@ function buildAtmosphere(){
     beam.position.set(p.x, h / 2, p.z); world.add(beam); BEAMS.push(beam);
     const pool = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 5.2), new THREE.MeshBasicMaterial({ map: poolTex, color: tint, transparent: true, opacity: .38, depthWrite: false, blending: THREE.AdditiveBlending, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
     pool.rotation.x = -Math.PI / 2; pool.position.set(p.x, .012, p.z); world.add(pool);
+    /* a soft contact shadow, so every piece sits down on the floor */
+    const bb = new THREE.Box3().setFromObject(g), sz = new THREE.Vector3(); bb.getSize(sz);
+    const ao = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: aoTex, transparent: true, opacity: ROOMS[i].side === 'eng' ? .7 : .38, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
+    ao.rotation.x = -Math.PI / 2; ao.scale.set(Math.min(sz.x, 9) * 1.25, Math.min(sz.z, 6) * 1.35, 1); ao.position.set((bb.min.x + bb.max.x) / 2, .014, (bb.min.z + bb.max.z) / 2); world.add(ao);
     const lamp = new THREE.Mesh(new THREE.CylinderGeometry(.16, .26, .22, 12), fm('ink').clone()); lamp.position.set(p.x, RH - .11, p.z); world.add(lamp);
     const lens = new THREE.Mesh(new THREE.CircleGeometry(.2, 16), flat(0xFFFFFF)); lens.rotation.x = Math.PI / 2; lens.position.set(p.x, RH - .23, p.z); world.add(lens);
     ceilMats.push(lamp.material);
@@ -1231,9 +1367,12 @@ function buildHits(){
   });
 }
 
+let hemi = null, spot = null;
+const HEMI = { eng: [0xD6FFE4, 0x0B110D, .42], cre: [0xFFEDE4, 0xF23A1D, .46], both: [0xFFFFFF, 0xCFCBC4, .44], hall: [0xFFFFFF, 0xCFCBC4, .44] };
+const SPOT_TINT = { eng: 0xCFFFE0, cre: 0xFFE9D2, both: 0xFFF4E6, hall: 0xFFF4E6 };
 function buildLights(){
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xCFCBC4, .5));
-  keyLight = new THREE.DirectionalLight(0xFFFFFF, .55);
+  hemi = new THREE.HemisphereLight(0xffffff, 0xCFCBC4, .44); scene.add(hemi);
+  keyLight = new THREE.DirectionalLight(0xFFF8EE, .42);
   keyLight.position.set(5, 14, 7); scene.add(keyLight.target);
   if (!LOW){
     /* the shadow box follows the camera, so it stays sharp and never shimmers */
@@ -1242,6 +1381,23 @@ function buildLights(){
     keyLight.shadow.bias = -.0004; keyLight.shadow.normalBias = .04; keyLight.shadow.radius = 3;
   }
   scene.add(keyLight);
+  /* a gallery spot over the room you are in: it pools light on the piece and lets the corners fall away */
+  spot = new THREE.SpotLight(0xFFF4E6, LOW ? .7 : .85, 0, .62, .75, 1);
+  spot.position.set(0, RH - .2, -HALL_D / 2); spot.target.position.set(0, 0, -HALL_D / 2); scene.add(spot.target);
+  if (!LOW){ spot.castShadow = true; spot.shadow.mapSize.set(1024, 1024); spot.shadow.bias = -.0006; spot.shadow.normalBias = .03; spot.shadow.radius = 4; spot.shadow.camera.near = 1; spot.shadow.camera.far = RH + 2; }
+  scene.add(spot);
+}
+const _sp = new THREE.Vector3(), _hc = new THREE.Color(), _gc = new THREE.Color();
+function steerLights(here, dt){
+  if (!spot) return;
+  const side = here >= 0 ? ROOMS[here].side : 'hall';
+  if (here >= 0) PIECE[here].getWorldPosition(_sp); else _sp.set(0, 0, -HALL_D / 2);
+  const k = 1 - Math.exp(-(dt || .016) * 3.2);
+  spot.target.position.lerp(_sp, k); spot.position.set(spot.target.position.x, RH - .25, spot.target.position.z + .6);
+  spot.color.lerp(_hc.set(SPOT_TINT[side]).convertSRGBToLinear(), k);
+  const H = HEMI[side];
+  hemi.color.lerp(_hc.set(H[0]).convertSRGBToLinear(), k); hemi.groundColor.lerp(_gc.set(H[1]).convertSRGBToLinear(), k);
+  hemi.intensity += (H[2] - hemi.intensity) * k;
 }
 
 /* ══ the lanes in 3D ════════════════════════════════════════ */
@@ -1729,6 +1885,7 @@ function frame(now){
   pNow = REDUCED ? pTarget : pNow + (pTarget - pNow) * (1 - Math.exp(-dt * 10));
   if (Math.abs(pTarget - pNow) < .01) pNow = pTarget;
   direct(pNow, clockT);
+  steerLights(hereOf(pNow), dt);
   anim.forEach(f => f(clockT, dt));
   moveCursor(dt);
   if (pop && PIECE[pop.i]){
@@ -1756,7 +1913,7 @@ history.scrollRestoration = 'manual';
 loadAll().then(() => {
   buildLights(); buildShell();
   [buildArthis, buildBlender, buildAkverse, buildHexa, buildAI, buildBoard, buildNumbers, buildArcade, buildContact].forEach((f, i) => { PIECE[i] = f(i); });
-  buildHits(); buildGates(); buildAtmosphere(); buildTrack();
+  buildHits(); buildGates(); ROOMS.forEach((r, i) => dressRoom(i)); buildAtmosphere(); buildTrack();
   layout(); buildPoses();
   const want = location.hash.replace('#st-', '').replace('#', '');
   const s = STATIONS.find(x => x.id === want);
@@ -1769,17 +1926,18 @@ loadAll().then(() => {
     const i = +SHOT[1], keep = new Set(OWN[i]);
     world.children.forEach(c => { c.visible = keep.has(c); });
     backdrop.visible = false; lanes.forEach(L => { if (L.o) L.o.visible = false; });
-    if (WORDS[i]) WORDS[i].pl.visible = false;
+    if (WORDS[i]) WORDS[i].pl.parent.remove(WORDS[i].pl);
     body.classList.add('shot'); body.classList.remove('booting');
     const bb = new THREE.Box3(); OWN[i].forEach(g => bb.expandByObject(g));
     const c = new THREE.Vector3(), sz = new THREE.Vector3(); bb.getCenter(c); bb.getSize(sz);
     const q = new THREE.Quaternion(); PIECE[i].getWorldQuaternion(q);
     const dir = V3(.55, .55, 1).normalize().applyQuaternion(q), r = Math.max(sz.x, sz.y, sz.z);
     camera.fov = 24; camera.aspect = VW / VH; camera.updateProjectionMatrix();
-    camera.position.copy(c).addScaledVector(dir, r * 1.7); camera.lookAt(c);
+    camera.position.copy(c).addScaledVector(dir, r * 2.5); camera.lookAt(c);
     if (keyLight){ keyLight.target.position.copy(c); keyLight.position.copy(c).add(V3(5, 14, 7)); }
     const BG = { eng: 0x0B110D, cre: 0xF23A1D, both: 0xF3F1EC };
     renderer.setClearColor(BG[ROOMS[i].side], 1);
+    steerLights(i, 10);
     anim.forEach(f => f(3, .016));
     renderer.render(scene, camera);
     document.title = 'shot-ready';
