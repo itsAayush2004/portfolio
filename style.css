@@ -792,3 +792,33 @@ body.simple #laneL .bin-field{display:none}
 .menu-l button.side-eng{background:var(--term);color:var(--green);font-family:var(--f-code)}
 .seam-mark{background:linear-gradient(90deg,var(--term) 50%,var(--red) 50%)}
 @media (prefers-reduced-motion:reduce){ #laneL .lane-h b::after,.caret,#laneL .intro-name::after{animation:none} }
+
+/* ══ ROUND 5 · binary at 32 × 32, and the split-boot loader ═══ */
+.term-bin{display:block;width:100%;height:auto;margin-top:auto;text-shadow:none}
+
+#gate{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:none;color:inherit;overflow:hidden}
+#gate::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--paper);z-index:2}
+#gate .g-eng{background:var(--term);color:var(--green);font-family:var(--f-code);display:flex;flex-direction:column;justify-content:space-between;gap:var(--s3);
+  padding:var(--s4);background-image:repeating-linear-gradient(transparent 0 3px,rgba(59,240,122,.035) 3px 4px);min-width:0}
+#gate .g-log{display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--green-l);min-height:9em}
+#gate .g-log b{color:var(--green);font-weight:700}
+#gate .g-log em{font-style:normal;color:#F2C14E}
+#gate .g-log span{animation:fadeUp var(--d2) var(--ease-out) both}
+#gate .g-bin{width:min(100%,560px);height:auto}
+#gate .g-bar{display:flex;align-items:center;gap:var(--s2);font-size:13px}
+#gate .gate-bar{display:block;flex:1;height:6px;border-radius:99px;background:rgba(59,240,122,.15);margin:0;overflow:hidden}
+#gate .gate-bar i{background:var(--green);border-radius:99px}
+#gate .g-cre{background:var(--red);color:var(--black);display:flex;flex-direction:column;justify-content:space-between;padding:var(--s4);min-width:0;position:relative}
+#gate .g-top,#gate .g-foot{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);font:500 12px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.04em}
+#gate .gate-num{position:static;margin:0 0 0 -.04em;font-size:min(36vw,68vh);line-height:.78;color:var(--black);display:flex;align-items:flex-start;font-variant-numeric:tabular-nums}
+#gate .gate-num i{font-style:normal;font-size:.32em;color:var(--paper);margin:.12em 0 0 .04em}
+#gate .gate-simple{background:var(--black);color:var(--paper);text-decoration:none;padding:8px 13px;border-radius:999px;font:500 12px/1 var(--f-mono);text-transform:uppercase}
+#gate .gate-card,#gate .gate-word{display:none}
+@media (max-width:760px){
+  #gate{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}
+  #gate::after{left:0;right:0;top:50%;bottom:auto;width:auto;height:2px;margin:-1px 0 0}
+  #gate .g-eng,#gate .g-cre{padding:var(--s3)}
+  #gate .g-log{font-size:11px;min-height:7.5em}
+  #gate .gate-num{font-size:min(70vw,36vh)}
+  body:not(.booting) #gate{clip-path:inset(50% 0 50% 0)}
+}

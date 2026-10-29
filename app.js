@@ -84,22 +84,6 @@ function posterHTML(key){
 /* ══ the engineer half speaks in a terminal ═══════════════
    Each project is a shell window: a prompt, a command, and its number
    or word drawn as a 5 × 7 bitmap of 1s, green on black. */
-const BITS = {
-  '0': ['01110','10001','10011','10101','11001','10001','01110'], '1': ['00100','01100','00100','00100','00100','00100','01110'],
-  '2': ['01110','10001','00001','00110','01000','10000','11111'], '5': ['11111','10000','11110','00001','00001','10001','01110'],
-  '6': ['00110','01000','10000','11110','10001','10001','01110'], '+': ['00000','00100','00100','11111','00100','00100','00000'],
-  '-': ['00000','00000','00000','11111','00000','00000','00000'], 'A': ['01110','10001','10001','11111','10001','10001','10001'],
-  'T': ['11111','00100','00100','00100','00100','00100','00100'], 'S': ['01111','10000','10000','01110','00001','00001','11110'],
-  'G': ['01110','10001','10000','10111','10001','10001','01111'], 'P': ['11110','10001','10001','11110','10000','10000','10000'],
-  'W': ['10001','10001','10001','10101','10101','10101','01010'], 'L': ['10000','10000','10000','10000','10000','10000','11111'],
-  'H': ['10001','10001','10001','11111','10001','10001','10001'], 'I': ['01110','00100','00100','00100','00100','00100','01110'],
-  'M': ['10001','11011','10101','10101','10001','10001','10001'], 'E': ['11111','10000','10000','11110','10000','10000','11111']
-};
-function bitRows(word){
-  const rows = [];
-  for (let r = 0; r < 7; r++) rows.push(Array.from(word).map(ch => (BITS[ch] || BITS['-'])[r].replace(/1/g, '1').replace(/0/g, '·')).join('·'));
-  return rows;
-}
 const TERM = {
   feed:    { path: '~/arthis.space', cmd: 'ls games | wc -l', word: '105' },
   wall:    { path: '~/arthis.land',  cmd: 'cat rooms/*.json | jq length', word: 'WALL' },
@@ -109,15 +93,54 @@ const TERM = {
   cv:      { path: '~/cv-forge',     cmd: 'cvforge tailor job.txt', word: 'ATS' },
   tools:   { path: '~/apps',         cmd: 'npm run ship', word: 'SHIP' }
 };
+/* every character on a 32 × 32 grid: lit cells print 1, the rest print a dim 0 */
+const BIN = 32;
+const _glyph = document.createElement('canvas'); _glyph.width = _glyph.height = BIN;
+const _gctx = _glyph.getContext('2d', { willReadFrequently: true });
+function glyphCells(ch){
+  const g = _gctx; g.clearRect(0, 0, BIN, BIN);
+  g.font = '900 100px Archivo, "Helvetica Neue", Arial, sans-serif'; if ('fontStretch' in g) g.fontStretch = 'normal';
+  const m = g.measureText(ch), w = (m.actualBoundingBoxLeft + m.actualBoundingBoxRight) || 60, h = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) || 72;
+  const pad = 3, k = Math.min((BIN - 2 * pad) / w, (BIN - 2 * pad) / h);
+  g.save(); g.translate(BIN / 2, BIN / 2); g.scale(k, k);
+  g.fillStyle = '#fff'; g.textBaseline = 'alphabetic';
+  g.fillText(ch, -w / 2 + (m.actualBoundingBoxLeft || 0), h / 2 - (m.actualBoundingBoxDescent || 0));
+  g.restore();
+  const d = g.getImageData(0, 0, BIN, BIN).data, cells = new Uint8Array(BIN * BIN);
+  for (let k2 = 0; k2 < BIN * BIN; k2++) cells[k2] = d[k2 * 4 + 3] > 110 ? 1 : 0;
+  return cells;
+}
+function drawBinary(cv, word, cell){
+  cell = cell || 12;
+  const chars = Array.from(word), cols = chars.length * BIN;
+  cv.width = cols * cell; cv.height = BIN * cell;
+  const g = cv.getContext('2d'), grids = chars.map(glyphCells);
+  g.clearRect(0, 0, cv.width, cv.height);
+  g.font = '800 ' + Math.round(cell * .95) + 'px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  /* lit cells get a soft tile behind their 1, so the character reads at a glance */
+  g.fillStyle = 'rgba(59,240,122,.2)';
+  grids.forEach((cells, n) => { for (let y = 0; y < BIN; y++) for (let x = 0; x < BIN; x++) if (cells[y * BIN + x]) g.fillRect((n * BIN + x) * cell + .5, y * cell + .5, cell - 1, cell - 1); });
+  for (let pass = 0; pass < 2; pass++){
+    g.fillStyle = pass ? '#5CFF94' : 'rgba(59,240,122,.09)';
+    if (pass){ g.shadowColor = 'rgba(59,240,122,.55)'; g.shadowBlur = cell * .5; }
+    grids.forEach((cells, n) => { for (let y = 0; y < BIN; y++) for (let x = 0; x < BIN; x++){
+      const on = cells[y * BIN + x]; if ((on === 1) !== !!pass) continue;
+      g.fillText(on ? '1' : '0', (n * BIN + x + .5) * cell, (y + .5) * cell);
+    } });
+  }
+  g.shadowBlur = 0;
+}
+function drawAllBinary(){ $$('canvas.term-bin').forEach(cv => drawBinary(cv, cv.dataset.word, 12)); }
 function termHTML(key){
   const t = TERM[key]; if (!t) return posterHTML(key);
-  const rows = bitRows(t.word), cols = rows[0].length;
   return '<div class="term"><div class="term-bar"><i></i><i></i><i></i><span>' + esc(t.path) + ' — zsh</span></div>' +
     '<p class="term-line"><b>aayush@nitj</b>:<em>' + esc(t.path) + '</em>$ ' + esc(t.cmd) + '</p>' +
-    '<pre class="term-bits" style="font-size:' + (88 / (cols * .6)).toFixed(2) + 'cqw">' + rows.map(esc).join('\n') + '</pre>' +
+    '<canvas class="term-bin term-bits" data-word="' + esc(t.word) + '" role="img" aria-label="' + esc(t.word) + ' in binary"></canvas>' +
     '<p class="term-line"><b>aayush@nitj</b>:<em>' + esc(t.path) + '</em>$ <span class="caret"></span></p></div>';
 }
 $$('.lc-art[data-art]').forEach(f => { f.innerHTML = f.closest('#laneL') ? termHTML(f.dataset.art) : posterHTML(f.dataset.art); });
+drawAllBinary();
+if (document.fonts && document.fonts.load) Promise.all(['900 100px Archivo', '800 20px "JetBrains Mono"'].map(f => document.fonts.load(f))).then(drawAllBinary, () => {});
 /* a quiet field of 0s and 1s behind the engineer half */
 (function(){
   const lane = $('#laneL'); if (!lane) return;
@@ -265,17 +288,37 @@ body.classList.toggle('low', LOW);
 /* ── the loader lifts away by itself once everything is built ── */
 const gateFill = $('#gateFill'), gateMsg = $('#gateMsg');
 let loadedN = 0, loadTotal = 1;
-let gateShown = 0, gateWant = 0;
+/* the inline starter counted while the scripts downloaded; carry on from where it got to */
+window.__gateTaken = true;
+let gateShown = parseInt(($('#gateNum') || {}).textContent, 10) || 0, gateWant = gateShown;
 function progress(){
-  gateWant = Math.round(100 * loadedN / loadTotal);
+  gateWant = Math.max(gateWant, Math.round(100 * loadedN / loadTotal));
   gateFill.style.width = gateWant + '%';
-  gateMsg.textContent = 'Loading ' + gateWant + '%';
 }
-/* the loader counts up smoothly rather than jumping */
+/* the boot log on the engineer side ticks off real facts as loading passes them */
+const BOOT = [[0, './boot --portfolio', true], [12, 'mount engineer.half'], [30, 'load arthis.space · 105 games'], [48, 'compile hexabed · 3,705 lines c#'],
+  [66, 'warm up gpt-2 weights'], [84, 'render dioramas · 28 add-ons'], [98, 'build nine rooms']];
+const CRE_MSG = [[0, 'Waking the halves'], [30, 'Rendering dioramas'], [66, 'Hanging the posters'], [98, 'Opening the doors']];
+function bootLog(n){
+  const log = $('#gateLog'); if (!log) return;
+  log.innerHTML = BOOT.filter(b => b[2] || n >= b[0] - 12).map(b => b[2]
+    ? '<span><b>aayush@nitj</b>:~$ ' + b[1] + '</span>'
+    : '<span>[ ' + (n >= b[0] ? '<b>ok</b>' : '<em>..</em>') + ' ] ' + b[1] + '</span>').join('');
+  const m = CRE_MSG.filter(c => n >= c[0]).pop(); gateMsg.textContent = m ? m[1] : '';
+}
+/* both halves count up together, smoothly rather than in jumps */
+let gateDrawn = -1;
 (function count(){
   if (!body.classList.contains('booting')) return;
-  gateShown += (gateWant - gateShown) * .12;
-  const n = Math.round(gateShown); const el = $('#gateNum'); if (el && el.textContent !== String(n)) el.textContent = n;
+  gateShown += (gateWant - gateShown) * .1;
+  const n = Math.min(100, Math.round(gateShown));
+  if (n !== gateDrawn){
+    gateDrawn = n;
+    $('#gateNum').textContent = n;
+    $('#gateBits').textContent = '0b' + n.toString(2);
+    const cv = $('#gateBin'); if (cv) drawBinary(cv, String(n).padStart(2, '0'), 12);
+    bootLog(n);
+  }
   requestAnimationFrame(count);
 })();
 const bootAt = performance.now();
