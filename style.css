@@ -498,3 +498,19 @@ html,body,*{scrollbar-width:none;-ms-overflow-style:none}
   .merge-cap span{font-size:var(--t4)}
   .merge-cap b{font-size:var(--t5)}
 }
+
+/* ══ SMOOTHNESS PASS ════════════════════════════════════════
+   Nothing filters the WebGL canvas, nothing blends the whole screen.
+   The focus band is a class that flips once per card, then eases. */
+#gl{filter:none}
+body.three .lc{filter:none;opacity:1;transition:filter .6s var(--ease-out),opacity .6s var(--ease-out)}
+body.three .lc.far{filter:blur(2px);opacity:.5}
+#cursor{mix-blend-mode:normal;border-color:var(--red);width:22px;height:22px;margin:-11px 0 0 -11px}
+#cursor.on{width:46px;height:46px;margin:-23px 0 0 -23px;background:rgba(242,58,29,.18);rotate:45deg}
+html{scroll-behavior:auto}
+@media (prefers-reduced-motion:reduce){ body.three .lc.far{filter:none;opacity:1} }
+
+/* posters drift on the GPU only: no per-frame clipping or rescaling */
+.lc-art{clip-path:none}
+.po{scale:var(--hs, 1)}
+.po-big,.po-stack{translate:none;will-change:transform}

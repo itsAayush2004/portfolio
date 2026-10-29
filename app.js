@@ -135,7 +135,7 @@ const GAMES = {
 };
 
 /* ══ the scroll timeline, in viewport-heights × 100 ═════════ */
-const ACT1 = 260, MERGE = 280, STEP = 120;
+const ACT1 = 220, MERGE = 240, STEP = 100;
 const HALL_AT = ACT1 + MERGE;
 const TOTAL = HALL_AT + N * STEP;
 const posOf = i => i < 0 ? HALL_AT : HALL_AT + (i + 1) * STEP;     // -1 is the hall
@@ -157,7 +157,6 @@ function playGame(key){
   $('#arcT').textContent = g.name; $('#arcHint').textContent = g.hint;
   $('#arcFrame').src = g.file;
   openOverlay($('#arcade'));
-  sfx('start');
 }
 function copyText(text, btn){
   const done = () => { if (btn){ const was = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => btn.textContent = was, 1400); } toast('Copied', esc(text)); };
@@ -187,34 +186,6 @@ function toast(tag, html){
   box.appendChild(t); setTimeout(() => t.remove(), 3500);
   while (box.children.length > 1) box.firstChild.remove();
 }
-
-/* ══ sound: a few soft tones, off until asked for ═══════════ */
-let AC = null, soundOn = false;
-function sfx(kind){
-  if (!soundOn || !AC) return;
-  const now = AC.currentTime;
-  const note = (f, at, dur, vol) => {
-    const o = AC.createOscillator(), g = AC.createGain();
-    o.type = 'sine'; o.frequency.setValueAtTime(f, now + at);
-    g.gain.setValueAtTime(0, now + at); g.gain.linearRampToValueAtTime(vol || .08, now + at + .01);
-    g.gain.exponentialRampToValueAtTime(.0001, now + at + dur);
-    o.connect(g).connect(AC.destination); o.start(now + at); o.stop(now + at + dur + .02);
-  };
-  if (kind === 'step') note(520, 0, .12, .05);
-  else if (kind === 'found'){ note(660, 0, .18); note(990, .09, .28); }
-  else if (kind === 'all'){ [523, 659, 784, 1047].forEach((f, k) => note(f, k * .1, .4)); }
-  else if (kind === 'merge'){ note(196, 0, .9, .06); note(294, .15, .9, .05); }
-  else if (kind === 'start'){ note(440, 0, .12); note(660, .08, .2); }
-  else if (kind === 'open') note(780, 0, .08, .05);
-}
-$('#soundBtn').addEventListener('click', e => {
-  soundOn = !soundOn;
-  if (soundOn && !AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (err) { soundOn = false; } }
-  if (AC && AC.state === 'suspended') AC.resume();
-  e.currentTarget.setAttribute('aria-pressed', soundOn);
-  e.currentTarget.textContent = soundOn ? 'Sound on' : 'Sound off';
-  sfx('start');
-});
 
 /* ══ the simple view ═════════════════════════════════════════ */
 let running = false;
@@ -256,7 +227,7 @@ function start(){ body.classList.remove('booting'); body.classList.add('intro');
 const canvas = $('#gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: !LOW, alpha: true, powerPreference: 'high-performance' });
 renderer.setClearColor(0x000000, 0);
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, LOW ? 1.25 : 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, LOW ? 1.25 : 1.5));
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.shadowMap.enabled = !LOW;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -385,18 +356,6 @@ function gameCanvas(key, W){
 const GAMEC = {};
 function gameTex(key){ if (!GAMEC[key]) GAMEC[key] = gameCanvas(key, 240); return GAMEC[key]; }
 
-/* a museum label, also a golden rectangle: a number and a name, nothing else */
-function labelCanvas(s, dark){
-  const W = 809, H = 500, [c, g] = makeCanvas(W, H);
-  g.fillStyle = dark ? HEX.paper : HEX.black; g.fillRect(0, 0, W, H);
-  const ink = dark ? HEX.black : HEX.paper;
-  g.fillStyle = HEX.red; g.fillRect(0, 0, W, 13);
-  g.fillStyle = ink; g.font = '500 31px "Geist Mono", ui-monospace, monospace'; g.textBaseline = 'top';
-  g.fillText(String(s.i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0'), 50, 55);
-  g.textBaseline = 'alphabetic';
-  const t = s.title.toUpperCase(); const px = fitText(g, t, W - 100, 210); g.fillText(t, 46, H - 55);
-  return texFrom(c);
-}
 
 /* ── images: game covers, the channel avatar ── */
 const loader = new THREE.TextureLoader();
@@ -450,7 +409,7 @@ function sideAt(x, z){
 }
 const faceMat = s => mat(s === null || s === 'hall' ? C.paper : wallColor(s));
 
-const pick = [], anim = [], MARK = [];
+const anim = [];
 let ceilMats = [], keyLight = null;
 
 /* a wall along one axis, with door gaps; each face takes its own room's colour */
@@ -522,7 +481,7 @@ function buildShell(){
   const [hc, hg] = makeCanvas(1600, 990);
   hg.fillStyle = HEX.black; let px = fitText(hg, 'NINE', 1560, 520); hg.fillText('NINE', 10, 480);
   hg.fillStyle = HEX.red; px = fitText(hg, 'ROOMS.', 1560, 520); hg.fillText('ROOMS.', 10, 960);
-  plane(world, 8.09, 5.0, decal(texFrom(hc), { transparent: true }), XR, 3.9, -HALL_D + WT / 2 + .01);
+  plane(world, 6.47, 4.0, decal(texFrom(hc), { transparent: true }), 3.4, 3.9, -HALL_D + WT / 2 + .01);
 }
 
 /* each room's frame: origin on the floor at the middle of its far wall, +z into the room */
@@ -539,7 +498,6 @@ function dress(i, key, opts){
     B(g, w + .1, h + .1, .04, dark ? C.paper : C.black, x, 4.1 - h / 2 - .05, .02, { noShadow: true });
     plane(g, w, h, decal(texFrom(posterCanvas(key, 500))), x, 4.1, .05);
   }
-  if (opts.label !== false) plane(g, 1.62, 1.0, decal(labelCanvas(STATIONS[i], dark)), opts.lx != null ? opts.lx : x, opts.ly || 1.45, .03);
   return g;
 }
 /* an asset group stands `dist` out from the far wall, facing the door */
@@ -548,7 +506,6 @@ function stand(i, dist){
   g.position.copy(rm.f).addScaledVector(rm.n, dist); g.rotation.y = rm.ry; world.add(g);
   g.userData.dist = dist; return g;
 }
-function tagStation(obj, i){ obj.traverse(o => { if (o.isMesh){ o.userData.st = i; pick.push(o); } }); }
 
 /* ── 0 · ARTHIS: a desk with two screens and a phone ── */
 let feedTex = null, feedIdx = 0;
@@ -595,7 +552,6 @@ function buildArthis(i){
   R(ph, .2, .02, .14, C.black, 0, 0, 0, { r: .01 }); R(ph, .2, .38, .02, C.black, 0, .02, -.03, { r: .008, rx: -.2 });
   plane(ph, .17, .275, decal(texFrom(gameTex('fruit'))), 0, .22, .01).rotation.x = -.2;
   chair(g, .1, 1.05, Math.PI + .25);
-  tagStation(g, i);
   dress(i, 'feed');
   anim.push(t => { const k = Math.floor(t / 2.4); if (k !== feedIdx){ feedIdx = k; drawFeed(); } });
   return g;
@@ -632,7 +588,6 @@ function buildBlender(i){
   R(cam, .56, .36, .34, C.black, 0, 1.42, 0, { r: .04 });
   CYL(cam, .13, .15, .26, 32, C.black2, 0, 1.6, .3).rotation.x = Math.PI / 2;
   const rec = new THREE.Mesh(new THREE.SphereGeometry(.035, 10, 8), flat(C.red)); rec.position.set(.2, 1.82, 0); cam.add(rec);
-  tagStation(g, i);
   dress(i, 'rig');
   anim.push((t, dt) => { fig.rotation.y += dt * (REDUCED ? 0 : .5); plate.rotation.y = fig.rotation.y; rec.visible = Math.floor(t * 1.5) % 2 === 0; });
   return g;
@@ -685,7 +640,6 @@ function buildAkverse(i){
   const cl = new THREE.Group(); cl.position.set(-1.1, .5, .02); cl.rotation.y = .3; g.add(cl);
   B(cl, .42, .3, .03, C.black, 0, 0, 0);
   for (let k = 0; k < 5; k++) B(cl, .084, .07, .034, k % 2 ? C.black : C.paper, -.168 + k * .084, .31, 0, { noShadow: true });
-  tagStation(g, i);
   dress(i, 'house');
   return g;
 }
@@ -722,7 +676,6 @@ function buildHexa(i){
     born = now;
   };
   hexRegen(0);
-  tagStation(g, i);
   dress(i, 'hex');
   anim.push(t => {
     const age = t - born;
@@ -755,7 +708,6 @@ function buildAI(i){
   nodes.forEach(p => nodes.forEach(q => { if (q.li === p.li + 1){ pts.push(p.m.position, q.m.position); edges.push([p.m.position, q.m.position, p.li]); } }));
   net.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: lin(0x5A5957) })));
   const pulses = edges.map(() => { const m = new THREE.Mesh(new THREE.SphereGeometry(.028, 8, 6), flat(C.red)); net.add(m); return m; });
-  tagStation(g, i);
   dress(i, 'net');
   let last = 0;
   anim.push(t => {
@@ -806,7 +758,6 @@ function buildBoard(i){
   [0, 2.1, 4.2].forEach(r => B(st, .035, .72, .035, C.black, Math.sin(r) * .18, 0, Math.cos(r) * .18, { rx: Math.cos(r) * -.08, rz: Math.sin(r) * .08 }));
   R(g, 1.0, .72, .6, C.black, .3, 0, -.4, { r: .03 });
   R(g, .3, .2, .22, C.paper, .2, .72, -.4, { r: .02 });
-  tagStation(w, i); tagStation(g, i);
   dress(i, null, { lx: 3.9, ly: 1.45 });
   return g;
 }
@@ -831,7 +782,6 @@ function buildNumbers(i){
     const p = plane(g, .66, .66 * PHI, decal(statCanvas(s[0], s[1], s[2])), x, y + .54, .02); p.rotation.x = -.05;
   });
   B(g, .5, .5, .5, C.red, -2.6, 0, .6, { ry: .3 }); B(g, .31, .31, .31, C.black, -2.2, 0, .9, { ry: -.2 });
-  tagStation(g, i);
   dress(i, 'numbers');
   return g;
 }
@@ -872,7 +822,6 @@ function buildArcade(i){
   const g = stand(i, 1.4);
   drawArcade(0);
   cabinet(g, -.85, .14, 'ARCADE'); cabinet(g, .85, -.14, 'PLAY');
-  tagStation(g, i);
   dress(i, 'arcade');
   anim.push(t => drawArcade(t));
   return g;
@@ -896,7 +845,6 @@ function buildContact(i){
   pg.computeVertexNormals();
   pl.add(new THREE.Mesh(pg, mat(C.paper, { side: THREE.DoubleSide })));
   const rm = ROOMS[i];
-  tagStation(w, i);
   dress(i, null, { label: false });
   anim.push(t => {
     const u = REDUCED ? 0 : t * .5;
@@ -906,17 +854,16 @@ function buildContact(i){
   return g;
 }
 
-/* ── markers: a small cube over each piece; white once found ── */
+/* ── one invisible box per room's piece answers the pointer ── */
 const RING = new THREE.Mesh(new THREE.RingGeometry(1.4, 1.5, 64), new THREE.MeshBasicMaterial({ color: lin(C.red), transparent: true, opacity: .9, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
 RING.rotation.x = -Math.PI / 2; RING.visible = false; world.add(RING);
-const MK_OFF = flat(C.red), MK_ON = flat(0xffffff);
-const PIECE = [];
-function buildMarkers(){
+const PIECE = [], HITS = [];
+function buildHits(){
   PIECE.forEach((g, i) => {
-    const m = new THREE.Mesh(boxGeo(.22, .22, .22), found.has(STATIONS[i].id) ? MK_ON : MK_OFF);
-    const p = new THREE.Vector3(); g.getWorldPosition(p);
-    m.position.set(p.x, i === 4 ? 4.5 : i === 8 ? 4.4 : 3.3, p.z);
-    m.userData.st = i; m.userData.y = m.position.y; pick.push(m); world.add(m); MARK.push(m);
+    const bb = new THREE.Box3().setFromObject(g), sz = new THREE.Vector3(), c = new THREE.Vector3();
+    bb.getSize(sz); bb.getCenter(c);
+    const m = new THREE.Mesh(boxGeo(Math.max(sz.x, .5), Math.max(sz.y, .5), Math.max(sz.z, .5)), new THREE.MeshBasicMaterial({ visible: false }));
+    m.position.copy(c); m.userData.st = i; world.add(m); HITS.push(m);
   });
 }
 
@@ -926,7 +873,7 @@ function buildLights(){
   keyLight.position.set(5, 14, 7); scene.add(keyLight.target);
   if (!LOW){
     /* the shadow box follows the camera, so it stays sharp and never shimmers */
-    keyLight.castShadow = true; keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.castShadow = true; keyLight.shadow.mapSize.set(1536, 1536);
     const s = keyLight.shadow.camera; s.left = -13; s.right = 13; s.top = 13; s.bottom = -13; s.near = 1; s.far = 50;
     keyLight.shadow.bias = -.0004; keyLight.shadow.normalBias = .04; keyLight.shadow.radius = 3;
   }
@@ -960,7 +907,7 @@ function layout(){
     L.strip.style.paddingTop = (L.head.offsetHeight + 4) + 'px';
     L.travel = Math.max(0, L.strip.offsetHeight - VH);
     L.headH = L.head.offsetHeight;
-    L.cards = $$('.lc', L.el).map(el => ({ el, top: el.offsetTop, h: el.offsetHeight, py: null, rv: null, bl: null }));
+    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack', el) || el.querySelector('.lc-art') || el, top: el.offsetTop, h: el.offsetHeight, py: null, bl: null }));
   });
   camera.aspect = VW / VH; camera.updateProjectionMatrix();
   renderer.setSize(VW, VH, false); css.setSize(VW, VH);
@@ -987,10 +934,10 @@ function placeLanes(t){
 
 /* ══ camera poses ═══════════════════════════════════════════ */
 const DOOR = { pos: V3(0, Y0, ZL + DIST), look: V3(0, Y0, ZL - 20) };
-const HALLP = { pos: V3(2.2, 4.0, 7.5), look: V3(-1.2, 2.8, -HALL_D), u: 0, v: 0 };
+const HALLP = { pos: V3(0, 4.2, 9), look: V3(-.4, 3.1, -HALL_D), u: 0, v: 0 };
 let REVEAL = { pos: V3(0, 52, 24), look: V3(0, -2, -36) };
 /* the golden line: a piece sits 0.118 of the width right of centre, the card fills the 38.2% on the left */
-const GOLD_U = 2 * (PHI - 1) - 1;
+const GOLD_U = 2 * (PHI - 1) - 1;   // 0.236
 function stationPose(i){
   const rm = ROOMS[i], g = PIECE[i], d = rm.door;
   const pos = V3(d.x, 3.0, d.z).addScaledVector(rm.nin, 2.0);
@@ -1026,30 +973,48 @@ function applyPose(pos, look, u, v){
 
 /* ══ the director: scroll in, everything out ════════════════ */
 function readScroll(){ pTarget = clamp(scrollY / VH * 100, 0, TOTAL); }
-addEventListener('scroll', () => { readScroll(); armSnap(); }, { passive: true });
+/* the wheel glides: each notch moves a target, and the page eases to it */
+let sTarget = 0, sCur = 0, gliding = false, ownScroll = false;
+const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
+addEventListener('wheel', e => {
+  if (e.ctrlKey || openLayer || REDUCED || body.classList.contains('booting')) return;
+  e.preventDefault();
+  if (!gliding) sTarget = sCur = scrollY;
+  sTarget = clamp(sTarget + (e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY), 0, maxScroll());
+  gliding = true;
+}, { passive: false });
+function glide(dt){
+  if (!gliding) return;
+  sCur += (sTarget - sCur) * (1 - Math.exp(-dt * 7));
+  if (Math.abs(sTarget - sCur) < .5){ sCur = sTarget; gliding = false; }
+  ownScroll = true; scrollTo(0, sCur);
+}
+addEventListener('scroll', () => { readScroll(); if (!ownScroll){ gliding = false; } ownScroll = false; }, { passive: true });
+['touchstart', 'keydown', 'mousedown'].forEach(ev => addEventListener(ev, () => { if (ev !== 'keydown') gliding = false; }, { passive: true }));
 
 const seamCard = $('#seamCard'), mergeCap = $('#mergeCap'), tkFill = $('#tkFill');
-const capA = $('span', mergeCap), capB = $('b', mergeCap), wipeA = $('#wipe i'), wipeB = $('#wipe i + i');
-let lastP = 0, lastT = 0, skew = 0, speed = 0, roll = 0, lastLookX = 0, blurNow = 0;
+const capA = $('span', mergeCap), capB = $('b', mergeCap), wipeA = $('#wipe i');
+let lastP = 0, lastT = 0, skew = 0;
 function phaseOf(p){ return p < ACT1 ? 'act1' : p < HALL_AT ? 'merge' : 'room'; }
 function hereOf(p){
   if (p < HALL_AT - 25) return -2;
-  const k = (p - HALL_AT) / STEP, r = Math.round(k);
-  return Math.abs(k - r) < .22 ? r - 1 : -3;            // -1 hall, -3 walking
+  const k = (p - HALL_AT) / STEP, r = Math.round(k), d = Math.abs(k - r);
+  /* hysteresis: the card stays while you hover near a room, so it never blinks */
+  if (d < .2 || (d < .3 && lastHere === r - 1)) return r - 1;
+  return -3;                                          // -1 hall, -3 walking
 }
 
 function direct(p, t){
   const ph = phaseOf(p);
   if (ph !== lastPhase){
     body.classList.toggle('act1', ph === 'act1'); body.classList.toggle('merge', ph === 'merge'); body.classList.toggle('room', ph === 'room');
-    if (ph === 'merge' && lastPhase === 'act1') sfx('merge');
+    if (ph === 'merge' && lastPhase === 'act1')
     lastPhase = ph;
   }
-  /* scroll speed drives the lean of the lanes, the camera's kick and the blur */
+  /* scroll speed drives the lean of the lanes */
   const dt = Math.max(.001, t - lastT), vel = (p - lastP) / dt; lastP = p; lastT = t;
   const k = 1 - Math.exp(-dt * 9);
-  skew += ((REDUCED ? 0 : clamp(vel * .012, -7, 7)) - skew) * k;
-  speed += ((REDUCED ? 0 : Math.min(1, Math.abs(vel) / 400)) - speed) * k;
+  skew += ((REDUCED ? 0 : clamp(vel * .008, -4, 4)) - skew) * k;
 
   /* Act I: the strips run in opposite directions and lean with the scroll */
   const t1 = clamp(p / ACT1, 0, 1);
@@ -1062,13 +1027,11 @@ function direct(p, t){
     L.cards.forEach(c => {
       const top = c.top + y;
       if (top > VH + 40 || top + c.h < -40) return;
-      const rv = Math.min(clamp((VH - top) / (c.h * .55), 0, 1), clamp((top + c.h - L.headH) / (c.h * .55), 0, 1));
       const py = clamp((top + c.h / 2 - VH / 2) / VH, -1, 1) * -12;
       const dist = Math.abs(top + c.h / 2 - focusY) / VH;
-      const bl = live ? Math.round(clamp((dist - .2) * 9, 0, LOW ? 2 : 3.5) * 4) / 4 : 0;
-      if (c.rv === null || Math.abs(rv - c.rv) > .004){ c.rv = rv; c.el.style.setProperty('--rv', rv.toFixed(3)); }
-      if (c.py === null || Math.abs(py - c.py) > .05){ c.py = py; c.el.style.setProperty('--py', py.toFixed(2) + '%'); }
-      if (c.bl !== bl){ c.bl = bl; c.el.style.setProperty('--bl', bl + 'px'); c.el.style.setProperty('--fo', (bl / 9).toFixed(3)); }
+      const far = live && dist > .34;
+      if (c.py === null || Math.abs(py - c.py) > .05){ c.py = py; c.big.style.transform = 'translate3d(0,' + py.toFixed(2) + '%,0)'; }
+      if (c.bl !== far){ c.bl = far; c.el.classList.toggle('far', far); }
     });
   });
   const so = VW < 760 ? 1 - smooth(10, 45, p) : 1 - smooth(ACT1 * .82, ACT1 + 10, p);
@@ -1081,16 +1044,14 @@ function direct(p, t){
   capB.style.transform = 'translateX(' + ((1 - lock) * 45).toFixed(2) + 'vw) skewX(' + ((1 - lock) * -12).toFixed(1) + 'deg) scale(' + (1 + out * .3).toFixed(3) + ')';
   /* a red slash, then a black one, wipe across as the camera dives in */
   if (!REDUCED){
-    const w1 = smooth(ACT1 + MERGE * .66, ACT1 + MERGE * .86, p), w2 = smooth(ACT1 + MERGE * .7, ACT1 + MERGE * .9, p);
+    const w1 = smooth(ACT1 + MERGE * .68, ACT1 + MERGE * .9, p);
     wipeA.style.transform = 'translateX(' + lerp(-140, 140, w1).toFixed(2) + '%) skewX(-14deg)';
-    wipeB.style.transform = 'translateX(' + lerp(-420, 420, w2).toFixed(2) + '%) skewX(-14deg)';
   }
 
   /* Act II: doors open, the camera lifts out to the whole building, then drops into the hall */
   const tm = clamp((p - ACT1) / MERGE, 0, 1);
   placeLanes(smooth(0, .36, tm));
   lanes.forEach(L => { L.o.visible = p < HALL_AT + STEP * .6; });
-  let walking = 0;
   if (p < HALL_AT){
     const up = ease(smooth(.3, .58, tm)), down = ease(smooth(.7, 1, tm));
     tmpPos.lerpVectors(DOOR.pos, REVEAL.pos, up).lerp(HALLP.pos, down);
@@ -1100,30 +1061,16 @@ function direct(p, t){
   } else {
     /* Act III: walk room to room, through each door, resting at every piece */
     const kk = clamp((p - HALL_AT) / STEP, 0, N), i = Math.min(N - 1, Math.floor(kk));
-    const f = ease(smooth(.16, .84, kk - i));
+    const f = ease(smooth(.06, .94, kk - i));
     const A = POSES[i], Bp = POSES[i + 1], Cc = LEGS[i].C;
     const a = (1 - f) * (1 - f), b = 2 * (1 - f) * f, c = f * f;
     tmpPos.set(A.pos.x * a + Cc.x * b + Bp.pos.x * c, A.pos.y * a + Cc.y * b + Bp.pos.y * c, A.pos.z * a + Cc.z * b + Bp.pos.z * c);
     tan.copy(Cc).sub(A.pos).multiplyScalar(2 * (1 - f)).add(_t.copy(Bp.pos).sub(Cc).multiplyScalar(2 * f));
-    walking = Math.pow(Math.sin(Math.PI * f), 2);
+    const walking = Math.pow(Math.sin(Math.PI * f), 2);
     tmpLook.lerpVectors(A.look, Bp.look, f);
     if (tan.lengthSq() > 1e-6){ _t.copy(tan).normalize().multiplyScalar(6).add(tmpPos); _t.y = 2.6; tmpLook.lerp(_t, walking * .85); }
-    if (!REDUCED) tmpPos.y += Math.sin(t * .9) * .02;
     applyPose(tmpPos, tmpLook, lerp(A.u, Bp.u, f) * (1 - walking), lerp(A.v, Bp.v, f) * (1 - walking));
-    /* bank into turns */
-    if (!REDUCED){
-      const turn = (tmpLook.x - lastLookX) / dt; lastLookX = tmpLook.x;
-      roll += (clamp(-turn * .004, -.06, .06) - roll) * k;
-      camera.rotateZ(roll);
-    }
   }
-  /* the lens opens a little with speed; the picture softens while you walk */
-  const fovT = p > HALL_AT + STEP * .6 ? FOV + speed * 8 : FOV;
-  if (Math.abs(camera.fov - fovT) > .01){ camera.fov += (fovT - camera.fov) * k; if (Math.abs(camera.fov - fovT) < .02) camera.fov = fovT; camera.updateProjectionMatrix(); }
-  const blurT = LOW || REDUCED ? 0 : walking * 2.6;
-  blurNow += (blurT - blurNow) * k;
-  const bq = Math.round(blurNow * 8) / 8;
-  if (bq !== lastBlur){ lastBlur = bq; canvas.style.setProperty('--mb', bq + 'px'); }
 
   /* the ceiling fades as the camera rises over the walls */
   const co = 1 - smooth(RH - .8, RH + 4, camera.position.y);
@@ -1139,7 +1086,6 @@ function direct(p, t){
   if (here !== lastHere){ arrive(here); lastHere = here; }
   tkFill.style.width = (100 * p / TOTAL).toFixed(2) + '%';
 }
-let lastBlur = -1;
 
 /* ══ HUD ════════════════════════════════════════════════════ */
 const obj = $('#obj');
@@ -1185,7 +1131,6 @@ function arrive(here){
   obj.classList.add('show'); replayObj();
   markHere(here);
   if (here >= 0){
-    sfx('step');
     if (s.id === 'hexabed' && hexRegen) hexRegen(clockT);
     if (!found.has(s.id)) discover(here);
   }
@@ -1193,10 +1138,8 @@ function arrive(here){
 function discover(i){
   const s = STATIONS[i];
   found.add(s.id); store.set('aak-found', Array.from(found).join(','));
-  MARK[i].material = MK_ON;
   renderPips();
-  if (found.size === N){ toast('9/9', '<b>Every room found.</b> Thanks for walking through.'); sfx('all'); }
-  else sfx('found');
+  if (found.size === N) toast('9/9', '<b>Every room found.</b> Thanks for walking through.');
 }
 function renderPips(){
   $('#pips').innerHTML = STATIONS.map(s => '<i class="' + (found.has(s.id) ? 'on' : '') + '"></i>').join('');
@@ -1216,7 +1159,7 @@ function buildTrack(){
   });
   renderPips();
 }
-function travel(p){ closeOverlay(); scrollTo({ top: p / 100 * VH, behavior: REDUCED ? 'auto' : 'smooth' }); }
+function travel(p){ closeOverlay(); if (REDUCED){ scrollTo(0, p / 100 * VH); return; } if (!gliding) sCur = scrollY; sTarget = clamp(p / 100 * VH, 0, maxScroll()); gliding = true; }
 function stepTo(dir){
   const p = pTarget;
   const next = dir > 0 ? KEYS.find(k => k > p + 2) : KEYS.slice().reverse().find(k => k < p - 2);
@@ -1225,18 +1168,6 @@ function stepTo(dir){
 $('#prevBtn').addEventListener('click', () => stepTo(-1));
 $('#nextBtn').addEventListener('click', () => stepTo(1));
 $('.player').addEventListener('click', e => { e.preventDefault(); travel(0); });
-
-/* when scrolling has properly stopped inside the building, settle on the nearest room */
-let snapT = 0;
-function armSnap(){
-  clearTimeout(snapT);
-  snapT = setTimeout(() => {
-    if (openLayer || pTarget < HALL_AT - STEP * .5) return;
-    const near = KEYS.reduce((b, k) => Math.abs(k - pTarget) < Math.abs(b - pTarget) ? k : b, KEYS[0]);
-    const d = Math.abs(near - pTarget);
-    if (d > 3 && d < STEP * .4) travel(near);
-  }, 520);
-}
 
 function openMenu(){
   const l = $('#menuL'); l.innerHTML = '';
@@ -1258,7 +1189,6 @@ function inspect(id){
   $('#dosK').textContent = SIDE_LABEL[s.side] + ' · ' + String(s.i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
   openOverlay($('#dossier'));
   $('.dos-card').scrollTop = 0;
-  sfx('open');
 }
 
 addEventListener('keydown', e => {
@@ -1280,7 +1210,7 @@ let hover = -1;
 function hitAt(x, y){
   ndc.set(x / VW * 2 - 1, -(y / VH) * 2 + 1);
   ray.setFromCamera(ndc, camera);
-  const h = ray.intersectObjects(pick, false)[0];
+  const h = ray.intersectObjects(HITS, false)[0];
   return h ? h.object.userData.st : -1;
 }
 function overUI(t){ return !t || !t.closest || !!t.closest('#hud .obj,#hud .hud-top,#hud .track,.lane,.menu,.dossier,.arcade,#gate'); }
@@ -1319,12 +1249,12 @@ function frame(now){
   if (!running) return;
   requestAnimationFrame(frame);
   const dt = Math.min(.05, (now - lastNow) / 1000); lastNow = now; clockT += dt;
-  pNow = REDUCED ? pTarget : pNow + (pTarget - pNow) * (1 - Math.exp(-dt * 5));
+  glide(dt);
+  pNow = REDUCED ? pTarget : pNow + (pTarget - pNow) * (1 - Math.exp(-dt * 10));
   if (Math.abs(pTarget - pNow) < .01) pNow = pTarget;
   direct(pNow, clockT);
   anim.forEach(f => f(clockT, dt));
   moveCursor(dt);
-  MARK.forEach((m, i) => { m.rotation.y = clockT * (hover === i ? 3 : .8); m.rotation.x = .6; m.position.y = m.userData.y + Math.sin(clockT * 1.6 + i) * .05; });
   if (hover >= 0){ const pp = PIECE[hover].position; RING.visible = true; RING.position.set(pp.x, .02, pp.z); }
   else RING.visible = false;
   renderer.render(scene, camera);
@@ -1346,7 +1276,7 @@ history.scrollRestoration = 'manual';
 loadAll().then(() => {
   buildLights(); buildShell();
   [buildArthis, buildBlender, buildAkverse, buildHexa, buildAI, buildBoard, buildNumbers, buildArcade, buildContact].forEach((f, i) => { PIECE[i] = f(i); });
-  buildMarkers(); buildTrack();
+  buildHits(); buildTrack();
   layout(); buildPoses();
   const want = location.hash.replace('#st-', '').replace('#', '');
   const s = STATIONS.find(x => x.id === want);
