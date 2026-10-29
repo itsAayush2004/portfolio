@@ -302,29 +302,24 @@ body.classList.toggle('low', LOW);
 })();
 
 /* ── the loader lifts away by itself once everything is built ── */
-const gateFill = $('#gateFill'), gateMsg = $('#gateMsg');
+const gateFill = $('#gateFill');
 let loadedN = 0, loadTotal = 1;
 /* the inline starter counted while the scripts downloaded; carry on from where it got to */
 window.__gateTaken = true;
-let gateShown = parseInt(($('#gateNum') || {}).textContent, 10) || 0, gateWant = gateShown;
+let gateShown = Math.round(window.__gateN || 0), gateWant = gateShown;
 function progress(){
   gateWant = Math.max(gateWant, Math.round(100 * loadedN / loadTotal));
 }
-/* one line under the bar says what is happening */
-const GATE_MSG = [[0, 'Engineer · Creator'], [34, 'Building nine rooms'], [70, 'Hanging the posters'], [97, 'Opening up']];
 let gateDrawn = -1;
 (function count(){
   if (!body.classList.contains('booting')) return;
   gateShown += (gateWant - gateShown) * .1;
   const n = Math.min(100, Math.round(gateShown));
-  if (n !== gateDrawn){
-    gateDrawn = n; $('#gateNum').textContent = n; gateFill.style.width = n + '%';
-    const m = GATE_MSG.filter(c => n >= c[0]).pop(); if (gateMsg.textContent !== m[1]) gateMsg.textContent = m[1];
-  }
+  if (n !== gateDrawn){ gateDrawn = n; gateFill.style.transform = 'scaleX(' + (n / 100).toFixed(3) + ')'; }
   requestAnimationFrame(count);
 })();
 const bootAt = performance.now();
-/* the loader splits down the middle and its two halves slide apart */
+/* the loader fades away into the two halves */
 function start(){
   const g = $('#gate');
   body.classList.remove('booting'); body.classList.add('intro');
@@ -597,16 +592,6 @@ function buildShell(){
     const f = plane(world, CELL - WT, CELL - WT, new THREE.MeshLambertMaterial({ map: t, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }), rm.cx, .003, rm.cz);
     f.rotation.x = -Math.PI / 2; f.receiveShadow = true;
   });
-  /* the path you walk, drawn on the floor in red */
-  const pts = [V3(0, 0, 0)];
-  ROOMS.forEach(rm => { pts.push(V3(rm.door.x, 0, rm.door.z)); pts.push(V3(rm.cx, 0, rm.cz)); });
-  const lineM = flat(C.red, { polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
-  for (let k = 0; k < pts.length - 1; k++){
-    const a = pts[k], b = pts[k + 1], len = a.distanceTo(b); if (len < .01) continue;
-    const seg = plane(world, .14, len + .14, lineM, (a.x + b.x) / 2, .005, (a.z + b.z) / 2);
-    seg.rotation.x = -Math.PI / 2; seg.rotation.z = Math.atan2(b.x - a.x, b.z - a.z);
-  }
-
   /* the ceiling fades out as the camera rises above the walls */
   const cm = mat(C.paper, { transparent: true }); ceilMats.push(cm);
   const ceil = plane(world, 2 * HALF, -Z_BACK, cm, 0, RH, Z_BACK / 2); ceil.rotation.x = Math.PI / 2;
@@ -674,7 +659,7 @@ const WALLWORD = ['ARTHIS', 'BLENDER', 'AKVERSE', 'HEXABED', 'INFERENCE', 'THE B
 function wallType(i){
   const rm = ROOMS[i], word = WALLWORD[i];
   const inner = i === 8 ? 13.5 : rm.w - WT - .04;
-  const col = rm.side === 'eng' ? '#3BF07A' : rm.side === 'cre' ? HEX.black : HEX.red;
+  const col = rm.side === 'eng' ? '#3BF07A' : rm.side === 'cre' ? HEX.paper : HEX.red;
   const W = 2048, [c0, g0] = makeCanvas(W, 10);
   const px = fitText(g0, word, W * 1.04, 2000);
   const H = Math.round(px * .78), [c, g] = makeCanvas(W, H);
@@ -987,9 +972,6 @@ function buildNumbers(i){
     K(g, .8, h, .8, fm(bar[3]), x, b, 0, { r: .1 });
     plane(g, .7, .467, decal(plaqueCanvas(bar[0], bar[1], bar[3] === 'ink' || bar[3] === 'red')), x, b + .42, .41);
   });
-  const extra = [['AIR 8956', 'JEE Adv.'], ['98.9', 'JEE Main %ile']];
-  extra.forEach((e, k) => { const p = new THREE.Group(); p.position.set(2.0, b, .2 - k * .5); p.rotation.y = -.4; g.add(p);
-    K(p, .5, .5 + k * .2, .4, fm('cream'), 0, 0, 0, { r: .06 }); plane(p, .46, .3, decal(plaqueCanvas(e[0], e[1], false)), 0, .3 + k * .1, .21); });
   wallType(i);
   return g;
 }
@@ -1205,13 +1187,6 @@ function deskConsole(par, x, z, ry, seed){
   K(g, .34, .6, .6, fm('ink', 'f'), 1.4, 0, .35); [0, 1, 2].forEach(k => K(g, .2, .03, .02, flat(k ? 0xC9F5D6 : FAM.green), 1.4, .38 + k * .07, .66, { noShadow: true }));
   return g;
 }
-function neonSign(par, x, y, z, ry, text, col, w){
-  const [c, g] = makeCanvas(512, 256);
-  g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '800 150px "JetBrains Mono", ui-monospace, monospace';
-  g.shadowColor = col; g.shadowBlur = 26; g.fillStyle = col; g.fillText(text, 256, 132); g.shadowBlur = 0; g.fillStyle = '#ffffff'; g.globalAlpha = .55; g.fillText(text, 256, 132);
-  const m = plane(par, w, w / 2, decal(texFrom(c), { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), x, y, z, ry);
-  return m;
-}
 /* static dressing is merged per material, so a furnished room costs a handful of draw calls */
 const _inv = new THREE.Matrix4(), _rel = new THREE.Matrix4();
 function mergeStatic(D){
@@ -1255,10 +1230,6 @@ function dressRoom(i){
   if (side === 'eng'){
     deskConsole(D, L + .02, 3.6, Math.PI / 2, i * 7);
     framed(D, Rt - .02, 3.9, 3.6, -Math.PI / 2, codeTex(i * 7 + 3), 2.4, 1.5, 'ink');
-    neonSign(D, Rt - .04, 2.25, 3.6, -Math.PI / 2, ['</>', '{ }', '01'][i % 3] || '</>', '#3BF07A', 1.5);
-    plant(D, Rt - .6, 5.6, 1, 'ink', .8);
-    /* cable tray under the ceiling */
-    K(D, .34, .1, dep - 1, fm('ink', 't'), L + .5, RH - .9, dep / 2);
   } else if (side === 'cre'){
     shelf(D, L + .02, 3.4, Math.PI / 2, side, i * 11);
     const keys = { 1: ['rig', 'reel'], 2: ['house', 'build'], 5: ['tools', 'cv'] }[i] || ['wall', 'hex'];
@@ -1286,13 +1257,7 @@ function gradTex(stops, w, h, radial){
   stops.forEach(st => gr.addColorStop(st[0], st[1])); g.fillStyle = gr; g.fillRect(0, 0, w, h);
   return texFrom(c);
 }
-function glyphTex(ch, sq){
-  const [c, g] = makeCanvas(64, 64); g.fillStyle = '#fff';
-  if (sq) g.fillRect(22, 22, 20, 14);
-  else { g.font = '800 52px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ch, 32, 34); }
-  return texFrom(c);
-}
-const AIR = [], BEAMS = [];
+const BEAMS = [];
 function buildAtmosphere(){
   const beamTex = gradTex([[0, 'rgba(255,255,255,0)'], [.55, 'rgba(255,255,255,.35)'], [1, 'rgba(255,255,255,.9)']], 4, 256);
   const poolTex = gradTex([[0, 'rgba(255,255,255,.9)'], [.45, 'rgba(255,255,255,.35)'], [1, 'rgba(255,255,255,0)']], 256, 256, true);
@@ -1312,29 +1277,6 @@ function buildAtmosphere(){
     const lamp = new THREE.Mesh(new THREE.CylinderGeometry(.16, .26, .22, 12), fm('ink').clone()); lamp.position.set(p.x, RH - .11, p.z); world.add(lamp);
     const lens = new THREE.Mesh(new THREE.CircleGeometry(.2, 16), flat(0xFFFFFF)); lens.rotation.x = Math.PI / 2; lens.position.set(p.x, RH - .23, p.z); world.add(lens);
     ceilMats.push(lamp.material);
-  });
-  /* the air: 1s and 0s rising through the engineer rooms, paper flecks settling in the creator rooms */
-  const per = LOW ? 34 : 70;
-  [['eng', '1', 1], ['eng', '0', 1], ['cre', '', -1]].forEach(spec => {
-    const rooms = ROOMS.filter(r => r.side === spec[0]), n = rooms.length * per, pos = new Float32Array(n * 3), spd = new Float32Array(n);
-    rooms.forEach((rm, r) => { for (let k = 0; k < per; k++){ const j = (r * per + k) * 3;
-      pos[j] = rm.cx + (Math.random() - .5) * (CELL - 1.2); pos[j + 1] = .3 + Math.random() * (RH - 1); pos[j + 2] = rm.cz + (Math.random() - .5) * (CELL - 1.2);
-      spd[r * per + k] = .15 + Math.random() * .35; } });
-    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: glyphTex(spec[1], !spec[1]), color: lin(spec[0] === 'eng' ? FAM.green : C.paper),
-      size: spec[1] ? .2 : .12, transparent: true, opacity: spec[1] ? .55 : .7, depthWrite: false, blending: spec[1] ? THREE.AdditiveBlending : THREE.NormalBlending }));
-    world.add(pts); AIR.push({ pts, pos, spd, dir: spec[2] });
-  });
-  anim.push((t, dt) => {
-    if (REDUCED) return;
-    AIR.forEach(a => {
-      for (let k = 0; k < a.spd.length; k++){
-        const j = k * 3; a.pos[j + 1] += a.dir * a.spd[k] * dt;
-        if (a.dir < 0) a.pos[j] += Math.sin(t * .8 + k) * .002;
-        if (a.pos[j + 1] > RH - .6) a.pos[j + 1] = .3; else if (a.pos[j + 1] < .25) a.pos[j + 1] = RH - .8;
-      }
-      a.pts.geometry.attributes.position.needsUpdate = true;
-    });
   });
 }
 
