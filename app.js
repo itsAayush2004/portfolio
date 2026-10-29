@@ -135,7 +135,7 @@ const GAMES = {
 };
 
 /* ══ the scroll timeline, in viewport-heights × 100 ═════════ */
-const ACT1 = 220, MERGE = 240, STEP = 100;
+const ACT1 = 520, MERGE = 260, STEP = 110;
 const HALL_AT = ACT1 + MERGE;
 const TOTAL = HALL_AT + N * STEP;
 const posOf = i => i < 0 ? HALL_AT : HALL_AT + (i + 1) * STEP;     // -1 is the hall
@@ -212,15 +212,29 @@ body.classList.add('three', 'act1');
 const MOBILE = innerWidth < 760 || (matchMedia('(pointer: coarse)').matches && innerWidth < 1000);
 const LOW = MOBILE || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
 body.classList.toggle('low', LOW);
+/* a still film grain, made once */
+(function grain(){
+  const c = document.createElement('canvas'); c.width = c.height = 180; const g = c.getContext('2d'), d = g.createImageData(180, 180);
+  for (let k = 0; k < d.data.length; k += 4){ const v = Math.random() * 255; d.data[k] = d.data[k + 1] = d.data[k + 2] = v; d.data[k + 3] = 255; }
+  g.putImageData(d, 0, 0); $('#grain').style.backgroundImage = 'url(' + c.toDataURL() + ')';
+})();
 
 /* ── the loader lifts away by itself once everything is built ── */
 const gateFill = $('#gateFill'), gateMsg = $('#gateMsg');
 let loadedN = 0, loadTotal = 1;
+let gateShown = 0, gateWant = 0;
 function progress(){
-  const k = Math.round(100 * loadedN / loadTotal);
-  gateFill.style.width = k + '%';
-  gateMsg.textContent = 'Loading ' + k + '%';
+  gateWant = Math.round(100 * loadedN / loadTotal);
+  gateFill.style.width = gateWant + '%';
+  gateMsg.textContent = 'Loading ' + gateWant + '%';
 }
+/* the loader counts up smoothly rather than jumping */
+(function count(){
+  if (!body.classList.contains('booting')) return;
+  gateShown += (gateWant - gateShown) * .12;
+  const n = Math.round(gateShown); const el = $('#gateNum'); if (el && el.textContent !== String(n)) el.textContent = n;
+  requestAnimationFrame(count);
+})();
 const bootAt = performance.now();
 function start(){ body.classList.remove('booting'); body.classList.add('intro'); }
 
@@ -485,30 +499,71 @@ function buildShell(){
   plane(world, 6.47, 4.0, decal(texFrom(hc), { transparent: true }), 3.4, 3.9, -HALL_D + WT / 2 + .01);
 }
 
-/* each room's frame: origin on the floor at the middle of its far wall, +z into the room */
+/* ══ the pieces, in the ARTHIS flat-2D language ══════════════
+   Matte colour lit by a third of itself, three tones per family
+   (main · trim ×0.55 · facet ×1.18), flat-shaded facets, 8-sided
+   round parts, one-segment bevels, one accent per piece, and every
+   piece grounded on its own base. No outlines, no cel bands, no gloss. */
+const FAM = { wood: 0xB07A4A, cream: 0xEFE6D2, conc: 0x9E9A92, ink: 0x2B2B2E, red: 0xF23A1D, steel: 0x8D96A0,
+  pump: 0x3F95C4, grass: 0x7DB55A, sand: 0xE2C98F, water: 0x4FA3D1, stone: 0xA8A39A, leaf: 0x4F8A3E, lamp: 0xFFE7B0 };
+const F2M = new Map();
+function fm(fam, tone){
+  const key = fam + (tone || 'm');
+  if (F2M.has(key)) return F2M.get(key);
+  const c = new THREE.Color(FAM[fam]);
+  if (tone === 't') c.multiplyScalar(.55);
+  if (tone === 'f'){ c.multiplyScalar(1.18); c.r = Math.min(1, c.r + .04); c.g = Math.min(1, c.g + .04); c.b = Math.min(1, c.b + .04); }
+  const L = c.convertSRGBToLinear();
+  const m = LOW ? new THREE.MeshLambertMaterial({ color: L, emissive: L.clone().multiplyScalar(.32) })
+    : new THREE.MeshPhongMaterial({ color: L, emissive: L.clone().multiplyScalar(.32), flatShading: true, shininess: 0, specular: 0x000000 });
+  F2M.set(key, m); return m;
+}
+/* a chunky box: one-segment chamfer, straight-cut corners */
+function cgeo(w, h, d, r){
+  r = Math.min(r, w / 2 - .002, d / 2 - .002, h / 2 - .002);
+  const k = 'c' + [w, h, d, r].map(v => v.toFixed(3)).join(',');
+  if (GEO.has(k)) return GEO.get(k);
+  const W = w - 2 * r, Dd = d - 2 * r, s = new THREE.Shape();
+  s.moveTo(-W / 2, -Dd / 2); s.lineTo(W / 2, -Dd / 2); s.lineTo(W / 2, Dd / 2); s.lineTo(-W / 2, Dd / 2); s.lineTo(-W / 2, -Dd / 2);
+  const g = new THREE.ExtrudeGeometry(s, { depth: Math.max(.001, h - 2 * r), bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: 1, curveSegments: 1 });
+  g.rotateX(-Math.PI / 2); g.translate(0, r, 0); g.computeVertexNormals();
+  GEO.set(k, g); return g;
+}
+const K = (par, w, h, d, m, x, y, z, o) => mesh(par, cgeo(w, h, d, (o && o.r) || Math.min(.03, w * .12, h * .12, d * .12)), m, x, y, z, o);
+const O8 = (par, rt, rb, h, m, x, y, z, o) => CYL(par, rt, rb, h, (o && o.seg) || 8, m, x, y, z, o);
+
+/* every piece stands on its own base: a slab with a darker rim, like a diorama island */
+function base(g, w, d, fam, round){
+  fam = fam || 'cream';
+  if (round){ O8(g, w + .06, w + .1, .06, fm(fam, 't'), 0, 0, 0, { seg: 10 }); O8(g, w, w, .14, fm(fam), 0, .06, 0, { seg: 10 }); }
+  else { K(g, w + .1, .06, d + .1, fm(fam, 't'), 0, 0, 0); K(g, w, .14, d, fm(fam), 0, .06, 0); }
+  return .2;
+}
+
+/* the room's name, painted across its far wall and cropped by it */
+const WALLWORD = ['ARTHIS', 'BLENDER', 'AKVERSE', 'HEXABED', 'INFERENCE', 'THE BOARD', '154', 'ARCADE', 'LET’S BUILD'];
+function wallType(i){
+  const rm = ROOMS[i], word = WALLWORD[i];
+  const inner = i === 8 ? 13.5 : rm.w - WT - .04;
+  const col = rm.side === 'eng' ? HEX.red : rm.side === 'cre' ? HEX.black : HEX.red;
+  const W = 2048, [c0, g0] = makeCanvas(W, 10);
+  const px = fitText(g0, word, W * 1.04, 2000);
+  const H = Math.round(px * .78), [c, g] = makeCanvas(W, H);
+  g.fillStyle = col; posterFont(g, px); g.textBaseline = 'alphabetic'; g.fillText(word, -W * .02, H - px * .02);
+  const h = inner * H / W, f = frameOf(i);
+  plane(f, inner, h, decal(texFrom(c), { transparent: true }), 0, RH - .45 - h / 2, .012);
+}
 function frameOf(i){
   const rm = ROOMS[i], g = new THREE.Group(); g.position.copy(rm.f).addScaledVector(rm.n, WT / 2 + .005); g.rotation.y = rm.ry; world.add(g);
   return g;
 }
-/* the poster sits on the wall's golden section, the label under it */
-function dress(i, key, opts){
-  opts = opts || {};
-  const g = frameOf(i), dark = ROOMS[i].side === 'eng', x = opts.x != null ? opts.x : 3.5;
-  if (key){
-    const w = opts.w || 2.2, h = w * PHI;
-    B(g, w + .1, h + .1, .04, dark ? C.paper : C.black, x, 4.1 - h / 2 - .05, .02, { noShadow: true });
-    plane(g, w, h, decal(texFrom(posterCanvas(key, 500))), x, 4.1, .05);
-  }
-  return g;
-}
-/* an asset group stands `dist` out from the far wall, facing the door */
 function stand(i, dist){
   const rm = ROOMS[i], g = new THREE.Group();
   g.position.copy(rm.f).addScaledVector(rm.n, dist); g.rotation.y = rm.ry; world.add(g);
   g.userData.dist = dist; return g;
 }
 
-/* ── 0 · ARTHIS: a desk with two screens and a phone ── */
+/* ── 0 · ARTHIS: a work desk with the feed on screen ── */
 let feedTex = null, feedIdx = 0;
 function drawFeed(){
   const [c, g] = makeCanvas(640, 396);
@@ -527,200 +582,192 @@ function drawFeed(){
 }
 function chair(par, x, z, ry){
   const ch = new THREE.Group(); ch.position.set(x, 0, z); ch.rotation.y = ry || 0; par.add(ch);
-  R(ch, .56, .08, .54, C.black, 0, .48, 0, { r: .03 });
-  R(ch, .56, .62, .07, C.black, 0, .62, -.26, { r: .03 });
-  CYL(ch, .03, .03, .42, 10, C.steel, 0, .06, 0);
-  for (let k = 0; k < 5; k++){ const a = k * Math.PI * 2 / 5; B(ch, .05, .04, .32, C.steel, Math.sin(a) * .16, .04, Math.cos(a) * .16, { ry: a }); }
-  return ch;
+  K(ch, .62, .1, .6, fm('red'), 0, .5, 0); K(ch, .62, .05, .6, fm('red', 't'), 0, .45, 0);
+  K(ch, .62, .66, .1, fm('red'), 0, .62, -.27); K(ch, .66, .06, .14, fm('red', 't'), 0, 1.26, -.27);
+  O8(ch, .045, .045, .4, fm('ink'), 0, .05, 0);
+  for (let k = 0; k < 5; k++){ const a = k * Math.PI * 2 / 5; K(ch, .08, .06, .36, fm('ink', 't'), Math.sin(a) * .17, .02, Math.cos(a) * .17, { ry: a }); }
 }
 function buildArthis(i){
-  const g = stand(i, 1.6);
-  R(g, 3.6, .06, 1.4, C.paper, 0, .95, 0, { r: .025 });
-  [[-1.65, -.55], [1.65, -.55], [-1.65, .55], [1.65, .55]].forEach(p => CYL(g, .025, .025, .95, 10, C.black, p[0], 0, p[1]));
+  const g = stand(i, 1.9), b = base(g, 4.4, 2.6);
+  K(g, 3.4, .1, 1.3, fm('wood'), 0, b + .92, -.2); K(g, 3.44, .07, 1.34, fm('wood', 't'), 0, b + .86, -.2);
+  [[-1.55, -.75], [1.55, -.75], [-1.55, .35], [1.55, .35]].forEach(p => K(g, .12, .86, .12, fm('ink'), p[0], b, p[1]));
+  K(g, 3.1, .08, .08, fm('ink', 't'), 0, b + .3, -.75);
   drawFeed();
-  const m1 = new THREE.Group(); m1.position.set(-.55, 1.01, -.35); g.add(m1);
-  CYL(m1, .16, .18, .02, 24, C.black, 0, 0, 0); B(m1, .05, .38, .05, C.black, 0, .02, -.03);
-  R(m1, 1.64, .98, .05, C.black, 0, .36, 0, { r: .02 });
-  plane(m1, 1.58, .92, decal(feedTex), 0, .85, .03);
-  const m2 = new THREE.Group(); m2.position.set(.95, 1.01, -.35); m2.rotation.y = -.18; g.add(m2);
-  CYL(m2, .14, .16, .02, 24, C.black, 0, 0, 0); B(m2, .05, .3, .05, C.black, 0, .02, -.03);
-  R(m2, .7, 1.1, .05, C.black, 0, .28, 0, { r: .02 });
-  plane(m2, .64, 1.04, decal(texFrom(posterCanvas('wall', 300))), 0, .83, .03);
-  R(g, .9, .025, .28, C.black2, -.4, .98, .25, { r: .01 });
-  R(g, .07, .03, .11, C.black2, .3, .98, .3, { r: .015 });
-  LATHE(g, [[0, 0], [.07, 0], [.075, .14], [.068, .14], [.06, .01], [0, .01]], C.red, 1.3, .98, .3);
-  const ph = new THREE.Group(); ph.position.set(-1.45, 1.01, .05); ph.rotation.y = .4; g.add(ph);
-  R(ph, .2, .02, .14, C.black, 0, 0, 0, { r: .01 }); R(ph, .2, .38, .02, C.black, 0, .02, -.03, { r: .008, rx: -.2 });
-  plane(ph, .17, .275, decal(texFrom(gameTex('fruit'))), 0, .22, .01).rotation.x = -.2;
-  chair(g, .1, 1.05, Math.PI + .25);
-  dress(i, 'feed');
+  const top = b + 1.02;
+  const m1 = new THREE.Group(); m1.position.set(-.55, top, -.55); g.add(m1);
+  O8(m1, .2, .22, .04, fm('ink', 't'), 0, 0, 0); K(m1, .08, .36, .08, fm('ink'), 0, .04, -.02);
+  K(m1, 1.76, 1.06, .12, fm('ink'), 0, .36, 0); K(m1, 1.8, .06, .14, fm('ink', 't'), 0, .33, 0);
+  plane(m1, 1.6, .9, decal(feedTex), 0, .89, .065);
+  const m2 = new THREE.Group(); m2.position.set(1.0, top, -.55); m2.rotation.y = -.2; g.add(m2);
+  O8(m2, .17, .19, .04, fm('ink', 't'), 0, 0, 0); K(m2, .08, .3, .08, fm('ink'), 0, .04, -.02);
+  K(m2, .78, 1.16, .12, fm('ink'), 0, .3, 0);
+  plane(m2, .66, 1.04, decal(texFrom(posterCanvas('wall', 300))), 0, .88, .065);
+  K(g, .96, .04, .32, fm('cream'), -.4, top, .1); K(g, .96, .02, .32, fm('cream', 't'), -.4, top - .01, .1);
+  O8(g, .085, .08, .16, fm('cream'), 1.25, top, .15); O8(g, .09, .09, .02, fm('cream', 't'), 1.25, top + .16, .15);
+  const ph = new THREE.Group(); ph.position.set(-1.45, top, .05); ph.rotation.y = .4; g.add(ph);
+  K(ph, .22, .03, .16, fm('ink', 't'), 0, 0, 0); K(ph, .22, .4, .04, fm('ink'), 0, .03, -.04, { rx: -.2 });
+  plane(ph, .17, .275, decal(texFrom(gameTex('fruit'))), 0, .25, -.01).rotation.x = -.2;
+  chair(g, .2, .95, Math.PI + .3);
+  wallType(i);
   anim.push(t => { const k = Math.floor(t / 2.4); if (k !== feedIdx){ feedIdx = k; drawFeed(); } });
   return g;
 }
 
-/* ── 1 · Blender: an armature turning on a white plinth ── */
+/* ── 1 · Blender: a chunky mannequin turning on a turntable ── */
 function buildBlender(i){
-  const g = stand(i, 3.4);
-  LATHE(g, [[0, 0], [1.05, 0], [1.05, .02], [.98, .06], [.95, .62], [1.02, .66], [1.02, .7], [0, .7]], C.paper, 0, 0, 0);
-  const plate = CYL(g, 1.0, 1.0, .03, 64, C.black, 0, .7, 0);
-  const fig = new THREE.Group(); fig.position.y = .73; g.add(fig);
-  const W = mat(C.paper);
-  const J = { head: [0, 2.0, 0], neck: [0, 1.7, 0], chest: [0, 1.42, 0], hip: [0, .98, 0],
-    lh: [-.5, 1.1, .16], rh: [.52, 1.32, -.1], le: [-.33, 1.36, .08], re: [.35, 1.5, 0],
-    lk: [-.15, .52, .1], rk: [.17, .55, -.06], lf: [-.19, .05, .14], rf: [.21, .05, -.03] };
-  const V = k => V3(J[k][0], J[k][1], J[k][2]);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(.19, 32, 20), W); head.position.copy(V('head')); head.castShadow = true; fig.add(head);
-  const torso = new THREE.Mesh(new THREE.LatheGeometry([[0, -.32], [.14, -.3], [.19, -.05], [.22, .2], [.16, .32], [0, .34]].map(p => new THREE.Vector2(p[0], p[1])), 32), W);
-  torso.position.set(0, 1.25, 0); torso.castShadow = true; fig.add(torso);
-  const bones = [['neck', 'chest'], ['chest', 'hip'], ['chest', 're'], ['re', 'rh'], ['chest', 'le'], ['le', 'lh'], ['hip', 'lk'], ['lk', 'lf'], ['hip', 'rk'], ['rk', 'rf']];
-  bones.slice(2).forEach(b => { const A = V(b[0]), Bv = V(b[1]), len = A.distanceTo(Bv);
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(.05, .06, len, 16), W); m.position.copy(A).add(Bv).multiplyScalar(.5);
-    m.quaternion.setFromUnitVectors(V3(0, 1, 0), Bv.clone().sub(A).normalize()); m.castShadow = true; fig.add(m); });
-  const pts = []; bones.forEach(b => pts.push(V(b[0]).setZ(.27), V(b[1]).setZ(.27)));
-  fig.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: lin(C.red) })));
-  Object.keys(J).forEach(k => { const s = new THREE.Mesh(new THREE.SphereGeometry(.04, 12, 8), flat(C.red)); s.position.copy(V(k)).setZ(.27); fig.add(s); });
-  /* a softbox and a camera on a tripod, both aimed at the figure */
+  const g = stand(i, 3.4), b = base(g, 1.75, 0, 'cream', true);
+  O8(g, 1.1, 1.18, .5, fm('ink'), 0, b, 0, { seg: 10 }); O8(g, 1.2, 1.2, .06, fm('ink', 't'), 0, b + .5, 0, { seg: 10 });
+  const plate = O8(g, 1.04, 1.04, .06, fm('red'), 0, b + .56, 0, { seg: 10 });
+  const fig = new THREE.Group(); fig.position.y = b + .62; g.add(fig);
+  const W = fm('cream'), T = fm('cream', 't');
+  const limb = (x0, y0, x1, y1, r, z) => { const A = V3(x0, y0, z || 0), Bv = V3(x1, y1, z || 0), len = A.distanceTo(Bv);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.1, len, 8), W); m.position.copy(A).add(Bv).multiplyScalar(.5);
+    m.quaternion.setFromUnitVectors(V3(0, 1, 0), Bv.clone().sub(A).normalize()); m.castShadow = true; fig.add(m);
+    const j = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.3, r * 1.3, r * 1.2, 8), T); j.position.copy(Bv); j.quaternion.copy(m.quaternion); fig.add(j); };
+  K(fig, .5, .62, .3, W, 0, 1.0, 0); K(fig, .54, .08, .34, T, 0, 1.6, 0); K(fig, .44, .16, .28, T, 0, .92, 0);
+  O8(fig, .2, .22, .4, W, 0, 1.72, 0); O8(fig, .22, .22, .05, T, 0, 2.1, 0); O8(fig, .07, .08, .1, T, 0, 1.64, 0);
+  limb(-.3, 1.52, -.55, 1.2, .07); limb(-.55, 1.2, -.45, .92, .06); limb(.3, 1.52, .58, 1.34, .07); limb(.58, 1.34, .74, 1.6, .06);
+  limb(-.13, .92, -.18, .48, .09); limb(-.18, .48, -.2, .04, .08); limb(.13, .92, .2, .5, .09); limb(.2, .5, .22, .04, .08);
+  /* a softbox and a camera on a tripod, both on the same base */
   const sb = new THREE.Group(); sb.position.set(-2.2, 0, .6); sb.rotation.y = .9; g.add(sb);
-  CYL(sb, .025, .025, 2.3, 10, C.black, 0, 0, 0);
-  R(sb, 1.2, .9, .3, C.black, 0, 2.05, 0, { r: .03 });
-  plane(sb, 1.08, .78, flat(0xFFFFFF), 0, 2.5, .16);
-  const cam = new THREE.Group(); cam.position.set(2.0, 0, 1.5); cam.rotation.y = -2.4 + Math.PI; g.add(cam);
-  [0, 2.1, 4.2].forEach(r => B(cam, .03, 1.45, .03, C.black, Math.sin(r) * .28, 0, Math.cos(r) * .28, { rx: Math.cos(r) * -.19, rz: Math.sin(r) * .19 }));
-  R(cam, .56, .36, .34, C.black, 0, 1.42, 0, { r: .04 });
-  CYL(cam, .13, .15, .26, 32, C.black2, 0, 1.6, .3).rotation.x = Math.PI / 2;
-  const rec = new THREE.Mesh(new THREE.SphereGeometry(.035, 10, 8), flat(C.red)); rec.position.set(.2, 1.82, 0); cam.add(rec);
-  dress(i, 'rig');
+  O8(sb, .18, .22, .05, fm('ink', 't'), 0, 0, 0); O8(sb, .035, .035, 2.2, fm('ink'), 0, .05, 0);
+  K(sb, 1.2, .9, .34, fm('ink'), 0, 1.95, 0); K(sb, 1.26, .07, .38, fm('ink', 't'), 0, 2.82, 0);
+  plane(sb, 1.06, .76, flat(0xFFF4DE), 0, 2.4, .175);
+  const cam = new THREE.Group(); cam.position.set(2.0, 0, 1.4); cam.rotation.y = -2.4 + Math.PI; g.add(cam);
+  [0, 2.1, 4.2].forEach(r => K(cam, .05, 1.42, .05, fm('ink'), Math.sin(r) * .3, 0, Math.cos(r) * .3, { rx: Math.cos(r) * -.2, rz: Math.sin(r) * .2 }));
+  K(cam, .62, .4, .38, fm('ink'), 0, 1.38, 0); K(cam, .66, .06, .42, fm('ink', 't'), 0, 1.36, 0);
+  const lens = O8(cam, .15, .17, .3, fm('ink', 't'), 0, 1.58, .32); lens.rotation.x = Math.PI / 2;
+  const rec = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, .02, 8), flat(C.red)); rec.position.set(.22, 1.79, 0); cam.add(rec);
+  wallType(i);
   anim.push((t, dt) => { fig.rotation.y += dt * (REDUCED ? 0 : .5); plate.rotation.y = fig.rotation.y; rec.visible = Math.floor(t * 1.5) % 2 === 0; });
   return g;
 }
 
-/* ── 2 · AKverse: the channel on a screen, the house as an architect's model ── */
-function drawChannel(){
-  const [c, g] = makeCanvas(640, 396);
-  g.fillStyle = HEX.paper; g.fillRect(0, 0, 640, 396);
-  g.fillStyle = HEX.red; g.fillRect(0, 0, 640, 120);
-  g.fillStyle = HEX.black; posterFont(g, 128); g.fillText('AKVERSE', 22, 112);
-  if (IMG.dp) g.drawImage(IMG.dp, 530, 18, 90, 90);
-  g.fillStyle = HEX.black; g.font = '500 16px "Geist Mono", monospace'; g.fillText('@AKVERSEOFFICIAL · 21.9K', 24, 152);
-  [['KALESHI', 'FAMILY', HEX.black, HEX.paper], ['DIORAMA', 'BUILD', HEX.red, HEX.paper], ['DR', 'LODHA', HEX.paper, HEX.black]].forEach((t, k) => {
-    const x = 24 + k * 202, y = 172;
-    g.fillStyle = t[2]; g.fillRect(x, y, 188, 200); if (t[2] === HEX.paper){ g.strokeStyle = HEX.black; g.lineWidth = 2; g.strokeRect(x + 1, y + 1, 186, 198); }
-    g.fillStyle = t[3]; posterFont(g, 62); g.fillText(t[0], x + 12, y + 130); g.fillText(t[1], x + 12, y + 184);
-  });
-  return texFrom(c);
+/* ── 2 · AKverse: the Kaleshi Family set, mid-shoot ── */
+function handPump(par, x, z, ry){
+  const p = new THREE.Group(); p.position.set(x, 0, z); p.rotation.y = ry || 0; par.add(p);
+  K(p, .9, .08, .9, fm('conc', 't'), 0, 0, 0); K(p, .82, .06, .82, fm('conc'), 0, .08, 0);
+  K(p, .14, .03, .4, fm('conc', 't'), 0, .14, .5);
+  O8(p, .11, .14, .14, fm('pump', 't'), 0, .14, 0);
+  O8(p, .07, .08, .6, fm('pump'), 0, .28, 0);
+  O8(p, .13, .13, .34, fm('pump'), 0, .88, 0); O8(p, .14, .14, .04, fm('pump', 't'), 0, 1.06, 0);
+  K(p, .2, .14, .2, fm('pump', 'f'), 0, 1.22, 0);
+  const sp = K(p, .06, .06, .3, fm('pump'), 0, 1.0, .2); sp.rotation.x = .35;
+  const h = new THREE.Group(); h.position.set(0, 1.3, -.06); h.rotation.x = -.35; p.add(h);
+  K(h, .05, .05, .7, fm('pump'), 0, 0, -.35); K(h, .07, .07, .16, fm('pump', 't'), 0, -.01, -.66);
+  O8(p, .1, .08, .14, fm('steel'), 0, .14, .32); O8(p, .105, .105, .02, fm('steel', 't'), 0, .28, .32);
+}
+function charpai(par, x, z, ry){
+  const c = new THREE.Group(); c.position.set(x, 0, z); c.rotation.y = ry || 0; par.add(c);
+  [[-.5, -.28], [.5, -.28], [-.5, .28], [.5, .28]].forEach(q => { O8(c, .045, .04, .36, fm('wood'), q[0], 0, q[1]); O8(c, .055, .055, .04, fm('wood', 't'), q[0], .14, q[1]); });
+  K(c, 1.12, .06, .07, fm('wood', 't'), 0, .32, -.28); K(c, 1.12, .06, .07, fm('wood', 't'), 0, .32, .28);
+  K(c, .07, .06, .62, fm('wood', 't'), -.52, .32, 0); K(c, .07, .06, .62, fm('wood', 't'), .52, .32, 0);
+  for (let r = 0; r < 4; r++) for (let q = 0; q < 7; q++) K(c, .13, .02, .12, fm('cream', (r + q) % 2 ? 't' : 'm'), -.42 + q * .14, .33, -.2 + r * .135, { r: .004 });
 }
 function buildAkverse(i){
-  const g = stand(i, 1.2);
-  R(g, 3.2, .5, .55, C.black, 0, 0, -.1, { r: .03 });
-  [-1.2, 1.2].forEach(x => B(g, .5, .02, .5, C.black2, x, .25, .19, { noShadow: true }));
-  const tv = new THREE.Group(); tv.position.set(0, .5, -.2); g.add(tv);
-  B(tv, .4, .02, .2, C.black, 0, 0, 0); B(tv, .06, .24, .06, C.black, 0, .02, -.04);
-  R(tv, 2.6, 1.6, .05, C.black, 0, .25, 0, { r: .02 });
-  plane(tv, 2.52, 1.52, decal(drawChannel()), 0, 1.05, .03);
-  /* the house, white on a plinth */
-  const d = new THREE.Group(); d.position.set(2.3, 0, 1.6); d.rotation.y = -.45; g.add(d);
-  R(d, .95, .92, .95, C.paper, 0, 0, 0, { r: .02 });
-  B(d, 1.04, .04, 1.04, C.black, 0, .92, 0);
-  const H = new THREE.Group(); H.position.y = .96; d.add(H);
-  B(H, .7, .55, .56, C.paper, -.06, 0, -.06);
-  B(H, .72, .03, .58, C.paper2, -.06, .55, -.06);
-  [[-.06, .3], [.29, -.06]].forEach(() => {});
-  B(H, .72, .08, .02, C.paper, -.06, .58, .22); B(H, .02, .08, .58, C.paper, .3, .58, -.06);
-  CYL(H, .07, .07, .14, 20, C.black, -.25, .58, -.2);
-  B(H, .12, .24, .01, C.red, .05, 0, .225);
-  [[-.25, .3], [.2, .3]].forEach(p => B(H, .1, .1, .01, C.black, p[0], p[1], .225));
-  B(H, .01, .1, .1, C.black, .295, .3, -.05);
-  B(H, .26, .04, .16, C.paper2, .26, .06, .28);
-  [[.17, .22], [.35, .22], [.17, .34], [.35, .34]].forEach(p => B(H, .015, .06, .015, C.black, p[0], 0, p[1]));
-  /* a ring light */
-  const rl = new THREE.Group(); rl.position.set(-2.2, 0, .8); rl.rotation.y = .5; g.add(rl);
-  [0, 2.1, 4.2].forEach(r => B(rl, .025, .5, .025, C.black, Math.sin(r) * .18, 0, Math.cos(r) * .18, { rx: Math.cos(r) * -.3, rz: Math.sin(r) * .3 }));
-  CYL(rl, .02, .02, 1.6, 10, C.black, 0, .4, 0);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(.4, .045, 16, 64), flat(0xFFFFFF)); ring.position.y = 2.15; rl.add(ring);
-  /* a clapperboard on the console */
-  const cl = new THREE.Group(); cl.position.set(-1.1, .5, .02); cl.rotation.y = .3; g.add(cl);
-  B(cl, .42, .3, .03, C.black, 0, 0, 0);
-  for (let k = 0; k < 5; k++) B(cl, .084, .07, .034, k % 2 ? C.black : C.paper, -.168 + k * .084, .31, 0, { noShadow: true });
-  dress(i, 'house');
+  const g = stand(i, 2.4), b = base(g, 5.2, 3.4, 'sand');
+  /* the house: cream walls, a red door, a parapet and a black tank on the roof */
+  const H = new THREE.Group(); H.position.set(-1.0, b, -.8); g.add(H);
+  K(H, 2.2, 1.7, 1.5, fm('cream'), 0, 0, 0);
+  K(H, 2.3, .1, 1.6, fm('cream', 't'), 0, 1.7, 0);
+  K(H, 2.3, .22, .1, fm('cream'), 0, 1.8, .75); K(H, 2.3, .22, .1, fm('cream'), 0, 1.8, -.75); K(H, .1, .22, 1.6, fm('cream'), 1.1, 1.8, 0); K(H, .1, .22, 1.6, fm('cream'), -1.1, 1.8, 0);
+  O8(H, .26, .26, .36, fm('ink'), -.6, 1.8, -.35); O8(H, .28, .28, .05, fm('ink', 't'), -.6, 2.16, -.35);
+  K(H, .5, .9, .06, fm('red'), .35, 0, .76); K(H, .6, .06, .08, fm('red', 't'), .35, .9, .76);
+  [[-.55, .9], [.95, .9]].forEach(w => { K(H, .38, .38, .05, fm('ink'), w[0], w[1], .76); K(H, .44, .05, .07, fm('cream', 't'), w[0], w[1] - .03, .77); });
+  K(H, .7, .06, .3, fm('conc'), .35, 0, .92); K(H, .6, .06, .2, fm('conc', 't'), .35, .06, .88);
+  K(H, 2.3, .08, .08, fm('red'), 0, 1.45, .76);
+  charpai(g, 1.25, .55, -.3);
+  handPump(g, 1.85, -.95, .4);
+  /* the camera that shoots it */
+  const cam = new THREE.Group(); cam.position.set(-1.6, b, 1.3); cam.rotation.y = 2.7; g.add(cam);
+  [0, 2.1, 4.2].forEach(r => K(cam, .04, 1.1, .04, fm('ink'), Math.sin(r) * .24, 0, Math.cos(r) * .24, { rx: Math.cos(r) * -.2, rz: Math.sin(r) * .2 }));
+  K(cam, .44, .3, .3, fm('ink'), 0, 1.06, 0); O8(cam, .11, .13, .22, fm('ink', 't'), 0, 1.21, .24).rotation.x = Math.PI / 2;
+  wallType(i);
   return g;
 }
 
-/* ── 3 · HexaBed: a white terrain model that rebuilds itself ── */
+/* ── 3 · HexaBed: a hex island that builds itself, in his terrain tones ── */
 let hexRegen = null;
 function buildHexa(i){
-  const g = stand(i, 3.4);
-  LATHE(g, [[0, 0], [.6, 0], [.6, .03], [.09, .06], [.07, .9], [1.55, .9], [1.6, .93], [1.58, .97], [0, .97]], C.paper, 0, 0, 0);
-  const isle = new THREE.Group(); isle.position.y = .97; g.add(isle);
-  const Rr = .22, tiles = [], hexG = new THREE.CylinderGeometry(Rr * .95, Rr * .95, 1, 6);
+  const g = stand(i, 3.4), b = base(g, 1.95, 0, 'cream', true);
+  O8(g, .5, .6, .7, fm('ink'), 0, b, 0, { seg: 10 }); O8(g, 1.7, 1.7, .08, fm('ink', 't'), 0, b + .7, 0, { seg: 10 });
+  const isle = new THREE.Group(); isle.position.y = b + .78; g.add(isle);
+  const Rr = .2, tiles = [], hexG = new THREE.CylinderGeometry(Rr * .96, Rr * .96, 1, 6);
   for (let q = -3; q <= 3; q++) for (let r = -3; r <= 3; r++){
     if (Math.abs(q + r) > 3) continue;
     const x = (q + r / 2) * Rr * 1.732, z = r * Rr * 1.5, d = Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r));
-    const m = new THREE.Mesh(hexG, mat(C.paper)); m.position.set(x, 0, z); m.rotation.y = Math.PI / 6;
+    const m = new THREE.Mesh(hexG, fm('grass')); m.position.set(x, 0, z); m.rotation.y = Math.PI / 6;
     m.castShadow = m.receiveShadow = true; isle.add(m); tiles.push({ m, q, r, d, h: .2, t0: 0 });
   }
   const trees = [];
-  for (let k = 0; k < 8; k++){ const tr = new THREE.Mesh(new THREE.ConeGeometry(.075, .28, 16), mat(C.black)); tr.castShadow = true; isle.add(tr); trees.push(tr); }
+  for (let k = 0; k < 7; k++){
+    const tr = new THREE.Group();
+    O8(tr, .025, .03, .12, fm('wood', 't'), 0, 0, 0);
+    const c1 = new THREE.Mesh(new THREE.ConeGeometry(.11, .2, 8), fm('leaf')); c1.position.y = .2; tr.add(c1);
+    const c2 = new THREE.Mesh(new THREE.ConeGeometry(.08, .16, 8), fm('leaf', 'f')); c2.position.y = .32; tr.add(c2);
+    isle.add(tr); trees.push(tr);
+  }
   let seed = 1, born = -10;
   hexRegen = function(now){
     seed = (seed * 9301 + 49297) % 233280;
     const rnd = (a2, b2) => { const v = Math.sin(a2 * 12.9898 + b2 * 78.233 + seed * .013) * 43758.5453; return v - Math.floor(v); };
     tiles.forEach(t => {
       const n = Math.sin(t.q * 1.3 + seed) * .8 + Math.cos(t.r * 1.1 - seed * .7) * .7 + 1.2;
-      t.h = t.d === 3 ? .08 : .1 + Math.max(0, n) * .17;
-      t.road = (t.r === 0 && t.q > -3 && t.q < 3) || (t.q === 0 && t.r < 0 && t.r > -3);
-      t.m.material = mat(t.road ? C.red : t.h > .4 ? C.paper2 : C.paper);
-      if (t.road) t.h = Math.min(t.h, .16);
+      t.water = t.d > 0 && t.d < 3 && rnd(t.q, t.r) < .14;
+      t.road = !t.water && ((t.r === 0 && t.q > -3 && t.q < 3) || (t.q === 0 && t.r < 0 && t.r > -3));
+      t.h = t.water ? .06 : t.d === 3 ? .08 : .1 + Math.max(0, n) * .15;
+      if (t.road) t.h = Math.min(t.h, .14);
+      t.m.material = t.water ? fm('water') : t.road ? fm('ink', 'f') : t.d === 3 ? fm('sand') : t.h > .38 ? fm('stone') : fm('grass', (t.q + t.r) % 3 ? 'm' : 'f');
       t.t0 = t.d * .09 + rnd(t.r, t.q) * .12;
     });
-    const land = tiles.filter(t => !t.road && t.d < 3);
-    trees.forEach((tr, k) => { tr.userData.t = land[(k * 7 + seed) % land.length]; });
+    const land = tiles.filter(t => !t.road && !t.water && t.d < 3 && t.h <= .38);
+    trees.forEach((tr, k) => { tr.userData.t = land.length ? land[(k * 7 + seed) % land.length] : null; tr.visible = !!tr.userData.t; });
     born = now;
   };
   hexRegen(0);
-  dress(i, 'hex');
+  wallType(i);
   anim.push(t => {
     const age = t - born;
     tiles.forEach(tl => { const k = REDUCED ? 1 : ease(clamp((age - tl.t0) / .5, 0, 1)); const h = Math.max(.001, tl.h * k); tl.m.scale.y = h; tl.m.position.y = h / 2; });
-    trees.forEach(tr => { const tl = tr.userData.t; if (!tl) return; tr.position.set(tl.m.position.x, tl.m.scale.y + .14, tl.m.position.z); tr.scale.setScalar(REDUCED ? 1 : clamp((age - tl.t0 - .35) / .3, .001, 1)); });
+    trees.forEach(tr => { const tl = tr.userData.t; if (!tl) return; tr.position.set(tl.m.position.x, tl.m.scale.y, tl.m.position.z); tr.scale.setScalar(REDUCED ? 1 : clamp((age - tl.t0 - .35) / .3, .001, 1)); });
   });
   return g;
 }
 
-/* ── 4 · AI: racks, and a network thinking above them ── */
+/* ── 4 · Inference: racks on a plinth, a network thinking above ── */
 function buildAI(i){
-  const g = stand(i, .75);
-  const ON = [flat(0xffffff), flat(C.red)], OFF = flat(0x2A2A2C);
+  const g = stand(i, 1.1), b = base(g, 3.8, 1.4);
+  const ON = [flat(0xF3F1EC), flat(C.red)], OFF = fm('ink', 't');
   const leds = [];
-  [-1.05, 0, 1.05].forEach(x => {
-    R(g, .92, 2.5, .8, C.black, x, 0, 0, { r: .025 });
-    B(g, .78, 2.2, .01, C.black2, x, .15, .405, { noShadow: true });
-    for (let r = 0; r < 12; r++){ B(g, .7, .012, .012, 0x2E2E31, x, .22 + r * .18, .41, { noShadow: true }); }
-    for (let r = 0; r < 12; r++) for (let c = 0; c < 3; c++){
-      const m = new THREE.Mesh(boxGeo(.03, .03, .01), OFF); m.position.set(x - .28 + c * .06, .28 + r * .18, .415); g.add(m); leds.push(m);
+  [-1.1, 0, 1.1].forEach(x => {
+    K(g, .96, 2.4, .86, fm('ink'), x, b, 0); K(g, 1.0, .08, .9, fm('ink', 't'), x, b + 2.4, 0); K(g, 1.0, .1, .9, fm('ink', 't'), x, b, 0);
+    for (let r = 0; r < 10; r++){
+      K(g, .78, .04, .02, fm('ink', 't'), x, b + .26 + r * .21, .44, { r: .005 });
+      for (let c = 0; c < 3; c++){ const m = new THREE.Mesh(boxGeo(.05, .05, .02), OFF); m.position.set(x - .28 + c * .08, b + .36 + r * .21, .445); g.add(m); leds.push(m); }
     }
   });
-  const net = new THREE.Group(); net.position.set(0, 3.7, .3); g.add(net);
+  const net = new THREE.Group(); net.position.set(0, b + 3.4, .4); g.add(net);
   const LAY = [3, 4, 3, 1], nodes = [];
   LAY.forEach((n, li) => { for (let k = 0; k < n; k++){
-    const m = new THREE.Mesh(new THREE.SphereGeometry(.09, 24, 16), li === 3 ? flat(C.red) : mat(C.paper));
+    const m = new THREE.Mesh(new THREE.SphereGeometry(.1, 8, 6), li === 3 ? fm('red') : fm('cream'));
     m.position.set((li - 1.5) * .62, (k - (n - 1) / 2) * .4, 0); net.add(m); nodes.push({ m, li });
   } });
   const pts = [], edges = [];
   nodes.forEach(p => nodes.forEach(q => { if (q.li === p.li + 1){ pts.push(p.m.position, q.m.position); edges.push([p.m.position, q.m.position, p.li]); } }));
-  net.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: lin(0x5A5957) })));
-  const pulses = edges.map(() => { const m = new THREE.Mesh(new THREE.SphereGeometry(.028, 8, 6), flat(C.red)); net.add(m); return m; });
-  dress(i, 'net');
+  net.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: lin(0x6E6B66) })));
+  const pulses = edges.map(() => { const m = new THREE.Mesh(new THREE.SphereGeometry(.03, 6, 4), flat(C.red)); net.add(m); return m; });
+  wallType(i);
   let last = 0;
   anim.push(t => {
     if (t - last > .16){ last = t; leds.forEach((m, k) => { const v = Math.sin(k * 12.9898 + Math.floor(t * 6) * 78.233) * 43758.5453; const r = v - Math.floor(v); m.material = r > .85 ? ON[1] : r > .45 ? ON[0] : OFF; }); }
     const u = (t * .8) % 1, layer = Math.floor((t * .8) % 3);
     edges.forEach((e, k) => { const p = pulses[k]; p.visible = !REDUCED && e[2] === layer; if (p.visible) p.position.lerpVectors(e[0], e[1], u); });
-    net.position.y = 3.7 + Math.sin(t * 1.3) * .05;
+    net.position.y = b + 3.4 + Math.sin(t * 1.3) * .05;
   });
   return g;
 }
 
-/* ── 5 · The Board: a white pinboard and red thread ── */
+/* ── 5 · The Board: a wood-framed pinboard, a stool, a crate of cards ── */
 function cardCanvas(title, sub, dark){
   const [c, g] = makeCanvas(486, 300);
   g.fillStyle = dark ? HEX.black : HEX.paper; g.fillRect(0, 0, 486, 300);
@@ -732,62 +779,61 @@ function cardCanvas(title, sub, dark){
 }
 function buildBoard(i){
   const w = frameOf(i);
-  R(w, 6.2, 3.83, .06, C.paper, -.6, 1.6, .03, { r: .02 });
+  K(w, 6.4, 3.4, .1, fm('wood', 't'), -.4, .9, .05); K(w, 6.1, 3.1, .06, fm('cream'), -.4, 1.05, .12);
   const items = [
-    { tex: texFrom(posterCanvas('cv', 300)), w: .9, h: .9 * PHI, x: -2.9, y: 4.0 },
-    { tex: texFrom(posterCanvas('tools', 300)), w: .9, h: .9 * PHI, x: -1.8, y: 4.05 },
-    { tex: texFrom(gameTex('fruit')), w: .6, h: .6 * PHI, x: -.7, y: 4.25 },
-    { tex: texFrom(gameTex('doodle')), w: .6, h: .6 * PHI, x: 0, y: 4.2 },
-    { tex: cardCanvas('Hustiq', 'Edit by chatting', true), w: 1.1, h: .68, x: 1.3, y: 4.5 },
-    { tex: cardCanvas('Travel Atlas', '30+ places'), w: 1.1, h: .68, x: -2.7, y: 2.4 },
-    { tex: cardCanvas('Avatar Maker', 'Presets + parts', true), w: 1.1, h: .68, x: -1.4, y: 2.35 },
-    { tex: cardCanvas('Daily Rest', 'Pomodoro'), w: 1.1, h: .68, x: -.1, y: 2.4 },
-    { tex: cardCanvas('Asset viewer', 'Three.js', true), w: 1.1, h: .68, x: 1.25, y: 2.95 }
+    { tex: texFrom(posterCanvas('cv', 300)), w: .8, h: .8 * PHI, x: -2.9, y: 3.2 },
+    { tex: texFrom(posterCanvas('tools', 300)), w: .8, h: .8 * PHI, x: -1.95, y: 3.25 },
+    { tex: texFrom(gameTex('fruit')), w: .56, h: .56 * PHI, x: -1.0, y: 3.35 },
+    { tex: texFrom(gameTex('doodle')), w: .56, h: .56 * PHI, x: -.35, y: 3.3 },
+    { tex: cardCanvas('Hustiq', 'Edit by chatting', true), w: 1.05, h: .65, x: .95, y: 3.5 },
+    { tex: cardCanvas('Travel Atlas', '30+ places'), w: 1.05, h: .65, x: -2.6, y: 1.75 },
+    { tex: cardCanvas('Avatar Maker', 'Presets + parts', true), w: 1.05, h: .65, x: -1.35, y: 1.7 },
+    { tex: cardCanvas('Daily Rest', 'Pomodoro'), w: 1.05, h: .65, x: -.1, y: 1.75 },
+    { tex: cardCanvas('Asset viewer', 'Three.js', true), w: 1.05, h: .65, x: 1.2, y: 2.2 }
   ];
   const pins = [];
   items.forEach((it, k) => {
-    plane(w, it.w, it.h, decal(it.tex || null, { color: it.tex ? 0xffffff : lin(C.paper2) }), it.x, it.y, .1 + k * .003);
-    const pin = new THREE.Mesh(new THREE.SphereGeometry(.035, 12, 8), flat(C.red)); pin.position.set(it.x, it.y + it.h / 2 - .05, .14); w.add(pin);
-    pins.push(V3(it.x, it.y + it.h / 2 - .05, .15));
+    plane(w, it.w, it.h, decal(it.tex), it.x, it.y, .2 + k * .003);
+    O8(w, .035, .035, .04, fm('red'), it.x, it.y + it.h / 2 - .06, .2).rotation.x = Math.PI / 2;
+    pins.push(V3(it.x, it.y + it.h / 2 - .06, .24));
   });
   const order = [0, 5, 6, 1, 2, 7, 3, 8, 4, 0];
   const sp = []; for (let k = 0; k < order.length - 1; k++) sp.push(pins[order[k]], pins[order[k + 1]]);
   w.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(sp), new THREE.LineBasicMaterial({ color: lin(C.red) })));
-  const g = stand(i, 1.9);
-  const st = new THREE.Group(); st.position.set(-1.6, 0, 0); g.add(st);
-  LATHE(st, [[0, .7], [.28, .7], [.3, .74], [0, .76]], C.black, 0, 0, 0);
-  [0, 2.1, 4.2].forEach(r => B(st, .035, .72, .035, C.black, Math.sin(r) * .18, 0, Math.cos(r) * .18, { rx: Math.cos(r) * -.08, rz: Math.sin(r) * .08 }));
-  R(g, 1.0, .72, .6, C.black, .3, 0, -.4, { r: .03 });
-  R(g, .3, .2, .22, C.paper, .2, .72, -.4, { r: .02 });
-  dress(i, null, { lx: 3.9, ly: 1.45 });
+  const g = stand(i, 1.8), b = base(g, 3.0, 1.4);
+  const st = new THREE.Group(); st.position.set(-.8, b, 0); g.add(st);
+  O8(st, .3, .3, .07, fm('wood'), 0, .62, 0); O8(st, .31, .31, .03, fm('wood', 't'), 0, .6, 0);
+  [0, 2.1, 4.2].forEach(r => K(st, .06, .62, .06, fm('wood', 't'), Math.sin(r) * .2, 0, Math.cos(r) * .2, { rx: Math.cos(r) * -.08, rz: Math.sin(r) * .08 }));
+  K(g, .9, .5, .6, fm('wood'), .7, b, 0); K(g, .94, .06, .64, fm('wood', 't'), .7, b + .5, 0);
+  [[.5, .1], [.75, -.05], [.95, .12]].forEach((q, k) => K(g, .3, .02, .22, fm(k === 1 ? 'red' : 'cream'), q[0], b + .56 + k * .02, q[1], { ry: k * .3, r: .004 }));
+  wallType(i);
   return g;
 }
 
-/* ── 6 · Numbers: a black shelf on the white wall ── */
-function statCanvas(n, l, v){
-  const W = 300, H = Math.round(300 * PHI), [c, g] = makeCanvas(W, H); const s = VARIANT[v];
-  g.fillStyle = s.bg; g.fillRect(0, 0, W, H);
-  if (v === 'white'){ g.strokeStyle = HEX.black; g.lineWidth = 3; g.strokeRect(1.5, 1.5, W - 3, H - 3); }
-  g.fillStyle = s.fg; g.font = '500 19px "Geist Mono", monospace'; g.fillText(l.toUpperCase(), 18, 38);
-  g.fillRect(18, 52, W - 36, 2);
-  fitText(g, n, W - 28, 300); g.fillText(n, 13, H - 18);
+/* ── 6 · 154: the numbers as a chunky bar chart ── */
+function plaqueCanvas(n, l, dark){
+  const [c, g] = makeCanvas(300, 200);
+  g.fillStyle = dark ? HEX.black : HEX.paper; g.fillRect(0, 0, 300, 200);
+  g.fillStyle = dark ? HEX.paper : HEX.black; fitText(g, n, 270, 130); g.fillText(n, 14, 140);
+  g.font = '500 20px "Geist Mono", monospace'; g.fillStyle = dark ? '#B7B4AD' : '#5C5B58'; g.fillText(l.toUpperCase(), 16, 182);
   return texFrom(c);
 }
 function buildNumbers(i){
-  const g = stand(i, .26);
-  [0, 1.36, 2.72].forEach(y => R(g, 3.6, .05, .5, C.black, 0, y + .1, 0, { r: .01 }));
-  R(g, .05, 2.9, .5, C.black, -1.8, 0, 0, { r: .01 }); R(g, .05, 2.9, .5, C.black, 1.8, 0, 0, { r: .01 });
-  [['154', 'Builds', 'red'], ['141K', 'Lines', 'white'], ['43', 'Three.js', 'black'],
-   ['AIR 8956', 'JEE Adv.', 'black'], ['98.9', 'JEE Main', 'red'], ['28', 'Add-ons', 'white']].forEach((s, k) => {
-    const x = -1.15 + (k % 3) * 1.15, y = k < 3 ? 1.51 : .15;
-    const p = plane(g, .66, .66 * PHI, decal(statCanvas(s[0], s[1], s[2])), x, y + .54, .02); p.rotation.x = -.05;
+  const g = stand(i, 2.4), b = base(g, 5.0, 2.0);
+  const BARS = [['154', 'Builds', 154, 'red'], ['43', 'Three.js', 43, 'ink'], ['28', 'Add-ons', 28, 'conc'], ['15', 'P2P games', 15, 'cream']];
+  BARS.forEach((bar, k) => {
+    const x = -1.65 + k * 1.1, h = .5 + Math.sqrt(bar[2] / 154) * 2.6;
+    K(g, .8, h, .8, fm(bar[3]), x, b, 0); K(g, .86, .08, .86, fm(bar[3], 't'), x, b + h, 0);
+    plane(g, .7, .467, decal(plaqueCanvas(bar[0], bar[1], bar[3] === 'ink' || bar[3] === 'red')), x, b + .42, .41);
   });
-  B(g, .5, .5, .5, C.red, -2.6, 0, .6, { ry: .3 }); B(g, .31, .31, .31, C.black, -2.2, 0, .9, { ry: -.2 });
-  dress(i, 'numbers');
+  const extra = [['AIR 8956', 'JEE Adv.'], ['98.9', 'JEE Main %ile']];
+  extra.forEach((e, k) => { const p = new THREE.Group(); p.position.set(2.0, b, .2 - k * .5); p.rotation.y = -.4; g.add(p);
+    K(p, .5, .5 + k * .2, .4, fm('cream'), 0, 0, 0); plane(p, .46, .3, decal(plaqueCanvas(e[0], e[1], false)), 0, .3 + k * .1, .21); });
+  wallType(i);
   return g;
 }
 
-/* ── 7 · The arcade: two cabinets with a proper silhouette ── */
+/* ── 7 · The arcade: two red cabinets and a station bench ── */
 let arcTex = null, arcCtx = null;
 function drawArcade(t){
   if (!arcCtx){ const [c, g] = makeCanvas(256, 210); arcCtx = g; arcTex = texFrom(c); }
@@ -801,55 +847,69 @@ function drawArcade(t){
 }
 function cabinet(par, x, ry, label){
   const cab = new THREE.Group(); cab.position.set(x, 0, 0); cab.rotation.y = ry; par.add(cab);
-  /* the side profile, extruded across the width */
   const P = [[-.5, 0], [.5, 0], [.5, 1.0], [.64, 1.08], [.64, 1.18], [.26, 1.32], [.12, 2.16], [.4, 2.26], [.4, 2.72], [-.5, 2.72]];
   const s = new THREE.Shape(); s.moveTo(P[0][0], P[0][1]); P.slice(1).forEach(p => s.lineTo(p[0], p[1]));
-  const geo = new THREE.ExtrudeGeometry(s, { depth: 1.2, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: 2 });
-  geo.translate(0, 0, -.6); geo.rotateY(-Math.PI / 2); geo.computeVertexNormals();
-  mesh(cab, geo, C.black, 0, 0, 0);
-  /* the screen on the slanted face */
-  const a = P[5], b = P[6], len = Math.hypot(b[0] - a[0], b[1] - a[1]), nz = b[1] - a[1], ny = a[0] - b[0];
-  const nl = Math.hypot(nz, ny);
-  const scr = plane(cab, 1.02, len * .92, decal(arcTex), 0, (a[1] + b[1]) / 2 + ny / nl * .03, (a[0] + b[0]) / 2 + nz / nl * .03);
+  const side = new THREE.ExtrudeGeometry(s, { depth: .12, bevelEnabled: false });
+  side.rotateY(-Math.PI / 2);
+  [-.6, .72].forEach(sx => mesh(cab, side, fm('red'), sx, 0, 0));
+  const core = new THREE.ExtrudeGeometry(s, { depth: 1.18, bevelEnabled: false }); core.translate(0, 0, -.59); core.rotateY(-Math.PI / 2);
+  mesh(cab, core, fm('ink'), -.04, -.001, 0).scale.set(1, .998, .97);
+  const a = P[5], bb = P[6], len = Math.hypot(bb[0] - a[0], bb[1] - a[1]), nz = bb[1] - a[1], ny = a[0] - bb[0], nl = Math.hypot(nz, ny);
+  const scr = plane(cab, 1.0, len * .9, decal(arcTex), 0, (a[1] + bb[1]) / 2 + ny / nl * .03, (a[0] + bb[0]) / 2 + nz / nl * .03 - .02);
   scr.rotation.x = -Math.atan2(ny, nz);
-  const [mc, mg] = makeCanvas(512, 190); mg.fillStyle = HEX.red; mg.fillRect(0, 0, 512, 190); mg.fillStyle = HEX.paper; const mp = fitText(mg, label, 470, 170); mg.fillText(label, 21, 95 + mp * .38);
-  plane(cab, 1.1, .4, decal(texFrom(mc)), 0, 2.49, .425);
-  const knob = new THREE.Mesh(new THREE.SphereGeometry(.06, 16, 12), flat(C.red)); knob.position.set(-.28, 1.33, .45); cab.add(knob);
-  CYL(cab, .015, .015, .12, 8, C.paper, -.28, 1.2, .45);
-  [.08, .26, .44].forEach((bx, k) => CYL(cab, .045, .045, .03, 20, k === 0 ? C.red : C.paper, bx, 1.21, .48));
+  const [mc, mg] = makeCanvas(512, 190); mg.fillStyle = HEX.paper; mg.fillRect(0, 0, 512, 190); mg.fillStyle = HEX.red; const mp = fitText(mg, label, 470, 170); mg.fillText(label, 21, 95 + mp * .38);
+  plane(cab, 1.1, .4, decal(texFrom(mc)), 0, 2.49, .41);
+  O8(cab, .02, .02, .14, fm('ink', 't'), -.28, 1.2, .45); const knob = O8(cab, .07, .07, .08, fm('red'), -.28, 1.33, .45);
+  [.08, .26, .44].forEach((bx, k) => O8(cab, .05, .05, .04, fm(k === 0 ? 'red' : 'cream'), bx, 1.2, .48));
   return cab;
 }
+function bench(par, x, z, ry){
+  const bn = new THREE.Group(); bn.position.set(x, 0, z); bn.rotation.y = ry || 0; par.add(bn);
+  [-.75, .75].forEach(sx => { K(bn, .08, .44, .5, fm('ink'), sx, 0, 0); K(bn, .08, .5, .08, fm('ink'), sx, .44, -.22); K(bn, .1, .04, .52, fm('ink', 't'), sx, .42, 0); });
+  for (let k = 0; k < 4; k++) K(bn, 1.7, .05, .11, fm('wood', k % 2 ? 'f' : 'm'), 0, .46, -.18 + k * .125);
+  for (let k = 0; k < 3; k++) K(bn, 1.7, .1, .04, fm('wood', k % 2 ? 'f' : 'm'), 0, .58 + k * .13, -.24);
+}
 function buildArcade(i){
-  const g = stand(i, 1.4);
+  const g = stand(i, 1.9), b = base(g, 3.4, 1.6);
   drawArcade(0);
-  cabinet(g, -.85, .14, 'ARCADE'); cabinet(g, .85, -.14, 'PLAY');
-  dress(i, 'arcade');
+  const cabs = new THREE.Group(); cabs.position.y = b; g.add(cabs);
+  cabinet(cabs, -.8, .14, 'ARCADE'); cabinet(cabs, .8, -.14, 'PLAY');
+  bench(g, 0, 2.3, Math.PI);
+  wallType(i);
   anim.push(t => drawArcade(t));
   return g;
 }
 
-/* ── 8 · The exit: a black door under the biggest words in the building ── */
+/* ── 8 · The exit: a door, a street lamp, a bench and a postbox ── */
+function streetLamp(par, x, z, ry){
+  const l = new THREE.Group(); l.position.set(x, 0, z); l.rotation.y = ry || 0; par.add(l);
+  K(l, .5, .2, .5, fm('conc'), 0, 0, 0); K(l, .56, .05, .56, fm('conc', 't'), 0, .18, 0);
+  O8(l, .06, .1, 3.4, fm('ink'), 0, .2, 0);
+  [.6, 1.6, 2.6].forEach(y => O8(l, .1, .1, .05, fm('ink', 't'), 0, .2 + y, 0));
+  K(l, .07, .07, .9, fm('ink'), 0, 3.5, .38, { rx: -.12 });
+  K(l, .05, .05, .5, fm('ink', 't'), 0, 3.25, .2, { rx: .7 });
+  K(l, .3, .16, .4, fm('ink'), 0, 3.42, .84); plane(l, .26, .32, flat(FAM.lamp), 0, 3.42, .84).rotation.x = Math.PI / 2;
+}
 function buildContact(i){
   const w = frameOf(i);
-  B(w, 2.3, 3.9, .1, C.black, 0, 0, .05);
-  R(w, .05, .34, .07, C.paper, .85, 1.72, .14, { r: .02 });
-  const [c, gg] = makeCanvas(1618, 500);
-  gg.fillStyle = HEX.red; const px = fitText(gg, 'LET’S BUILD', 1618, 500); gg.fillText('LET’S BUILD', 0, 250 + px * .38);
-  plane(w, 8.09, 2.5, decal(texFrom(c), { transparent: true }), 0, 5.6, .02);
-  const g = stand(i, 1.6);
-  const mb = new THREE.Group(); mb.position.set(-2.6, 0, 0); g.add(mb);
-  CYL(mb, .03, .03, 1.1, 10, C.black, 0, 0, 0);
-  R(mb, .44, .4, .7, C.red, 0, 1.1, 0, { r: .1 });
-  R(mb, .28, .02, .2, C.paper, 0, 1.5, .08, { r: .01, rx: .3 });
+  K(w, 2.5, 4.1, .14, fm('cream', 't'), 0, 0, .07); K(w, 2.2, 3.9, .1, fm('wood'), 0, 0, .14);
+  [[-.5, .5], [.5, .5], [-.5, 2.2], [.5, 2.2]].forEach(q => K(w, .8, 1.4, .04, fm('wood', 't'), q[0], q[1], .22));
+  O8(w, .05, .05, .06, fm('red'), .82, 1.8, .26).rotation.x = Math.PI / 2;
+  const g = stand(i, 2.2), b = base(g, 7.0, 1.8);
+  streetLamp(g, -1.6, -.3, 0);
+  bench(g, -3.0, .1, 0);
+  const mb = new THREE.Group(); mb.position.set(2.2, b, 0); g.add(mb);
+  O8(mb, .07, .07, .9, fm('ink'), 0, 0, 0);
+  K(mb, .46, .5, .62, fm('red'), 0, .9, 0); K(mb, .5, .06, .66, fm('red', 't'), 0, 1.4, 0); K(mb, .3, .03, .04, fm('ink'), 0, 1.25, .31);
   const pl = new THREE.Group(); world.add(pl);
   const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, .5, -.3, 0, -.3, 0, .05, -.15, 0, 0, .5, 0, .05, -.15, .3, 0, -.3], 3));
   pg.computeVertexNormals();
-  pl.add(new THREE.Mesh(pg, mat(C.paper, { side: THREE.DoubleSide })));
+  pl.add(new THREE.Mesh(pg, new THREE.MeshPhongMaterial({ color: lin(C.paper), emissive: lin(C.paper).multiplyScalar(.32), side: THREE.DoubleSide, flatShading: true, shininess: 0, specular: 0x000000 })));
   const rm = ROOMS[i];
-  dress(i, null, { label: false });
+  wallType(i);
   anim.push(t => {
     const u = REDUCED ? 0 : t * .5;
-    pl.position.set(rm.cx + Math.sin(u) * 3, 3.5 + Math.sin(u * 2) * .3, rm.cz + Math.cos(u) * 1.6);
+    pl.position.set(rm.cx + Math.sin(u) * 3, 3.2 + Math.sin(u * 2) * .3, rm.cz + Math.cos(u) * 1.6);
     pl.rotation.set(0, u + Math.PI / 2, Math.sin(u * 2) * .3);
   });
   return g;
@@ -869,7 +929,7 @@ function buildHits(){
 }
 
 function buildLights(){
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xCFCBC4, LOW ? .78 : .7));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xCFCBC4, .5));
   keyLight = new THREE.DirectionalLight(0xFFFFFF, .55);
   keyLight.position.set(5, 14, 7); scene.add(keyLight.target);
   if (!LOW){
@@ -964,7 +1024,7 @@ function stationPose(i){
   const rm = ROOMS[i], g = PIECE[i], d = rm.door;
   const pos = V3(d.x, 3.0, d.z).addScaledVector(rm.nin, 2.0);
   const look = rm.f.clone().addScaledVector(rm.n, g.userData.dist * .6);
-  look.y = i === 8 ? 3.6 : i === 5 ? 3.1 : 2.0;
+  look.y = i === 8 ? 3.2 : 2.7;
   if (i === 8) pos.x = rm.door.x + 2.5;
   return { pos, look, u: GOLD_U, v: 0 };
 }
@@ -1052,7 +1112,7 @@ function direct(p, t){
       if (c.py === null || Math.abs(py - c.py) > .05){ c.py = py; c.big.style.transform = 'translate3d(0,' + py.toFixed(2) + '%,0)'; }
     });
   });
-  const so = VW < 760 ? 1 - smooth(10, 45, p) : 1 - smooth(ACT1 * .82, ACT1 + 10, p);
+  const so = VW < 760 ? 1 - smooth(10, 45, p) : 1 - smooth(ACT1 * .1, ACT1 * .2, p);
   seamCard.style.opacity = so.toFixed(3); seamCard.style.visibility = so < .02 ? 'hidden' : 'visible';
   const mc = smooth(ACT1 + MERGE * .4, ACT1 + MERGE * .5, p) * (1 - smooth(ACT1 + MERGE * .64, ACT1 + MERGE * .72, p));
   mergeCap.style.opacity = mc.toFixed(3);
@@ -1139,8 +1199,17 @@ function replayObj(){
   obj.classList.remove('enter'); void obj.offsetWidth; obj.classList.add('enter');
 }
 obj.addEventListener('click', e => { if (e.target.closest('[data-next]')) travel(posOf(0)); });
+const railN = $('#railN'), railT = $('#railT');
+function setRail(n, t){
+  if (railN.textContent === n && railT.textContent === t) return;
+  railN.textContent = n; railT.textContent = t;
+  railN.classList.remove('roll'); void railN.offsetWidth; railN.classList.add('roll');
+}
 function arrive(here){
   $('#where').textContent = where();
+  if (here >= 0) setRail(String(here + 1).padStart(2, '0'), STATIONS[here].title);
+  else if (here === -1) setRail('00', 'The hall');
+  else if (here === -2) setRail('00', pNow < ACT1 ? 'Two halves' : 'Nine rooms');
   if (here === -2 || here === -3){ obj.classList.remove('show'); markHere(-9); return; }
   const s = here < 0 ? HALL : STATIONS[here];
   fillObj(s, here);
@@ -1157,11 +1226,8 @@ function discover(i){
   const s = STATIONS[i];
   found.add(s.id); store.set('aak-found', Array.from(found).join(','));
   renderPips();
-  if (found.size === N) toast('9/9', '<b>Every room found.</b> Thanks for walking through.');
 }
 function renderPips(){
-  $('#pips').innerHTML = STATIONS.map(s => '<i class="' + (found.has(s.id) ? 'on' : '') + '"></i>').join('');
-  $('#foundN').textContent = found.size + '/' + N;
   $$('#ticks button[data-i]').forEach(b => b.classList.toggle('found', found.has(STATIONS[+b.dataset.i].id)));
 }
 function markHere(i){ $$('#ticks button[data-i]').forEach(b => b.classList.toggle('here', +b.dataset.i === i)); }
@@ -1171,7 +1237,7 @@ function buildTrack(){
   STATIONS.forEach((s, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.i = i;
     b.style.left = (100 * posOf(i) / TOTAL - (i === N - 1 ? 1.2 : 0)) + '%';
-    b.setAttribute('aria-label', 'Go to ' + s.title); b.title = s.title;
+    b.setAttribute('aria-label', 'Go to ' + s.title); b.dataset.t = s.title;
     b.addEventListener('click', () => travel(posOf(i)));
     box.appendChild(b);
   });
@@ -1183,8 +1249,6 @@ function stepTo(dir){
   const next = dir > 0 ? KEYS.find(k => k > p + 2) : KEYS.slice().reverse().find(k => k < p - 2);
   if (next !== undefined) travel(next);
 }
-$('#prevBtn').addEventListener('click', () => stepTo(-1));
-$('#nextBtn').addEventListener('click', () => stepTo(1));
 $('.player').addEventListener('click', e => { e.preventDefault(); travel(0); });
 
 function openMenu(){

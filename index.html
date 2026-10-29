@@ -35,7 +35,7 @@
     <p class="gate-msg" id="gateMsg">Loading 0%</p>
     <button class="gate-simple" type="button" data-simple>Simple page</button>
   </div>
-  <p class="gate-word poster" aria-hidden="true"><span>Engineer</span><span>Creator</span></p>
+  <p class="gate-num poster" aria-hidden="true"><span id="gateNum">0</span><i>%</i></p>
   <button id="gateGo" type="button" hidden disabled>Enter</button>
 </div>
 
@@ -149,9 +149,7 @@
       <span class="player-t"><b>Aayush Kumar</b><span id="where">Two halves</span></span>
     </a>
     <div class="hud-right">
-      <button class="pill found" id="foundBtn" type="button" aria-label="Stations found, open the map">
-        <span class="pips" id="pips" aria-hidden="true"></span><span id="foundN">0/9</span><span class="pill-l">found</span>
-      </button>
+      <button class="pill" id="foundBtn" type="button">Index</button>
           </div>
   </div>
 
@@ -177,10 +175,9 @@
 
   <div class="tip" id="tip" hidden></div>
 
-  <nav class="track" id="track" aria-label="Travel between stations">
-    <button class="tk-btn" id="prevBtn" type="button" aria-label="Previous station"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg></button>
-    <div class="tk-bar"><div class="tk-fill" id="tkFill"></div><div class="tk-ticks" id="ticks"></div></div>
-    <button class="tk-btn" id="nextBtn" type="button" aria-label="Next station"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button>
+  <nav class="rail" id="track" aria-label="Where you are">
+    <div class="rail-line"><div class="tk-fill" id="tkFill"></div><div class="tk-ticks" id="ticks"></div></div>
+    <div class="rail-at"><b class="rail-n"><i id="railN">00</i></b><span class="rail-of">/09</span><em id="railT">Two halves</em></div>
   </nav>
 
     <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -394,6 +391,7 @@
 
 <div class="wipe" id="wipe" aria-hidden="true"><i></i></div>
 <div id="cursor" aria-hidden="true"></div>
+<div id="grain" aria-hidden="true"></div>
 <div id="scroller" aria-hidden="true"></div>
 
 <script src="vendor/three.min.js" defer></script>

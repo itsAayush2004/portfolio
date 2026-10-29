@@ -530,3 +530,55 @@ body.flat .lane.eng::after{background:linear-gradient(transparent,rgba(12,12,13,
 body.flat .lane.cre::after{background:linear-gradient(transparent,rgba(242,58,29,.5))}
 @media (prefers-reduced-motion:reduce){ body.flat .lane::before,body.flat .lane::after{display:none} }
 body.low.flat .lane::before,body.low.flat .lane::after{-webkit-backdrop-filter:none;backdrop-filter:none}
+
+/* ══ LESS AT ONCE ═══════════════════════════════════════════
+   One project per screen in each lane; the space between them is
+   part of the design. */
+body.three .lane .lc,body.three .lane.wide .lc{grid-template-columns:minmax(0,1fr);grid-template-areas:none;padding:0 0 46vh;border-top:0;gap:var(--s3)}
+body.three .lane .lc-top,body.three .lane .lc-art,body.three .lane .lc-b{grid-area:auto}
+body.three .lane .lc-art{width:100%}
+body.three .lane .lc h3{font-size:var(--t4);line-height:.95;letter-spacing:-.035em}
+body.three .lane .lc-t li:nth-child(n+2){display:none}
+body.three .lane .strip{padding-top:calc(var(--hh, 200px) + 8vh)}
+body.three .lane.thin .lc h3{font-size:var(--t3)}
+.obj-chips{display:none!important}
+
+/* ══ THE RAIL: where you are, said quietly ══════════════════ */
+.track,.rail{position:fixed;inset:auto 0 0 0;z-index:18;height:0;background:none;width:auto;margin:0;transform:none;display:block}
+.rail-line{position:fixed;left:0;right:0;bottom:0;height:3px;background:rgba(243,241,236,.16)}
+.rail-line .tk-fill{position:absolute;left:0;top:0;bottom:0;height:auto;margin:0;width:0;background:var(--red)}
+.rail-line .tk-ticks{position:absolute;inset:0}
+.rail-line .tk-ticks button{position:absolute;bottom:0;top:auto;width:21px;height:21px;margin:0 0 0 -10px;border:0;background:none;padding:0;cursor:pointer}
+.rail-line .tk-ticks button::after{content:"";position:absolute;left:10px;bottom:0;top:auto;right:auto;width:1px;height:8px;background:var(--paper);box-shadow:none;opacity:.5;transition:height .3s var(--ease-out),opacity .3s}
+.rail-line .tk-ticks button:hover::after,.rail-line .tk-ticks button.here::after{height:13px;opacity:1;inset:auto auto 0 10px}
+.rail-line .tk-ticks button.found::after{background:var(--paper)}
+.rail-line .tk-ticks button.here::after{background:var(--red);width:3px;left:9px}
+.rail-line .tk-ticks button:hover::before{content:attr(data-t);position:absolute;bottom:21px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--black);color:var(--paper);font:500 11px/1 var(--f-mono);padding:6px 8px;text-transform:uppercase;letter-spacing:.04em}
+.rail-at{position:fixed;left:max(var(--s4),env(safe-area-inset-left,0px));bottom:calc(var(--s3) + env(safe-area-inset-bottom,0px));display:flex;align-items:flex-end;gap:var(--s1);padding:var(--s1) var(--s2) var(--s1) var(--s1);background:var(--black);color:var(--paper);pointer-events:none}
+.rail-n{display:block;overflow:hidden;height:.82em;font-family:var(--f-poster);font-stretch:62%;font-weight:900;font-size:var(--t4);line-height:.82}
+.rail-n i{display:block;font-style:normal}
+.rail-n i.roll{animation:roll .7s var(--ease-out) both}
+@keyframes roll{from{transform:translateY(100%)}to{transform:none}}
+.rail-of{font:500 12px/1 var(--f-mono);opacity:.55;padding-bottom:3px}
+.rail-at em{font:500 12px/1 var(--f-mono);font-style:normal;text-transform:uppercase;letter-spacing:.04em;padding:0 0 3px var(--s1);max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.room .obj.left{bottom:calc(var(--s6) + var(--s3))}
+body.intro .rail{animation:none}
+
+/* ══ LOADER: one big count ══════════════════════════════════ */
+.gate-num{position:absolute;left:max(var(--s2),env(safe-area-inset-left,0px));bottom:-.12em;margin:0;font-size:min(62vw,70vh);line-height:.8;color:var(--black);display:flex;align-items:flex-start;font-variant-numeric:tabular-nums}
+.gate-num i{font-style:normal;font-size:.28em;color:var(--paper);margin:.1em 0 0 .05em}
+.gate-bar{display:none}
+
+/* ══ GRAIN: a still film grain over everything ══════════════ */
+#grain{position:fixed;inset:0;z-index:85;pointer-events:none;opacity:.07;background-size:180px 180px}
+body.simple #grain{display:none}
+
+@media (max-width:760px){
+  .rail-at{left:var(--s2);bottom:calc(var(--s2) + env(safe-area-inset-bottom,0px))}
+  .rail-n{font-size:var(--t3)}
+  .rail-at em{max-width:52vw}
+  .obj{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+  body.room .obj.left{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+  body.three .lane .lc{padding-bottom:38vh}
+}
+@media (prefers-reduced-motion:reduce){ .rail-n i.roll{animation:none} }
