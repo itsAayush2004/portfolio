@@ -110,12 +110,14 @@ function glyphCells(ch){
   for (let k2 = 0; k2 < BIN * BIN; k2++) cells[k2] = d[k2 * 4 + 3] > 110 ? 1 : 0;
   return cells;
 }
-function drawBinary(cv, word, cell){
-  cell = cell || 12;
+/* resolve 0..1: 0 is pure binary, 1 is the smooth glyph the binary was sampled from */
+function drawBinary(cv, word, cell, resolve){
+  cell = cell || 12; const r = clamp(resolve || 0, 0, 1);
   const chars = Array.from(word), cols = chars.length * BIN;
   cv.width = cols * cell; cv.height = BIN * cell;
   const g = cv.getContext('2d'), grids = chars.map(glyphCells);
   g.clearRect(0, 0, cv.width, cv.height);
+  g.globalAlpha = 1 - r * .92;
   g.font = '800 ' + Math.round(cell * .95) + 'px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
   /* lit cells get a soft tile behind their 1, so the character reads at a glance */
   g.fillStyle = 'rgba(59,240,122,.2)';
@@ -128,7 +130,21 @@ function drawBinary(cv, word, cell){
       g.fillText(on ? '1' : '0', (n * BIN + x + .5) * cell, (y + .5) * cell);
     } });
   }
-  g.shadowBlur = 0;
+  g.shadowBlur = 0; g.globalAlpha = 1;
+  if (r > 0){
+    /* the same glyph, drawn as a smooth curve over the cells it was sampled into */
+    g.globalAlpha = r; g.fillStyle = '#5CFF94'; g.shadowColor = 'rgba(59,240,122,.6)'; g.shadowBlur = cell * 1.2;
+    g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+    chars.forEach((ch, n) => {
+      g.font = '900 100px Archivo, "Helvetica Neue", Arial, sans-serif'; if ('fontStretch' in g) g.fontStretch = 'normal';
+      const m = g.measureText(ch), w = (m.actualBoundingBoxLeft + m.actualBoundingBoxRight) || 60, h = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) || 72;
+      const k = Math.min((BIN - 6) / w, (BIN - 6) / h) * cell;
+      g.save(); g.translate((n * BIN + BIN / 2) * cell, BIN / 2 * cell); g.scale(k, k);
+      g.fillText(ch, -w / 2 + (m.actualBoundingBoxLeft || 0), h / 2 - (m.actualBoundingBoxDescent || 0));
+      g.restore();
+    });
+    g.shadowBlur = 0; g.globalAlpha = 1;
+  }
 }
 function drawAllBinary(){ $$('canvas.term-bin').forEach(cv => drawBinary(cv, cv.dataset.word, 12)); }
 function termHTML(key){
@@ -316,7 +332,7 @@ let gateDrawn = -1;
     gateDrawn = n;
     $('#gateNum').textContent = n;
     $('#gateBits').textContent = '0b' + n.toString(2);
-    const cv = $('#gateBin'); if (cv) drawBinary(cv, String(n).padStart(2, '0'), 12);
+    const cv = $('#gateBin'); if (cv) drawBinary(cv, String(n).padStart(2, '0'), 12, smooth(50, 92, n));
     bootLog(n);
   }
   requestAnimationFrame(count);
@@ -508,7 +524,34 @@ function sideAt(x, z){
   const k = ROOMS.findIndex((R0, i) => i < 8 && Math.abs(R0.cz - rowZ(r)) < .1 && Math.sign(R0.cx) === Math.sign(x));
   return k >= 0 ? ROOMS[k].side : 'both';
 }
-const faceMat = s => mat(s === null || s === 'hall' ? C.paper : wallColor(s));
+/* the walls speak like the two halves: binary on the engineer side, a printed halftone on the creator side */
+let WALL_TEX = null;
+function wallTextures(){
+  if (WALL_TEX) return WALL_TEX;
+  const [bc, bg] = makeCanvas(512, 512);
+  bg.fillStyle = '#0B110D'; bg.fillRect(0, 0, 512, 512);
+  bg.font = '700 15px "JetBrains Mono", ui-monospace, monospace'; bg.textBaseline = 'top';
+  for (let y = 0; y < 512; y += 19) for (let x = 0; x < 512; x += 13){
+    const v = Math.random(); bg.fillStyle = 'rgba(59,240,122,' + (v > .93 ? .34 : .07 + v * .07).toFixed(3) + ')'; bg.fillText(Math.random() > .5 ? '1' : '0', x + 1, y + 2);
+  }
+  const [dc, dg] = makeCanvas(256, 256);
+  dg.fillStyle = HEX.red; dg.fillRect(0, 0, 256, 256); dg.fillStyle = 'rgba(120,16,6,.16)';
+  for (let y = 0; y < 256; y += 16) for (let x = 0; x < 256; x += 16){ dg.beginPath(); dg.arc(x + (y / 16 % 2 ? 8 : 0), y, 2.6, 0, Math.PI * 2); dg.fill(); }
+  const [fc, fg] = makeCanvas(256, 256);
+  fg.fillStyle = '#0D140F'; fg.fillRect(0, 0, 256, 256); fg.strokeStyle = 'rgba(59,240,122,.28)'; fg.lineWidth = 2; fg.strokeRect(1, 1, 254, 254);
+  fg.fillStyle = 'rgba(59,240,122,.5)'; [[1, 1], [255, 1], [1, 255], [255, 255]].forEach(q => fg.fillRect(q[0] - 3, q[1] - 3, 6, 6));
+  WALL_TEX = { bin: texFrom(bc), dot: texFrom(dc), grid: texFrom(fc) };
+  Object.values(WALL_TEX).forEach(t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; });
+  return WALL_TEX;
+}
+function faceMat(s, w, h){
+  if (s === 'eng' || s === 'cre'){
+    const base = wallTextures()[s === 'eng' ? 'bin' : 'dot'], t = base.clone(); t.needsUpdate = true;
+    t.repeat.set(Math.max(1, w / (s === 'eng' ? 3.4 : 2.2)), Math.max(1, h / (s === 'eng' ? 3.4 : 2.2)));
+    return new THREE.MeshLambertMaterial({ map: t });
+  }
+  return mat(s === null || s === 'hall' ? C.paper : wallColor(s));
+}
 
 const anim = [];
 let ceilMats = [], keyLight = null;
@@ -526,11 +569,11 @@ function wall(axis, at, a0, a1, gaps){
     if (axis === 'z'){            // runs along x, at z = at
       g = boxGeo(len, h, WT); pos = V3(mid, sp[2] + h / 2, at);
       const end = mat(C.paper);
-      mats = [end, end, end, end, faceMat(sideAt(mid, at + .5)), faceMat(sideAt(mid, at - .5))];
+      mats = [end, end, end, end, faceMat(sideAt(mid, at + .5), len, h), faceMat(sideAt(mid, at - .5), len, h)];
     } else {                      // runs along z, at x = at
       g = boxGeo(WT, h, len); pos = V3(at, sp[2] + h / 2, mid);
       const end = mat(C.paper);
-      mats = [faceMat(sideAt(at + .5, mid)), faceMat(sideAt(at - .5, mid)), end, end, end, end];
+      mats = [faceMat(sideAt(at + .5, mid), len, h), faceMat(sideAt(at - .5, mid), len, h), end, end, end, end];
     }
     const me = new THREE.Mesh(g, mats); me.position.copy(pos); me.receiveShadow = true; me.castShadow = true; world.add(me);
   });
@@ -555,6 +598,13 @@ function buildShell(){
   [0, 1, 2, 3, 4].forEach(r => wall('z', -HALL_D - r * CELL, -HALF, HALF, [r % 2 ? XR : XL]));
   wall('x', 0, -HALL_D, -HALL_D - 4 * CELL, [0, 1, 2, 3].map(rowZ));
 
+  /* engineer rooms get a dark floor with a green grid, like a terminal's */
+  ROOMS.forEach(rm => {
+    if (rm.side !== 'eng') return;
+    const t = wallTextures().grid.clone(); t.needsUpdate = true; t.repeat.set(CELL / 1.6, CELL / 1.6);
+    const f = plane(world, CELL - WT, CELL - WT, new THREE.MeshLambertMaterial({ map: t, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }), rm.cx, .003, rm.cz);
+    f.rotation.x = -Math.PI / 2; f.receiveShadow = true;
+  });
   /* the path you walk, drawn on the floor in red */
   const pts = [V3(0, 0, 0)];
   ROOMS.forEach(rm => { pts.push(V3(rm.door.x, 0, rm.door.z)); pts.push(V3(rm.cx, 0, rm.cz)); });
@@ -590,7 +640,7 @@ function buildShell(){
    (main · trim ×0.55 · facet ×1.18), flat-shaded facets, 8-sided
    round parts, one-segment bevels, one accent per piece, and every
    piece grounded on its own base. No outlines, no cel bands, no gloss. */
-const FAM = { wood: 0xB07A4A, cream: 0xEFE6D2, conc: 0x9E9A92, ink: 0x2B2B2E, red: 0xF23A1D, steel: 0x8D96A0,
+const FAM = { green: 0x3BF07A, wood: 0xB07A4A, cream: 0xEFE6D2, conc: 0x9E9A92, ink: 0x2B2B2E, red: 0xF23A1D, steel: 0x8D96A0,
   pump: 0x3F95C4, grass: 0x7DB55A, sand: 0xE2C98F, water: 0x4FA3D1, stone: 0xA8A39A, leaf: 0x4F8A3E, lamp: 0xFFE7B0 };
 const F2M = new Map();
 function fm(fam, tone){
@@ -668,10 +718,11 @@ function drawFeed(){
   g.fillStyle = HEX.paper; posterFont(g, 60); g.fillText('105 GAMES · SWIPE UP', 24, 376);
   if (!feedTex) feedTex = texFrom(c); else { feedTex.image = c; feedTex.needsUpdate = true; }
 }
-function chair(par, x, z, ry){
+function chair(par, x, z, ry, acc){
+  acc = acc || 'red';
   const ch = new THREE.Group(); ch.position.set(x, 0, z); ch.rotation.y = ry || 0; par.add(ch);
-  K(ch, .62, .1, .6, fm('red'), 0, .5, 0); K(ch, .62, .05, .6, fm('red', 't'), 0, .45, 0);
-  K(ch, .62, .66, .1, fm('red'), 0, .62, -.27); K(ch, .66, .06, .14, fm('red', 't'), 0, 1.26, -.27);
+  K(ch, .62, .1, .6, fm(acc), 0, .5, 0); K(ch, .62, .05, .6, fm(acc, 't'), 0, .45, 0);
+  K(ch, .62, .66, .1, fm(acc), 0, .62, -.27); K(ch, .66, .06, .14, fm(acc, 't'), 0, 1.26, -.27);
   O8(ch, .045, .045, .4, fm('ink'), 0, .05, 0);
   for (let k = 0; k < 5; k++){ const a = k * Math.PI * 2 / 5; K(ch, .08, .06, .36, fm('ink', 't'), Math.sin(a) * .17, .02, Math.cos(a) * .17, { ry: a }); }
 }
@@ -695,7 +746,12 @@ function buildArthis(i){
   const ph = new THREE.Group(); ph.position.set(-1.45, top, .05); ph.rotation.y = .4; g.add(ph);
   K(ph, .22, .03, .16, fm('ink', 't'), 0, 0, 0); K(ph, .22, .4, .04, fm('ink'), 0, .03, -.04, { rx: -.2 });
   plane(ph, .17, .275, decal(texFrom(gameTex('fruit'))), 0, .25, -.01).rotation.x = -.2;
-  chair(g, .2, .95, Math.PI + .3);
+  chair(g, .2, .95, Math.PI + .3, 'green');
+  /* a desk lamp in the street-lamp language, and a cable run to the floor */
+  const dl = new THREE.Group(); dl.position.set(1.55, b + 1.02, -.6); g.add(dl);
+  O8(dl, .12, .14, .04, fm('ink', 't'), 0, 0, 0); K(dl, .04, .5, .04, fm('ink'), 0, .04, 0, { rz: .2 }); K(dl, .04, .04, .32, fm('ink'), -.05, .52, .1, { rx: .4 });
+  K(dl, .2, .12, .14, fm('ink'), -.05, .5, .28); plane(dl, .16, .1, flat(0xEFFFF4), -.05, .5, .35).rotation.x = Math.PI / 2;
+  K(g, .05, .05, 1.2, fm('green', 't'), -1.4, b, -.4, { r: .02 });
   wallType(i);
   anim.push(t => { const k = Math.floor(t / 2.4); if (k !== feedIdx){ feedIdx = k; drawFeed(); } });
   return g;
@@ -726,8 +782,15 @@ function buildBlender(i){
   K(cam, .62, .4, .38, fm('ink'), 0, 1.38, 0); K(cam, .66, .06, .42, fm('ink', 't'), 0, 1.36, 0);
   const lens = O8(cam, .15, .17, .3, fm('ink', 't'), 0, 1.58, .32); lens.rotation.x = Math.PI / 2;
   const rec = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, .02, 8), flat(C.red)); rec.position.set(.22, 1.79, 0); cam.add(rec);
+  /* the timeline as an orbit: keyframe diamonds circling the turntable */
+  const keys = new THREE.Group(); keys.position.y = b + 1.6; g.add(keys);
+  for (let k = 0; k < 10; k++){
+    const a = k / 10 * Math.PI * 2, d = new THREE.Mesh(new THREE.OctahedronGeometry(k % 3 ? .07 : .11, 0), k % 3 ? fm('cream') : fm('red'));
+    d.position.set(Math.cos(a) * 1.75, Math.sin(a * 2) * .08, Math.sin(a) * 1.75); keys.add(d);
+  }
+  const orbit = new THREE.Mesh(new THREE.TorusGeometry(1.75, .008, 6, 96), flat(0xF3F1EC, { transparent: true, opacity: .45 })); orbit.rotation.x = Math.PI / 2; keys.add(orbit);
   wallType(i);
-  anim.push((t, dt) => { fig.rotation.y += dt * (REDUCED ? 0 : .5); plate.rotation.y = fig.rotation.y; rec.visible = Math.floor(t * 1.5) % 2 === 0; });
+  anim.push((t, dt) => { fig.rotation.y += dt * (REDUCED ? 0 : .5); plate.rotation.y = fig.rotation.y; keys.rotation.y = REDUCED ? 0 : -t * .3; rec.visible = Math.floor(t * 1.5) % 2 === 0; });
   return g;
 }
 
@@ -770,7 +833,17 @@ function buildAkverse(i){
   const cam = new THREE.Group(); cam.position.set(-1.6, b, 1.3); cam.rotation.y = 2.7; g.add(cam);
   [0, 2.1, 4.2].forEach(r => K(cam, .04, 1.1, .04, fm('ink'), Math.sin(r) * .24, 0, Math.cos(r) * .24, { rx: Math.cos(r) * -.2, rz: Math.sin(r) * .2 }));
   K(cam, .44, .3, .3, fm('ink'), 0, 1.06, 0); O8(cam, .11, .13, .22, fm('ink', 't'), 0, 1.21, .24).rotation.x = Math.PI / 2;
+  const recL = O8(cam, .03, .03, .02, flat(C.red), .14, 1.36, 0);
+  /* a boom mic reaching over the set */
+  const bm = new THREE.Group(); bm.position.set(2.3, b, 1.0); g.add(bm);
+  [0, 2.1, 4.2].forEach(r => K(bm, .035, .8, .035, fm('ink'), Math.sin(r) * .22, 0, Math.cos(r) * .22, { rx: Math.cos(r) * -.25, rz: Math.sin(r) * .25 }));
+  O8(bm, .025, .025, 1.6, fm('ink'), 0, .7, 0);
+  const arm = new THREE.Group(); arm.position.y = 2.3; arm.rotation.y = 2.4; bm.add(arm);
+  K(arm, .04, .04, 2.2, fm('ink'), 0, 0, -1.0, { rx: -.18, r: .015 });
+  const mic = O8(arm, .07, .07, .42, fm('ink', 't'), 0, -.2, -2.05); mic.rotation.x = Math.PI / 2;
+  O8(arm, .09, .09, .3, fm('cream', 't'), 0, -.2, -2.05).rotation.x = Math.PI / 2;
   wallType(i);
+  anim.push(t => { recL.visible = Math.floor(t * 1.4) % 2 === 0; });
   return g;
 }
 
@@ -779,7 +852,16 @@ let hexRegen = null;
 function buildHexa(i){
   const g = stand(i, 3.4), b = base(g, 1.95, 0, 'cream', true);
   O8(g, .5, .6, .7, fm('ink'), 0, b, 0, { seg: 10 }); O8(g, 1.7, 1.7, .08, fm('ink', 't'), 0, b + .7, 0, { seg: 10 });
-  const isle = new THREE.Group(); isle.position.y = b + .78; g.add(isle);
+  /* the projector: a glowing green ring on the table, the island floating above it */
+  const ringM = new THREE.MeshBasicMaterial({ color: lin(FAM.green), transparent: true, opacity: .9 });
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.45, .025, 8, 72), ringM); ring.rotation.x = Math.PI / 2; ring.position.y = b + .8; g.add(ring);
+  const beamT = (function(){ const [c, x] = makeCanvas(4, 128); const gr = x.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, 'rgba(59,240,122,0)'); gr.addColorStop(1, 'rgba(59,240,122,.55)'); x.fillStyle = gr; x.fillRect(0, 0, 4, 128); return texFrom(c); })();
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.45, .55, 48, 1, true), new THREE.MeshBasicMaterial({ map: beamT, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+  beam.position.y = b + 1.08; g.add(beam);
+  const scan = new THREE.Mesh(new THREE.RingGeometry(1.3, 1.5, 64), new THREE.MeshBasicMaterial({ color: lin(FAM.green), transparent: true, opacity: .45, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+  scan.rotation.x = -Math.PI / 2; g.add(scan);
+  const isle = new THREE.Group(); isle.position.y = b + 1.05; g.add(isle);
+  anim.push(t => { isle.rotation.y = REDUCED ? 0 : t * .18; isle.position.y = b + 1.05 + Math.sin(t * 1.4) * .04; const u = (t * .5) % 1; scan.position.y = b + .82 + u * .7; scan.material.opacity = .45 * (1 - u); });
   const Rr = .2, tiles = [], hexG = new THREE.CylinderGeometry(Rr * .96, Rr * .96, 1, 6);
   for (let q = -3; q <= 3; q++) for (let r = -3; r <= 3; r++){
     if (Math.abs(q + r) > 3) continue;
@@ -825,7 +907,7 @@ function buildHexa(i){
 /* ── 4 · Inference: racks on a plinth, a network thinking above ── */
 function buildAI(i){
   const g = stand(i, 1.1), b = base(g, 3.8, 1.4);
-  const ON = [flat(0xF3F1EC), flat(C.red)], OFF = fm('ink', 't');
+  const ON = [flat(0xC9F5D6), flat(FAM.green)], OFF = fm('ink', 't');
   const leds = [];
   [-1.1, 0, 1.1].forEach(x => {
     K(g, .96, 2.4, .86, fm('ink'), x, b, 0); K(g, 1.0, .08, .9, fm('ink', 't'), x, b + 2.4, 0); K(g, 1.0, .1, .9, fm('ink', 't'), x, b, 0);
@@ -837,13 +919,15 @@ function buildAI(i){
   const net = new THREE.Group(); net.position.set(0, b + 3.4, .4); g.add(net);
   const LAY = [3, 4, 3, 1], nodes = [];
   LAY.forEach((n, li) => { for (let k = 0; k < n; k++){
-    const m = new THREE.Mesh(new THREE.SphereGeometry(.1, 8, 6), li === 3 ? fm('red') : fm('cream'));
+    const m = new THREE.Mesh(new THREE.SphereGeometry(.1, 10, 8), li === 3 ? fm('green') : fm('cream'));
     m.position.set((li - 1.5) * .62, (k - (n - 1) / 2) * .4, 0); net.add(m); nodes.push({ m, li });
   } });
   const pts = [], edges = [];
   nodes.forEach(p => nodes.forEach(q => { if (q.li === p.li + 1){ pts.push(p.m.position, q.m.position); edges.push([p.m.position, q.m.position, p.li]); } }));
   net.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: lin(0x6E6B66) })));
-  const pulses = edges.map(() => { const m = new THREE.Mesh(new THREE.SphereGeometry(.03, 6, 4), flat(C.red)); net.add(m); return m; });
+  const pulses = edges.map(() => { const m = new THREE.Mesh(new THREE.SphereGeometry(.03, 6, 4), flat(FAM.green)); net.add(m); return m; });
+  /* cable runs from the racks across the floor */
+  [-1.1, 0, 1.1].forEach((x, k) => K(g, .07, .04, 1.4 + k * .3, fm('green', 't'), x + .3, b, 1.1 + k * .15, { r: .015 }));
   wallType(i);
   let last = 0;
   anim.push(t => {
@@ -1001,6 +1085,60 @@ function buildContact(i){
     pl.rotation.set(0, u + Math.PI / 2, Math.sin(u * 2) * .3);
   });
   return g;
+}
+
+/* ══ atmosphere: a gallery beam over every piece, and the air of each half ══ */
+function gradTex(stops, w, h, radial){
+  const [c, g] = makeCanvas(w, h);
+  const gr = radial ? g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2) : g.createLinearGradient(0, h, 0, 0);
+  stops.forEach(st => gr.addColorStop(st[0], st[1])); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  return texFrom(c);
+}
+function glyphTex(ch, sq){
+  const [c, g] = makeCanvas(64, 64); g.fillStyle = '#fff';
+  if (sq) g.fillRect(22, 22, 20, 14);
+  else { g.font = '800 52px "JetBrains Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ch, 32, 34); }
+  return texFrom(c);
+}
+const AIR = [], BEAMS = [];
+function buildAtmosphere(){
+  const beamTex = gradTex([[0, 'rgba(255,255,255,0)'], [.55, 'rgba(255,255,255,.35)'], [1, 'rgba(255,255,255,.9)']], 4, 256);
+  const poolTex = gradTex([[0, 'rgba(255,255,255,.9)'], [.45, 'rgba(255,255,255,.35)'], [1, 'rgba(255,255,255,0)']], 256, 256, true);
+  const TINT = { eng: 0x9DFFC0, cre: 0xFFE2C2, both: 0xFFFFFF };
+  PIECE.forEach((g, i) => {
+    const p = new THREE.Vector3(); g.getWorldPosition(p); const tint = lin(TINT[ROOMS[i].side]);
+    const h = RH - .4, beam = new THREE.Mesh(new THREE.ConeGeometry(2.5, h, 48, 1, true),
+      new THREE.MeshBasicMaterial({ map: beamTex, color: tint, transparent: true, opacity: .16, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+    beam.position.set(p.x, h / 2, p.z); world.add(beam); BEAMS.push(beam);
+    const pool = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 5.2), new THREE.MeshBasicMaterial({ map: poolTex, color: tint, transparent: true, opacity: .38, depthWrite: false, blending: THREE.AdditiveBlending, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+    pool.rotation.x = -Math.PI / 2; pool.position.set(p.x, .012, p.z); world.add(pool);
+    const lamp = new THREE.Mesh(new THREE.CylinderGeometry(.16, .26, .22, 12), fm('ink').clone()); lamp.position.set(p.x, RH - .11, p.z); world.add(lamp);
+    const lens = new THREE.Mesh(new THREE.CircleGeometry(.2, 16), flat(0xFFFFFF)); lens.rotation.x = Math.PI / 2; lens.position.set(p.x, RH - .23, p.z); world.add(lens);
+    ceilMats.push(lamp.material);
+  });
+  /* the air: 1s and 0s rising through the engineer rooms, paper flecks settling in the creator rooms */
+  const per = LOW ? 34 : 70;
+  [['eng', '1', 1], ['eng', '0', 1], ['cre', '', -1]].forEach(spec => {
+    const rooms = ROOMS.filter(r => r.side === spec[0]), n = rooms.length * per, pos = new Float32Array(n * 3), spd = new Float32Array(n);
+    rooms.forEach((rm, r) => { for (let k = 0; k < per; k++){ const j = (r * per + k) * 3;
+      pos[j] = rm.cx + (Math.random() - .5) * (CELL - 1.2); pos[j + 1] = .3 + Math.random() * (RH - 1); pos[j + 2] = rm.cz + (Math.random() - .5) * (CELL - 1.2);
+      spd[r * per + k] = .15 + Math.random() * .35; } });
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: glyphTex(spec[1], !spec[1]), color: lin(spec[0] === 'eng' ? FAM.green : C.paper),
+      size: spec[1] ? .2 : .12, transparent: true, opacity: spec[1] ? .55 : .7, depthWrite: false, blending: spec[1] ? THREE.AdditiveBlending : THREE.NormalBlending }));
+    world.add(pts); AIR.push({ pts, pos, spd, dir: spec[2] });
+  });
+  anim.push((t, dt) => {
+    if (REDUCED) return;
+    AIR.forEach(a => {
+      for (let k = 0; k < a.spd.length; k++){
+        const j = k * 3; a.pos[j + 1] += a.dir * a.spd[k] * dt;
+        if (a.dir < 0) a.pos[j] += Math.sin(t * .8 + k) * .002;
+        if (a.pos[j + 1] > RH - .6) a.pos[j + 1] = .3; else if (a.pos[j + 1] < .25) a.pos[j + 1] = RH - .8;
+      }
+      a.pts.geometry.attributes.position.needsUpdate = true;
+    });
+  });
 }
 
 /* ── one invisible box per room's piece answers the pointer ── */
@@ -1313,6 +1451,7 @@ function direct(p, t){
 
   /* the ceiling fades as the camera rises over the walls */
   const co = 1 - smooth(RH - .8, RH + 4, camera.position.y);
+  const inside = camera.position.y < RH - .3; BEAMS.forEach(b => { b.visible = inside; });
   ceilMats.forEach(m => { const on = co > .001; m.opacity = co; if (m.visible !== on) m.visible = on; const tr = co < .999; if (m.transparent !== tr){ m.transparent = tr; m.needsUpdate = true; } });
   /* and the key light follows what you look at, so its shadows stay crisp */
   if (keyLight){
@@ -1525,7 +1664,7 @@ history.scrollRestoration = 'manual';
 loadAll().then(() => {
   buildLights(); buildShell();
   [buildArthis, buildBlender, buildAkverse, buildHexa, buildAI, buildBoard, buildNumbers, buildArcade, buildContact].forEach((f, i) => { PIECE[i] = f(i); });
-  buildHits(); buildTrack();
+  buildHits(); buildAtmosphere(); buildTrack();
   layout(); buildPoses();
   const want = location.hash.replace('#st-', '').replace('#', '');
   const s = STATIONS.find(x => x.id === want);
