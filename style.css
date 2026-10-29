@@ -59,8 +59,6 @@ kbd{font:500 11px/1 var(--f-mono);border:1px solid currentColor;padding:2px 4px}
 .x:hover{background:var(--black);color:var(--paper)}
 
 /* ── loader ───────────────────────────────────────────────── */
-#gate{position:fixed;inset:0;z-index:60;background:var(--red);color:var(--black);overflow:hidden;transition:transform .9s cubic-bezier(.7,0,.2,1),visibility .9s}
-body:not(.booting) #gate{transform:translateY(-101%);visibility:hidden;pointer-events:none}
 .gate-word{position:absolute;left:-.04em;right:0;bottom:-.1em;margin:0;font-size:clamp(120px,31vw,520px);color:var(--black);white-space:nowrap}
 .gate-word span{display:block}
 .gate-word span + span{color:var(--paper)}
@@ -331,7 +329,6 @@ body.simple .strip{position:static;transform:none!important;padding-top:6px}
 @media (max-width:380px){ #soundBtn{display:none} }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  #gate{transition:none}
 }
 .lane.thin .lane-tag span + span{display:none}
 
@@ -740,12 +737,8 @@ body.stack .obj.enter{animation:stripInStack .6s var(--ease-out) both}
 .btn:active,.pill:active,.x:active,.menu-l button:active{transform:scale(.96)}
 .pill:hover{transform:translateY(-1px)}
 body.three .lane .lc{transform-origin:50% 50%;will-change:transform,opacity}
-/* the loader opens from the middle, like the two doors */
-#gate{transition:clip-path .9s var(--ease-io),visibility .9s;clip-path:inset(0 0 0 0)}
-body:not(.booting) #gate{transform:none;clip-path:inset(0 50% 0 50%)}
 @media (prefers-reduced-motion:reduce){
   .lane-count i.roll,.menu-l li,.menu:not([hidden]) .menu-card,.dossier:not([hidden]) .dos-card{animation:none}
-  body:not(.booting) #gate{clip-path:none;opacity:0}
 }
 
 /* ══ ROUND 4 · the engineer half as a terminal ══════════════
@@ -796,33 +789,6 @@ body.simple #laneL .bin-field{display:none}
 /* ══ ROUND 5 · binary at 32 × 32, and the split-boot loader ═══ */
 .term-bin{display:block;width:100%;height:auto;margin-top:auto;text-shadow:none}
 
-#gate{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:none;color:inherit;overflow:hidden}
-#gate::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--paper);z-index:2}
-#gate .g-eng{background:var(--term);color:var(--green);font-family:var(--f-code);display:flex;flex-direction:column;justify-content:space-between;gap:var(--s3);
-  padding:var(--s4);background-image:repeating-linear-gradient(transparent 0 3px,rgba(59,240,122,.035) 3px 4px);min-width:0}
-#gate .g-log{display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:var(--green-l);min-height:9em}
-#gate .g-log b{color:var(--green);font-weight:700}
-#gate .g-log em{font-style:normal;color:#F2C14E}
-#gate .g-log span{animation:fadeUp var(--d2) var(--ease-out) both}
-#gate .g-bin{width:min(100%,560px);height:auto}
-#gate .g-bar{display:flex;align-items:center;gap:var(--s2);font-size:13px}
-#gate .gate-bar{display:block;flex:1;height:6px;border-radius:99px;background:rgba(59,240,122,.15);margin:0;overflow:hidden}
-#gate .gate-bar i{background:var(--green);border-radius:99px}
-#gate .g-cre{background:var(--red);color:var(--black);display:flex;flex-direction:column;justify-content:space-between;padding:var(--s4);min-width:0;position:relative}
-#gate .g-top,#gate .g-foot{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);font:500 12px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.04em}
-#gate .gate-num{position:static;margin:0 0 0 -.04em;font-size:min(36vw,68vh);line-height:.78;color:var(--black);display:flex;align-items:flex-start;font-variant-numeric:tabular-nums}
-#gate .gate-num i{font-style:normal;font-size:.32em;color:var(--paper);margin:.12em 0 0 .04em}
-#gate .gate-simple{background:var(--black);color:var(--paper);text-decoration:none;padding:8px 13px;border-radius:999px;font:500 12px/1 var(--f-mono);text-transform:uppercase}
-#gate .gate-card,#gate .gate-word{display:none}
-@media (max-width:760px){
-  #gate{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}
-  #gate::after{left:0;right:0;top:50%;bottom:auto;width:auto;height:2px;margin:-1px 0 0}
-  #gate .g-eng,#gate .g-cre{padding:var(--s3)}
-  #gate .g-log{font-size:11px;min-height:7.5em}
-  #gate .gate-num{font-size:min(70vw,36vh)}
-  body:not(.booting) #gate{clip-path:inset(50% 0 50% 0)}
-}
-
 body.shot #hud,body.shot #gate,body.shot #grain,body.shot #cursor,body.shot #lanes,body.shot #flat,body.shot #wipe,body.shot .codex{display:none!important}
 body.shot #css3d{display:none}
 
@@ -836,16 +802,43 @@ body.shot #css3d{display:none}
 @media (prefers-reduced-motion:reduce){ .dos-body .st-hero{animation:none} }
 
 /* ══ tiles: the loader leaves, and the merge sweeps, in squares ══ */
-.g-tiles{position:absolute;inset:0;z-index:3;pointer-events:none}
-.g-tiles i,#wipe i{position:absolute;display:grid;place-items:center;font:800 18px/1 var(--f-code);font-style:normal}
-.g-tiles i.e,#wipe i.e{background:var(--term);color:var(--green)}
-.g-tiles i.c,#wipe i.c{background:var(--red)}
+#wipe i{position:absolute;display:grid;place-items:center;font:800 18px/1 var(--f-code);font-style:normal}
+#wipe i.e{background:var(--term);color:var(--green)}
+#wipe i.c{background:var(--red)}
 #wipe i.p{background:var(--paper)}
-#gate.dissolve{clip-path:none!important;visibility:visible!important;pointer-events:none;background:none;transition:none}
-#gate.dissolve::after{opacity:0;transition:opacity .3s}
-#gate.dissolve > section{opacity:0;transition:opacity .22s var(--ease-out)}
-#gate.dissolve .g-tiles i{animation:tileOut .62s var(--ease-io) both;animation-delay:var(--dl)}
-@keyframes tileOut{0%{transform:none;opacity:1}100%{transform:scale(0) rotate(90deg);opacity:0}}
 #wipe{visibility:hidden}
 #wipe i{transform:scale(0);will-change:transform;bottom:auto}
 @media (prefers-reduced-motion:reduce){ #wipe{display:none!important} }
+
+/* ══ ROUND 8 · the loader, simplified ═══════════════════════
+   Paper, the name, one rounded bar and a number. It leaves by
+   splitting down the middle, the two halves sliding apart. */
+#gate{position:fixed;inset:0;z-index:60;color:var(--black);overflow:hidden;visibility:visible;transition:visibility 0s 1.1s}
+#gate .g-half{position:absolute;top:0;bottom:0;width:50.5%;background:var(--paper);transition:transform .9s var(--ease-io) .18s}
+#gate .g-l{left:0}
+#gate .g-r{right:0}
+#gate .g-in{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:var(--s4);padding:var(--s5);max-width:1100px;margin:0 auto;transition:opacity .35s var(--ease-out),transform .45s var(--ease-out)}
+#gate .g-chip{display:inline-flex;align-items:center;gap:var(--s2);font:500 12px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.06em}
+#gate .g-chip i{width:21px;height:21px;border-radius:7px;background:linear-gradient(90deg,var(--term) 50%,var(--red) 50%)}
+#gate .g-name{margin:0;font-size:clamp(64px,13vw,190px);line-height:.82;letter-spacing:-.02em;text-transform:uppercase;white-space:nowrap}
+#gate .g-name em{font-style:normal;color:var(--red)}
+#gate .g-row{display:flex;align-items:center;gap:var(--s3)}
+#gate .gate-bar{display:block;flex:1;height:8px;border-radius:99px;background:rgba(12,12,13,.1);overflow:hidden;position:relative;min-width:0;margin:0}
+#gate .gate-bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:99px;background:linear-gradient(90deg,var(--green) 0%,var(--red) 100%);transition:width .3s var(--ease-out)}
+#gate .g-n{font:800 21px/1 var(--f-code);font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right}
+#gate .g-foot{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);font:500 12px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.04em;color:#5C5B58}
+#gate .gate-simple{background:var(--black);color:var(--paper);border:0;padding:9px 14px;border-radius:999px;font:500 12px/1 var(--f-mono);text-transform:uppercase;cursor:pointer}
+body:not(.booting) #gate{visibility:hidden;pointer-events:none}
+body:not(.booting) #gate .g-in{opacity:0;transform:translateY(-13px)}
+body:not(.booting) #gate .g-l{transform:translateX(-101%)}
+body:not(.booting) #gate .g-r{transform:translateX(101%)}
+@media (max-width:760px){
+  #gate .g-in{padding:var(--s4) var(--s3);gap:var(--s3)}
+  #gate .g-name{font-size:min(24vw,120px);white-space:normal}
+  #gate .g-half{width:100%;height:50.5%;left:0;right:0}
+  #gate .g-l{top:0;bottom:auto}
+  #gate .g-r{bottom:0;top:auto}
+  body:not(.booting) #gate .g-l{transform:translateY(-101%)}
+  body:not(.booting) #gate .g-r{transform:translateY(101%)}
+}
+@media (prefers-reduced-motion:reduce){ #gate,#gate *{transition:none!important} }

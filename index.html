@@ -29,27 +29,23 @@
      A title screen while the room loads. Any key, a scroll or the
      button starts it; it never blocks the content underneath. -->
 <div id="gate" role="status" aria-live="polite" aria-label="Loading the portfolio">
-  <section class="g-eng">
-    <div class="g-log" id="gateLog"></div>
-    <canvas class="g-bin" id="gateBin" aria-hidden="true"></canvas>
-    <div class="g-bar"><span id="gateBits">0b0</span><div class="gate-bar" aria-hidden="true"><i id="gateFill"></i></div><span>engineer_</span></div>
-  </section>
-  <section class="g-cre">
-    <div class="g-top"><span>Creator</span><span>Aayush Kumar · Portfolio 2026</span></div>
-    <p class="gate-num poster" aria-hidden="true"><span id="gateNum">0</span><i>%</i></p>
-    <div class="g-foot"><span id="gateMsg">Waking the halves</span><button class="gate-simple" type="button" data-simple>Simple page</button></div>
-  </section>
+  <div class="g-half g-l"></div><div class="g-half g-r"></div>
+  <div class="g-in">
+    <span class="g-chip"><i></i>Portfolio 2026</span>
+    <p class="g-name poster" aria-hidden="true">Aayush <em>Kumar</em></p>
+    <div class="g-row"><div class="gate-bar" aria-hidden="true"><i id="gateFill"></i></div><span class="g-n"><span id="gateNum">0</span>%</span></div>
+    <div class="g-foot"><span id="gateMsg">Engineer · Creator</span><button class="gate-simple" type="button" data-simple>Simple page</button></div>
+  </div>
   <button id="gateGo" type="button" hidden disabled>Enter</button>
 </div>
 <script>
 /* counts the first stretch while the 3D library downloads; app.js takes over from here */
 (function(){
-  var n = 0, num = document.getElementById('gateNum'), bits = document.getElementById('gateBits'), log = document.getElementById('gateLog');
-  if (log) log.innerHTML = '<span><b>aayush@nitj</b>:~$ ./boot --portfolio</span><span>[ <em>..</em> ] mount engineer.half</span>';
+  var n = 0, num = document.getElementById('gateNum'), fill = document.getElementById('gateFill');
   (function tick(){
     if (window.__gateTaken) return;
     n += (32 - n) * .045;
-    var k = Math.round(n); if (num) num.textContent = k; if (bits) bits.textContent = '0b' + k.toString(2);
+    var k = Math.round(n); if (num) num.textContent = k; if (fill) fill.style.width = k + '%';
     setTimeout(tick, 60);
   })();
 })();

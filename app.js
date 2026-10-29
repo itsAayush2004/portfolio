@@ -309,52 +309,26 @@ window.__gateTaken = true;
 let gateShown = parseInt(($('#gateNum') || {}).textContent, 10) || 0, gateWant = gateShown;
 function progress(){
   gateWant = Math.max(gateWant, Math.round(100 * loadedN / loadTotal));
-  gateFill.style.width = gateWant + '%';
 }
-/* the boot log on the engineer side ticks off real facts as loading passes them */
-const BOOT = [[0, './boot --portfolio', true], [12, 'mount engineer.half'], [30, 'load arthis.space · 105 games'], [48, 'compile hexabed · 3,705 lines c#'],
-  [66, 'warm up gpt-2 weights'], [84, 'render dioramas · 28 add-ons'], [98, 'build nine rooms']];
-const CRE_MSG = [[0, 'Waking the halves'], [30, 'Rendering dioramas'], [66, 'Hanging the posters'], [98, 'Opening the doors']];
-function bootLog(n){
-  const log = $('#gateLog'); if (!log) return;
-  log.innerHTML = BOOT.filter(b => b[2] || n >= b[0] - 12).map(b => b[2]
-    ? '<span><b>aayush@nitj</b>:~$ ' + b[1] + '</span>'
-    : '<span>[ ' + (n >= b[0] ? '<b>ok</b>' : '<em>..</em>') + ' ] ' + b[1] + '</span>').join('');
-  const m = CRE_MSG.filter(c => n >= c[0]).pop(); gateMsg.textContent = m ? m[1] : '';
-}
-/* both halves count up together, smoothly rather than in jumps */
+/* one line under the bar says what is happening */
+const GATE_MSG = [[0, 'Engineer · Creator'], [34, 'Building nine rooms'], [70, 'Hanging the posters'], [97, 'Opening up']];
 let gateDrawn = -1;
 (function count(){
   if (!body.classList.contains('booting')) return;
   gateShown += (gateWant - gateShown) * .1;
   const n = Math.min(100, Math.round(gateShown));
   if (n !== gateDrawn){
-    gateDrawn = n;
-    $('#gateNum').textContent = n;
-    $('#gateBits').textContent = '0b' + n.toString(2);
-    const cv = $('#gateBin'); if (cv) drawBinary(cv, String(n).padStart(2, '0'), 12, smooth(50, 92, n));
-    bootLog(n);
+    gateDrawn = n; $('#gateNum').textContent = n; gateFill.style.width = n + '%';
+    const m = GATE_MSG.filter(c => n >= c[0]).pop(); if (gateMsg.textContent !== m[1]) gateMsg.textContent = m[1];
   }
   requestAnimationFrame(count);
 })();
 const bootAt = performance.now();
-/* the loader leaves as tiles: they shrink and turn away in a wave that spreads out from the seam */
+/* the loader splits down the middle and its two halves slide apart */
 function start(){
   const g = $('#gate');
-  if (REDUCED || !g || g.classList.contains('dissolve')){ body.classList.remove('booting'); body.classList.add('intro'); return; }
-  const cols = STACK ? 8 : 18, rows = Math.max(4, Math.round(cols * VH / VW)), box = document.createElement('div');
-  box.className = 'g-tiles'; box.setAttribute('aria-hidden', 'true');
-  let html = '';
-  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++){
-    const fx = (x + .5) / cols, fy = (y + .5) / rows, eng = STACK ? fy < .5 : fx < .5;
-    const d = STACK ? Math.abs(fy - .5) * 2 : Math.abs(fx - .5) * 2;
-    const dl = Math.round(d * 520 + Math.random() * 220);
-    html += '<i class="' + (eng ? 'e' : 'c') + '" style="left:' + (x / cols * 100) + '%;top:' + (y / rows * 100) + '%;width:' + (100 / cols + .05) + '%;height:' + (100 / rows + .05) + '%;--dl:' + dl + 'ms">' + (eng ? (Math.random() > .5 ? '1' : '0') : '') + '</i>';
-  }
-  box.innerHTML = html; g.appendChild(box);
-  g.classList.add('dissolve');
   body.classList.remove('booting'); body.classList.add('intro');
-  setTimeout(() => { g.hidden = true; }, 1500);
+  if (g) setTimeout(() => { g.hidden = true; }, REDUCED ? 0 : 1300);
 }
 
 /* ── three ── */
@@ -833,33 +807,44 @@ function charpai(par, x, z, ry){
   K(c, .07, .06, .62, fm('wood', 't'), -.52, .32, 0); K(c, .07, .06, .62, fm('wood', 't'), .52, .32, 0);
   for (let r = 0; r < 4; r++) for (let q = 0; q < 7; q++) K(c, .13, .02, .12, fm('cream', (r + q) % 2 ? 't' : 'm'), -.42 + q * .14, .33, -.2 + r * .135, { r: .004 });
 }
+/* a slab with a rounded top, like the gates: doors, windows, signs */
+function archGeo(w, h, r, depth){
+  const k = 'a' + [w, h, r, depth].map(v => v.toFixed(3)).join(',');
+  if (GEO.has(k)) return GEO.get(k);
+  const s = new THREE.Shape();
+  s.moveTo(-w / 2, 0); s.lineTo(w / 2, 0); s.lineTo(w / 2, h - r); s.quadraticCurveTo(w / 2, h, w / 2 - r, h);
+  s.lineTo(-w / 2 + r, h); s.quadraticCurveTo(-w / 2, h, -w / 2, h - r); s.lineTo(-w / 2, 0);
+  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: .015, bevelSize: .015, bevelSegments: 2, curveSegments: 10 });
+  g.translate(0, 0, -depth / 2); g.computeVertexNormals(); GEO.set(k, g); return g;
+}
+function tripodCam(par, x, z, ry, s){
+  const cam = new THREE.Group(); cam.position.set(x, 0, z); cam.rotation.y = ry; cam.scale.setScalar(s || 1); par.add(cam);
+  [0, 2.1, 4.2].forEach(r => K(cam, .045, 1.12, .045, fm('ink'), Math.sin(r) * .26, 0, Math.cos(r) * .26, { rx: Math.cos(r) * -.22, rz: Math.sin(r) * .22, r: .015 }));
+  O8(cam, .09, .09, .08, fm('ink', 't'), 0, 1.06, 0);
+  K(cam, .5, .32, .32, fm('ink'), 0, 1.13, 0, { r: .06 }); K(cam, .2, .1, .16, fm('ink', 't'), -.08, 1.45, 0, { r: .03 });
+  O8(cam, .12, .14, .22, fm('ink', 't'), 0, 1.29, .2, { seg: 16 }).rotation.x = Math.PI / 2;
+  const lens = new THREE.Mesh(new THREE.CircleGeometry(.09, 16), flat(0x2A3A44)); lens.position.set(0, 1.29, .42); cam.add(lens);
+  return O8(cam, .03, .03, .02, flat(C.red), .17, 1.45, .06);
+}
 function buildAkverse(i){
-  const g = stand(i, 2.4), b = base(g, 5.2, 3.4, 'sand');
-  /* the house: cream walls, a red door, a parapet and a black tank on the roof */
-  const H = new THREE.Group(); H.position.set(-1.0, b, -.8); g.add(H);
-  K(H, 2.2, 1.7, 1.5, fm('cream'), 0, 0, 0);
-  K(H, 2.3, .1, 1.6, fm('cream', 't'), 0, 1.7, 0);
-  K(H, 2.3, .22, .1, fm('cream'), 0, 1.8, .75); K(H, 2.3, .22, .1, fm('cream'), 0, 1.8, -.75); K(H, .1, .22, 1.6, fm('cream'), 1.1, 1.8, 0); K(H, .1, .22, 1.6, fm('cream'), -1.1, 1.8, 0);
-  O8(H, .26, .26, .36, fm('ink'), -.6, 1.8, -.35); O8(H, .28, .28, .05, fm('ink', 't'), -.6, 2.16, -.35);
-  K(H, .5, .9, .06, fm('red'), .35, 0, .76); K(H, .6, .06, .08, fm('red', 't'), .35, .9, .76);
-  [[-.55, .9], [.95, .9]].forEach(w => { K(H, .38, .38, .05, fm('ink'), w[0], w[1], .76); K(H, .44, .05, .07, fm('cream', 't'), w[0], w[1] - .03, .77); });
-  K(H, .7, .06, .3, fm('conc'), .35, 0, .92); K(H, .6, .06, .2, fm('conc', 't'), .35, .06, .88);
-  K(H, 2.3, .08, .08, fm('red'), 0, 1.45, .76);
-  charpai(g, 1.25, .55, -.3);
-  handPump(g, 1.85, -.95, .4);
+  const g = stand(i, 2.4), b = base(g, 5.0, 3.2, 'sand');
+  /* the house: one clean block, an arched red door, two arched windows, a black tank on the roof */
+  const H = new THREE.Group(); H.position.set(-.7, b, -.6); g.add(H);
+  K(H, 2.6, .16, 1.7, fm('cream', 't'), 0, 0, 0);
+  K(H, 2.5, 2.0, 1.6, fm('cream'), 0, .14, 0, { r: .05 });
+  K(H, 2.6, .1, 1.7, fm('cream', 't'), 0, 2.14, 0);
+  K(H, 2.6, .22, 1.7, fm('cream'), 0, 2.2, 0, { r: .05 });
+  K(H, 2.5, .08, .02, fm('red'), 0, 1.72, .81, { r: .01 });
+  mesh(H, archGeo(.74, 1.32, .37, .1), fm('cream', 't'), .4, .14, .81);
+  mesh(H, archGeo(.6, 1.22, .3, .08), fm('red'), .4, .14, .85);
+  O8(H, .03, .03, .04, fm('ink'), .58, .8, .9, { seg: 8 }).rotation.x = Math.PI / 2;
+  [-.72].forEach(wx => { mesh(H, archGeo(.52, .7, .26, .08), fm('cream', 't'), wx, .82, .81); mesh(H, archGeo(.4, .58, .2, .06), fm('ink'), wx, .88, .84); });
+  K(H, .9, .1, .4, fm('conc'), .4, 0, 1.0, { r: .03 });
+  O8(H, .32, .32, .44, fm('ink'), -.75, 2.42, -.3, { seg: 16 }); O8(H, .34, .34, .06, fm('ink', 't'), -.75, 2.86, -.3, { seg: 16 });
+  charpai(g, 1.45, .55, -.25);
+  handPump(g, 1.7, -.95, .5);
   /* the camera that shoots it */
-  const cam = new THREE.Group(); cam.position.set(-1.6, b, 1.3); cam.rotation.y = 2.7; g.add(cam);
-  [0, 2.1, 4.2].forEach(r => K(cam, .04, 1.1, .04, fm('ink'), Math.sin(r) * .24, 0, Math.cos(r) * .24, { rx: Math.cos(r) * -.2, rz: Math.sin(r) * .2 }));
-  K(cam, .44, .3, .3, fm('ink'), 0, 1.06, 0); O8(cam, .11, .13, .22, fm('ink', 't'), 0, 1.21, .24).rotation.x = Math.PI / 2;
-  const recL = O8(cam, .03, .03, .02, flat(C.red), .14, 1.36, 0);
-  /* a boom mic reaching over the set */
-  const bm = new THREE.Group(); bm.position.set(2.3, b, 1.0); g.add(bm);
-  [0, 2.1, 4.2].forEach(r => K(bm, .035, .8, .035, fm('ink'), Math.sin(r) * .22, 0, Math.cos(r) * .22, { rx: Math.cos(r) * -.25, rz: Math.sin(r) * .25 }));
-  O8(bm, .025, .025, 1.6, fm('ink'), 0, .7, 0);
-  const arm = new THREE.Group(); arm.position.y = 2.3; arm.rotation.y = 2.4; bm.add(arm);
-  K(arm, .04, .04, 2.2, fm('ink'), 0, 0, -1.0, { rx: -.18, r: .015 });
-  const mic = O8(arm, .07, .07, .42, fm('ink', 't'), 0, -.2, -2.05); mic.rotation.x = Math.PI / 2;
-  O8(arm, .09, .09, .3, fm('cream', 't'), 0, -.2, -2.05).rotation.x = Math.PI / 2;
+  const recL = tripodCam(g, -1.75, 1.1, 2.6, .95);
   wallType(i);
   anim.push(t => { recL.visible = Math.floor(t * 1.4) % 2 === 0; });
   return g;
@@ -1037,72 +1022,85 @@ function drawArcade(t){
 }
 function cabinet(par, x, ry, label){
   const cab = new THREE.Group(); cab.position.set(x, 0, 0); cab.rotation.y = ry; par.add(cab);
-  const P = [[-.5, 0], [.5, 0], [.5, 1.0], [.64, 1.08], [.64, 1.18], [.26, 1.32], [.12, 2.16], [.4, 2.26], [.4, 2.72], [-.5, 2.72]];
-  const s = new THREE.Shape(); s.moveTo(P[0][0], P[0][1]); P.slice(1).forEach(p => s.lineTo(p[0], p[1]));
-  const side = new THREE.ExtrudeGeometry(s, { depth: .12, bevelEnabled: false });
+  /* the side profile, depth along x and height along y, with a rounded crown */
+  const s = new THREE.Shape();
+  s.moveTo(-.5, 0); s.lineTo(.5, 0); s.lineTo(.5, .96); s.lineTo(.66, 1.06); s.lineTo(.66, 1.17); s.lineTo(.3, 1.3);
+  s.lineTo(.16, 1.36); s.lineTo(.08, 2.12); s.lineTo(.42, 2.2); s.lineTo(.42, 2.56); s.quadraticCurveTo(.42, 2.8, .18, 2.8);
+  s.lineTo(-.26, 2.8); s.quadraticCurveTo(-.5, 2.8, -.5, 2.56); s.lineTo(-.5, 0);
+  const side = new THREE.ExtrudeGeometry(s, { depth: .1, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: 2, curveSegments: 10 });
   side.rotateY(-Math.PI / 2);
-  [-.6, .72].forEach(sx => mesh(cab, side, fm('red'), sx, 0, 0));
-  const core = new THREE.ExtrudeGeometry(s, { depth: 1.18, bevelEnabled: false }); core.translate(0, 0, -.59); core.rotateY(-Math.PI / 2);
-  mesh(cab, core, fm('ink'), -.04, -.001, 0).scale.set(1, .998, .97);
-  const a = P[5], bb = P[6], len = Math.hypot(bb[0] - a[0], bb[1] - a[1]), nz = bb[1] - a[1], ny = a[0] - bb[0], nl = Math.hypot(nz, ny);
-  const scr = plane(cab, 1.0, len * .9, decal(arcTex), 0, (a[1] + bb[1]) / 2 + ny / nl * .03, (a[0] + bb[0]) / 2 + nz / nl * .03 - .02);
-  scr.rotation.x = -Math.atan2(ny, nz);
-  const [mc, mg] = makeCanvas(512, 190); mg.fillStyle = HEX.paper; mg.fillRect(0, 0, 512, 190); mg.fillStyle = HEX.red; const mp = fitText(mg, label, 470, 170); mg.fillText(label, 21, 95 + mp * .38);
-  plane(cab, 1.1, .4, decal(texFrom(mc)), 0, 2.49, .41);
-  O8(cab, .02, .02, .14, fm('ink', 't'), -.28, 1.2, .45); const knob = O8(cab, .07, .07, .08, fm('red'), -.28, 1.33, .45);
-  [.08, .26, .44].forEach((bx, k) => O8(cab, .05, .05, .04, fm(k === 0 ? 'red' : 'cream'), bx, 1.2, .48));
+  [-.6, .7].forEach(sx => mesh(cab, side, fm('red'), sx, 0, 0));
+  const core = new THREE.ExtrudeGeometry(s, { depth: 1.1, bevelEnabled: false, curveSegments: 10 }); core.translate(0, 0, -.55); core.rotateY(-Math.PI / 2);
+  mesh(cab, core, fm('ink'), 0, -.001, 0).scale.set(1, .996, .97);
+  /* the screen, set into the slanted face */
+  const ay = 1.36, az = .16, by = 2.12, bz = .08, len = Math.hypot(by - ay, bz - az), ang = Math.atan2(bz - az, by - ay);
+  const scr = plane(cab, .94, len * .88, decal(arcTex), 0, (ay + by) / 2, (az + bz) / 2 + .015); scr.rotation.x = ang;
+  /* the marquee: a lit panel with the cabinet's name */
+  const [mc, mg] = makeCanvas(512, 180); mg.fillStyle = HEX.paper; mg.fillRect(0, 0, 512, 180); mg.fillStyle = HEX.red; const mp = fitText(mg, label, 460, 150); mg.textAlign = 'center'; mg.fillText(label, 256, 90 + mp * .36);
+  plane(cab, 1.0, .34, flat(0xFFFFFF, { map: texFrom(mc) }), 0, 2.38, .425);
+  /* the deck: a red-ball stick and three buttons */
+  const deck = new THREE.Group(); deck.position.set(0, 1.12, .5); deck.rotation.x = -.36; cab.add(deck);
+  O8(deck, .1, .1, .02, fm('ink', 't'), -.26, 0, 0, { seg: 16 }); O8(deck, .02, .02, .16, fm('steel'), -.26, 0, 0);
+  mesh(deck, new THREE.SphereGeometry(.065, 12, 8), fm('red'), -.26, .19, 0);
+  [.04, .2, .36].forEach((bx, k) => O8(deck, .05, .05, .04, fm(k === 1 ? 'cream' : 'red'), bx, 0, 0, { seg: 16 }));
+  /* the coin door, two lit slots */
+  K(cab, .4, .46, .04, fm('ink', 't'), 0, .32, .51, { r: .02 });
+  [-.08, .08].forEach(cx => K(cab, .06, .1, .02, flat(C.red), cx, .58, .535, { noShadow: true, r: .005 }));
   return cab;
-}
-function bench(par, x, z, ry){
-  const bn = new THREE.Group(); bn.position.set(x, 0, z); bn.rotation.y = ry || 0; par.add(bn);
-  [-.75, .75].forEach(sx => { K(bn, .08, .44, .5, fm('ink'), sx, 0, 0); K(bn, .08, .5, .08, fm('ink'), sx, .44, -.22); K(bn, .1, .04, .52, fm('ink', 't'), sx, .42, 0); });
-  for (let k = 0; k < 4; k++) K(bn, 1.7, .05, .11, fm('wood', k % 2 ? 'f' : 'm'), 0, .46, -.18 + k * .125);
-  for (let k = 0; k < 3; k++) K(bn, 1.7, .1, .04, fm('wood', k % 2 ? 'f' : 'm'), 0, .58 + k * .13, -.24);
 }
 function buildArcade(i){
   const g = stand(i, 1.9), b = base(g, 3.4, 1.6);
   drawArcade(0);
   const cabs = new THREE.Group(); cabs.position.y = b; g.add(cabs);
-  cabinet(cabs, -.8, .14, 'ARCADE'); cabinet(cabs, .8, -.14, 'PLAY');
-  bench(g, 0, 2.3, Math.PI);
+  cabinet(cabs, -.8, .1, 'ARCADE'); cabinet(cabs, .8, -.1, 'PLAY');
   wallType(i);
   anim.push(t => drawArcade(t));
   return g;
 }
 
-/* ── 8 · The exit: a door, a street lamp, a bench and a postbox ── */
-function streetLamp(par, x, z, ry){
-  const l = new THREE.Group(); l.position.set(x, 0, z); l.rotation.y = ry || 0; par.add(l);
-  K(l, .5, .2, .5, fm('conc'), 0, 0, 0); K(l, .56, .05, .56, fm('conc', 't'), 0, .18, 0);
-  O8(l, .06, .1, 3.4, fm('ink'), 0, .2, 0);
-  [.6, 1.6, 2.6].forEach(y => O8(l, .1, .1, .05, fm('ink', 't'), 0, .2 + y, 0));
-  K(l, .07, .07, .9, fm('ink'), 0, 3.5, .38, { rx: -.12 });
-  K(l, .05, .05, .5, fm('ink', 't'), 0, 3.25, .2, { rx: .7 });
-  K(l, .3, .16, .4, fm('ink'), 0, 3.42, .84); plane(l, .26, .32, flat(FAM.lamp), 0, 3.42, .84).rotation.x = Math.PI / 2;
+/* ── 8 · The exit: one big letter on the wall, half out of its envelope ── */
+function letterTex(){
+  const [c, g] = makeCanvas(900, 640);
+  g.fillStyle = HEX.paper; g.fillRect(0, 0, 900, 640);
+  g.fillStyle = HEX.red; g.fillRect(0, 0, 900, 14);
+  g.fillStyle = HEX.black; posterFont(g, 112); g.fillText('OPEN TO', 50, 128);
+  g.fillStyle = HEX.red; g.fillText('ROLES · 2026', 50, 228);
+  g.font = '500 30px "Geist Mono", monospace'; g.fillStyle = '#5C5B58'; g.fillText('GAMES · GRAPHICS · AI  —  AAYUSH', 54, 284);
+  return texFrom(c);
 }
 function buildContact(i){
-  const w = frameOf(i);
-  K(w, 2.5, 4.1, .14, fm('cream', 't'), 0, 0, .07); K(w, 2.2, 3.9, .1, fm('wood'), 0, 0, .14);
-  [[-.5, .5], [.5, .5], [-.5, 2.2], [.5, 2.2]].forEach(q => K(w, .8, 1.4, .04, fm('wood', 't'), q[0], q[1], .22));
-  O8(w, .05, .05, .06, fm('red'), .82, 1.8, .26).rotation.x = Math.PI / 2;
-  const g = stand(i, 2.2), b = base(g, 7.0, 1.8);
-  streetLamp(g, -1.6, -.3, 0);
-  bench(g, -3.0, .1, 0);
-  const mb = new THREE.Group(); mb.position.set(2.2, b, 0); g.add(mb);
-  O8(mb, .07, .07, .9, fm('ink'), 0, 0, 0);
-  K(mb, .46, .5, .62, fm('red'), 0, .9, 0); K(mb, .5, .06, .66, fm('red', 't'), 0, 1.4, 0); K(mb, .3, .03, .04, fm('ink'), 0, 1.25, .31);
+  const f = frameOf(i), W = 4.8, Hh = 3.0, y0 = .7; f.userData.dist = 2.2;
+  /* the flap lies open against the wall, the body is a soft slab, the letter rises out between them */
+  const tri = (pts, d) => { const s = new THREE.Shape(); s.moveTo(pts[0][0], pts[0][1]); pts.slice(1).forEach(p => s.lineTo(p[0], p[1])); s.lineTo(pts[0][0], pts[0][1]);
+    const g = new THREE.ExtrudeGeometry(s, { depth: d, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: 2 }); g.computeVertexNormals(); return g; };
+  mesh(f, tri([[-W / 2 + .02, 0], [W / 2 - .02, 0], [0, Hh * .52]], .04), fm('red', 't'), 0, y0 + Hh - .02, .015);
+  const letter = new THREE.Group(); f.add(letter);
+  K(letter, W - .5, Hh - .3, .04, fm('cream', 'f'), 0, y0 + .1, .1, { r: .015 });
+  const lh = Hh - .42; plane(letter, lh * 900 / 640, lh, decal(letterTex()), 0, y0 + .1 + (Hh - .3) / 2, .125);
+  K(f, W, Hh, .2, fm('cream'), 0, y0, .1, { r: .06 });
+  mesh(f, tri([[-W / 2 + .06, .06], [-W / 2 + .06, Hh - .08], [-.15, Hh * .46]], .03), fm('cream', 'f'), 0, y0, .2);
+  mesh(f, tri([[W / 2 - .06, .06], [W / 2 - .06, Hh - .08], [.15, Hh * .46]], .03), fm('cream', 'f'), 0, y0, .2);
+  mesh(f, tri([[-W / 2 + .1, .04], [W / 2 - .1, .04], [0, Hh * .42]], .035), fm('red'), 0, y0, .21);
+  const seal = O8(f, .3, .3, .06, fm('ink'), 0, 0, 0, { seg: 24 }); seal.rotation.x = Math.PI / 2; seal.position.set(0, y0 + Hh * .42, .27);
+  const face = new THREE.Mesh(new THREE.CircleGeometry(.27, 32), decal(badgeTex('@', HEX.black, HEX.paper), { transparent: true }));
+  face.position.set(0, y0 + Hh * .42, .305); f.add(face);
+  /* a paper plane circles the room */
   const pl = new THREE.Group(); world.add(pl);
   const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, .5, -.3, 0, -.3, 0, .05, -.15, 0, 0, .5, 0, .05, -.15, .3, 0, -.3], 3));
   pg.computeVertexNormals();
   pl.add(new THREE.Mesh(pg, new THREE.MeshPhongMaterial({ color: lin(C.paper), emissive: lin(C.paper).multiplyScalar(.32), side: THREE.DoubleSide, flatShading: true, shininess: 0, specular: 0x000000 })));
-  const rm = ROOMS[i];
+  const rm = ROOMS[i], at = new THREE.Vector3(); f.getWorldPosition(at);
   wallType(i);
-  anim.push(t => {
+  let rise = 0;
+  anim.push((t, dt) => {
     const u = REDUCED ? 0 : t * .5;
-    pl.position.set(rm.cx + Math.sin(u) * 3, 3.2 + Math.sin(u * 2) * .3, rm.cz + Math.cos(u) * 1.6);
+    pl.position.set(rm.cx + Math.sin(u) * 3, 3.2 + Math.sin(u * 2) * .3, rm.cz + Math.cos(u) * 1.6 + rm.n.z * 3);
     pl.rotation.set(0, u + Math.PI / 2, Math.sin(u * 2) * .3);
+    const want = REDUCED ? 1 : 1 - smooth(12, 19, camera.position.distanceTo(at));
+    rise += (want - rise) * (1 - Math.exp(-(dt || .016) * 3));
+    letter.position.y = rise * 1.6 + Math.sin(t * 1.2) * .03 * rise;
   });
-  return g;
+  return f;
 }
 
 /* ══ gates: one rounded portal per doorway, in the colour of the room it opens on,
@@ -1938,7 +1936,7 @@ loadAll().then(() => {
     const BG = { eng: 0x0B110D, cre: 0xF23A1D, both: 0xF3F1EC };
     renderer.setClearColor(BG[ROOMS[i].side], 1);
     steerLights(i, 10);
-    anim.forEach(f => f(3, .016));
+    for (let k = 0; k < 60; k++) anim.forEach(f => f(k * .05, .05));
     renderer.render(scene, camera);
     document.title = 'shot-ready';
     return;
