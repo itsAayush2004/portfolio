@@ -747,3 +747,48 @@ body:not(.booting) #gate{transform:none;clip-path:inset(0 50% 0 50%)}
   .lane-count i.roll,.menu-l li,.menu:not([hidden]) .menu-card,.dossier:not([hidden]) .dos-card{animation:none}
   body:not(.booting) #gate{clip-path:none;opacity:0}
 }
+
+/* ══ ROUND 4 · the engineer half as a terminal ══════════════
+   Phosphor green on near-black, JetBrains Mono, scanlines and a
+   quiet field of binary. The creator half stays poster red. */
+:root{--green:#3BF07A;--green-d:#2E9E5A;--green-l:#8CFFB0;--term:#070B08;--term-2:#0B120D;--f-code:"JetBrains Mono","Geist Mono",ui-monospace,monospace}
+#laneL.lane.eng{background:var(--term);color:var(--green);font-family:var(--f-code);
+  background-image:repeating-linear-gradient(transparent 0 3px,rgba(59,240,122,.035) 3px 4px)}
+#laneL .lane-h{background:var(--term)}
+#laneL .lane-h b{color:var(--green);font-family:var(--f-code);font-stretch:100%;font-weight:800;text-transform:lowercase;letter-spacing:-.03em}
+#laneL .lane-h b::before{content:"> "}
+#laneL .lane-h b::after{content:"";display:inline-block;width:.5em;height:.85em;margin-left:.12em;vertical-align:-.06em;background:var(--green);animation:caret 1.1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+#laneL .lane-count{border-color:rgba(59,240,122,.45);color:var(--green);opacity:1}
+#laneL .bin-field{position:absolute;inset:0;z-index:0;padding:21px;font:500 12px/1.35 var(--f-code);letter-spacing:.32em;word-break:break-all;color:rgba(59,240,122,.07);pointer-events:none;overflow:hidden}
+#laneL .strip{z-index:1}
+#laneL .lane-h{z-index:2}
+#laneL .lc h3{font-family:var(--f-code);font-weight:700;letter-spacing:-.03em;color:var(--green)}
+#laneL .lc-k,#laneL .lc-n{color:var(--green)}
+#laneL .lc-t li{border-color:rgba(59,240,122,.45);color:var(--green-l);font-family:var(--f-code)}
+#laneL .lc p{color:var(--green-l)}
+#laneL .lc{border-color:rgba(59,240,122,.2)}
+/* a project as a shell window */
+.term{position:absolute;inset:0;display:flex;flex-direction:column;gap:2.4cqw;padding:3.4cqw;background:var(--term-2);border:1px solid rgba(59,240,122,.3);border-radius:inherit;color:var(--green);font-family:var(--f-code);overflow:hidden}
+.term-bar{display:flex;align-items:center;gap:1.4cqw;font-size:max(9px,2.4cqw);color:var(--green-d)}
+.term-bar i{width:1.9cqw;height:1.9cqw;min-width:7px;min-height:7px;border-radius:50%;background:#1E7A40}
+.term-bar i:nth-child(3){background:var(--green)}
+.term-bar span{margin-left:auto}
+.term-line{margin:0;font-size:max(9px,2.7cqw);line-height:1.5;color:var(--green-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.term-line b{color:var(--green);font-weight:700}
+.term-line em{font-style:normal;color:var(--green-d)}
+.term-bits{margin:auto 0 0;font-family:var(--f-code);font-weight:800;line-height:1.05;letter-spacing:0;color:var(--green);text-shadow:0 0 .35em rgba(59,240,122,.45);white-space:pre}
+.caret{display:inline-block;width:.6em;height:1.05em;vertical-align:-.18em;background:var(--green);animation:caret 1.1s steps(1) infinite}
+#laneL .intro-name{font-family:var(--f-code);font-stretch:100%;font-weight:800;color:var(--green);letter-spacing:-.06em;text-shadow:0 0 .2em rgba(59,240,122,.3);font-size:24cqw}
+#laneL .intro-name::after{content:"_";animation:caret 1.1s steps(1) infinite}
+#laneL .intro-line{color:var(--green-d);font-family:var(--f-code);text-transform:none}
+body.simple #laneL .bin-field{display:none}
+/* the rest of the interface picks the green up wherever the engineer half speaks */
+.obj[data-side="eng"] .obj-num b{color:var(--green);text-shadow:0 0 .3em rgba(59,240,122,.35)}
+.obj[data-side="eng"]{background:var(--term);color:var(--green-l)}
+.obj[data-side="eng"] .obj-k{color:var(--green)}
+.obj[data-side="eng"] .obj-act .btn{color:var(--green);border-color:rgba(59,240,122,.5)}
+.obj[data-side="eng"] .obj-act .btn-solid{background:var(--green);color:var(--term);border-color:var(--green)}
+.menu-l button.side-eng{background:var(--term);color:var(--green);font-family:var(--f-code)}
+.seam-mark{background:linear-gradient(90deg,var(--term) 50%,var(--red) 50%)}
+@media (prefers-reduced-motion:reduce){ #laneL .lane-h b::after,.caret,#laneL .intro-name::after{animation:none} }

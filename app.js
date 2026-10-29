@@ -81,7 +81,50 @@ function posterHTML(key){
   }
   return h + '</div>';
 }
-$$('.lc-art[data-art]').forEach(f => { f.innerHTML = posterHTML(f.dataset.art); });
+/* ══ the engineer half speaks in a terminal ═══════════════
+   Each project is a shell window: a prompt, a command, and its number
+   or word drawn as a 5 × 7 bitmap of 1s, green on black. */
+const BITS = {
+  '0': ['01110','10001','10011','10101','11001','10001','01110'], '1': ['00100','01100','00100','00100','00100','00100','01110'],
+  '2': ['01110','10001','00001','00110','01000','10000','11111'], '5': ['11111','10000','11110','00001','00001','10001','01110'],
+  '6': ['00110','01000','10000','11110','10001','10001','01110'], '+': ['00000','00100','00100','11111','00100','00100','00000'],
+  '-': ['00000','00000','00000','11111','00000','00000','00000'], 'A': ['01110','10001','10001','11111','10001','10001','10001'],
+  'T': ['11111','00100','00100','00100','00100','00100','00100'], 'S': ['01111','10000','10000','01110','00001','00001','11110'],
+  'G': ['01110','10001','10000','10111','10001','10001','01111'], 'P': ['11110','10001','10001','11110','10000','10000','10000'],
+  'W': ['10001','10001','10001','10101','10101','10101','01010'], 'L': ['10000','10000','10000','10000','10000','10000','11111'],
+  'H': ['10001','10001','10001','11111','10001','10001','10001'], 'I': ['01110','00100','00100','00100','00100','00100','01110'],
+  'M': ['10001','11011','10101','10101','10001','10001','10001'], 'E': ['11111','10000','10000','11110','10000','10000','11111']
+};
+function bitRows(word){
+  const rows = [];
+  for (let r = 0; r < 7; r++) rows.push(Array.from(word).map(ch => (BITS[ch] || BITS['-'])[r].replace(/1/g, '1').replace(/0/g, '·')).join('·'));
+  return rows;
+}
+const TERM = {
+  feed:    { path: '~/arthis.space', cmd: 'ls games | wc -l', word: '105' },
+  wall:    { path: '~/arthis.land',  cmd: 'cat rooms/*.json | jq length', word: 'WALL' },
+  hex:     { path: '~/hexabed',      cmd: 'unity -batch -build world', word: '160+' },
+  net:     { path: '~/clymora',      cmd: 'python train_gpt2.py', word: 'GPT-2' },
+  factory: { path: '~/game-factory', cmd: 'factory new "a fishing game"', word: 'GAME' },
+  cv:      { path: '~/cv-forge',     cmd: 'cvforge tailor job.txt', word: 'ATS' },
+  tools:   { path: '~/apps',         cmd: 'npm run ship', word: 'SHIP' }
+};
+function termHTML(key){
+  const t = TERM[key]; if (!t) return posterHTML(key);
+  const rows = bitRows(t.word), cols = rows[0].length;
+  return '<div class="term"><div class="term-bar"><i></i><i></i><i></i><span>' + esc(t.path) + ' — zsh</span></div>' +
+    '<p class="term-line"><b>aayush@nitj</b>:<em>' + esc(t.path) + '</em>$ ' + esc(t.cmd) + '</p>' +
+    '<pre class="term-bits" style="font-size:' + (88 / (cols * .6)).toFixed(2) + 'cqw">' + rows.map(esc).join('\n') + '</pre>' +
+    '<p class="term-line"><b>aayush@nitj</b>:<em>' + esc(t.path) + '</em>$ <span class="caret"></span></p></div>';
+}
+$$('.lc-art[data-art]').forEach(f => { f.innerHTML = f.closest('#laneL') ? termHTML(f.dataset.art) : posterHTML(f.dataset.art); });
+/* a quiet field of 0s and 1s behind the engineer half */
+(function(){
+  const lane = $('#laneL'); if (!lane) return;
+  let bits = ''; for (let k = 0; k < 3400; k++) bits += Math.random() > .5 ? '1' : '0';
+  const f = document.createElement('div'); f.className = 'bin-field'; f.setAttribute('aria-hidden', 'true'); f.textContent = bits;
+  lane.prepend(f);
+})();
 
 /* ══ the game marks: one geometric symbol and a stacked name per game ══ */
 const GAMEMARKS = {
@@ -384,7 +427,7 @@ function loadAll(){
       undefined, () => { loadedN++; progress(); res(); });
   }));
   const fonts = (document.fonts && document.fonts.load
-    ? Promise.all(['900 100px Archivo', '500 20px Geist', '500 20px "Geist Mono"'].map(f => document.fonts.load(f))).catch(() => {})
+    ? Promise.all(['900 100px Archivo', '500 20px Geist', '500 20px "Geist Mono"', '800 20px "JetBrains Mono"', '400 20px "JetBrains Mono"'].map(f => document.fonts.load(f))).catch(() => {})
     : Promise.resolve()).then(() => { loadedN++; progress(); });
   return Promise.race([Promise.all(jobs.concat([fonts])), new Promise(res => setTimeout(res, 9000))]);
 }
@@ -413,7 +456,7 @@ const ROOMS = [[XL, 0], [XR, 0], [XR, 1], [XL, 1], [XL, 2], [XR, 2], [XR, 3], [X
   const f = d.a === 'x' ? V3(cx, 0, cz + nin.z * (CELL / 2 - WT / 2)) : V3(cx + nin.x * (CELL / 2 - WT / 2), 0, cz);
   return { cx, cz, w, side: STATIONS[i].side, door: d, nin, n, f, ry: Math.atan2(n.x, n.z) };
 });
-const wallColor = s => s === 'eng' ? C.black2 : s === 'cre' ? C.red : C.paper;
+const wallColor = s => s === 'eng' ? 0x0B110D : s === 'cre' ? C.red : C.paper;
 function sideAt(x, z){
   if (x < -HALF || x > HALF || z > 0 || z < Z_BACK) return null;
   if (z > -HALL_D) return 'hall';
@@ -546,7 +589,7 @@ const WALLWORD = ['ARTHIS', 'BLENDER', 'AKVERSE', 'HEXABED', 'INFERENCE', 'THE B
 function wallType(i){
   const rm = ROOMS[i], word = WALLWORD[i];
   const inner = i === 8 ? 13.5 : rm.w - WT - .04;
-  const col = rm.side === 'eng' ? HEX.red : rm.side === 'cre' ? HEX.black : HEX.red;
+  const col = rm.side === 'eng' ? '#3BF07A' : rm.side === 'cre' ? HEX.black : HEX.red;
   const W = 2048, [c0, g0] = makeCanvas(W, 10);
   const px = fitText(g0, word, W * 1.04, 2000);
   const H = Math.round(px * .78), [c, g] = makeCanvas(W, H);
@@ -947,7 +990,7 @@ function buildLights(){
 const laneEls = [$('#laneL'), $('#laneR')];
 const flatBox = $('#flat');
 /* each panel opens on half of the name, then one project per frame */
-[['laneL', 'Aayush', 'Game developer · AI engineer'], ['laneR', 'Kumar', '3D animator · Jaipur, India']].forEach(d => {
+[['laneL', 'Aayush', 'game_developer && ai_engineer'], ['laneR', 'Kumar', '3D animator · Jaipur, India']].forEach(d => {
   const el = $('#' + d[0]), strip = $('.strip', el);
   const intro = document.createElement('div'); intro.className = 'lc lc-intro'; intro.setAttribute('aria-hidden', 'true');
   intro.innerHTML = '<div class="intro-name">' + d[1] + '</div><div class="intro-line"><span>' + d[2] + '</span><span>Scroll ↓</span></div>';
@@ -1023,7 +1066,7 @@ function layout(){
     L.el.style.setProperty('--ch', L.ch + 'px');
     L.el.style.setProperty('--cw', laneW + 'px');
     L.strip.style.top = L.headH + 'px'; L.strip.style.paddingTop = '0px';
-    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack', el) || el.querySelector('.lc-art') || el, pos: STACK ? el.offsetLeft : el.offsetTop, py: null, d: null }));
+    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack, .term-bits, .intro-name', el) || { style: {} }, pos: STACK ? el.offsetLeft : el.offsetTop, py: null, d: null }));
     L.n = L.cards.length;
     if (isFlat) placeFlat(L);
   });
@@ -1161,7 +1204,8 @@ function direct(p, t){
     const travel = steps * L.step;
     const y = n === 0 ? -st * travel : -(1 - st) * travel;
     const idx = Math.round(st * steps);
-    if (idx !== L.idx){ L.idx = idx; L.count.innerHTML = '<i class="roll">' + String(idx).padStart(2, '0') + '</i> / ' + String(steps).padStart(2, '0'); }
+    if (idx !== L.idx){ L.idx = idx; L.count.innerHTML = n === 0 ? '[<i class="roll">' + String(idx).padStart(2, '0') + '</i>/' + String(steps).padStart(2, '0') + ']'
+      : '<i class="roll">' + String(idx).padStart(2, '0') + '</i> / ' + String(steps).padStart(2, '0'); }
     L.strip.style.transform = STACK ? 'translate3d(' + y.toFixed(1) + 'px,0,0)'
       : 'translate3d(0,' + y.toFixed(1) + 'px,0) skewY(' + ((n ? -1 : 1) * skew).toFixed(2) + 'deg)';
     if (REDUCED) return;
