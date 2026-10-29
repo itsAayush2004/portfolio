@@ -8,7 +8,7 @@ the earlier walk-through lives on at [`classic.html`](classic.html).
 ![Two halves, nine rooms](art/og.jpg)
 
 This merges my two earlier portfolios, the walk-through gallery (this repo) and the
-[corkboard](https://github.com/itsAayush2004/Board-repo), into one page you only have to scroll.
+[corkboard](https://github.com/itsAayush2004/portfolio-board), into one page you only have to scroll.
 
 ## How it reads
 
