@@ -1,11 +1,11 @@
 # portfolio
 
-> Two halves scroll past each other, then fold into one room.
+> Two halves scroll past each other, then fold into nine rooms.
 
 **Live → [itsaayush2004.github.io/portfolio](https://itsaayush2004.github.io/portfolio/)** ·
 the earlier walk-through lives on at [`classic.html`](classic.html).
 
-![Two halves, one room](art/og.jpg)
+![Two halves, nine rooms](art/og.jpg)
 
 This merges my two earlier portfolios, the walk-through gallery (this repo) and the
 [corkboard](https://github.com/itsAayush2004/Board-repo), into one page you only have to scroll.
@@ -15,8 +15,8 @@ This merges my two earlier portfolios, the walk-through gallery (this repo) and 
 | Act | What scrolling does |
 |---|---|
 | **I · Two halves** | Two lanes of real HTML run in opposite directions: **Engineer** on black, **Creator** on vermilion. The room shows through the seam between them. |
-| **II · The merge** | The lanes swing open on their outer edges like doors and settle on the side walls. The camera lifts out to show the whole room as a cut-away model, then drops in. |
-| **III · The room** | The camera walks nine stations, zig-zagging between the black engineer wall and the red creator wall to the exit at the back. Each station's card opens by itself as you arrive, with the key facts. |
+| **II · The merge** | The lanes swing open on their outer edges like doors and settle on the hall's side walls. *Two halves* and *Nine rooms* slide together, the camera lifts out over the building as a cut-away plan, and a red slash wipes it back inside. |
+| **III · The rooms** | The camera walks doorway to doorway through nine rooms in a serpentine: black rooms for the engineer, red for the creator, white for both. Each room holds one piece, one poster and one label, and its card builds itself as you arrive. |
 
 Stations: ARTHIS.space + ARTHIS.land · Blender add-on suite · HexaBed · AKverse · Systems & Inference ·
 the Board (CV Forge and the side projects) · the Arcade (four playable games) · the numbers · contact.
@@ -28,9 +28,22 @@ Clicking is optional: arrows or `← →` step between stations, `1–9` jump, `
 
 - **Palette:** black `#0C0C0D`, paper `#F3F1EC`, vermilion `#F23A1D`. Nothing else.
 - **Type:** Archivo at its condensed black width for poster type; Geist for text; Geist Mono for labels and data.
-- **Pictures are set in type.** Every project's image is a poster drawn in code (`POSTERS` in `app.js`): a cropped
+- **Pictures are set in type.** Every project's image, and every game's mark, is drawn in code (`POSTERS` in `app.js`): a cropped
   numeral, a halftone count, stacked words. The same definitions render as HTML in the lanes and as canvas
-  textures on the room's walls. The only photos are the game covers and logos.
+  textures on the room's walls. The only photo is the AKverse avatar on the channel screen.
+
+## Motion
+
+Every effect is tied to scroll, so it plays backwards too: letters rise out of masks in the intro, the
+lanes lean with scroll speed, posters open from their centres and drift at their own depth, cards sharpen on
+the lane's golden line and blur away from it, the camera banks into turns and softens while it walks, and
+each station card builds itself. `prefers-reduced-motion` turns all of it off.
+
+## Proportion
+
+φ = 1.618 runs through it: type steps 12 · 19 · 31 · 50 · 81 · 131, spacing steps 8 · 13 · 21 · 34 · 55 · 89,
+posters and labels are golden rectangles, splits are 38.2 / 61.8, and each piece sits on the screen's golden line.
+No scrollbars are drawn anywhere.
 
 ## How it works
 

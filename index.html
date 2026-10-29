@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Aayush Kumar — Two Halves, One Room</title>
-<meta name="description" content="Aayush Kumar: game developer, AI and backend engineer, and 3D animator. Two halves of the work scroll past each other, then fold into one 3D room you can explore like a game.">
+<title>Aayush Kumar — Two Halves, Nine Rooms</title>
+<meta name="description" content="Aayush Kumar: game developer, AI and backend engineer, and 3D animator. Two halves of the work scroll past each other, then fold into nine 3D rooms you walk through like a game.">
 <meta name="author" content="Aayush Kumar">
 <meta name="theme-color" content="#0C0C0D">
 <link rel="canonical" href="https://itsaayush2004.github.io/portfolio/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Aayush Kumar — Two Halves, One Room">
-<meta property="og:description" content="The engineer and the creator scroll past each other, then merge into one 3D room with nine stations to find.">
+<meta property="og:title" content="Aayush Kumar — Two Halves, Nine Rooms">
+<meta property="og:description" content="The engineer and the creator scroll past each other, then fold into nine rooms you walk through.">
 <meta property="og:url" content="https://itsaayush2004.github.io/portfolio/">
 <meta property="og:image" content="https://itsaayush2004.github.io/portfolio/art/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -123,8 +123,8 @@
       </a>
       <a class="lc" href="#st-arthis" data-go="arthis">
         <div class="lc-top"><span class="lc-n">05</span><span class="lc-k">Game art</span></div>
-        <figure class="lc-art covers"><img src="assets/brand/cover-fruit-blast.jpg" alt="Fruit Crush Blast cover art" width="540" height="960" loading="lazy"><img src="assets/brand/cover-doodle-militia.jpg" alt="Doodle Militia cover art" width="540" height="960" loading="lazy"><img src="assets/brand/cover-chess.jpg" alt="Chess cover art" width="540" height="960" loading="lazy"><img src="assets/brand/cover-table-tennis.jpg" alt="Table Tennis cover art" width="540" height="960" loading="lazy"></figure>
-        <div class="lc-b"><h3>Three covers a game</h3><p>Every ARTHIS game ships with its own icon, three cover posters and a guide page.</p><ul class="lc-t"><li>105 games</li><li>One style kit</li></ul></div>
+        <figure class="lc-art games" data-games aria-hidden="true"></figure>
+        <div class="lc-b"><h3>A mark for every game</h3><p>Every ARTHIS game ships with its own icon, three cover posters and a guide page.</p><ul class="lc-t"><li>105 games</li><li>One style kit</li></ul></div>
       </a>
       <a class="lc" href="#st-akverse" data-go="akverse">
         <div class="lc-top"><span class="lc-n">06</span><span class="lc-k">YouTube</span></div>
@@ -152,20 +152,19 @@
         <span class="pips" id="pips" aria-hidden="true"></span><span id="foundN">0/9</span><span class="pill-l">found</span>
       </button>
       <button class="pill" id="soundBtn" type="button" aria-pressed="false">Sound off</button>
-      <button class="pill" type="button" data-simple>Simple view</button>
-    </div>
+          </div>
   </div>
 
   <!-- Act I: the title in the gap between the two lanes -->
   <div class="seam-card" id="seamCard">
+    <div class="ticker" aria-hidden="true"><div class="tk-run"><span>Engineer <i></i> Creator <i></i> Games <i></i> AI <i></i> Animation <i></i> Tools <i></i> </span><span>Engineer <i></i> Creator <i></i> Games <i></i> AI <i></i> Animation <i></i> Tools <i></i> </span></div></div>
     <p class="kick"><span>Jaipur, India</span><span>NIT Jaipur ’26</span></p>
     <h2 class="seam-name"><span>Aayush</span><span>Kumar</span></h2>
-    <p class="seam-lede">Game developer, AI &amp; backend engineer, and 3D animator.
-      I build worlds, games, and the tools behind them.</p>
-    <p class="seam-how"><span class="mouse" aria-hidden="true"><i></i></span><span>Scroll. The two halves slide past each other, then fold into one room.</span></p>
+    <p class="seam-lede">Game developer, AI engineer, 3D animator.</p>
+    <p class="seam-how"><span class="mouse" aria-hidden="true"><i></i></span><span>Scroll to merge the halves</span></p>
   </div>
 
-  <div class="merge-cap" id="mergeCap" aria-hidden="true"><span>Two halves</span><b>One room.</b></div>
+  <div class="merge-cap" id="mergeCap" aria-hidden="true"><span>Two halves</span><b>Nine rooms.</b></div>
 
   <!-- the objective card for the station you are standing at -->
   <article class="obj" id="obj" aria-live="polite">
@@ -184,8 +183,7 @@
     <button class="tk-btn" id="nextBtn" type="button" aria-label="Next station"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></button>
   </nav>
 
-  <div class="map" id="map" aria-hidden="true"><span class="map-l">Plan</span><svg id="mapSvg" viewBox="-10 -35 20 37"></svg></div>
-  <div class="toasts" id="toasts" aria-live="polite"></div>
+    <div class="toasts" id="toasts" aria-live="polite"></div>
 </div>
 
 <!-- the fast-travel menu -->
@@ -193,7 +191,7 @@
   <div class="menu-card">
     <div class="menu-h"><h2 id="menuT">Fast travel</h2><button class="x" type="button" data-close aria-label="Close">Esc</button></div>
     <ol class="menu-l" id="menuL"></ol>
-    <p class="menu-keys"><kbd>←</kbd><kbd>→</kbd> walk · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> back</p>
+    <p class="menu-keys"><button class="linkish" type="button" data-simple>Open the simple page</button> · <kbd>←</kbd><kbd>→</kbd> walk · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> back</p>
   </div>
 </div>
 
@@ -226,11 +224,10 @@
   </header>
 
   <article class="st" id="st-arthis" data-id="arthis" data-side="eng" data-title="ARTHIS"
-    data-blurb="Two live platforms. A feed of 105 mini-games, and a Unity city of rooms you share with friends."
+    data-blurb="105 mini-games in one feed, and a city of rooms."
     data-chips="105 games|1 → 10K DAU|40+ live rooms">
     <p class="st-k">Engineer · two live platforms</p>
     <h2>ARTHIS.space and ARTHIS.land</h2>
-    <div class="st-logos"><img src="assets/brand/logo-space.png" alt="ARTHIS.space logo" width="256" height="173"><img src="assets/brand/logo-land.png" alt="ARTHIS.land logo" width="256" height="256"></div>
     <h3>ARTHIS.space: 105 games in one swipeable feed</h3>
     <p>A mini-games platform with a TikTok-style vertical feed. Open it and you are already playing; swipe up for the next game. 61 single-player games and 44 for friends on one device.</p>
     <ul>
@@ -240,7 +237,6 @@
       <li>Every game has its own icon, three cover posters and a written guide page</li>
       <li>One UI that reshapes itself for phone, tablet and desktop, with a lite mode for low-end phones, Data Saver and 2G</li>
     </ul>
-    <figure class="st-atlas"><img src="assets/brand/games-atlas.jpg" alt="A grid of ARTHIS.space game icons" width="1440" height="1920" loading="lazy"><figcaption>Game icons from the ARTHIS.space catalog</figcaption></figure>
     <h3>ARTHIS.land: The Wall</h3>
     <p>A handcrafted vertical city in the browser. Unity, shipped to WebGL, where every brick on the wall is a room someone built, and 2–4 people explore a space together in real time.</p>
     <ul>
@@ -253,7 +249,7 @@
   </article>
 
   <article class="st" id="st-blender" data-id="blender" data-side="cre" data-title="Blender Add-on Suite"
-    data-blurb="28 Python add-ons that automate the animation and rendering behind the AKverse channel."
+    data-blurb="28 Python tools behind every AKverse reel."
     data-chips="28 add-ons|27,208 lines|6 camera rig versions">
     <p class="st-k">Creator · pipeline tooling</p>
     <h2>28 Blender add-ons, written to ship a channel</h2>
@@ -268,8 +264,22 @@
     <dl class="st-spec"><div><dt>Add-ons</dt><dd>28</dd></div><div><dt>Lines of Python</dt><dd>27,208</dd></div><div><dt>Formats</dt><dd>GLB · FBX</dd></div></dl>
   </article>
 
+  <article class="st" id="st-akverse" data-id="akverse" data-side="cre" data-title="AKverse"
+    data-blurb="Two reel series, shot in my own dioramas."
+    data-chips="21.9K subscribers|2 series|1 UI kit">
+    <p class="st-k">Creator · YouTube @AKverseOfficial</p>
+    <h2>AKverse: two reel series and the system behind every upload</h2>
+    <h3>Kaleshi Family</h3>
+    <p>A 40–50 second Hinglish mini-drama with Panchayat-meets-TMKOC energy, played by my characters in my dioramas. Every episode has a cold open, a title card, a deadpan beat, a twist and a cliffhanger.</p>
+    <h3>Diorama Build Shorts</h3>
+    <p>Tilu says “Aaj hum banayenge…!”, then a Blender diorama builds itself piece by piece while the characters hop in.</p>
+    <h3>The YouTube UI system</h3>
+    <p>One kit for the whole channel: thumbnail grid, title type, series colours, end screens and a full SEO pack per video. It also covers Dr Lodha reels, Friends On Stand-Up sets and school episodes.</p>
+    <p class="st-go"><a class="btn btn-solid" href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">Watch on YouTube ↗</a></p>
+  </article>
+
   <article class="st" id="st-hexabed" data-id="hexabed" data-side="eng" data-title="HexaBed"
-    data-blurb="A procedural hex-grid terrain engine in Unity, with editor tooling so a designer never opens a script."
+    data-blurb="Procedural hex worlds, built without a script."
     data-chips="160+ tiles|14 scripts|3,705 lines of C#">
     <p class="st-k">Engineer · Unity engine</p>
     <h2>HexaBed</h2>
@@ -288,22 +298,8 @@
     <dl class="st-spec"><div><dt>Scripts</dt><dd>14</dd></div><div><dt>Lines of C#</dt><dd>3,705</dd></div><div><dt>Engine</dt><dd>Unity</dd></div></dl>
   </article>
 
-  <article class="st" id="st-akverse" data-id="akverse" data-side="cre" data-title="AKverse"
-    data-blurb="Two reel series on YouTube, shot in my own Blender dioramas, and the system behind every upload."
-    data-chips="21.9K subscribers|2 series|1 UI kit">
-    <p class="st-k">Creator · YouTube @AKverseOfficial</p>
-    <h2>AKverse: two reel series and the system behind every upload</h2>
-    <h3>Kaleshi Family</h3>
-    <p>A 40–50 second Hinglish mini-drama with Panchayat-meets-TMKOC energy, played by my characters in my dioramas. Every episode has a cold open, a title card, a deadpan beat, a twist and a cliffhanger.</p>
-    <h3>Diorama Build Shorts</h3>
-    <p>Tilu says “Aaj hum banayenge…!”, then a Blender diorama builds itself piece by piece while the characters hop in.</p>
-    <h3>The YouTube UI system</h3>
-    <p>One kit for the whole channel: thumbnail grid, title type, series colours, end screens and a full SEO pack per video. It also covers Dr Lodha reels, Friends On Stand-Up sets and school episodes.</p>
-    <p class="st-go"><a class="btn btn-solid" href="https://www.youtube.com/@AKverseOfficial" target="_blank" rel="noopener">Watch on YouTube ↗</a></p>
-  </article>
-
   <article class="st" id="st-ai" data-id="ai" data-side="eng" data-title="Systems &amp; Inference"
-    data-blurb="AI backend work at Clymora, a GPT-2 built from scratch, and the pipelines that turn a sentence into a shipped thing."
+    data-blurb="GPT-2 from scratch, RAG and fast inference."
     data-chips="6 months at Clymora|23 ComfyUI workflows|GPT-2 from scratch">
     <p class="st-k">Engineer · AI and backend</p>
     <h2>Systems &amp; Inference</h2>
@@ -323,7 +319,7 @@
   </article>
 
   <article class="st" id="st-board" data-id="board" data-side="cre" data-title="The Board"
-    data-blurb="Small products, each one shipped end to end, pinned up with red string."
+    data-blurb="Small products, each shipped end to end."
     data-chips="CV Forge|Hustiq|Travel Atlas">
     <p class="st-k">Both halves · tools and side projects</p>
     <h2>The Board: small products, shipped end to end</h2>
@@ -346,23 +342,8 @@
     <p class="st-go"><a class="btn btn-solid" href="https://github.com/itsAayush2004/Cv-maker" target="_blank" rel="noopener">CV Forge source</a><a class="btn" href="https://itsaayush2004.github.io/TravelDiary/" target="_blank" rel="noopener">Travel Atlas ↗</a><a class="btn" href="https://github.com/itsAayush2004" target="_blank" rel="noopener">Every repo ↗</a></p>
   </article>
 
-  <article class="st" id="st-arcade" data-id="arcade" data-side="both" data-title="The Arcade"
-    data-blurb="Four of my games, playable right here. Pick one and the cabinet hands you the controls."
-    data-chips="Flappy Fird|Trigger Runner|3072|Sudoku">
-    <p class="st-k">Both halves · play</p>
-    <h2>The Arcade</h2>
-    <p>Four games from my builds, running in the page. Each one is a single HTML file with no install.</p>
-    <p class="st-go games">
-      <button class="btn btn-solid" type="button" data-play="flappy">▶ Flappy Fird</button>
-      <button class="btn" type="button" data-play="runner">▶ Trigger Runner</button>
-      <button class="btn" type="button" data-play="g3072">▶ 3072</button>
-      <button class="btn" type="button" data-play="sudoku">▶ Sudoku</button>
-    </p>
-    <p>All 105 ARTHIS games live at <a href="https://arthis.space" target="_blank" rel="noopener">arthis.space</a>.</p>
-  </article>
-
   <article class="st" id="st-trophies" data-id="trophies" data-side="both" data-title="Trophy Shelf"
-    data-blurb="The counts, measured rather than estimated, and the ranks that got me to NIT Jaipur."
+    data-blurb="154 builds, counted rather than estimated."
     data-chips="154 builds|141K lines|AIR 8956">
     <p class="st-k">Both halves · evidence</p>
     <h2>By the numbers</h2>
@@ -380,8 +361,23 @@
     <p class="st-skills"><span>Unity</span><span>C#</span><span>Unreal Engine</span><span>Blender</span><span>Python</span><span>JavaScript</span><span>Three.js</span><span>React</span><span>React Native</span><span>Supabase</span><span>PostgreSQL</span><span>FastAPI</span><span>MCP</span><span>C++</span><span>Java</span><span>Git</span><span>Rigging</span><span>3D Animation</span><span>Procedural Generation</span><span>Video Editing</span></p>
   </article>
 
+  <article class="st" id="st-arcade" data-id="arcade" data-side="both" data-title="The Arcade"
+    data-blurb="Four of my games, playable right here."
+    data-chips="Flappy Fird|Trigger Runner|3072|Sudoku">
+    <p class="st-k">Both halves · play</p>
+    <h2>The Arcade</h2>
+    <p>Four games from my builds, running in the page. Each one is a single HTML file with no install.</p>
+    <p class="st-go games">
+      <button class="btn btn-solid" type="button" data-play="flappy">▶ Flappy Fird</button>
+      <button class="btn" type="button" data-play="runner">▶ Trigger Runner</button>
+      <button class="btn" type="button" data-play="g3072">▶ 3072</button>
+      <button class="btn" type="button" data-play="sudoku">▶ Sudoku</button>
+    </p>
+    <p>All 105 ARTHIS games live at <a href="https://arthis.space" target="_blank" rel="noopener">arthis.space</a>.</p>
+  </article>
+
   <article class="st" id="st-contact" data-id="contact" data-side="both" data-title="Let’s build something"
-    data-blurb="Open to game development, graphics and AI engineering roles from 2026, or a collab on the channel."
+    data-blurb="Open to game, graphics and AI roles from 2026."
     data-chips="Roles from 2026|Collabs|Jaipur, India">
     <p class="st-k">The exit · say hi</p>
     <h2>Let’s build something.</h2>
@@ -396,6 +392,8 @@
   <footer class="cx-foot">© 2026 Aayush Kumar · Built in the browser with Three.js, no build step · <a href="https://github.com/itsAayush2004/portfolio" target="_blank" rel="noopener">Source</a> · <a href="classic.html">Classic walk-through</a></footer>
 </main>
 
+<div class="wipe" id="wipe" aria-hidden="true"><i></i><i></i></div>
+<div id="cursor" aria-hidden="true"></div>
 <div id="scroller" aria-hidden="true"></div>
 
 <script src="vendor/three.min.js" defer></script>

@@ -162,8 +162,8 @@ body.three #hud{display:block}
   background:var(--paper);color:var(--black);transition:opacity .2s}
 .seam-card .kick{display:flex;justify-content:space-between}
 .seam-name{margin:0 0 0 -.03em;font-family:var(--f-poster);font-stretch:62%;font-weight:900;text-transform:uppercase;font-size:clamp(76px,8.2vw,124px);line-height:.8;letter-spacing:-.02em}
-.seam-name span{display:block}
-.seam-name span + span{color:var(--red)}
+.seam-name > span{display:block}
+.seam-name > span + span{color:var(--red)}
 .seam-lede{margin:0;font:500 15px/1.45 var(--f-sans)}
 .seam-how{margin:0;display:flex;gap:12px;align-items:center;font:500 12px/1.45 var(--f-mono);border-top:1.5px solid var(--black);padding-top:14px}
 .mouse{width:16px;height:26px;border:1.5px solid var(--black);border-radius:9px;flex:none;position:relative}
@@ -334,3 +334,167 @@ body.simple .strip{position:static;transform:none!important;padding-top:6px}
   #gate{transition:none}
 }
 .lane.thin .lane-tag span + span{display:none}
+
+/* ══ MOTION ═════════════════════════════════════════════════
+   Everything here is either a one-off entrance or driven by
+   scroll from app.js, so it plays backwards as well as forwards. */
+:root{--ease-out:cubic-bezier(.16,1,.3,1);--ease-io:cubic-bezier(.7,0,.2,1)}
+.ch{display:inline-block;will-change:transform}
+.lane-h b{display:block;overflow:hidden;padding-bottom:.02em}
+.seam-name > span{overflow:hidden;padding-bottom:.02em}
+@keyframes chUp{from{transform:translateY(108%)}to{transform:none}}
+@keyframes wipeIn{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes cardDown{from{opacity:0;transform:translateY(-90px)}to{opacity:1;transform:none}}
+@keyframes cardUp{from{opacity:0;transform:translateY(90px)}to{opacity:1;transform:none}}
+@keyframes bandIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+
+/* the intro, once the loader lifts */
+body.intro .lane-h b .ch,body.intro .seam-name .ch{animation:chUp 1s var(--ease-out) both;animation-delay:calc(450ms + var(--i) * 45ms)}
+body.intro .seam-name > span + span .ch{animation-delay:calc(650ms + var(--i) * 45ms)}
+body.intro .seam-card{animation:wipeIn 1.1s var(--ease-io) .25s both}
+body.intro #laneL .lc{animation:cardDown 1.1s var(--ease-out) both;animation-delay:calc(500ms + var(--k) * 90ms)}
+body.intro #laneR .lc{animation:cardUp 1.1s var(--ease-out) both;animation-delay:calc(500ms + var(--k) * 90ms)}
+body.intro .lane-tag,body.intro .lane-sub{animation:fadeUp .8s var(--ease-out) .9s both}
+body.intro .hud-top > *,body.intro .track{animation:fadeUp .8s var(--ease-out) 1.1s both}
+
+/* the ticker across the title card */
+.ticker{margin:-20px -20px 0;background:var(--black);color:var(--paper);overflow:hidden;white-space:nowrap;font:500 12px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+.tk-run{display:inline-flex;animation:tick 16s linear infinite;padding:8px 0}
+.tk-run span{display:inline-flex;align-items:center;gap:12px;padding-right:12px}
+.tk-run i{width:7px;height:7px;background:var(--red);display:inline-block}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* posters: revealed from the centre, drifting at their own depth */
+.lc-art{clip-path:inset(calc((1 - var(--rv, 1)) * 50%) 0 calc((1 - var(--rv, 1)) * 50%) 0)}
+.po{scale:calc((1.14 - .14 * var(--rv, 1)) * var(--hs, 1));transition:scale .6s var(--ease-out)}
+.po-big,.po-stack{translate:0 var(--py, 0%)}
+.lc:hover{--hs:1.06}
+.lc:hover .lc-art{outline:0}
+.lc h3{transition:transform .5s var(--ease-out),color .2s}
+.lc:hover h3{transform:translateX(8px)}
+
+/* the merge: two words slide together, then a slash wipes the screen */
+.merge-cap span,.merge-cap b{will-change:transform}
+.wipe{position:fixed;inset:0;z-index:13;pointer-events:none;overflow:hidden;display:none}
+body.three .wipe{display:block}
+.wipe i{position:absolute;top:-10%;bottom:-10%;left:-20%;width:140%;background:var(--red);transform:translateX(-140%) skewX(-14deg);will-change:transform}
+.wipe i + i{background:var(--black);width:40%;left:-30%}
+
+/* the station card builds itself */
+.obj-t .w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.04em}
+.obj-t .w > i{display:inline-block;font-style:normal}
+.obj.enter .obj-band{animation:bandIn .55s var(--ease-io) both}
+.obj.enter .obj-t .w > i{animation:chUp .8s var(--ease-out) both;animation-delay:calc(140ms + var(--i) * 70ms)}
+.obj.enter .obj-p,.obj.enter .obj-pts li,.obj.enter .obj-chips span,.obj.enter .obj-act > *{animation:fadeUp .6s var(--ease-out) both;animation-delay:calc(300ms + var(--i, 0) * 60ms)}
+
+/* the cursor: a square that inverts what it passes over */
+#cursor{position:fixed;left:0;top:0;z-index:80;width:26px;height:26px;margin:-13px 0 0 -13px;border:1.5px solid #fff;pointer-events:none;mix-blend-mode:difference;display:none;
+  transition:width .35s var(--ease-out),height .35s var(--ease-out),margin .35s var(--ease-out),background .25s,rotate .35s var(--ease-out)}
+#cursor.on{width:58px;height:58px;margin:-29px 0 0 -29px;background:#fff;rotate:45deg}
+@media (hover:hover) and (pointer:fine){body.three #cursor{display:block}}
+body.simple #cursor{display:none!important}
+
+@media (prefers-reduced-motion:reduce){
+  .lc-art{clip-path:none}.po{scale:1}.po-big,.po-stack{translate:none}
+  .wipe,#cursor{display:none!important}
+  .tk-run{animation:none}
+}
+
+/* ══ GOLDEN RATIO ═══════════════════════════════════════════
+   φ = 1.618. Type steps by φ: 12 · 19 · 31 · 50 · 81 · 131.
+   Space steps by Fibonacci: 8 · 13 · 21 · 34 · 55 · 89.
+   Pictures are golden rectangles; splits are 38.2 / 61.8. */
+:root{--phi:1.618;--t1:12px;--t2:19px;--t3:31px;--t4:50px;--t5:81px;--t6:131px;
+  --s1:8px;--s2:13px;--s3:21px;--s4:34px;--s5:55px;--s6:89px}
+
+/* lanes: less to read, more to look at */
+.lane-h{padding:var(--s6) var(--s4) var(--s3);gap:var(--s2)}
+.lane-h b{font-size:min(var(--t6),9vw)}
+.lane-sub{display:none}
+.strip{padding:0 var(--s4) var(--s6)}
+.lc{padding:var(--s4) 0;gap:var(--s3)}
+.lc-art{aspect-ratio:1.618/1}
+.lc h3{font-size:var(--t3)}
+body.three .lc-b p{display:none}
+body.three .lc-t li:nth-child(n+3){display:none}
+.lane.wide .lc{grid-template-columns:minmax(0,61.8%) minmax(0,38.2%);column-gap:var(--s3)}
+.lane.wide .lc-b{align-content:end}
+.lane.thin .lane-h{padding:68px var(--s2) var(--s2)}
+.lane.thin .lane-h b{font-size:var(--t4)}
+.lane.thin .strip{padding:0 var(--s2) var(--s5)}
+.lane.thin .lc{padding:var(--s3) 0}
+.lane.thin .lc h3{font-size:var(--t2)}
+/* the focus band: cards sharpen at the middle of the lane */
+body.three .lc{filter:blur(var(--bl, 0px));opacity:calc(1 - var(--fo, 0))}
+
+/* the title card */
+.seam-card{width:min(calc(var(--seam) - 34px),382px);gap:var(--s3);padding:var(--s3)}
+.ticker{margin:calc(-1 * var(--s3)) calc(-1 * var(--s3)) 0}
+.seam-name{font-size:var(--t6)}
+.seam-lede{font-size:var(--t2);line-height:1.3;font-weight:500}
+
+/* the station card: a golden rectangle, one idea */
+.obj{width:min(382px,calc(100% - 32px));bottom:calc(var(--s6) + env(safe-area-inset-bottom,0px))}
+.obj.left{left:max(var(--s4),env(safe-area-inset-left,0px))}
+.obj.right{right:max(var(--s4),env(safe-area-inset-right,0px))}
+.obj-band{padding:var(--s2) var(--s3)}
+.obj-t{font-size:var(--t5);line-height:.82;margin:var(--s3) var(--s3) var(--s2);padding-left:0}
+.obj-p{font-size:var(--t2);line-height:1.3;margin:0 var(--s3) var(--s3)}
+.obj-pts{display:none!important}
+.obj-chips{margin:0 var(--s3) var(--s3)}
+.obj-chips span:nth-child(n+3){display:none}
+.obj-act{padding:0 var(--s3) var(--s3)}
+.track{width:min(618px,calc(100% - 32px));bottom:var(--s4)}
+.tk-ticks .tk-l{display:none}
+.merge-cap span{font-size:min(var(--t5),11vw)}
+.merge-cap b{font-size:min(var(--t6),18vw)}
+
+/* moving between rooms softens the picture; arriving brings it into focus */
+#gl{filter:blur(var(--mb, 0px))}
+
+@media (max-width:760px){
+  .seam-name{font-size:var(--t5)}
+  .obj-t{font-size:var(--t4)}
+  .obj-p{font-size:15px}
+  .obj-chips{display:none}
+}
+@media (prefers-reduced-motion:reduce){ body.three .lc{filter:none;opacity:1} #gl{filter:none} }
+
+.seam-name{font-size:clamp(64px,calc(var(--seam) * .29),var(--t6))}
+.seam-name > span{white-space:nowrap}
+.lane-h b{white-space:nowrap}
+
+/* the game marks, four golden rectangles in a row */
+.lc-art.games{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:none}
+.gm{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:12% 10% 10%;overflow:hidden;container-type:inline-size;box-shadow:inset 0 0 0 1px rgba(12,12,13,.18)}
+.gm svg{width:70%;height:auto}
+.gm b{font-family:var(--f-poster);font-stretch:62%;font-weight:900;text-transform:uppercase;font-size:24cqw;line-height:.84;letter-spacing:-.01em}
+
+/* RULE: no visible scrollbars anywhere. Everything still scrolls. */
+html,body,*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{display:none;width:0;height:0}
+.seam-name{font-size:clamp(56px,calc(var(--seam) * .25),var(--t6))}
+
+/* centred without transform, so entrance animations can't knock things off-centre */
+.track{left:0;right:0;margin:0 auto;transform:none}
+
+/* ══ PHONES: the same design, re-cut for one hand ══════════ */
+@media (max-width:760px){
+  .seam-card{left:var(--s2);right:var(--s2);width:auto;top:auto;bottom:calc(var(--s6) + env(safe-area-inset-bottom,0px));transform:none;padding:var(--s2);gap:var(--s2)}
+  .ticker{margin:calc(-1 * var(--s2)) calc(-1 * var(--s2)) 0}
+  .seam-name{font-size:var(--t5)}
+  .seam-name > span{display:inline-block;margin-right:.18em}
+  .seam-lede{font-size:15px}
+  .seam-how{padding-top:var(--s2)}
+  .lane.thin .lane-h b{font-size:44px}
+  .lane-tag{font-size:10px}
+  .obj{left:var(--s2)!important;right:var(--s2)!important;width:auto;bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .obj-t{font-size:var(--t4);margin:var(--s2) var(--s2) var(--s1)}
+  .obj-p{margin:0 var(--s2) var(--s2)}
+  .obj-band{padding:var(--s1) var(--s2)}
+  .obj-act{padding:0 var(--s2) var(--s2)}
+  .track{width:calc(100% - 2 * var(--s2));bottom:calc(var(--s2) + env(safe-area-inset-bottom,0px))}
+  .merge-cap span{font-size:var(--t4)}
+  .merge-cap b{font-size:var(--t5)}
+}
