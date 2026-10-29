@@ -676,3 +676,74 @@ body.room .obj.left{bottom:calc(var(--s4) + env(safe-area-inset-bottom,0px))}
 
 body.flat .lane::before,body.flat .lane::after{display:none}
 .lane.thin .lane-count{display:none}
+
+/* ══ ROUND 3 · the phone: two stacked halves ════════════════ */
+body.stack.three .lane .lane-h{padding:var(--s2) 16px var(--s1)}
+body.stack.three .lane .lane-h b{font-size:var(--t3)}
+body.stack.three .lane-count{display:inline-block!important;padding:5px 9px;font-size:10px}
+body.stack.three .lane .strip{flex-direction:row;top:var(--hh);bottom:0;left:0;right:auto;width:max-content;padding:0}
+body.stack.three #laneR .strip{flex-direction:row-reverse}
+body.stack.three .lane .lc{width:var(--cw);height:var(--ch);flex:none;padding:0 var(--s2) var(--s2);gap:var(--s1)}
+body.stack.three .lane .lc-art{border-radius:var(--r2)}
+body.stack.three .lane .lc-b,body.stack.three #laneR .lc-b{flex-direction:row;align-items:center;justify-content:space-between;text-align:left}
+body.stack.three #laneR .lc-b{flex-direction:row-reverse}
+body.stack.three .lane .lc h3{font-size:var(--t2)}
+body.stack.three .lane .lc-b p{display:none}
+body.stack.three .lc-intro{padding:var(--s1) 16px var(--s2)}
+body.stack.three .intro-name{font-size:33cqw}
+body.stack.three #laneR .intro-name{justify-content:flex-end}
+body.stack.three .intro-line span + span{display:inline}
+body.stack .hud-top{padding-top:calc(var(--s2) + env(safe-area-inset-top,0px))}
+
+/* the caption becomes a bottom sheet */
+body.stack .obj{left:var(--s1)!important;right:var(--s1)!important;width:auto;transform:translateY(34px);bottom:calc(var(--s1) + env(safe-area-inset-bottom,0px));
+  grid-template-columns:auto minmax(0,1fr);gap:var(--s1) var(--s2);padding:22px var(--s3) var(--s3);border-radius:var(--r3)}
+body.stack .obj::before{content:"";position:absolute;left:50%;top:8px;width:34px;height:4px;margin-left:-17px;border-radius:99px;background:rgba(12,12,13,.2)}
+body.stack.room .obj.show,body.stack.room .obj.left{transform:none;bottom:calc(var(--s1) + env(safe-area-inset-bottom,0px))}
+body.stack .obj .obj-mid{grid-column:2}
+body.stack .obj .obj-p{white-space:normal;font-size:17px}
+body.stack .obj .obj-act{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
+body.stack .obj .obj-act .btn{justify-content:center;height:48px}
+body.stack .rail-line{bottom:2px}
+@keyframes stripInStack{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+body.stack .obj.enter{animation:stripInStack .6s var(--ease-out) both}
+
+/* ══ the index: coloured rows by half, a sheet on phones ════ */
+.menu-l{border-top:0;gap:6px}
+.menu-l li{border-bottom:0;animation:fadeUp .5s var(--ease-out) both;animation-delay:calc(var(--i, 0) * 35ms)}
+.menu-l button{padding:12px 14px;border-radius:var(--r2);background:var(--paper-2)}
+.menu-l button.side-eng{background:var(--black);color:var(--paper)}
+.menu-l button.side-cre{background:var(--red);color:var(--black)}
+.menu-l button.side-eng .s,.menu-l button.side-cre .s{color:inherit}
+.menu-l button:hover{transform:translateX(4px);background:inherit}
+.menu-l button.here{box-shadow:inset 0 0 0 2px var(--paper),0 0 0 2px var(--black)}
+.menu-l button .s::before{display:none}
+.menu:not([hidden]) .menu-card{animation:sheetIn .5s var(--ease-out) both}
+.dossier:not([hidden]) .dos-card{animation:sheetIn .5s var(--ease-out) both}
+@keyframes sheetIn{from{transform:translateY(34px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+@media (max-width:760px){
+  .menu,.dossier{place-items:end stretch;padding:var(--s1)}
+  .menu-card,.dos-card{width:100%;max-height:calc(100% - 89px)}
+  .menu-card{position:relative;padding-top:26px}
+  .menu-card::before{content:"";position:absolute;left:50%;top:9px;width:34px;height:4px;margin-left:-17px;border-radius:99px;background:rgba(12,12,13,.2)}
+  @keyframes sheetIn{from{transform:translateY(100%)}to{transform:none}}
+}
+
+/* ══ MOTION SYSTEM ══════════════════════════════════════════
+   Durations step by φ: 160 · 260 · 420 · 680 ms. One out-curve
+   for arrivals, one in-out curve for things that travel. */
+:root{--d1:160ms;--d2:260ms;--d3:420ms;--d4:680ms}
+.lane-count{overflow:hidden}
+.lane-count i{display:inline-block;font-style:normal}
+.lane-count i.roll{animation:roll var(--d3) var(--ease-out) both}
+.btn,.pill,.x,.menu-l button{transition:transform var(--d1) var(--ease-out),background var(--d2),color var(--d2),border-color var(--d2),box-shadow var(--d2)}
+.btn:active,.pill:active,.x:active,.menu-l button:active{transform:scale(.96)}
+.pill:hover{transform:translateY(-1px)}
+body.three .lane .lc{transform-origin:50% 50%;will-change:transform,opacity}
+/* the loader opens from the middle, like the two doors */
+#gate{transition:clip-path .9s var(--ease-io),visibility .9s;clip-path:inset(0 0 0 0)}
+body:not(.booting) #gate{transform:none;clip-path:inset(0 50% 0 50%)}
+@media (prefers-reduced-motion:reduce){
+  .lane-count i.roll,.menu-l li,.menu:not([hidden]) .menu-card,.dossier:not([hidden]) .dos-card{animation:none}
+  body:not(.booting) #gate{clip-path:none;opacity:0}
+}

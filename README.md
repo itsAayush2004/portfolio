@@ -34,10 +34,23 @@ Clicking is optional: arrows or `← →` step between stations, `1–9` jump, `
 
 ## Motion
 
-Every effect is tied to scroll, so it plays backwards too: letters rise out of masks in the intro, the
-lanes lean with scroll speed, posters open from their centres and drift at their own depth, cards sharpen on
-the lane's golden line and blur away from it, the camera banks into turns and softens while it walks, and
-each station card builds itself. `prefers-reduced-motion` turns all of it off.
+Every effect is tied to scroll, so it plays backwards too. Durations step by φ (160 · 260 · 420 · 680 ms)
+on two curves: an out-curve for arrivals, an in-out curve for things that travel.
+
+- The loader opens from the middle, like the two doors; letters rise out of masks.
+- Each panel holds one frame, then glides to the next; the frame on show sits forward while the ones leaving
+  and arriving recede, its type drifts at its own depth, and the counter rolls.
+- At the merge the panels swing open (side doors on a desktop, a hatch and a trapdoor on a phone), the two
+  words slide together, the camera lifts over the building, and a red slash wipes back inside.
+- In each room the name rises up its wall as you come through the door, the piece settles on a small
+  spring, and the caption builds itself. Sheets and dossiers glide in; buttons press.
+
+`prefers-reduced-motion` turns all of it off.
+
+## On a phone
+
+The halves stack: Engineer above, Creator below, each the full width, with projects sliding sideways in
+opposite directions. The caption becomes a bottom sheet with thumb-sized buttons, and the index a pull-up sheet.
 
 ## Proportion
 

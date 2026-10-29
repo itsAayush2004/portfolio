@@ -541,6 +541,7 @@ function base(g, w, d, fam, round){
 }
 
 /* the room's name, painted across its far wall and cropped by it */
+const WORDS = [];
 const WALLWORD = ['ARTHIS', 'BLENDER', 'AKVERSE', 'HEXABED', 'INFERENCE', 'THE BOARD', '154', 'ARCADE', 'LET’S BUILD'];
 function wallType(i){
   const rm = ROOMS[i], word = WALLWORD[i];
@@ -550,8 +551,9 @@ function wallType(i){
   const px = fitText(g0, word, W * 1.04, 2000);
   const H = Math.round(px * .78), [c, g] = makeCanvas(W, H);
   g.fillStyle = col; posterFont(g, px); g.textBaseline = 'alphabetic'; g.fillText(word, -W * .02, H - px * .02);
-  const h = inner * H / W, f = frameOf(i);
-  plane(f, inner, h, decal(texFrom(c), { transparent: true }), 0, RH - .45 - h / 2, .012);
+  const h = inner * H / W, f = frameOf(i), y = RH - .45 - h / 2;
+  const pl = plane(f, inner, h, decal(texFrom(c), { transparent: true }), 0, y, .012);
+  WORDS[i] = { pl, y, a: -1 };
 }
 function frameOf(i){
   const rm = ROOMS[i], g = new THREE.Group(); g.position.copy(rm.f).addScaledVector(rm.n, WT / 2 + .005); g.rotation.y = rm.ry; world.add(g);
@@ -970,12 +972,17 @@ function setFlat(on){
       flatBox.appendChild(L.el); placeFlat(L);
     } else {
       L.el.style.left = L.el.style.top = '';
+      L.cards.forEach(c => { c.el.style.transform = ''; c.el.style.opacity = ''; c.d = null; });
       L.o = new THREE.CSS3DObject(L.el); L.o.add(L.hole); scene.add(L.o);
     }
   });
   body.classList.toggle('flat', on);
 }
-function placeFlat(L){ L.el.style.position = 'absolute'; L.el.style.top = INSET + 'px'; L.el.style.left = (L.side < 0 ? INSET : VW / 2 + seamPx / 2) + 'px'; }
+function laneTop(L){ return STACK ? (L.side < 0 ? TOPBAR : TOPBAR + laneH + INSET) : INSET; }
+function placeFlat(L){
+  L.el.style.position = 'absolute'; L.el.style.top = laneTop(L) + 'px';
+  L.el.style.left = (STACK || L.side < 0 ? INSET : VW / 2 + seamPx / 2) + 'px';
+}
 /* a rounded rectangle, in the lane's own pixels, for the hole the canvas cuts */
 function roundRectGeo(w, h, r){
   const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
@@ -988,19 +995,22 @@ const Y0 = 3.3, ZL = .6, DIST = 7;
 /* the pale ground behind the two panels lives in the scene, just behind them, and fades as the doors open */
 const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(60, 30), new THREE.MeshBasicMaterial({ color: lin(0xE4E1DA), transparent: true, depthWrite: false }));
 backdrop.position.set(0, Y0, ZL - .03); scene.add(backdrop);
-let VW = innerWidth, VH = innerHeight, seamPx = 0, laneW = 0, laneH = 0, INSET = 13, RAD = 34, sScreen = 1, sWall = 1;
+let VW = innerWidth, VH = innerHeight, seamPx = 0, laneW = 0, laneH = 0, INSET = 13, RAD = 34, TOPBAR = 0, STACK = false, sScreen = 1, sWall = 1;
 let pTarget = 0, pNow = 0, lastHere = -2, lastPhase = '';
 function layout(){
   VW = innerWidth; VH = innerHeight;
   /* the seam is the small part of a golden cut of the screen's middle */
   /* two rounded panels with a narrow seam between them: 89 px, a Fibonacci step */
-  const phone = VW < 760;
-  INSET = phone ? 8 : 13; RAD = phone ? 21 : 34;
-  seamPx = phone ? 8 : 89;
-  laneW = Math.round((VW - seamPx) / 2 - INSET); laneH = VH - 2 * INSET;
+  /* on a phone the halves stack: Engineer above, Creator below, each the full width */
+  STACK = VW < 760;
+  body.classList.toggle('stack', STACK);
+  INSET = STACK ? 8 : 13; RAD = STACK ? 21 : 34; TOPBAR = STACK ? 58 : 0;
+  seamPx = STACK ? 0 : 89;
+  if (STACK){ laneW = VW - 2 * INSET; laneH = Math.round((VH - TOPBAR - 2 * INSET) / 2); }
+  else { laneW = Math.round((VW - seamPx) / 2 - INSET); laneH = VH - 2 * INSET; }
   document.documentElement.style.setProperty('--seam', seamPx + 'px');
   sScreen = 2 * DIST * Math.tan(FOV * Math.PI / 360) / VH;
-  sWall = Math.min(6.2 / laneH, 7.4 / laneW);
+  sWall = STACK ? Math.min(7.4 / laneH, 20 / laneW) : Math.min(6.2 / laneH, 7.4 / laneW);
   lanes.forEach(L => {
     L.el.style.width = laneW + 'px'; L.el.style.height = laneH + 'px';
     L.el.classList.remove('wide');
@@ -1008,10 +1018,12 @@ function layout(){
     L.hole.geometry.dispose(); L.hole.geometry = roundRectGeo(laneW, laneH, RAD);
     L.headH = L.head.offsetHeight;
     L.ch = laneH - L.headH;
+    L.step = STACK ? laneW : L.ch;
     L.el.style.setProperty('--hh', L.headH + 'px');
     L.el.style.setProperty('--ch', L.ch + 'px');
+    L.el.style.setProperty('--cw', laneW + 'px');
     L.strip.style.top = L.headH + 'px'; L.strip.style.paddingTop = '0px';
-    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack', el) || el.querySelector('.lc-art') || el, top: el.offsetTop, h: el.offsetHeight, py: null }));
+    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack', el) || el.querySelector('.lc-art') || el, pos: STACK ? el.offsetLeft : el.offsetTop, py: null, d: null }));
     L.n = L.cards.length;
     if (isFlat) placeFlat(L);
   });
@@ -1023,9 +1035,25 @@ function layout(){
 }
 const _up = V3(0, 1, 0);
 const HINGE_X = HALF - WT / 2 - .05;
+const _ax = V3(1, 0, 0);
 function placeLanes(t){
   /* t: 0 = flat across the screen, 1 = open against the hall's side walls */
   const a = ease(clamp(t, 0, 1));
+  if (STACK){
+    /* stacked: the top panel swings up to the ceiling, the bottom one down to the floor */
+    lanes.forEach(L => {
+      if (!L.o) return;
+      const s = lerp(sScreen, sWall, a), top = L.side < 0;
+      const yc = Y0 + (VH / 2 - (laneTop(L) + laneH / 2)) * sScreen;
+      const hy0 = yc + (top ? 1 : -1) * laneH / 2 * sScreen;
+      const hy = lerp(hy0, top ? RH - .12 : .03, a), hz = lerp(ZL, -.3, a);
+      const th = (top ? 1 : -1) * a * Math.PI / 2, v = (top ? -1 : 1) * laneH / 2 * s;
+      L.o.position.set(0, hy + v * Math.cos(th), hz + v * Math.sin(th));
+      L.o.quaternion.setFromAxisAngle(_ax, th);
+      L.o.scale.setScalar(s);
+    });
+    return;
+  }
   lanes.forEach(L => {
     if (!L.o) return;
     const s = lerp(sScreen, sWall, a);
@@ -1130,18 +1158,21 @@ function direct(p, t){
     /* each frame holds, then glides to the next: a dwell on every project */
     const steps = Math.max(1, L.n - 1), u = t1 * steps, k0 = Math.min(steps - 1, Math.floor(u));
     const st = (k0 + ease(smooth(.3, .82, u - k0))) / steps;
-    const travel = steps * L.ch;
+    const travel = steps * L.step;
     const y = n === 0 ? -st * travel : -(1 - st) * travel;
     const idx = Math.round(st * steps);
-    if (idx !== L.idx){ L.idx = idx; L.count.textContent = String(idx).padStart(2, '0') + ' / ' + String(steps).padStart(2, '0'); }
-    L.strip.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0) skewY(' + ((n ? -1 : 1) * skew).toFixed(2) + 'deg)';
+    if (idx !== L.idx){ L.idx = idx; L.count.innerHTML = '<i class="roll">' + String(idx).padStart(2, '0') + '</i> / ' + String(steps).padStart(2, '0'); }
+    L.strip.style.transform = STACK ? 'translate3d(' + y.toFixed(1) + 'px,0,0)'
+      : 'translate3d(0,' + y.toFixed(1) + 'px,0) skewY(' + ((n ? -1 : 1) * skew).toFixed(2) + 'deg)';
     if (REDUCED) return;
-    /* posters drift at their own depth */
+    /* the frame on show sits forward; the ones leaving and arriving recede, and their type drifts */
     L.cards.forEach(c => {
-      const top = c.top + y;
-      if (top > VH + 40 || top + c.h < -40) return;
-      const py = clamp((top + c.h / 2 - VH / 2) / VH, -1, 1) * -12;
-      if (c.py === null || Math.abs(py - c.py) > .05){ c.py = py; c.big.style.transform = 'translate3d(0,' + py.toFixed(2) + '%,0)'; }
+      const d = (c.pos + y) / L.step;
+      if (Math.abs(d) > 1.6) return;
+      const dq = Math.round(clamp(Math.abs(d), 0, 1) * 200) / 200;
+      if (dq !== c.d){ c.d = dq; c.el.style.transform = 'scale(' + (1 - dq * .08).toFixed(3) + ')'; c.el.style.opacity = (1 - dq * .55).toFixed(3); }
+      const py = clamp(d, -1, 1) * -14;
+      if (c.py === null || Math.abs(py - c.py) > .05){ c.py = py; c.big.style.transform = STACK ? 'translate3d(' + py.toFixed(2) + '%,0,0)' : 'translate3d(0,' + py.toFixed(2) + '%,0)'; }
     });
   });
   const so = VW < 760 ? 1 - smooth(10, 45, p) : 1 - smooth(ACT1 * .1, ACT1 * .2, p);
@@ -1166,7 +1197,7 @@ function direct(p, t){
   placeLanes(smooth(0, .36, tm));
   const bo = 1 - smooth(ACT1 - 25, ACT1 - 2, p);
   backdrop.material.opacity = bo; backdrop.visible = bo > .002;
-  lanes.forEach(L => { if (L.o) L.o.visible = p < HALL_AT + STEP * .6; });
+  lanes.forEach(L => { if (L.o) L.o.visible = p < HALL_AT + STEP * .6 && !(STACK && L.side < 0 && tm > .42); });
   if (p < HALL_AT){
     const up = ease(smooth(.3, .58, tm)), down = ease(smooth(.7, 1, tm));
     tmpPos.lerpVectors(DOOR.pos, REVEAL.pos, up).lerp(HALLP.pos, down);
@@ -1184,6 +1215,13 @@ function direct(p, t){
     tmpLook.lerpVectors(A.look, Bp.look, f);
     if (tan.lengthSq() > 1e-6){ _t.copy(tan).normalize().multiplyScalar(6).add(tmpPos); _t.y = 2.6; tmpLook.lerp(_t, walking * .85); }
     applyPose(tmpPos, tmpLook, lerp(A.u, Bp.u, f) * (1 - walking), lerp(A.v, Bp.v, f) * (1 - walking));
+    /* each room's word rises into place as you come through its door */
+    WORDS.forEach((w, j) => {
+      if (!w) return;
+      const ar = REDUCED ? 1 : ease(clamp(1.35 - Math.abs(kk - (j + 1)) * 1.6, 0, 1));
+      if (Math.abs(ar - w.a) < .002) return; w.a = ar;
+      w.pl.position.y = w.y - (1 - ar) * 1.4; w.pl.material.opacity = ar;
+    });
   }
 
   /* the ceiling fades as the camera rises over the walls */
@@ -1253,6 +1291,7 @@ function arrive(here){
   obj.classList.add('show'); replayObj();
   markHere(here);
   if (here >= 0){
+    pop = { i: here, t0: clockT };
     if (s.id === 'hexabed' && hexRegen) hexRegen(clockT);
     if (!found.has(s.id)) discover(here);
   }
@@ -1292,6 +1331,8 @@ function openMenu(){
     const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button';
     b.innerHTML = '<span class="n">' + String(k).padStart(2, '0') + '</span><span class="t">' + esc(s.title) + (s.id && found.has(s.id) ? '<span class="f">found</span>' : '') + '</span><span class="s ' + s.side + '">' + (s.side === 'both' ? 'Shared' : s.side === 'eng' ? 'Engineer' : 'Creator') + '</span>';
     b.addEventListener('click', () => travel(s.p));
+    b.classList.add('side-' + s.side); li.style.setProperty('--i', k);
+    if (s.id && hereOf(pTarget) === STATIONS.findIndex(x => x.id === s.id)) b.classList.add('here');
     li.appendChild(b); l.appendChild(li);
   });
   openOverlay($('#menu'));
@@ -1361,7 +1402,7 @@ addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; if (e.poi
 function moveCursor(dt){ const kk = REDUCED ? 1 : 1 - Math.exp(-dt * 18); cx += (mx - cx) * kk; cy += (my - cy) * kk; cur.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)'; }
 
 /* ══ the loop ═══════════════════════════════════════════════ */
-let clockT = 0, lastNow = performance.now();
+let clockT = 0, lastNow = performance.now(), pop = null;
 function frame(now){
   if (!running) return;
   requestAnimationFrame(frame);
@@ -1372,6 +1413,10 @@ function frame(now){
   direct(pNow, clockT);
   anim.forEach(f => f(clockT, dt));
   moveCursor(dt);
+  if (pop && PIECE[pop.i]){
+    const age = clockT - pop.t0, sc = REDUCED ? 1 : 1 - .07 * Math.exp(-age * 5) * Math.cos(age * 11);
+    PIECE[pop.i].scale.setScalar(sc); if (age > 2){ PIECE[pop.i].scale.setScalar(1); pop = null; }
+  }
   if (hover >= 0){ const pp = PIECE[hover].position; RING.visible = true; RING.position.set(pp.x, .02, pp.z); }
   else RING.visible = false;
   renderer.render(scene, camera);
