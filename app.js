@@ -525,12 +525,12 @@ function cgeo(w, h, d, r){
   if (GEO.has(k)) return GEO.get(k);
   const W = w - 2 * r, Dd = d - 2 * r, s = new THREE.Shape();
   s.moveTo(-W / 2, -Dd / 2); s.lineTo(W / 2, -Dd / 2); s.lineTo(W / 2, Dd / 2); s.lineTo(-W / 2, Dd / 2); s.lineTo(-W / 2, -Dd / 2);
-  const g = new THREE.ExtrudeGeometry(s, { depth: Math.max(.001, h - 2 * r), bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: 1, curveSegments: 1 });
+  const g = new THREE.ExtrudeGeometry(s, { depth: Math.max(.001, h - 2 * r), bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: LOW ? 1 : 3, curveSegments: 1 });
   g.rotateX(-Math.PI / 2); g.translate(0, r, 0); g.computeVertexNormals();
   GEO.set(k, g); return g;
 }
-const K = (par, w, h, d, m, x, y, z, o) => mesh(par, cgeo(w, h, d, (o && o.r) || Math.min(.03, w * .12, h * .12, d * .12)), m, x, y, z, o);
-const O8 = (par, rt, rb, h, m, x, y, z, o) => CYL(par, rt, rb, h, (o && o.seg) || 8, m, x, y, z, o);
+const K = (par, w, h, d, m, x, y, z, o) => mesh(par, cgeo(w, h, d, (o && o.r) || Math.min(.06, w * .2, h * .2, d * .2)), m, x, y, z, o);
+const O8 = (par, rt, rb, h, m, x, y, z, o) => CYL(par, rt, rb, h, (o && o.seg) || 12, m, x, y, z, o);
 
 /* every piece stands on its own base: a slab with a darker rim, like a diorama island */
 function base(g, w, d, fam, round){
@@ -944,9 +944,18 @@ function buildLights(){
 /* ══ the lanes in 3D ════════════════════════════════════════ */
 const laneEls = [$('#laneL'), $('#laneR')];
 const flatBox = $('#flat');
+/* each panel opens on half of the name, then one project per frame */
+[['laneL', 'Aayush', 'Game developer · AI engineer'], ['laneR', 'Kumar', '3D animator · Jaipur, India']].forEach(d => {
+  const el = $('#' + d[0]), strip = $('.strip', el);
+  const intro = document.createElement('div'); intro.className = 'lc lc-intro'; intro.setAttribute('aria-hidden', 'true');
+  intro.innerHTML = '<div class="intro-name">' + d[1] + '</div><div class="intro-line"><span>' + d[2] + '</span><span>Scroll ↓</span></div>';
+  strip.prepend(intro);
+  const cnt = document.createElement('span'); cnt.className = 'lane-count'; cnt.textContent = '00 / 07';
+  $('.lane-h', el).appendChild(cnt);
+});
 const lanes = laneEls.map((el, k) => {
   const hole = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0, blending: THREE.NoBlending, side: THREE.DoubleSide }));
-  return { el, o: null, hole, strip: $('.strip', el), head: $('.lane-h', el), side: k === 0 ? -1 : 1, travel: 0, headH: 0, cards: [] };
+  return { el, o: null, hole, strip: $('.strip', el), head: $('.lane-h', el), count: $('.lane-count', el), side: k === 0 ? -1 : 1, headH: 0, cards: [], n: 1, ch: 0, idx: -1 };
 });
 /* In the opening the lanes are flat, ordinary HTML over the canvas: text is drawn once and only
    slides. When the merge starts they hand over to CSS3D at exactly the same place, so the switch
@@ -966,28 +975,44 @@ function setFlat(on){
   });
   body.classList.toggle('flat', on);
 }
-function placeFlat(L){ L.el.style.position = 'absolute'; L.el.style.top = '0px'; L.el.style.left = (L.side < 0 ? 0 : VW - laneW) + 'px'; }
+function placeFlat(L){ L.el.style.position = 'absolute'; L.el.style.top = INSET + 'px'; L.el.style.left = (L.side < 0 ? INSET : VW / 2 + seamPx / 2) + 'px'; }
+/* a rounded rectangle, in the lane's own pixels, for the hole the canvas cuts */
+function roundRectGeo(w, h, r){
+  const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r); s.lineTo(x + w, y + h - r);
+  s.quadraticCurveTo(x + w, y + h, x + w - r, y + h); s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+  return new THREE.ShapeGeometry(s, 8);
+}
 const Y0 = 3.3, ZL = .6, DIST = 7;
-let VW = innerWidth, VH = innerHeight, seamPx = 0, laneW = 0, sScreen = 1, sWall = 1;
+/* the pale ground behind the two panels lives in the scene, just behind them, and fades as the doors open */
+const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(60, 30), new THREE.MeshBasicMaterial({ color: lin(0xE4E1DA), transparent: true, depthWrite: false }));
+backdrop.position.set(0, Y0, ZL - .03); scene.add(backdrop);
+let VW = innerWidth, VH = innerHeight, seamPx = 0, laneW = 0, laneH = 0, INSET = 13, RAD = 34, sScreen = 1, sWall = 1;
 let pTarget = 0, pNow = 0, lastHere = -2, lastPhase = '';
 function layout(){
   VW = innerWidth; VH = innerHeight;
   /* the seam is the small part of a golden cut of the screen's middle */
-  seamPx = VW >= 1000 ? clamp(VW * .236, 360, 420) : VW >= 760 ? 320 : 0;
-  laneW = Math.round((VW - seamPx) / 2);
+  /* two rounded panels with a narrow seam between them: 89 px, a Fibonacci step */
+  const phone = VW < 760;
+  INSET = phone ? 8 : 13; RAD = phone ? 21 : 34;
+  seamPx = phone ? 8 : 89;
+  laneW = Math.round((VW - seamPx) / 2 - INSET); laneH = VH - 2 * INSET;
   document.documentElement.style.setProperty('--seam', seamPx + 'px');
   sScreen = 2 * DIST * Math.tan(FOV * Math.PI / 360) / VH;
-  sWall = Math.min(6.2 / VH, 7.4 / laneW);
+  sWall = Math.min(6.2 / laneH, 7.4 / laneW);
   lanes.forEach(L => {
-    L.el.style.width = laneW + 'px'; L.el.style.height = VH + 'px';
-    L.el.classList.toggle('wide', laneW >= 440);
+    L.el.style.width = laneW + 'px'; L.el.style.height = laneH + 'px';
+    L.el.classList.remove('wide');
     L.el.classList.toggle('thin', laneW < 300);
-    L.hole.geometry.dispose(); L.hole.geometry = new THREE.PlaneGeometry(laneW, VH);
-    L.strip.style.paddingTop = (L.head.offsetHeight + 4) + 'px';
-    L.travel = Math.max(0, L.strip.offsetHeight - VH);
+    L.hole.geometry.dispose(); L.hole.geometry = roundRectGeo(laneW, laneH, RAD);
     L.headH = L.head.offsetHeight;
-    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack', el) || el.querySelector('.lc-art') || el, top: el.offsetTop, h: el.offsetHeight, py: null }));
+    L.ch = laneH - L.headH;
     L.el.style.setProperty('--hh', L.headH + 'px');
+    L.el.style.setProperty('--ch', L.ch + 'px');
+    L.strip.style.top = L.headH + 'px'; L.strip.style.paddingTop = '0px';
+    L.cards = $$('.lc', L.el).map(el => ({ el, big: $('.po-big, .po-stack', el) || el.querySelector('.lc-art') || el, top: el.offsetTop, h: el.offsetHeight, py: null }));
+    L.n = L.cards.length;
     if (isFlat) placeFlat(L);
   });
   camera.aspect = VW / VH; camera.updateProjectionMatrix();
@@ -1004,8 +1029,9 @@ function placeLanes(t){
   lanes.forEach(L => {
     if (!L.o) return;
     const s = lerp(sScreen, sWall, a);
-    const hx = lerp(L.side * (VW / 2) * sScreen, L.side * HINGE_X, a);
-    const hy = lerp(Y0, .4 + VH * sWall / 2, a), hz = lerp(ZL, -.3, a);
+    /* the hinge starts on the panel's outer edge, exactly where the flat panel sat */
+    const hx = lerp(L.side * (seamPx / 2 + laneW) * sScreen, L.side * HINGE_X, a);
+    const hy = lerp(Y0, .4 + laneH * sWall / 2, a), hz = lerp(ZL, -.3, a);
     const th = -L.side * a * Math.PI / 2;
     const off = -L.side * laneW / 2 * s;
     L.o.position.set(hx + off * Math.cos(th), hy, hz - off * Math.sin(th));
@@ -1074,7 +1100,7 @@ function glide(dt){
 addEventListener('scroll', () => { readScroll(); if (!ownScroll){ gliding = false; } ownScroll = false; }, { passive: true });
 ['touchstart', 'keydown', 'mousedown'].forEach(ev => addEventListener(ev, () => { if (ev !== 'keydown') gliding = false; }, { passive: true }));
 
-const seamCard = $('#seamCard'), mergeCap = $('#mergeCap'), tkFill = $('#tkFill');
+const seamCard = $('#seamCard'), seamV = $('#seamV'), mergeCap = $('#mergeCap'), tkFill = $('#tkFill');
 const capA = $('span', mergeCap), capB = $('b', mergeCap), wipeA = $('#wipe i');
 let lastP = 0, lastT = 0, skew = 0;
 function phaseOf(p){ return p < ACT1 ? 'act1' : p < HALL_AT ? 'merge' : 'room'; }
@@ -1101,7 +1127,13 @@ function direct(p, t){
   /* Act I: the strips run in opposite directions and lean with the scroll */
   const t1 = clamp(p / ACT1, 0, 1);
   if (p < HALL_AT + STEP * .6) lanes.forEach((L, n) => {
-    const y = n === 0 ? -t1 * L.travel : -(1 - t1) * L.travel;
+    /* each frame holds, then glides to the next: a dwell on every project */
+    const steps = Math.max(1, L.n - 1), u = t1 * steps, k0 = Math.min(steps - 1, Math.floor(u));
+    const st = (k0 + ease(smooth(.3, .82, u - k0))) / steps;
+    const travel = steps * L.ch;
+    const y = n === 0 ? -st * travel : -(1 - st) * travel;
+    const idx = Math.round(st * steps);
+    if (idx !== L.idx){ L.idx = idx; L.count.textContent = String(idx).padStart(2, '0') + ' / ' + String(steps).padStart(2, '0'); }
     L.strip.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0) skewY(' + ((n ? -1 : 1) * skew).toFixed(2) + 'deg)';
     if (REDUCED) return;
     /* posters drift at their own depth */
@@ -1113,7 +1145,9 @@ function direct(p, t){
     });
   });
   const so = VW < 760 ? 1 - smooth(10, 45, p) : 1 - smooth(ACT1 * .1, ACT1 * .2, p);
-  seamCard.style.opacity = so.toFixed(3); seamCard.style.visibility = so < .02 ? 'hidden' : 'visible';
+  seamCard.style.opacity = 0; seamCard.style.visibility = 'hidden';
+  const sv = 1 - smooth(ACT1 - 20, ACT1 + 15, p);
+  seamV.style.opacity = sv.toFixed(3); seamV.style.visibility = sv < .02 ? 'hidden' : 'visible';
   const mc = smooth(ACT1 + MERGE * .4, ACT1 + MERGE * .5, p) * (1 - smooth(ACT1 + MERGE * .64, ACT1 + MERGE * .72, p));
   mergeCap.style.opacity = mc.toFixed(3);
   /* the two words slide in from opposite sides until they lock together */
@@ -1130,6 +1164,8 @@ function direct(p, t){
   const tm = clamp((p - ACT1) / MERGE, 0, 1);
   setFlat(p <= ACT1);
   placeLanes(smooth(0, .36, tm));
+  const bo = 1 - smooth(ACT1 - 25, ACT1 - 2, p);
+  backdrop.material.opacity = bo; backdrop.visible = bo > .002;
   lanes.forEach(L => { if (L.o) L.o.visible = p < HALL_AT + STEP * .6; });
   if (p < HALL_AT){
     const up = ease(smooth(.3, .58, tm)), down = ease(smooth(.7, 1, tm));
@@ -1179,21 +1215,20 @@ function where(){
 function fillObj(s, i){
   obj.dataset.side = s.side;
   $('#objSide').textContent = SIDE_LABEL[s.side];
-  $('#objN').textContent = (i < 0 ? '00' : String(i + 1).padStart(2, '0')) + ' / ' + String(N).padStart(2, '0');
-  $('#objT').setAttribute('aria-label', s.title);
-  $('#objT').innerHTML = s.title.split(' ').map((w, n) => '<span class="w" aria-hidden="true"><i style="--i:' + n + '">' + esc(w) + '</i></span>').join(' ');
+  $('#objN').textContent = i < 0 ? '00' : String(i + 1).padStart(2, '0');
+  $('#objT').textContent = s.title;
   $('#objP').textContent = s.blurb;
   $('#objChips').innerHTML = s.chips.map(c => '<span>' + esc(c) + '</span>').join('');
   const act = $('#objAct'); act.innerHTML = '';
   const btn = (labelTxt, cls, attrs) => { const b = document.createElement(attrs && attrs.href ? 'a' : 'button'); b.className = 'btn btn-sm ' + (cls || ''); b.innerHTML = labelTxt;
     if (b.tagName === 'BUTTON') b.type = 'button'; Object.keys(attrs || {}).forEach(k => b.setAttribute(k, attrs[k])); act.appendChild(b); return b; };
-  if (i < 0){ btn('Keep scrolling ↓', 'btn-solid', { 'data-next': '' }); return; }
+  if (i < 0){ btn('Walk in ↓', 'btn-solid', { 'data-next': '' }); return; }
   if (s.id === 'arcade'){ Object.keys(GAMES).forEach((k, n) => btn('▶ ' + GAMES[k].name, n ? '' : 'btn-solid', { 'data-play': k })); return; }
+  if (first0(s)) btn(esc(first0(s).textContent.replace(/^Open /, '')), '', { href: first0(s).href, target: '_blank', rel: 'noopener' });
+  if (s.id === 'contact') btn('Copy email', '', { 'data-copy': 'aayushkumarofficial21@gmail.com' });
   btn('Read more', 'btn-solid', { 'data-inspect': s.id });
-  if (s.id === 'contact'){ btn('Copy email', '', { 'data-copy': 'aayushkumarofficial21@gmail.com' }); return; }
-  const first = $('.st-go a', s.el);
-  if (first) btn(esc(first.textContent.replace(/^Open /, '')), '', { href: first.href, target: '_blank', rel: 'noopener' });
 }
+const first0 = s => s.id === 'contact' ? null : $('.st-go a', s.el);
 function replayObj(){
   $$('.obj-chips span, .obj-act > *', obj).forEach((el, n) => el.style.setProperty('--i', n + 1));
   obj.classList.remove('enter'); void obj.offsetWidth; obj.classList.add('enter');

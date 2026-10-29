@@ -582,3 +582,97 @@ body.simple #grain{display:none}
   body.three .lane .lc{padding-bottom:38vh}
 }
 @media (prefers-reduced-motion:reduce){ .rail-n i.roll{animation:none} }
+
+/* ══ ROUND 2 · the opening: two rounded panels, one frame each ═══
+   Radii step by Fibonacci too: 8 · 13 · 21 · 34. */
+:root{--r1:8px;--r2:13px;--r3:21px;--r4:34px}
+body.three .lane{border-radius:var(--r4);overflow:hidden}
+body.three .lane .lane-h{position:absolute;inset:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:var(--s2);padding:var(--s4) var(--s4) var(--s3);border-bottom:0}
+body.three .lane .lane-tag,body.three .lane .lane-sub{display:none}
+body.three .lane .lane-h b{font-size:var(--t4);line-height:.8}
+.lane-count{font:500 12px/1 var(--f-mono);padding:7px 12px;border-radius:999px;border:1px solid currentColor;opacity:.75;font-variant-numeric:tabular-nums;white-space:nowrap}
+body.three .lane .strip{display:flex;flex-direction:column;padding:0 var(--s4);gap:0;top:var(--hh)}
+body.three #laneR .strip{flex-direction:column-reverse}
+body.three .lane .lc,body.three .lane.wide .lc{height:var(--ch);box-sizing:border-box;padding:0 0 var(--s4);display:flex;flex-direction:column;gap:var(--s3);border:0}
+body.three .lane .lc-top{display:none}
+body.three .lane .lc-art{flex:1;min-height:0;aspect-ratio:auto;border-radius:var(--r3)}
+body.three .lane .lc-b{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--s2)}
+body.three #laneR .lc-b{flex-direction:row-reverse;text-align:right}
+body.three .lane .lc h3{font-size:var(--t3);line-height:1}
+body.three .lane .lc-t li{border-radius:999px}
+body.three .lane .lc:hover h3{transform:none}
+/* the first frame of each panel: half of the name */
+.lc-intro{container-type:inline-size;justify-content:space-between}
+.intro-name{flex:1;display:flex;align-items:center;font-family:var(--f-poster);font-stretch:62%;font-weight:900;text-transform:uppercase;font-size:33cqw;line-height:.8;letter-spacing:-.02em;white-space:nowrap}
+#laneL .intro-name{justify-content:flex-end}
+.intro-line{display:flex;justify-content:space-between;font:500 12px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.04em;opacity:.75}
+body.simple .lc-intro{display:none}
+.lane.thin .intro-line span + span{display:none}
+/* the seam: the name, running down the gap */
+.seam-v{position:fixed;z-index:15;top:var(--s3);bottom:var(--s3);left:50%;width:var(--seam);margin-left:calc(var(--seam) / -2);display:flex;flex-direction:column;align-items:center;justify-content:space-between;pointer-events:none}
+.seam-mark{width:34px;height:34px;border-radius:var(--r2);background:linear-gradient(90deg,var(--black) 50%,var(--red) 50%);box-shadow:0 0 0 2px var(--paper)}
+.seam-v b{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--f-poster);font-stretch:62%;font-weight:900;text-transform:uppercase;font-size:min(81px,calc(var(--seam) * .9));line-height:1;color:var(--black);letter-spacing:-.01em;white-space:nowrap}
+.seam-v em{writing-mode:vertical-rl;transform:rotate(180deg);font:500 11px/1 var(--f-mono);font-style:normal;text-transform:uppercase;letter-spacing:.1em;color:var(--black);background:var(--paper);padding:10px 6px;border-radius:999px}
+body:not(.act1) .seam-v{opacity:0}
+.seam-card{display:none!important}
+body.intro .seam-v b{animation:fadeUp 1s var(--ease-out) .5s both}
+
+/* ══ ROUND 2 · in a room: one floating caption strip ════════ */
+.obj{left:50%!important;right:auto!important;transform:translate(-50%,21px);bottom:calc(var(--s4) + env(safe-area-inset-bottom,0px));width:min(890px,calc(100% - 26px));
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--s3);padding:var(--s2) var(--s2) var(--s2) var(--s3);border-radius:999px;overflow:visible;
+  box-shadow:0 21px 55px rgba(12,12,13,.22)}
+body.room .obj.show{transform:translate(-50%,0)}
+.obj.left,.obj.right{left:50%;right:auto}
+body.room .obj.left{bottom:calc(var(--s4) + env(safe-area-inset-bottom,0px))}
+.obj-num{display:flex;align-items:baseline;gap:6px}
+.obj-num b{font-family:var(--f-poster);font-stretch:62%;font-weight:900;font-size:var(--t4);line-height:.8;color:var(--red)}
+.obj-num span{font:500 12px/1 var(--f-mono);opacity:.55}
+.obj-mid{display:flex;flex-direction:column;gap:3px;min-width:0}
+.obj-k{font:500 11px/1.2 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.obj .obj-p{margin:0;font:600 19px/1.25 var(--f-sans);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.obj .obj-act{padding:0;display:flex;gap:var(--s1);flex-wrap:nowrap}
+.obj .obj-act .btn{height:44px;padding:0 var(--s3);border-radius:999px;font-size:14px}
+.obj-band,.obj-t:not(#objT){display:none}
+.obj.enter{animation:stripIn .7s var(--ease-out) both}
+.obj.enter .obj-p,.obj.enter .obj-act > *{animation:fadeUp .6s var(--ease-out) both;animation-delay:calc(150ms + var(--i, 0) * 60ms)}
+@keyframes stripIn{from{clip-path:inset(0 50% 0 50% round 999px)}to{clip-path:inset(0 0 0 0 round 999px)}}
+.rail-at{display:none}
+.rail-line{height:3px;left:var(--s3);right:var(--s3);bottom:var(--s1);border-radius:999px;overflow:hidden}
+
+/* ══ ROUNDED EVERYWHERE ═════════════════════════════════════ */
+.btn,.pill,.x,.lc-t li,.obj-chips span,.st-skills span,kbd,.toast,.tip{border-radius:999px}
+.player{border-radius:999px;padding:0 var(--s2) 0 6px}
+.mark{border-radius:6px;overflow:hidden}
+.lc-art,.po{border-radius:var(--r3)}
+.gm{border-radius:var(--r2)}
+.lc-art.games{gap:6px}
+.menu-card,.dos-card{border-radius:var(--r3)}
+.dos-h{border-radius:var(--r3) var(--r3) 0 0}
+.menu-l button{border-radius:var(--r2)}
+.st-atlas img,.st-spec,.st-tally{border-radius:var(--r2)}
+.arc-bar{border-radius:0 0 var(--r3) var(--r3)}
+.ticker{border-radius:var(--r1)}
+.gate-simple{border-radius:999px}
+#cursor{border-radius:50%}
+#cursor.on{border-radius:50%;rotate:0deg}
+
+/* ══ phones ═════════════════════════════════════════════════ */
+@media (max-width:760px){
+  .seam-v{display:none}
+  body.three .lane .lane-h{padding:60px var(--s2) var(--s2)}
+  body.three .lane .lane-h b{font-size:var(--t3)}
+  .lane-count{padding:5px 8px;font-size:10px}
+  body.three .lane .strip{padding:0 var(--s2)}
+  body.three .lane .lc{padding-bottom:var(--s2);gap:var(--s2)}
+  body.three .lane .lc h3{font-size:var(--t2)}
+  body.three .lane .lc-b{flex-direction:column;align-items:flex-start}
+  body.three #laneR .lc-b{flex-direction:column;align-items:flex-end}
+  .obj{grid-template-columns:auto minmax(0,1fr);border-radius:var(--r3);bottom:calc(var(--s3) + env(safe-area-inset-bottom,0px));padding:var(--s2)}
+  .obj .obj-act{grid-column:1 / -1}
+  .obj .obj-p{white-space:normal;font-size:15px}
+  body.room .obj.left{bottom:calc(var(--s3) + env(safe-area-inset-bottom,0px))}
+  @keyframes stripIn{from{clip-path:inset(0 50% 0 50% round 21px)}to{clip-path:inset(0 0 0 0 round 21px)}}
+}
+
+body.flat .lane::before,body.flat .lane::after{display:none}
+.lane.thin .lane-count{display:none}
