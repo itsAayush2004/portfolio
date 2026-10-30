@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/banner.svg" alt="Animated banner: an Engineer lane and a Creator lane scroll past each other, then fold into a grid of nine rooms." width="100%"></p>
+
 # portfolio
 
 > Two halves scroll past each other, then fold into nine rooms.
