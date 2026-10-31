@@ -1,6 +1,13 @@
-<p align="center"><img src=".github/banner.svg" alt="Animated banner: an Engineer lane and a Creator lane scroll past each other, then fold into a grid of nine rooms." width="100%"></p>
+<p align="center"><img src=".github/banner.svg" alt="portfolio banner: a dark gallery corridor with three framed pictures" width="100%"></p>
 
 # portfolio
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Three.js-8C6D12?style=flat-square" alt="Three.js">
+  <img src="https://img.shields.io/badge/No_build_step-8C6D12?style=flat-square" alt="No build step">
+  <img src="https://img.shields.io/badge/GitHub_Pages-8C6D12?style=flat-square" alt="GitHub Pages">
+  <br><a href="https://itsaayush2004.github.io/portfolio/"><b>Open it live →</b></a>
+</p>
 
 > Two halves scroll past each other, then fold into nine rooms.
 
