@@ -656,16 +656,23 @@ function base(g, w, d, fam, round){
 /* the room's name, painted across its far wall and cropped by it */
 const WORDS = [];
 const WALLWORD = ['ARTHIS', 'BLENDER', 'AKVERSE', 'HEXABED', 'INFERENCE', 'THE BOARD', 'TROPHIES', 'ARCADE', 'LET’S BUILD'];
+/* the room's name on its far wall: a small numbered line, a hairline, then the word, whole and centred */
 function wallType(i){
   const rm = ROOMS[i], word = WALLWORD[i];
-  const inner = i === 8 ? 13.5 : rm.w - WT - .04;
   const col = rm.side === 'eng' ? '#3BF07A' : rm.side === 'cre' ? HEX.paper : HEX.red;
   const W = 2048, [c0, g0] = makeCanvas(W, 10);
-  const px = fitText(g0, word, W * 1.04, 2000);
-  const H = Math.round(px * .78), [c, g] = makeCanvas(W, H);
-  g.fillStyle = col; posterFont(g, px); g.textBaseline = 'alphabetic'; g.fillText(word, -W * .02, H - px * .02);
-  const h = inner * H / W, f = frameOf(i), y = RH - .45 - h / 2;
-  const pl = plane(f, inner, h, decal(texFrom(c), { transparent: true }), 0, y, .012);
+  const px = fitText(g0, word, W * .98, 1400), lab = Math.round(px * .085);
+  const H = Math.round(px * .8 + lab * 2.4), [c, g] = makeCanvas(W, H);
+  g.fillStyle = col; g.strokeStyle = col; g.textBaseline = 'alphabetic';
+  g.font = '700 ' + lab + 'px "JetBrains Mono", ui-monospace, monospace';
+  g.globalAlpha = .78; g.fillText(String(i + 1).padStart(2, '0') + ' / 09', W * .01, lab);
+  g.textAlign = 'right'; g.fillText(SIDE_LABEL[rm.side].toUpperCase(), W * .99, lab); g.textAlign = 'left';
+  g.globalAlpha = .45; g.fillRect(W * .01, lab * 1.45, W * .98, Math.max(3, lab * .08)); g.globalAlpha = 1;
+  posterFont(g, px); g.fillText(word, W * .01, H - px * .03);
+  let w = i === 8 ? 7.4 : Math.min(rm.w * .62, 7.8), h = w * H / W;
+  if (h > 2.9){ w *= 2.9 / h; h = 2.9; }
+  const f = frameOf(i), y = RH - (i === 8 ? .5 : 1.0) - h / 2;
+  const pl = plane(f, w, h, decal(texFrom(c), { transparent: true }), 0, y, .012);
   WORDS[i] = { pl, y, a: -1 };
 }
 const OWN = [];
@@ -1102,7 +1109,7 @@ function buildContact(i){
     pl.rotation.set(0, u + Math.PI / 2, Math.sin(u * 2) * .3);
     const want = REDUCED ? 1 : 1 - smooth(12, 19, camera.position.distanceTo(at));
     rise += (want - rise) * (1 - Math.exp(-(dt || .016) * 3));
-    letter.position.y = rise * 1.6 + Math.sin(t * 1.2) * .03 * rise;
+    letter.position.y = rise * 1.45 + Math.sin(t * 1.2) * .03 * rise;
   });
   return f;
 }
