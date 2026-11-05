@@ -1026,6 +1026,31 @@ function buildArcade(i){
   return g;
 }
 
+/* the socials, as postage stamps: one source for the wall, the caption and the dossier */
+const SOCIALS = [
+  { n: '01', k: '3D', mono: 'SF', name: 'Sketchfab', h: '@akverse_official', url: 'https://sketchfab.com/akverse_official', bg: '#FFFFFF', fg: '#1E2B33', ac: '#1CAAD9', dot: '#1CAAD9', rz: -.05 },
+  { n: '02', k: 'Art', mono: 'AS', name: 'ArtStation', h: '/akverse', url: 'https://www.artstation.com/akverse', bg: '#171717', fg: '#FFFFFF', ac: '#13AFF0', dot: '#13AFF0', rz: .035 },
+  { n: '03', k: 'Code', mono: 'GH', name: 'GitHub', h: '@itsAayush2004', url: 'https://github.com/itsAayush2004', bg: '#24292F', fg: '#FFFFFF', ac: '#FFFFFF', dot: '#24292F', rz: -.03 },
+  { n: '04', k: 'Work', mono: 'IN', name: 'LinkedIn', h: '/aayush-kumar', url: 'https://www.linkedin.com/in/aayush-kumar-872ab1323/', bg: '#0A66C2', fg: '#FFFFFF', ac: '#FFFFFF', dot: '#0A66C2', rz: .045 }
+];
+function stampTex(so){
+  const W = 500, H = 620, [c, g] = makeCanvas(W, H), r = 9, step = 25;
+  g.fillStyle = '#FFFDF8'; g.fillRect(0, 0, W, H);
+  /* bite the perforations out of the paper edge */
+  g.globalCompositeOperation = 'destination-out';
+  for (let x = 0; x <= W; x += step){ g.beginPath(); g.arc(x, 0, r, 0, Math.PI * 2); g.arc(x, H, r, 0, Math.PI * 2); g.fill(); }
+  for (let y = 0; y <= H; y += step){ g.beginPath(); g.arc(0, y, r, 0, Math.PI * 2); g.arc(W, y, r, 0, Math.PI * 2); g.fill(); }
+  g.globalCompositeOperation = 'source-over';
+  const m = 26; g.fillStyle = so.bg; g.fillRect(m, m, W - 2 * m, H - 2 * m);
+  if (so.bg === '#FFFFFF'){ g.strokeStyle = so.ac; g.lineWidth = 6; g.strokeRect(m + 3, m + 3, W - 2 * m - 6, H - 2 * m - 6); }
+  g.fillStyle = so.fg; g.font = '600 24px "JetBrains Mono", ui-monospace, monospace'; g.textBaseline = 'top';
+  g.fillText(('No. ' + so.n + ' · ' + so.k).toUpperCase(), m + 26, m + 26); g.textAlign = 'right'; g.fillText('↗', W - m - 26, m + 22); g.textAlign = 'left';
+  g.fillStyle = so.ac; g.textBaseline = 'alphabetic'; posterFont(g, 250); g.fillText(so.mono, m + 18, m + 330);
+  g.fillStyle = so.fg; posterFont(g, 62); g.fillText(so.name.toUpperCase(), m + 26, H - m - 74);
+  g.globalAlpha = .72; g.font = '500 24px "JetBrains Mono", ui-monospace, monospace'; g.fillText(so.h, m + 28, H - m - 32); g.globalAlpha = 1;
+  return texFrom(c);
+}
+const STAMPS = [];
 /* ── 8 · The exit: one big letter on the wall, half out of its envelope ── */
 function letterTex(){
   const [c, g] = makeCanvas(900, 640);
@@ -1057,6 +1082,17 @@ function buildContact(i){
   const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, .5, -.3, 0, -.3, 0, .05, -.15, 0, 0, .5, 0, .05, -.15, .3, 0, -.3], 3));
   pg.computeVertexNormals();
   pl.add(new THREE.Mesh(pg, new THREE.MeshPhongMaterial({ color: lin(C.paper), emissive: lin(C.paper).multiplyScalar(.32), side: THREE.DoubleSide, flatShading: true, shininess: 0, specular: 0x000000 })));
+  /* the socials, stuck on the wall either side of the letter; each one opens its page */
+  const shTex = gradTex([[0, 'rgba(0,0,0,.28)'], [.6, 'rgba(0,0,0,.12)'], [1, 'rgba(0,0,0,0)']], 128, 128, true);
+  SOCIALS.forEach((so, k) => {
+    const sx = (k < 2 ? -1 : 1) * 3.45, sy = k % 2 ? 1.45 : 3.25, sw = 1.3, shh = sw * 620 / 500;
+    const grp = new THREE.Group(); grp.position.set(sx, sy, .02); grp.rotation.z = so.rz; f.add(grp);
+    const sh = plane(grp, sw * 1.25, shh * 1.2, new THREE.MeshBasicMaterial({ map: shTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }), .04, -.08, 0);
+    const face = plane(grp, sw, shh, decal(stampTex(so), { transparent: true }), 0, 0, .01);
+    /* desktop: two either side of the letter; phone: one row above it, so all four fit the narrow frame */
+    face.userData = { url: so.url, name: so.name, grp, want: 1, sc: 1, wide: V3(sx, sy, so.rz), narrow: V3((k - 1.5) * 1.32, 5.9, so.rz * .6) }; STAMPS.push(face);
+  });
+  anim.push((t, dt) => STAMPS.forEach(m => { const u = m.userData; u.sc += (u.want - u.sc) * (1 - Math.exp(-(dt || .016) * 12)); u.grp.scale.setScalar(u.sc * (STACK ? .9 : 1)); u.grp.position.z = .02 + (u.sc - 1) * 2; }));
   const rm = ROOMS[i], at = new THREE.Vector3(); f.getWorldPosition(at);
   wallType(i);
   let rise = 0;
@@ -1470,6 +1506,7 @@ function buildPoses(){
   const narrow = VW < 760;
   /* on a phone the camera looks down from high up, where the pendants would hang in front of the set */
   PENDANTS.forEach(m => { m.visible = !narrow; });
+  STAMPS.forEach(m => { const u = m.userData, q = narrow ? u.narrow : u.wide; u.grp.position.x = q.x; u.grp.position.y = q.y; u.grp.rotation.z = q.z; u.grp.scale.setScalar(narrow ? .9 : 1); });
   POSES = [HALLP].concat(STATIONS.map((s, i) => {
     const p = stationPose(i);
     /* on a phone the room is seen as a diorama: high in the doorway, looking down on the whole set */
@@ -1480,7 +1517,7 @@ function buildPoses(){
       const tHh = Math.tan(66 * Math.PI / 360) * VW / VH, room = Math.abs((rm.door.x - c.x) * rm.n.x + (rm.door.z - c.z) * rm.n.z) - .3;
       const d = clamp(wide * .56 / tHh, 5.2, room);
       p.pos = c.clone().addScaledVector(rm.n, d); p.pos.y = 1.4 + d * .42;
-      p.look = V3(c.x, PIECE[i].userData.wall ? 2.3 : 1.1, c.z);
+      p.look = V3(c.x, i === 8 ? 3.5 : PIECE[i].userData.wall ? 2.3 : 1.1, c.z);
       p.u = 0; p.v = .08;
     }
     return p;
@@ -1675,10 +1712,11 @@ function fillObj(s, i){
   const act = $('#objAct'); act.innerHTML = '';
   const btn = (labelTxt, cls, attrs) => { const b = document.createElement(attrs && attrs.href ? 'a' : 'button'); b.className = 'btn btn-sm ' + (cls || ''); b.innerHTML = labelTxt;
     if (b.tagName === 'BUTTON') b.type = 'button'; Object.keys(attrs || {}).forEach(k => b.setAttribute(k, attrs[k])); act.appendChild(b); return b; };
-  if (i < 0){ btn('Walk in ↓', 'btn-solid', { 'data-next': '' }); return; }
-  if (s.id === 'arcade'){ Object.keys(GAMES).forEach((k, n) => btn('▶ ' + GAMES[k].name, n ? '' : 'btn-solid', { 'data-play': k })); return; }
+  if (i < 0){ act.classList.remove('soc'); btn('Walk in ↓', 'btn-solid', { 'data-next': '' }); return; }
+  if (s.id === 'arcade'){ act.classList.remove('soc'); Object.keys(GAMES).forEach((k, n) => btn('▶ ' + GAMES[k].name, n ? '' : 'btn-solid', { 'data-play': k })); return; }
   if (first0(s)) btn(esc(first0(s).textContent.replace(/^Open /, '')), '', { href: first0(s).href, target: '_blank', rel: 'noopener' });
-  if (s.id === 'contact') btn('Copy email', '', { 'data-copy': 'aayushkumarofficial21@gmail.com' });
+  act.classList.toggle('soc', s.id === 'contact');
+  if (s.id === 'contact') SOCIALS.forEach(so => btn('<i style="--c:' + so.dot + '"></i>' + so.name, 'btn-soc', { href: so.url, target: '_blank', rel: 'noopener' }));
   btn('Read more', 'btn-solid', { 'data-inspect': s.id });
 }
 const first0 = s => s.id === 'contact' ? null : $('.st-go a', s.el);
@@ -1787,9 +1825,19 @@ function hitAt(x, y){
   const h = ray.intersectObjects(HITS, false)[0];
   return h ? h.object.userData.st : -1;
 }
+/* a stamp under the pointer, but only from inside the last room */
+function stampAt(x, y){
+  if (!STAMPS.length || hereOf(pTarget) !== STATIONS.length - 1) return null;
+  ndc.set(x / VW * 2 - 1, -(y / VH) * 2 + 1); ray.setFromCamera(ndc, camera);
+  const h = ray.intersectObjects(STAMPS, false)[0]; return h ? h.object : null;
+}
+let hoverStamp = null;
+function setStamp(m){ if (m === hoverStamp) return; if (hoverStamp) hoverStamp.userData.want = 1; hoverStamp = m; if (m) m.userData.want = 1.08; }
 function overUI(t){ return !t || !t.closest || !!t.closest('#hud .obj,#hud .hud-top,#hud .track,.lane,.menu,.dossier,.arcade,#gate'); }
 addEventListener('pointermove', e => {
-  if (e.pointerType === 'touch' || openLayer || pNow < HALL_AT - 30 || overUI(e.target)){ if (hover !== -1){ hover = -1; tip.hidden = true; } return; }
+  if (e.pointerType === 'touch' || openLayer || pNow < HALL_AT - 30 || overUI(e.target)){ setStamp(null); if (hover !== -1){ hover = -1; tip.hidden = true; } return; }
+  const sm = stampAt(e.clientX, e.clientY); setStamp(sm);
+  if (sm){ hover = -1; tip.innerHTML = 'Open ' + esc(sm.userData.name) + ' ↗'; tip.hidden = false; tip.style.left = e.clientX + 'px'; tip.style.top = e.clientY + 'px'; return; }
   const i = hitAt(e.clientX, e.clientY);
   if (i !== hover){
     hover = i;
@@ -1801,6 +1849,8 @@ addEventListener('pointermove', e => {
 addEventListener('click', e => {
   if (openLayer || overUI(e.target) || pNow < HALL_AT - 30) return;
   if (e.target.closest('a,button')) return;
+  const sm = stampAt(e.clientX, e.clientY);
+  if (sm){ window.open(sm.userData.url, '_blank', 'noopener'); return; }
   const i = hitAt(e.clientX, e.clientY);
   if (i < 0) return;
   if (hereOf(pTarget) === i) inspect(STATIONS[i].id); else travel(posOf(i));
@@ -1814,7 +1864,7 @@ $$('.lc[data-go]').forEach(a => a.addEventListener('click', e => {
 /* the cursor: trails the pointer, grows over anything you can press */
 const cur = $('#cursor'); let cx = -100, cy = -100, mx = -100, my = -100;
 addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; if (e.pointerType !== 'mouse') return;
-  cur.classList.toggle('on', !!(e.target.closest && e.target.closest('a,button,.lc,[data-play]')) || hover >= 0); }, { passive: true });
+  cur.classList.toggle('on', !!(e.target.closest && e.target.closest('a,button,.lc,[data-play]')) || hover >= 0 || !!hoverStamp); }, { passive: true });
 function moveCursor(dt){ const kk = REDUCED ? 1 : 1 - Math.exp(-dt * 18); cx += (mx - cx) * kk; cy += (my - cy) * kk; cur.style.transform = 'translate3d(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px,0)'; }
 
 /* ══ the loop ═══════════════════════════════════════════════ */
