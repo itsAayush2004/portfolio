@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-label="portfolio: a dark gallery corridor with three framed pictures">
+<style>@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+<defs><clipPath id="c"><rect width="1200" height="420" rx="24"/></clipPath></defs>
+<g clip-path="url(#c)">
+
+<rect width="1200" height="420" fill="#1C1B22"/>
+<polygon points="640,0 1200,0 1200,420 640,420" fill="#26252E"/>
+<polygon points="640,330 1200,330 1200,420 640,420" fill="#3A2E25"/>
+<rect x="692" y="102" width="136" height="166" fill="#C9A227"/><rect x="700" y="110" width="120" height="150" fill="#3D5A80"/><polygon points="720.0,260 800.0,260 760.0,200" fill="#F4F1DE" opacity="0.5"/><rect x="842" y="82" width="166" height="206" fill="#C9A227"/><rect x="850" y="90" width="150" height="190" fill="#E07A5F"/><polygon points="885.0,280 965.0,280 925.0,220" fill="#F4F1DE" opacity="0.5"/><rect x="1022" y="102" width="136" height="166" fill="#C9A227"/><rect x="1030" y="110" width="120" height="150" fill="#81B29A"/><polygon points="1050.0,260 1130.0,260 1090.0,200" fill="#F4F1DE" opacity="0.5"/>
+<g fill="#F4F1DE" opacity="0.08"><polygon points="760,0 800,0 900,330 700,330"/><polygon points="905,0 945,0 1020,330 840,330"/></g>
+<text x="56" y="110" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="22" fill="#C9A227">a CV you walk through</text>
+<text x="56" y="200" font-family="Georgia, 'Times New Roman', serif" font-size="86" fill="#F4F1DE">Portfolio</text>
+<text x="58" y="250" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="21" fill="#B9B4C7">A scroll-driven 3D gallery. Each room holds</text>
+<text x="58" y="282" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="21" fill="#B9B4C7">a chapter of my work. Three.js, no build step.</text>
+<text x="58" y="350" font-family="Consolas, 'SFMono-Regular', Menlo, 'Courier New', monospace" font-size="15" fill="#8C87A0">itsaayush2004.github.io/portfolio</text>
+
+</g>
+</svg>

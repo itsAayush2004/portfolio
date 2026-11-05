@@ -1,4 +1,13 @@
+<p align="center"><img src=".github/banner.svg" alt="portfolio banner: a dark gallery corridor with three framed pictures" width="100%"></p>
+
 # portfolio
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Three.js-8C6D12?style=flat-square" alt="Three.js">
+  <img src="https://img.shields.io/badge/No_build_step-8C6D12?style=flat-square" alt="No build step">
+  <img src="https://img.shields.io/badge/GitHub_Pages-8C6D12?style=flat-square" alt="GitHub Pages">
+  <br><a href="https://itsaayush2004.github.io/portfolio/"><b>Open it live →</b></a>
+</p>
 
 > Two halves scroll past each other, then fold into nine rooms.
 
@@ -8,7 +17,7 @@ the earlier walk-through lives on at [`classic.html`](classic.html).
 ![Two halves, nine rooms](art/og.jpg)
 
 This merges my two earlier portfolios, the walk-through gallery (this repo) and the
-[corkboard](https://github.com/itsAayush2004/Board-repo), into one page you only have to scroll.
+[corkboard](https://github.com/itsAayush2004/portfolio-board), into one page you only have to scroll.
 
 ## How it reads
 
